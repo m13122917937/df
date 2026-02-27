@@ -1,0 +1,143 @@
+# 项目相关配置
+ruoyi:
+  # 名称
+  name: RuoYi
+  # 版本
+  version: 3.9.0
+  #host
+  host: https://api.wujievip.cn/
+  # 版权年份
+  copyrightYear: 2025
+  # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
+  profile: D:/ruoyi/uploadPath
+  # 获取ip地址开关
+  addressEnabled: false
+  # 验证码类型 math 数字计算 char 字符验证
+  captchaType: math
+  warehouseNo: "dfc"
+
+# 开发环境配置
+server:
+  # 服务器的HTTP端口，默认为8080
+  port: 7772
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # 连接数满后的排队数，默认为100
+    accept-count: 300
+    threads:
+      # tomcat最大线程数，默认为200
+      max: 300
+      # Tomcat启动初始化的线程数，默认值10
+      min-spare: 50
+
+# Spring配置
+spring:
+  mian:
+    allow-circular-references: true
+  jackson:
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+  profiles:
+    active: dev
+  # 文件上传
+  servlet:
+    multipart:
+      # 单个文件大小
+      max-file-size: 10MB
+      # 设置总上传的文件大小
+      max-request-size: 20MB
+  # redis 配置
+  redis:
+    # 连接超时时间
+    timeout: 10s
+    lettuce:
+      pool:
+        # 连接池中的最小空闲连接
+        min-idle: 0
+        # 连接池中的最大空闲连接
+        max-idle: 8
+        # 连接池的最大数据库连接数
+        max-active: 8
+        # #连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1ms
+
+# token配置
+token:
+  # 令牌自定义标识
+  header: Authorization
+  # 令牌密钥
+  secret: abcdefghijklmnopqrstuvwxyz
+  # 令牌有效期（默认30分钟）
+  expireTime: 1440
+
+mybatis-plus:
+  # 1. XML 映射文件位置 (Mapper XML 文件位置)
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  # 2. 实体类别名包路径
+  type-aliases-package: com.ruoyi.**.domain
+  configuration:
+    # 4. 自动驼峰命名规则映射（默认true，通常无需再配置）
+    map-underscore-to-camel-case: true
+    # 5. 日志实现（开发环境可开启查看SQL）
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 6. 查询时，对象的setter方法被调用，即使查询结果为null
+    call-setters-on-nulls: true
+    # 7. 缓存开启
+    cache-enabled: false
+  global-config:
+    db-config:
+      # 8. 主键生成策略
+      id-type: AUTO # ASSIGN_ID(雪花算法), ASSIGN_UUID, INPUT等
+      # 9. 表名前缀
+      # 10. 逻辑删除配置
+      logic-delete-value: 1 # 逻辑已删除值
+      logic-not-delete-value: 0 # 逻辑未删除值
+      # 11. 数据库类型（可选）
+      db-type: mysql
+
+# PageHelper分页插件
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+logging:
+  level:
+    com.github.pagehelper: DEBUG
+
+# 防盗链配置
+referer:
+  # 防盗链开关
+  enabled: false
+  # 允许的域名列表
+  allowed-domains: localhost,127.0.0.1,ruoyi.vip,www.ruoyi.vip
+
+# 防止XSS攻击
+xss:
+  # 过滤开关
+  enabled: true
+  # 排除链接（多个用逗号分隔）
+  excludes: /system/notice
+  # 匹配链接
+  urlPatterns: /system/*,/monitor/*,/tool/*
+
+knife4j:
+  openapi:
+    setting:
+      language: zh_cn
+    title: Knife4j官方文档
+    description: 风扬
+    email: xiaoymin@foxmail.com
+    concat: 八一菜刀
+    url: https://docs.xiaominfo.com
+    version: v4.0
+    license: Apache 2.0
+    license-url: https://stackoverflow.com/
+    terms-of-service-url: https://stackoverflow.com/
+    group:
+      test1:
+        group-name: 分组名称
+        api-rule: package
+        api-rule-resources:
+          - com.ruoyi

@@ -1,0 +1,388 @@
+package com.ruoyi.biz.address;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.StrSplitter;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
+import com.ruoyi.biz.address.domain.AddressInfo;
+import com.ruoyi.biz.address.domain.UserInfo;
+import lombok.Data;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.regex.Pattern;
+
+public class SmartParse {
+
+    /**
+     * 前缀字符特殊处理，匹配时候会自动处理掉符合正则的文字
+     */
+    private Pattern pattern = Pattern.compile("^[省市区县州街道镇乡特别行政自治]+");
+    private final AddressDataLoader addressDataLoader;
+
+
+    public SmartParse(AddressDataLoader addressDataLoader) {
+        this.addressDataLoader = addressDataLoader;
+    }
+
+
+    /**
+     * 解析用户地址信息
+     *
+     * @param text 地址信息
+     */
+    public UserInfo parseUserInfo(String text) {
+        if (StrUtil.isBlank(text)) {
+            return null;
+        }
+
+        text = text.replace(" 详细地址: ", "");
+        StringBuilder matchText = new StringBuilder();
+        // 先根据空白符分割，如果空白符分割包含：号，则默认取最后那一段
+        for (String str : StrSplitter.splitByRegex(text, "[\\n\\r]", 0, true, true)) {
+            str = str.replace(": ", ":");
+            if (StrUtil.isBlank(str)) {
+                continue;
+            }
+
+            for (String s : str.split(" ")) {
+                List<String> strings = StrSplitter.splitByRegex(s, "[:：]", 0, true, true);
+                if (CollUtil.isEmpty(strings)) {
+                    continue;
+                }
+                if (strings.size() == 2) {
+                    matchText.append(strings.get(1));
+                } else {
+                    matchText.append(strings.get(0));
+                }
+                matchText.append(" ");
+            }
+
+
+        }
+        text = matchText.toString();
+
+        UserInfo userInfo = new UserInfo();
+        String mobile = matchMobile(text);
+        if (StrUtil.isNotEmpty(mobile)) {
+            userInfo.setMobile(mobile);
+            text = text.replace(mobile, "");
+        }
+
+        //text = filterStr(text);
+        List<AddressDataLoader.Address> addressList = addressDataLoader.loadData();
+
+        List<String> split = StrUtil.split(text, " ");
+        for (String str : split) {
+            if (StrUtil.isBlank(str)) {
+                continue;
+            }
+            AddressInfo addressInfo = null;
+            // 大于6才能判断是一串地址信息
+            if (str.length() > 6) {
+                addressInfo = matchAddress(addressList, str);
+            }
+
+            if (addressInfo == null || addressInfo.isEmpty()) {
+                userInfo.setName(str);
+            } else {
+                BeanUtil.copyProperties(addressInfo, userInfo, CopyOptions.create().ignoreNullValue());
+            }
+        }
+        return userInfo;
+    }
+
+    String MOBILE = "(?:0|86|\\+86)?1[3-9]\\d{9}";
+    /**
+     * 中国香港移动电话
+     * eg: 中国香港： +852 5100 4810， 三位区域码+10位数字, 中国香港手机号码8位数
+     * eg: 中国大陆： +86  180 4953 1399，2位区域码标示+13位数字
+     * 中国大陆 +86 Mainland China
+     * 中国香港 +852 Hong Kong
+     * 中国澳门 +853 Macao
+     * 中国台湾 +886 Taiwan
+     */
+    String MOBILE_HK = "(?:0|852|\\+852)?\\d{8}";
+    /**
+     * 中国台湾移动电话
+     * eg: 中国台湾： +886 09 60 000000， 三位区域码+号码以数字09开头 + 8位数字, 中国台湾手机号码10位数
+     * 中国台湾 +886 Taiwan 国际域名缩写：TW
+     */
+    String MOBILE_TW = "(?:0|886|\\+886)?(?:|-)09\\d{8}";
+    /**
+     * 中国澳门移动电话
+     * eg: 中国台湾： +853 68 00000， 三位区域码 +号码以数字6开头 + 7位数字, 中国台湾手机号码8位数
+     * 中国澳门 +853 Macao 国际域名缩写：MO
+     */
+    String MOBILE_MO = "(?:0|853|\\+853)?(?:|-)6\\d{7}";
+    /**
+     * 座机号码<br>
+     * pr#387@Gitee
+     */
+    String TEL = "(010|02\\d|0[3-9]\\d{2})-?(\\d{6,8})";
+    /**
+     * 座机号码+400+800电话
+     *
+     * @see <a href="https://baike.baidu.com/item/800">800</a>
+     */
+    String TEL_400_800 = "0\\d{2,3}[\\- ]?[1-9]\\d{6,7}|[48]00[\\- ]?[1-9]\\d{6}";
+
+    /**
+     * 匹配手机号码
+     *
+     * @param text
+     * @return
+     */
+    public String matchMobile(String text) {
+        String mobile = ReUtil.getGroup0(MOBILE, text);
+        if (StrUtil.isNotEmpty(mobile)) {
+            return mobile;
+        }
+
+        mobile = ReUtil.getGroup0(TEL, text);
+        if (StrUtil.isNotEmpty(mobile)) {
+            return mobile;
+        }
+
+        mobile = ReUtil.getGroup0(TEL_400_800, text);
+        if (StrUtil.isNotEmpty(mobile)) {
+            return mobile;
+        }
+        mobile = ReUtil.getGroup0(MOBILE_HK, text);
+        if (StrUtil.isNotEmpty(mobile)) {
+            return mobile;
+        }
+        mobile = ReUtil.getGroup0(MOBILE_TW, text);
+        if (StrUtil.isNotEmpty(mobile)) {
+            return mobile;
+        }
+        return ReUtil.getGroup0(MOBILE_MO, text);
+    }
+
+    /**
+     * 解析地址
+     */
+    public AddressInfo parseAddressInfo(String text) {
+
+        if (StrUtil.isBlank(text)) {
+            return null;
+        }
+        List<AddressDataLoader.Address> addressList = addressDataLoader.loadData();
+        AddressInfo addressInfo = new AddressInfo();
+
+        //text = filterStr(text);
+        List<String> split = StrUtil.split(text, " ");
+//        List<String> split = StrUtil.split(text, " ");
+        for (String str : split) {
+            AddressInfo info = matchAddress(addressList, str);
+            if (info != null && !info.isEmpty()) {
+                BeanUtil.copyProperties(info, addressInfo, CopyOptions.create().ignoreNullValue());
+            }
+        }
+        return addressInfo;
+    }
+
+
+    /**
+     * 匹配地址
+     *
+     * @param addressList 地址列表
+     * @param text        匹配的地址信息
+     */
+    private AddressInfo matchAddress(List<AddressDataLoader.Address> addressList, String text) {
+
+        if (StrUtil.isBlank(text)) {
+            return null;
+        }
+        AddressInfo info = new AddressInfo();
+        String address = text;
+
+        String matchAddress = "";
+        List<MatchData> matchProvince = new ArrayList<>();
+        for (int endIndex = 0; endIndex < text.length(); endIndex++) {
+            matchAddress = StrUtil.subWithLength(text, 0, endIndex + 2);
+            for (AddressDataLoader.Address province : addressList) {
+                if (province.getName().contains(matchAddress)) {
+                    matchProvince.add(new MatchData(province, null, null, null, matchAddress));
+                }
+            }
+        }
+
+        if (!matchProvince.isEmpty()) {
+            MatchData matchData = getTheOptimalMatch(matchProvince);
+            setMatchInfo(info, matchData);
+            text = text.replaceFirst(matchData.getMatchValue(), "");
+            text = ReUtil.delFirst(pattern, text);
+        }
+
+        //市查找
+        List<MatchData> matchCity = new ArrayList<>(); //粗略匹配上的市
+        for (int endIndex = 0; endIndex < text.length(); endIndex++) {
+            matchAddress = StrUtil.subWithLength(text, 0, endIndex + 2);
+            for (AddressDataLoader.Address province : addressList) {
+                if (province.getChildren() == null) {
+                    continue;
+                }
+                if (info.getProvince() == null || province.getName().equals(info.getProvince())) {
+                    for (AddressDataLoader.Address city : province.getChildren()) {
+                        if (city.getName().contains(matchAddress)) {
+                            matchCity.add(new MatchData(province, city, null, null, matchAddress));
+                        }
+                    }
+                }
+            }
+        }
+        if (!matchCity.isEmpty()) {
+            MatchData matchData = getTheOptimalMatch(matchCity);
+            setMatchInfo(info, matchData);
+            text = text.replaceFirst(matchData.getMatchValue(), "");
+            // 如果是市开头的，去掉
+//            text = ReUtil.replaceFirst(pattern, text, "");
+            text = ReUtil.delFirst(pattern, text);
+        }
+
+        //区县查找
+        List<MatchData> matchCounty = new ArrayList<>(); //粗略匹配上的区县
+        for (int endIndex = 0; endIndex < text.length(); endIndex++) {
+            matchAddress = StrUtil.subWithLength(text, 0, endIndex + 2);
+
+            for (AddressDataLoader.Address province : addressList) {
+                if (province.getChildren() == null) {
+                    continue;
+                }
+                if (info.getProvince() != null && !info.getProvince().equals(province.getName())) {
+                    continue;
+                }
+                for (AddressDataLoader.Address city : province.getChildren()) {// 市
+                    if (CollUtil.isEmpty(city.getChildren())) {
+                        continue;
+                    }
+                    if (info.getCity() != null && !info.getCity().equals(city.getName())) {
+                        continue;
+                    }
+                    for (AddressDataLoader.Address county : city.getChildren()) { // 区
+                        if (county.getName().contains(matchAddress)) {
+                            matchCounty.add(new MatchData(province, city, county, null, matchAddress));
+                        }
+                    }
+                }
+            }
+        }
+        if (!matchCounty.isEmpty()) {
+            MatchData matchData = getTheOptimalMatch(matchCounty);
+            setMatchInfo(info, matchData);
+            text = text.replaceFirst(matchData.getMatchValue(), "");
+//            text = ReUtil.replaceFirst(pattern, text, "");
+            text = ReUtil.delFirst(pattern, text);
+        }
+        if (!address.equals(text)) {
+            info.setAddress(text);
+        }
+        return info;
+    }
+
+    /**
+     * 获取最优匹配
+     */
+    private MatchData getTheOptimalMatch(List<MatchData> matchDataList) {
+        return Collections.max(matchDataList, Comparator.comparingInt(o -> o.getMatchValue().length()));
+    }
+
+    protected void setMatchInfo(AddressInfo info, MatchData matchData) {
+        info.setProvince(matchData.getProvince());
+        info.setProvinceCode(matchData.getProvinceCode());
+        info.setCity(matchData.getCity());
+        info.setCityCode(matchData.getCityCode());
+        info.setCounty(matchData.getCounty());
+        info.setCountyCode(matchData.getCountyCode());
+        info.setStreet(matchData.getStreet());
+        info.setStreetCode(matchData.getStreetCode());
+        info.setAreaId(matchData.getAreaId());
+    }
+
+
+    public String filterStr(String text) {
+        text = ReUtil.replaceAll(text, "[`~!@#$^&*=|{}':;',.<>/?~！@#￥……&*——|‘；：”“’。，、？-]", " ");
+        return text.replace("\r", "").replace("\n", "");
+    }
+
+
+    public Pattern getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(Pattern pattern) {
+        this.pattern = pattern;
+    }
+}
+
+
+/**
+ * 匹配上的数据
+ */
+@Data
+class MatchData {
+
+    public MatchData(AddressDataLoader.Address province,
+                     AddressDataLoader.Address city,
+                     AddressDataLoader.Address county,
+                     AddressDataLoader.Address street,
+                     String matchValue) {
+        if (province != null) {
+            this.province = province.getName();
+            this.provinceCode = province.getCode();
+            this.areaId = province.getId();
+        }
+        if (city != null) {
+            this.city = city.getName();
+            this.cityCode = city.getCode();
+            this.areaId = city.getId();
+        }
+        if (county != null) {
+            this.county = county.getName();
+            this.countyCode = county.getCode();
+            this.areaId = county.getId();
+        }
+        if (street != null) {
+            this.street = street.getName();
+            this.streetCode = street.getCode();
+            this.areaId = street.getId();
+        }
+        this.matchValue = matchValue;
+    }
+
+    private String province;
+
+    private String provinceCode;
+
+    /**
+     * 市
+     */
+    private String city;
+
+    private String cityCode;
+
+    /**
+     * 区
+     */
+    private String county;
+
+    private String countyCode;
+
+    /**
+     * 街道
+     */
+    private String street;
+
+    private String streetCode;
+
+    private String matchValue;
+
+    private String areaId;
+
+}
