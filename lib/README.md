@@ -1,0 +1,1 @@
+mvn install:install-file  "-Dfile=pop-sdk-1.23.36.jar"  "-DgroupId=com.pinduoduo"   "-DartifactId=pop-sdk" "-Dversion=1.23.36" "-Dpackaging=jar" "-DlocalRepositoryPath=D:\software\maven\rep"
