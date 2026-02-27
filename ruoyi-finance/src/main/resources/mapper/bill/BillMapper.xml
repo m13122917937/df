@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bill.mapper.BillMapper">
+
+    <resultMap type="Bill" id="BillResult">
+        <result property="id" column="id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="supplierBankId" column="supplier_bank_id"/>
+        <result property="shipmentsDate" column="shipments_date"/>
+        <result property="signedDate" column="signed_date"/>
+        <result property="settlementDate" column="settlement_date"/>
+        <result property="payDate" column="pay_date"/>
+        <result property="payCompanyId" column="pay_company_id"/>
+        <result property="payCompanyName" column="pay_company_name"/>
+        <result property="payPlan" column="pay_plan"/>
+        <result property="planId" column="plan_id"/>
+        <result property="status" column="status"/>
+        <result property="billingAmount" column="billing_amount"/>
+        <result property="orderAmount" column="order_amount"/>
+        <result property="tradePrice" column="trade_price"/>
+        <result property="quantity" column="quantity"/>
+        <result property="billType" column="bill_type"/>
+        <result property="originalOrderId" column="original_order_id"/>
+        <result property="gjOrderId" column="gj_order_id"/>
+        <result property="orderCode" column="order_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="skuName" column="sku_name"/>
+        <result property="skuCode" column="sku_code"/>
+        <result property="brand" column="brand"/>
+        <result property="category" column="category"/>
+        <result property="accounting" column="accounting"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="collectDate" column="collect_date"/>
+        <result property="reversed" column="reversed"/>
+    </resultMap>
+
+    <select id="selectBillSum" resultType="com.ruoyi.bill.domain.dto.BillSUMDTO">
+        SELECT
+            SUM(IF(settlement_date  <![CDATA[ <=   ]]> DATE(NOW()), billing_amount, 0)) AS todayAmount
+        FROM
+        f_bill
+        WHERE
+        deleted = 0
+        AND today_show = 1
+        <if test="supplierId !=null">
+            AND supplier_id = #{supplierId}
+        </if>
+        <if test="payCompanyId !=null" >
+            AND pay_company_id = #{payCompanyId}
+        </if>
+        <if test="billType !=null" >
+            AND bill_type = #{billType}
+        </if>
+<!--        AND ( STATUS = 1 OR ((STATUS = 2 OR STATUS = 4 OR STATUS = 2) AND pay_date = #{settlementDate} ) )-->
+    </select>
+
+
+    <select id="paymentOperations" resultType="com.ruoyi.bill.domain.dto.PaymentOperationsDTO">
+        SELECT *  FROM  (
+            SELECT
+            supplier_id,
+            supplier_name,
+            <![CDATA[
+            -- 已结算账单金额（含未支付 + 当日已支付）
+            SUM(IF(settlement_date <= DATE(NOW()) AND ( status = 1 OR (status IN (2, 3, 4) AND pay_date = DATE(NOW()))), billing_amount,0)) AS billingAmount,
+            -- 今日需展示的未安排付款计划的账单数量（已确认收款 + 无付款计划）
+            SUM(IF( settlement_date <= DATE(NOW())  AND pay_plan = 0,  1, 0)) AS billCount,
+            -- 异常账单数量（status=5 且 settlement_date <= 今天，且无付款计划）
+            SUM(IF( settlement_date <= DATE(NOW()) AND status = 5 AND pay_plan = 0,1,0)) AS abnormalCount,
+            -- 未支付金额（status 为 1 或 5，且有付款计划）
+            SUM( IF(settlement_date <= DATE(NOW()) AND status IN (1, 5) AND pay_plan = 1, billing_amount, 0 ) ) AS notPayMoney,
+            -- 今日已支付金额（status in (2,3,4) 且 pay_date 是今天）
+            SUM(IF( settlement_date <= DATE(NOW()) AND status IN (2, 3, 4) AND pay_date = DATE(NOW()),billing_amount,0)) AS havePayMoney
+             ]]>
+
+            FROM
+                f_bill
+            WHERE
+                deleted = 0
+                AND today_show = 1
+                <if test="supplierId !=null" >
+                    AND supplier_id = #{supplierId}
+                </if>
+                <if test="payCompanyId !=null" >
+                        AND pay_company_id = #{payCompanyId}
+                </if>
+                AND bill_type = #{billType}
+            GROUP BY
+                supplier_id,
+                supplier_name
+        )  t
+        WHERE
+            t.billingAmount != 0
+        ORDER BY
+            t.billingAmount DESC
+    </select>
+
+
+</mapper>

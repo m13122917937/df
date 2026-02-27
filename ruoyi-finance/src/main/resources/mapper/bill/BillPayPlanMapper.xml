@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bill.mapper.BillPayPlanMapper">
+    
+    <resultMap type="BillPayPlan" id="BillPayPlanResult">
+        <result property="id"    column="id"    />
+        <result property="billType"    column="bill_type"    />
+        <result property="supplierId"    column="supplier_id"    />
+        <result property="supplierName"    column="supplier_name"    />
+        <result property="payCompanyId"    column="pay_company_id"    />
+        <result property="payCompanyName"    column="pay_company_name"    />
+        <result property="supplierBankId"    column="supplier_bank_id"    />
+        <result property="payAmount"    column="pay_amount"    />
+        <result property="payVoucherUrls"    column="pay_voucher_urls"    />
+        <result property="status"    column="status"    />
+        <result property="abnormalReason"    column="abnormal_reason"    />
+        <result property="payTime"    column="pay_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="deleted"    column="deleted"    />
+    </resultMap>
+
+
+</mapper>

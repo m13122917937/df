@@ -1,0 +1,26 @@
+package ${packageName}.model.param;
+
+import lombok.Data;
+import lombok.experimental.Accessors;
+import java.math.BigDecimal;
+
+import java.util.Date;
+
+/**
+ * ${functionName}对象 ${tableName}
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Data
+@Accessors(chain = true)
+public class ${ClassName}Param {
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+            /** $column.columnComment */
+        private $column.javaType $column.javaField;
+#end
+
+
+}

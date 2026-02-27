@@ -1,0 +1,31 @@
+package ${packageName}.convert;
+
+
+import com.ruoyi.common.model.page.PageBO;
+import ${packageName}.domain.${ClassName};
+import ${packageName}.model.bo.${ClassName}BO;
+import ${packageName}.model.query.${ClassName}Query;
+import ${packageName}.model.param.${ClassName}Param;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+
+import java.util.List;
+
+@Mapper
+public interface ${ClassName}Cov {
+
+    ${ClassName}Cov INSTANCE = Mappers.getMapper(${ClassName}Cov.class);
+
+
+    List<${ClassName}BO>  listToBO(List<${ClassName}>  list );
+
+    ${ClassName}BO   toBO(${ClassName}  list );
+
+    ${ClassName}  queryToDomain(${ClassName}Query query);
+
+    ${ClassName}  paramToDomain(${ClassName}Param param);
+
+    ${ClassName} toEntity(${ClassName}Param param);
+
+}
+

@@ -1,0 +1,33 @@
+package ${packageName}.domain;
+
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import java.math.BigDecimal;
+
+#if($table.crud || $table.sub)
+#elseif($table.tree)
+import domain.core.common.com.ruoyi.TreeEntity;
+#end
+
+import java.util.Date;
+
+/**
+ * ${functionName}对象 ${tableName}
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Data
+@Accessors(chain = true)
+@TableName("${tableName}")
+public class ${ClassName} {
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+            /** $column.columnComment */
+    private $column.javaType $column.javaField;
+#end
+
+
+}

@@ -1,0 +1,99 @@
+knife4j:
+  enable: false
+  production: true
+# 数据源配置
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://rm-wz9750v58imj89ts0.mysql.rds.aliyuncs.com:3306/df?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+    username: op_user
+    #必须包含三种及以上类型：大写字母、小写字母、数字、特殊符号。长度为8～32位。特殊字符包括! @ # $ % ^ & * () _ + - =
+    password: Fy123Fy321!!!
+    # 初始连接数
+    initialSize: 5
+    # 最小连接池数量
+    minIdle: 10
+    # 最大连接池数量
+    maxActive: 20
+    # 配置获取连接等待超时的时间
+    maxWait: 60000
+    # 配置连接超时时间
+    connectTimeout: 30000
+    # 配置网络超时时间
+    socketTimeout: 60000
+    # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+    timeBetweenEvictionRunsMillis: 60000
+    # 配置一个连接在池中最小生存的时间，单位是毫秒
+    minEvictableIdleTimeMillis: 300000
+    # 配置一个连接在池中最大生存的时间，单位是毫秒
+    maxEvictableIdleTimeMillis: 900000
+    # 配置检测连接是否有效
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    webStatFilter:
+      enabled: false
+    statViewServlet:
+      enabled: false
+      # 设置白名单，不填则允许所有访问
+      allow:
+      url-pattern: /druid/*
+      # 控制台管理用户名和密码
+      login-username: ruoyi
+      login-password: 123456
+    filter:
+      stat:
+        enabled: false
+        # 慢SQL记录
+        log-slow-sql: false
+        slow-sql-millis: 1000
+        merge-sql: false
+      wall:
+        config:
+          multi-statement-allow: false
+  redis:
+    # 地址
+    host: r-wz92lkz03upo003n23.redis.rds.aliyuncs.com
+    # 端口，默认为6379
+    port: 6379
+    # 数据库索引
+    database: 0
+    # 密码
+    password: rN8_iR44
+aliyun:
+  rocketmq:
+    nameServer: rmq-cn-2104h8w2701.cn-shenzhen.rmq.aliyuncs.com:8080
+    instanceId: rmq-cn-2104h8w2701
+    accessKey: EWHsr62jbzI2mAQF
+    secretKey: 10FlOp8R1077FW7p
+    orderTopic: OrderTradeTopic
+    expressTopic: expressTopic
+    customerGroup: group_order_trade
+wechat:
+  mp:
+    useRedis: true
+    configs:
+      - appId: wxe31f23ecb8ee2f5c
+        secret: 8d0f2f5ce562a5e420f5ebec4b7a03ce
+        token: oiXr3GV0RYUl2FYVsI4U8k2KhI
+        aesKey: oiXr3GV0RYUl2FYVsI4U8k2KhISQWJK40a4YQ6huCc6
+  pay:
+    mchId: 1729892505
+    mchKey: W8cKBCbLdGZN6ZPpws6R9wXyZFM4K7Dj
+    mchV3Key: yxCc4HOQbkDflkGJCqHsaEJR4P50qqS4
+    keyPath: "classpath:cert/apiclient_cert.p12"
+    privateKeyPath: "classpath:cert/apiclient_key.pem"
+    privateCertPath: "classpath:cert/apiclient_cert.pem"
+fy:
+  wd:
+    sid: lltxsb3
+    appkey: lltxsb3-yy
+    appsecret: 9290c78ee0b9a66e2f70bad499868281:1294184460056224683b0f894ceea66f
+    baseUrl: http://wdt.wangdian.cn/openapi
+    connectTimeout: 3000
+    readTimeout: 15000
+    warehouseNo: 005
+
+
