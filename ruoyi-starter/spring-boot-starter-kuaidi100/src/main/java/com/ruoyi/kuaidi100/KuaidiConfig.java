@@ -1,5 +1,6 @@
 package com.ruoyi.kuaidi100;
 
+import com.ruoyi.kuaidi100.factory.DesensitizedOrderStrategyFactory;
 import com.ruoyi.kuaidi100.properties.ExpressProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -12,11 +13,15 @@ public class KuaidiConfig {
     @Autowired
     ExpressProperties properties;
 
+    @Autowired
+    private DesensitizedOrderStrategyFactory strategyFactory;
 
     @Bean
     @ConditionalOnMissingBean // 如果用户没有自己定义，则创建默认 Bean
-    public ExpressClient expressClient() {
-        return new ExpressClient(properties);
+    public EExpressClient expressClient() {
+        EExpressClient client = new EExpressClient(properties);
+        client.setStrategyFactory(strategyFactory);
+        return client;
     }
 
 

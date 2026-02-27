@@ -5,10 +5,12 @@ import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.http.HttpRequest;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.JacksonUtil;
+import com.ruoyi.wangdian.param.Pager;
 import com.ruoyi.wangdian.param.base.ProductParams;
 import com.ruoyi.wangdian.param.base.ProviderParams;
 import com.ruoyi.wangdian.param.base.product.GoodsInfo;
 import com.ruoyi.wangdian.param.base.product.SpecInfo;
+import com.ruoyi.wangdian.param.order.TradeQueryParams;
 import com.ruoyi.wangdian.param.stock.StockInInfoParam;
 import com.ruoyi.wangdian.properties.WdProperties;
 import com.ruoyi.wangdian.rep.WDRep;
@@ -63,18 +65,26 @@ public class WdtClient {
 //
 //    }
 
-    public void goodsList(GoodsInfo goodsInfo,SpecInfo specInfoList) throws IOException {
-        String response = execute("goods.Goods.queryWithSpec", goodsInfo,List.of(specInfoList));
-        log.info("创建商品，返回结果：{}", response);
-        WDRep wdRep = JacksonUtil.parse(response, WDRep.class);
-        if (Objects.isNull(wdRep) || !wdRep.isSuccess()) {
-            throw new ServiceException(wdRep.getMessage());
-        }
 
+    public void orderList(TradeQueryParams params, Pager pager){
+        Map<String, Object> pagerMap = JacksonUtil.beanToMap(pager);
+        String response = execute("sales.TradeQuery.queryWithDetail",  params, pagerMap);
+        System.out.println( response );
     }
 
+
+//    public void goodsList(GoodsInfo goodsInfo,SpecInfo specInfoList) throws IOException {
+//        String response = execute("goods.Goods.queryWithSpec", goodsInfo,List.of(specInfoList), null);
+//        log.info("创建商品，返回结果：{}", response);
+//        WDRep wdRep = JacksonUtil.parse(response, WDRep.class);
+//        if (Objects.isNull(wdRep) || !wdRep.isSuccess()) {
+//            throw new ServiceException(wdRep.getMessage());
+//        }
+//
+//    }
+
     public void goods(GoodsInfo goodsInfo,SpecInfo specInfoList) throws IOException {
-        String response = execute("goods.Goods.push", goodsInfo,List.of(specInfoList));
+        String response = execute("goods.Goods.push", goodsInfo,List.of(specInfoList), null);
         log.info("创建商品，返回结果：{}", response);
         WDRep wdRep = JacksonUtil.parse(response, WDRep.class);
         if (Objects.isNull(wdRep) || !wdRep.isSuccess()) {
@@ -91,7 +101,7 @@ public class WdtClient {
      * @throws IOException
      */
     public String stockInPush(StockInInfoParam stockInInfoParam) throws IOException {
-        String response = execute("wms.stockin.Other.createOtherOrder", stockInInfoParam);
+        String response = execute("wms.stockin.Other.createOtherOrder", stockInInfoParam, null);
         log.info("创建其他入库单，返回结果：{}", response);
         StockInRep stock = JacksonUtil.parse(response, StockInRep.class);
         if (Objects.isNull(stock) || !stock.isSuccess()) {
@@ -99,7 +109,6 @@ public class WdtClient {
         }
         return stock.getStockinNo();
     }
-
 
     /**
      * 查询店铺信息
@@ -109,14 +118,13 @@ public class WdtClient {
      * @throws IOException
      */
     public void createProvider(ProviderParams params) throws IOException {
-        String response = execute("setting.PurchaseProvider.push", params);
+        String response = execute("setting.PurchaseProvider.push", params, null);
         log.info("创建供应商，返回结果：{}", response);
         WDRep wdRep = JacksonUtil.parse(response, WDRep.class);
         if (Objects.isNull(wdRep) || !wdRep.isSuccess()) {
             throw new ServiceException(wdRep.getMessage());
         }
     }
-
 
     // 时间戳基准：2012-01-01 00:00:00 UTC
     private static final long TIMESTAMP_BASE = 1325347200L;
@@ -132,7 +140,7 @@ public class WdtClient {
      * @param pager      分页参数，可为 null（包含 page_size, page_no, calc_total）
      * @return 生成的 sign 字符串
      */
-    public static String generateSign(String sid, String appKey, String appSecret,
+    protected static String generateSign(String sid, String appKey, String appSecret,
                                       String method, Object bodyParams, Map<String, Object> pager) {
         if (StrUtil.hasBlank(sid, appKey, appSecret, method)) {
             throw new IllegalArgumentException("必要参数不能为空");
@@ -185,80 +193,46 @@ public class WdtClient {
             sb.append(key).append(value == null ? "" : value.toString());
         }
         sb.append(secret);
-        log.info("待签名字符串：{}", sb.toString());
         // MD5 并转小写
         return DigestUtil.md5Hex(sb.toString()).toLowerCase();
     }
 
-    /**
-     * 重载方法：无分页参数
-     */
-    public static String generateSign(String sid, String appKey, String appSecret,
-                                      String method, Object bodyParams) {
-        return generateSign(sid, appKey, appSecret, method, bodyParams, null);
-    }
-
-    String execute(String method, Object param) {
+    String execute(String method, Object param, Map<String, Object> pager) {
         Object[] bodyParams = new Object[]{param};
         // 无分页
-        String sign = generateSign(wdProperties.getSid(), wdProperties.getAppkey(), wdProperties.getAppsecret(), method, bodyParams);
+        String sign = generateSign(wdProperties.getSid(), wdProperties.getAppkey(), wdProperties.getAppsecret(), method, bodyParams,pager);
         long timestamp = (System.currentTimeMillis() / 1000) - TIMESTAMP_BASE;
         String salt = wdProperties.getAppsecret().split(":")[1];
-        String url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0", wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp);
+        String url = null;
+        if(Objects.isNull(pager)){
+            url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0", wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp);
+        }else {
+            url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0&page_size=%d&page_no=%d&calc_total=%d",
+                    wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp, pager.get("page_size"), pager.get("page_no"), pager.get("calc_total"));
+        }
         String json = JacksonUtil.toJson(bodyParams);
-        log.info("旺店通请求地址：{},请求参数：{}", url, json);
+//        log.info("旺店通请求地址：{},请求参数：{}", url, json);
         String body = HttpRequest.post(url).body(json).timeout(wdProperties.getConnectTimeout()).execute().body();
         return body;
     }
 
-    String execute(String method, Object param, Object param2) {
+    String execute(String method, Object param, Object param2, Map<String, Object> pager ) {
         Object[] bodyParams = new Object[]{param, param2};
         // 无分页
-        String sign = generateSign(wdProperties.getSid(), wdProperties.getAppkey(), wdProperties.getAppsecret(), method, bodyParams);
+        String sign = generateSign(wdProperties.getSid(), wdProperties.getAppkey(), wdProperties.getAppsecret(), method, bodyParams, pager);
         long timestamp = (System.currentTimeMillis() / 1000) - TIMESTAMP_BASE;
         String salt = wdProperties.getAppsecret().split(":")[1];
-        String url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0", wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp);
-        String json = JacksonUtil.toJson(bodyParams);
+        String url = null;
+        if(Objects.isNull(pager)){
+            url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0", wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp);
+        }else {
+            url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0&page_size=%d&page_no=%d&calc_total=%d",
+                    wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp, pager.get("page_size"), pager.get("page_no"), pager.get("calc_total"));
+        }        String json = JacksonUtil.toJson(bodyParams);
         log.info("旺店通请求地址：{},请求参数：{}", url, json);
         String body = HttpRequest.post(url).body(json).timeout(wdProperties.getConnectTimeout()).execute().body();
         return body;
     }
-
-
-//    public static void main(String[] args) {
-//
-//        List<String> imeiList = List.of("863229076190124");
-//
-//
-//
-//        StockInInfoGoodsList stockInInfoGoodsList = StockInInfoGoodsList.builder().spec_no("X98V00-783BS-160512").num(new BigDecimal(1))
-//                .remark(String.format("代发订单号:%s,供应商名称:%s", "1bcad8bcc8990000", "四川欣锦扬科技发展有限公司")).stockin_price(new BigDecimal(3675.00)).sn_list(imeiList).build();
-//        StockInInfoParam dfc = StockInInfoParam.builder().outer_no("1bcad8bcc8990000").warehouse_no("dfc")
-//                .is_check(1).goods_list(Collections.singletonList(stockInInfoGoodsList)).build();
-//
-//        String response = execute1("wms.stockin.Other.createOtherOrder", dfc);
-//        log.info("创建其他入库单，返回结果：{}", response);
-//        StockInRep stock = JacksonUtil.parse(response, StockInRep.class);
-//        if (Objects.isNull(stock) || !stock.isSuccess()) {
-//            throw new ServiceException(stock.getMessage());
-//        }
-//
-//    }
-//
-//
-//
-//    static String execute1(String method, Object param) {
-//        Object[] bodyParams = new Object[]{param};
-//        // 无分页
-//        String sign = generateSign("lltxsb3", "lltxsb3-yy", "9290c78ee0b9a66e2f70bad499868281:1294184460056224683b0f894ceea66f", method, bodyParams);
-//        long timestamp = (System.currentTimeMillis() / 1000) - TIMESTAMP_BASE;
-//        String salt = "9290c78ee0b9a66e2f70bad499868281:1294184460056224683b0f894ceea66f".split(":")[1];
-//        String url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0", "lltxsb3-yy", method, salt, "lltxsb3", sign, timestamp);
-//        String json = JacksonUtil.toJson(bodyParams);
-//        log.info("旺店通请求地址：{},请求参数：{}", url, json);
-//        String body = HttpRequest.post(url).body(json).timeout(200000).execute().body();
-//        return body;
-//    }
 
 }
 

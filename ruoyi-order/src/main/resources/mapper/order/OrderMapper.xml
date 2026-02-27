@@ -396,9 +396,10 @@
                     #{originalOrderId}
                 </foreach>
             </if>
-            <if test="createTime != null">
-                and o.create_time > #{createTime}
+            <if test="createTimeStart != null">
+                and o.create_time > #{createTimeStart}
             </if>
+
             <if test="province != null and province!=0">
                 and o.province = #{province}
             </if>

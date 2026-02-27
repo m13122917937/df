@@ -34,7 +34,7 @@ public class ExpressClient {
 
     public static final String LOG = "【快递100】";
 
-    private final ExpressProperties expressProperties;
+    protected final ExpressProperties expressProperties;
 
     public ExpressClient(final ExpressProperties expressProperties) {
         this.expressProperties = expressProperties;

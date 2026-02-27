@@ -72,12 +72,21 @@ wechat:
         secret: 8d0f2f5ce562a5e420f5ebec4b7a03ce
         token: oiXr3GV0RYUl2FYVsI4U8k2KhI
         aesKey: oiXr3GV0RYUl2FYVsI4U8k2KhISQWJK40a4YQ6huCc6
+#fy:
+#  wd:
+#    sid: apidevnew2
+#    appkey: lltxsb3-test
+#    appsecret: d92dbe54e
+#    baseUrl: https://sandbox.wangdian.cn/openapi2/
+#    connectTimeout: 3000
+#    readTimeout: 15000
 fy:
   wd:
-    sid: apidevnew2
-    appkey: lltxsb3-test
-    appsecret: d92dbe54e
-    baseUrl: https://sandbox.wangdian.cn/openapi2/
+    sid: lltxsb3
+    appkey: lltxsb3-yy
+    appsecret: 9290c78ee0b9a66e2f70bad499868281:1294184460056224683b0f894ceea66f
+    salt: 1294184460056224683b0f894ceea66f
+    baseUrl: http://wdt.wangdian.cn/openapi
     connectTimeout: 3000
     readTimeout: 15000
   oss:

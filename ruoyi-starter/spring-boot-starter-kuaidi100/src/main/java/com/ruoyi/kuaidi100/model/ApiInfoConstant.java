@@ -8,6 +8,10 @@ public class ApiInfoConstant {
      * 查询url
      */
     public static final String QUERY_URL = "https://poll.kuaidi100.com/poll/query.do";
+
+
+
+
     /**
      * 快递查询地图轨迹url
      */
@@ -172,16 +176,9 @@ public class ApiInfoConstant {
      * 发货单接口url
      */
     public static final String BILL_PARCELS_METHOD = "billparcels";
+
     /**
-     * 第三方平台网点&面单余额接口url
-     */
-    public static final String THIRD_PLATFORM_REST = "getThirdInfo";
-    /**
-     * 快递面单OCR识别接口url
-     */
-    public static final String ELEC_DETOCR_URL = "http://api.kuaidi100.com/elec/detocr";
-    /**
-     * 新版编辑器请求地址
+     * 电子面单下单接口地址
      */
     public static final String NEW_TEMPLATE_URL = "https://api.kuaidi100.com/label/order";
     /**

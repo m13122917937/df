@@ -220,6 +220,17 @@ public class JacksonUtil {
         return null;
     }
 
+
+    /**
+     * 转Map.
+     *
+     * @param content 内容
+     * @return Map
+     */
+    public static Map<String, Object> beanToMap(final Object content) {
+        return getInstance().convertValue(content, Map.class);
+    }
+
     /**
      * 转对象.
      *

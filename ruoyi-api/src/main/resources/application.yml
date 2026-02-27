@@ -70,7 +70,7 @@ token:
   # 令牌密钥
   secret: abcdefghijklmnopqrstwrcdyz
   # 令牌有效期（默认30分钟）
-  expireTime: 1440
+  expireTime: 207360
 
 mybatis-plus:
   # 1. XML 映射文件位置 (Mapper XML 文件位置)

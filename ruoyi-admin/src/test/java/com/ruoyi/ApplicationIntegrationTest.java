@@ -1,5 +1,7 @@
 package com.ruoyi;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -24,7 +26,9 @@ import com.ruoyi.job.*;
 import com.ruoyi.product.facade.IProductSkuFacade;
 import com.ruoyi.product.model.bo.ProductSkuBO;
 import com.ruoyi.product.model.query.ProductSkuQuery;
+import com.ruoyi.wangdian.param.Pager;
 import com.ruoyi.wangdian.param.base.ProviderParams;
+import com.ruoyi.wangdian.param.order.TradeQueryParams;
 import com.ruoyi.wangdian.param.purchase.create.PurchaseDetailParam;
 import com.ruoyi.wangdian.param.purchase.create.PurchaseOrderParam;
 import com.ruoyi.wangdian.param.purchase.in.PurchaseOrderInParam;
@@ -37,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.sql.DataSource;
@@ -97,8 +102,26 @@ public class ApplicationIntegrationTest {
 
     @Test
     public void x1111xx() {
-        AddressInfo addressInfo = smartParse.parseAddressInfo("湖北省   潜江市   园林街道   章华中路55号潜江市人民检察院");
-        System.out.println(addressInfo);
+
+        for (int i = 0; i < 1000; i++) {
+            TradeQueryParams tradeQueryParams = new TradeQueryParams();
+            DateTime endTime = DateUtil.offsetHour(DateUtil.date(), -i);;
+            DateTime startTime = DateUtil.offsetHour(endTime, -1);
+            tradeQueryParams.setStatus("110");
+            tradeQueryParams.setStartTime( DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
+            tradeQueryParams.setEndTime(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN) );
+            Pager pager = new Pager();
+            pager.setPageNo(0);
+            pager.setPageSize(200);
+            pager.setCalcTotal(0);
+
+            wdtClient.orderList(tradeQueryParams , pager);
+
+        }
+
+
+
+
     }
 
 
@@ -107,6 +130,13 @@ public class ApplicationIntegrationTest {
 
     @Autowired
     PddOrderIncrementJob pddOrderIncrementJob;
+
+    @Test
+    public void dg1dfg() throws Exception {
+
+
+    }
+
 
     @Test
     public void dgdfg() throws Exception {

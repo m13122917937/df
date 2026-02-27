@@ -62,6 +62,49 @@ public class PddOrderIncrement {
      */
     private Integer orderTag ;
 
+    // ========== 拼多多脱敏订单打印相关字段 ==========
+
+    /**
+     * 收件人省份
+     */
+    private String province;
+
+    /**
+     * 收件人城市
+     */
+    private String city;
+
+    /**
+     * 收件人区/县
+     */
+    private String district;
+
+
+    /**
+     * 快递公司编码（用于打印面单）
+     */
+    private String expressCom;
+
+    /**
+     * 商品名称（用于打印面单）
+     */
+    private String cargoName;
+
+    /**
+     * 商品数量（用于打印面单）
+     */
+    private Integer cargoCount;
+
+    /**
+     * 商品单位（用于打印面单）
+     */
+    private String cargoUnit;
+
+    /**
+     * 商品重量（用于打印面单）
+     */
+    private String cargoWeight;
+
 
     /**
      * 创建时间

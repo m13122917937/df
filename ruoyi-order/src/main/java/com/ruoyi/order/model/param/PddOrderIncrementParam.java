@@ -3,8 +3,6 @@ package com.ruoyi.order.model.param;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.Date;
-
 /**
  * 拼多多增量订单参数对象
  *
@@ -50,10 +48,49 @@ public class PddOrderIncrementParam {
      */
     private String receiverAddress;
 
+
+
     /**
-     * 订单创建时间(时间戳)
+     * 收件人省份
      */
-    private Long createdTime;
+    private String province;
+
+    /**
+     * 收件人城市
+     */
+    private String city;
+
+    /**
+     * 收件人区/县
+     */
+    private String district;
+
+
+    /**
+     * 快递公司编码（用于打印面单）
+     */
+    private String expressCom;
+
+    /**
+     * 商品名称（用于打印面单）
+     */
+    private String cargoName;
+
+    /**
+     * 商品数量（用于打印面单）
+     */
+    private Integer cargoCount;
+
+    /**
+     * 商品单位（用于打印面单）
+     */
+    private String cargoUnit;
+
+    /**
+     * 商品重量（用于打印面单）
+     */
+    private String cargoWeight;
+
 
 
 }

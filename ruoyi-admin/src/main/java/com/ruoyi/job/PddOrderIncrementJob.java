@@ -9,7 +9,6 @@ import com.ruoyi.bill.facade.IPayerConfigFacade;
 import com.ruoyi.bill.model.bo.PayerConfigBO;
 import com.ruoyi.bill.model.param.PayerConfigParam;
 import com.ruoyi.bill.model.query.PayerConfigQuery;
-import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.order.facade.IPddOrderIncrementFacade;
 import com.ruoyi.order.model.param.PddOrderIncrementParam;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component()
-public class PddOrderIncrementJob  {
+public class PddOrderIncrementJob {
 
     @Autowired
     PopClient popClient;
@@ -98,7 +97,7 @@ public class PddOrderIncrementJob  {
             startTime = payerConfig.getLastSyncTime();
         }
         //多多限制接口只能拉30分钟内的数据
-        if((endTime - startTime)> 1800 ){
+        if ((endTime - startTime) > 1800) {
             endTime = startTime + 1800;
         }
 
@@ -118,7 +117,7 @@ public class PddOrderIncrementJob  {
                 PddOrderNumberListIncrementGetResponse response = popClient.syncInvoke(request, payerConfig.getToken());
 
                 // 检查响应
-                if (response == null || response.getOrderSnIncrementGetResponse() == null ) {
+                if (response == null || response.getOrderSnIncrementGetResponse() == null) {
                     log.warn("店铺[{}]第{}页响应为空", payerConfig.getKeyWord(), page);
                     break;
                 }
@@ -159,7 +158,7 @@ public class PddOrderIncrementJob  {
         }
         log.info("店铺[{}]增量订单同步完成，共处理{}条，成功{}条，失败{}条", payerConfig.getKeyWord(), totalOrder, totalSuccess, totalFail);
 
-        payerConfigFacade.update( new PayerConfigParam().setLastSyncTime(endTime),  new PayerConfigQuery().setId(payerConfig.getId()));
+        payerConfigFacade.update(new PayerConfigParam().setLastSyncTime(endTime), new PayerConfigQuery().setId(payerConfig.getId()));
         log.info("店铺[{}]最后同步时间已更新为: {}", payerConfig.getKeyWord(), endTime);
 
 
@@ -195,12 +194,10 @@ public class PddOrderIncrementJob  {
      */
     private void saveOrUpdateOrder(PddOrderNumberListIncrementGetResponse.OrderSnIncrementGetResponseOrderSnListItem orderInfo, PayerConfigBO payerConfig, Long endUpdatedAt) {
         // 构建订单参数
-        log.info("订单数据：{}}" , JacksonUtil.toJson(orderInfo));
         PddOrderIncrementParam param = buildOrderParam(orderInfo, payerConfig);
-        if(Objects.isNull(param)){
+        if (Objects.isNull(param)) {
             return;
         }
-
         // 保存或更新（根据订单号判断是否存在）
         pddOrderIncrementFacade.saveOrUpdate(param);
 
@@ -210,34 +207,50 @@ public class PddOrderIncrementJob  {
     /**
      * 构建订单参数对象
      *
-     * @param orderInfo    拼多多订单信息
-     * @param payerConfig  店铺配置
+     * @param orderInfo   拼多多订单信息
+     * @param payerConfig 店铺配置
      * @return 订单参数
      */
     private PddOrderIncrementParam buildOrderParam(PddOrderNumberListIncrementGetResponse.OrderSnIncrementGetResponseOrderSnListItem orderInfo, PayerConfigBO payerConfig) {
 
-        if(StrUtil.isBlank(orderInfo.getReceiverAddress())){
+        if (StrUtil.isBlank(orderInfo.getReceiverAddress())) {
             return null;
         }
 
         PddOrderIncrementParam param = new PddOrderIncrementParam();
 
-        // 订单基本信息
+        // ========== 订单基本信息 ==========
         param.setOrderSn(orderInfo.getOrderSn());
         param.setPayerConfigId(payerConfig.getId());
         param.setPayerName(payerConfig.getKeyWord());
 
-        // 收件人信息
+        // ========== 收件人原始信息 ==========
         param.setReceiverName(orderInfo.getReceiverName());
         param.setReceiverPhone(orderInfo.getReceiverPhone());
-
-        // 构建完整地址：省+市+区+详细地址
         param.setReceiverAddress(orderInfo.getReceiverAddress());
-        param.setOrderTag( buildOrderTag( orderInfo.getOrderTagList()));
+        param.setProvince(orderInfo.getProvince());
+        param.setCity(orderInfo.getCity());
+        param.setDistrict(orderInfo.getTown());
+
+        // ========== 订单标签 ==========
+        param.setOrderTag(buildOrderTag(orderInfo.getOrderTagList()));
+
+        // ========== 商品信息（从拼多多API读取）==========
+        PddOrderNumberListIncrementGetResponse.OrderSnIncrementGetResponseOrderSnListItemItemListItem orderItem = orderInfo.getItemList().get(0);
+        // 商品名称（如果没有获取到，使用默认值）
+        param.setCargoName(orderItem.getGoodsName());
+        // 商品数量（如果没有获取到，默认为1）
+        param.setCargoCount(orderItem.getGoodsCount().intValue());
+        // 商品单位（默认为"件"）
+        param.setCargoUnit("件");
+        // 商品重量（如果没有获取到，使用默认值1.0）
+        param.setCargoWeight("1.0");
+
+        // ========== 快递公司编码（默认使用顺丰，可根据配置修改）==========
+        param.setExpressCom("shunfeng");
 
         return param;
     }
-
 
     /**
      * 构建订单标签
@@ -252,7 +265,7 @@ public class PddOrderIncrementJob  {
 
         // 遍历标签列表，查找 has_weipai_service:1
         for (PddOrderNumberListIncrementGetResponse.OrderSnIncrementGetResponseOrderSnListItemOrderTagListItem tag : orderTagList) {
-            if (Objects.equals("has_weipai_service", tag.getName()) && Objects.equals(1, tag.getValue())){
+            if (Objects.equals("has_weipai_service", tag.getName()) && Objects.equals(1, tag.getValue())) {
                 return 1;
             }
         }

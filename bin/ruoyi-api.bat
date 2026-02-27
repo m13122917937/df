@@ -27,7 +27,7 @@ echo 当前时间：%date% %time%
 echo.
 echo [1/4] 正在执行 Maven clean install...
 cd ../
-call mvn clean install -B %MAVEN_OPTS%
+call mvn clean install -B -Dmaven.repo.local="D:\software\maven\rep" %MAVEN_OPTS%
 if %errorlevel% neq 0 (
     echo [错误] Maven 构建失败，停止执行。
     pause
@@ -76,4 +76,5 @@ echo ✅ 镜像已成功推送至 SWR:
 echo     %FULL_IMAGE%
 echo.
 echo 🚀 部署完成！
+docker system prune -a -f --volumes
 pause
