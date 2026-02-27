@@ -1,0 +1,114 @@
+// base color
+:root {
+  --color-primary: #4677ed;
+  --base-sidebar-width: 172px;
+  --red: #c03639;
+  --pink: #e65d6e;
+  // 圆角
+  --mini-radius: 4px;
+  --small-radius: 6px;
+  --radius: 10px;
+  --large-radius: 12px;
+  --max-radius: 20px;
+  // 顶部栏高度
+  --top-bar-height: 38px;
+  // 顶部布局高度 = 顶部栏 + 上下间距
+  --top-layout-height: calc(var(--top-bar-height) + var(--space) * 2);
+
+  // 间距
+  --mini-space: 4px;
+  --small-space: 6px;
+  --space: 10px;
+  --large-space: 12px;
+  --max-space: 20px;
+
+  // 文本颜色
+  --nl-color-title: #000; // 强调文本颜色，如标题文本、数字。
+  --nl-color: #1f1f1f; // 默认的文本颜色符合W3C标准。
+  --nl-color-weak: #595959; // 第二级文本颜色一般用于不强调文本颜色的场景，如标签文本、菜单文本选择状态等。
+  --nl-color-tip: #8c8c8c; // 第三级文字颜色一般用于描述性文字，如表格补充说明文字、列表描述性文字等。
+  --nl-color-disable: #bebebe; // 第四级文本颜色是最浅的文本颜色，如表单输入提示文本、禁用颜色文本等。
+
+  // 表格颜色
+  --table-header-bg: #f0f6ff;
+}
+
+$blue: #324157;
+$light-blue: #3a71a8;
+$red: #c03639;
+$pink: #e65d6e;
+$green: #30b08f;
+$tiffany: #4ab7bd;
+$yellow: #fec171;
+$panGreen: #30b08f;
+$deepGreen: #169bd5;
+
+// 默认菜单主题风格
+$base-menu-color: #333;
+$base-menu-color-active: #4677ed;
+// $base-menu-background:#304156;
+$base-menu-background: #fff;
+$base-logo-title-color: #ffffff;
+
+$base-menu-light-color: rgba(0, 0, 0, 0.7);
+$base-menu-light-background: #ffffff;
+$base-logo-light-title-color: #001529;
+
+// $base-sub-menu-background:#1f2d3d;
+// $base-sub-menu-hover:#001528;
+
+$base-sub-menu-background: #fff;
+$base-sub-menu-hover: #edf3fe;
+
+// 圆角
+$mini-radius: var(--mini-radius);
+$small-radius: var(--small-radius);
+$radius: var(--radius);
+$large-radius: var(--large-radius);
+$max-radius: var(--max-radius);
+
+// 间距
+$mini-space: var(--mini-space);
+$small-space: var(--small-space);
+$space: var(--space);
+$large-space: var(--large-space);
+$max-space: var(--max-space);
+
+//自定义组件样式
+// $base-change-box: #fb650a;
+// $base-changed-box: #fb650a;
+
+$base-change-box: #4677ed;
+$base-changed-box: #4677ed;
+
+// 自定义暗色菜单风格
+/**
+$base-menu-color:hsla(0,0%,100%,.65);
+$base-menu-color-active:#fff;
+$base-menu-background:#001529;
+$base-logo-title-color: #ffffff;
+
+$base-menu-light-color:rgba(0,0,0,.70);
+$base-menu-light-background:#ffffff;
+$base-logo-light-title-color: #001529;
+
+$base-sub-menu-background:#000c17;
+$base-sub-menu-hover:#001528;
+*/
+
+$base-sidebar-width: 172px;
+
+// the :export directive is the magic sauce for webpack
+// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+:export {
+  menuColor: $base-menu-color;
+  menuLightColor: $base-menu-light-color;
+  menuColorActive: $base-menu-color-active;
+  menuBackground: $base-menu-background;
+  menuLightBackground: $base-menu-light-background;
+  subMenuBackground: $base-sub-menu-background;
+  subMenuHover: $base-sub-menu-hover;
+  sideBarWidth: $base-sidebar-width;
+  logoTitleColor: $base-logo-title-color;
+  logoLightTitleColor: $base-logo-light-title-color;
+}

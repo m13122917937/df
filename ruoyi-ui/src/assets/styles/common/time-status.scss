@@ -1,0 +1,19 @@
+/* 时间状态样式 - 通用样式类 */
+
+/* 超时状态 - 红色 */
+.time-overdue {
+  color: #f56c6c !important; /* 红色 - 当前时间 > 发货时间 */
+  font-weight: 600;
+}
+
+/* 警告状态 - 橙色 */
+.time-warning {
+  color: #e6a23c !important; /* 浅红色/橙色 - 最晚发货时间 - 当前时间 < 24小时 */
+  font-weight: 500;
+}
+
+/* 正常状态 - 默认颜色 */
+.time-normal {
+  color: #606266 !important; /* 默认文字颜色 */
+  font-weight: normal;
+}

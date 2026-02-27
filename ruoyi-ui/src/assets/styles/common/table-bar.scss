@@ -1,0 +1,209 @@
+/* Element UI 表格横向滚动条样式 - 更加明显的样式 */
+:deep(.el-table__body-wrapper) {
+  &::-webkit-scrollbar {
+    height: 20p x;
+    /* 增加滚动条高度 */
+    background-color: #f0f0f0;
+    border-radius: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+    border-radius: 8px;
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+    box-shadow: 0 4px 8px rgba(64, 158, 255, 0.4);
+    transform: scaleY(1.1);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(135deg, #2c5aa0 0%, #337ecc 100%);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: #f0f0f0;
+  }
+}
+
+/* Firefox 滚动条样式 */
+:deep(.el-table__body-wrapper) {
+  scrollbar-width: auto;
+  /* 改为 auto 让滚动条更明显 */
+  scrollbar-color: #409eff #f0f0f0;
+}
+
+/* 表格容器滚动条样式 - 更加明显的样式 */
+.table-section {
+  &::-webkit-scrollbar {
+    height: 20px;
+    /* 增加滚动条高度 */
+    background-color: #f0f0f0;
+    border-radius: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+    border-radius: 8px;
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+    box-shadow: 0 4px 8px rgba(64, 158, 255, 0.4);
+    transform: scaleY(1.1);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(135deg, #2c5aa0 0%, #337ecc 100%);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: #f0f0f0;
+  }
+}
+
+/* Firefox 表格容器滚动条样式 */
+.table-section {
+  scrollbar-width: auto;
+  /* 改为 auto 让滚动条更明显 */
+  scrollbar-color: #409eff #f0f0f0;
+}
+
+
+
+.table-section:hover::after {
+  opacity: 1;
+}
+
+// /* 表格滚动条增强样式 - 当表格内容超出时显示更明显的滚动条 */
+:deep(.el-table) {
+  .el-table__body-wrapper {
+    position: relative;
+
+    /* 滚动条阴影效果 */
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.1) 0%, transparent 100%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+}
+
+/* 强制显示滚动条样式 - 确保在所有情况下都显示明显的滚动条 */
+:deep(.el-table__body-wrapper) {
+  /* 强制显示滚动条 */
+  overflow-x: auto;
+  overflow-y: auto;
+
+  /* 确保滚动条始终可见 */
+  &::-webkit-scrollbar {
+    height: 20px;
+    width: 20px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+    border-radius: 8px;
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+    min-height: 20px;
+    /* 确保滚动条有最小高度 */
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+    box-shadow: 0 4px 8px rgba(64, 158, 255, 0.4);
+    transform: scaleY(1.1);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(135deg, #2c5aa0 0%, #337ecc 100%);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: #f0f0f0;
+  }
+}
+
+/* 表格容器强制滚动条样式 */
+.table-section {
+  /* 强制显示滚动条 */
+  overflow-x: auto;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    height: 20px;
+    width: 20px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+    border-radius: 8px;
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+    min-height: 20px;
+    /* 确保滚动条有最小高度 */
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+    box-shadow: 0 4px 8px rgba(64, 158, 255, 0.4);
+    transform: scaleY(1.1);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(135deg, #2c5aa0 0%, #337ecc 100%);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: #f0f0f0;
+  }
+}

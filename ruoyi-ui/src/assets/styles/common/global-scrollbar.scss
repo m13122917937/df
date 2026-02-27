@@ -1,0 +1,65 @@
+/* Global scrollbar styles applied across the project.
+   Targets common scrollable containers to ensure scrollbars are more visible and easier to operate.
+   Add more selectors here if you use different container classes (e.g. `.my-scroll`, `.data-grid`).
+*/
+.el-scroll-container,
+:deep(.el-table__body-wrapper),
+.el-table__body-wrapper,
+.table-section,
+.scrollable,
+.overflow-scroll,
+.my-scroll {
+  /* WebKit browsers */
+  &::-webkit-scrollbar {
+    height: 16px;
+    width: 16px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+    border-radius: 8px;
+    border: 2px solid #f5f5f5;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 6px rgba(64, 158, 255, 0.25);
+    min-height: 20px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #337ecc 0%, #409eff 100%);
+    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.35);
+    transform: scaleY(1.05);
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(135deg, #2c5aa0 0%, #337ecc 100%);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: #f5f5f5;
+  }
+
+  /* Firefox */
+  scrollbar-width: auto;
+  scrollbar-color: #409eff #f5f5f5;
+}
+
+/* Ensure overflow is enabled on these containers when needed */
+.el-table__body-wrapper,
+.table-section,
+.scrollable,
+.overflow-scroll,
+.el-scroll-container,
+.my-scroll {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+}
+
+

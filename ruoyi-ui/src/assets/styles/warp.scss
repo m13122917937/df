@@ -1,0 +1,136 @@
+@import "~@/assets/styles/variables.scss";
+.wrap {
+  .wrap_btn {
+    border-radius: 0px 0px $radius $radius;
+    background: #fff;
+    box-shadow: 0px 4px 4px 0px rgba(208, 211, 230, 0.22);
+    padding: 0 $space $space;
+    margin-bottom: $space;
+
+    // tab 组
+    .type-btn-list {
+      background-color: #fff;
+      margin-bottom: $space;
+      padding: 0 $large-space;
+      box-shadow: 0px 2px 8px 0px rgba(216, 223, 228, 0.5);
+    }
+    // 按钮组
+    .btnWrap {
+      padding-top: $space;
+    }
+    // 品牌
+    .filter-condition {
+      padding-top: $space;
+    }
+  }
+
+  .body {
+    display: flex;
+    
+    // 表格容器
+    .tableList {
+      width: calc(100% - 200px);
+      background: #fff;
+      padding: $space $space 0;
+      border-radius: $radius;
+    }
+    .filter-panels {
+      width: 200px;
+      flex-shrink: 0;
+      background: #f8f9fa;
+      border-radius: 4px;
+      padding: 10px;
+      box-sizing: border-box;
+      height: calc(100vh - 250px);
+    }
+    .filter-panels-small {
+      width: 200px;
+      flex-shrink: 0;
+      background: #f8f9fa;
+      border-radius: 4px;
+      padding: 10px;
+      box-sizing: border-box;
+      height: calc(100vh - 250px);
+    }
+    .pagination-section {
+      margin: 0;
+      padding: 10px 0;
+      text-align: right;
+    }
+  }
+  // 表格上面按钮禁用
+  .checkedAllWrap {
+    display: flex;
+    align-items: center;
+    height: 34px;
+    line-height: 34px;
+    margin-bottom: $space;
+
+    .cancelCheckedStyle {
+      width: 52px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .checkedAllBtn,
+    .copyBtn {
+      margin-left: 8px;
+      padding: 6px 12px;
+      height: 28px;
+      &.is-disabled {
+        background-color: #f7f7f7;
+        border-color: #f0f0f0;
+        color: #999;
+      }
+    }
+  }
+  ::v-deep {
+    .el-table {
+      .is-sortable {
+        .caret-wrapper {
+          position: absolute;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          color: #333;
+          margin-left: var(--mini-space);
+          .sort-caret.descending {
+            border-top-color: #333 !important;
+          }
+
+          .sort-caret.ascending {
+            border-bottom-color: #333 !important;
+          }
+        }
+      }
+    }
+  }
+
+  .yellowCattle {
+    color: #333333;
+    display: flex;
+    font-size: 12px;
+    width: 34px;
+    height: 18px;
+    padding: 2px 6px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px 0px;
+    background: #e8d244;
+  }
+
+  .el-icon-document-copy {
+    cursor: pointer;
+    color: var(--color-primary);
+  }
+
+  .qualityitemtooltip {
+    width: 250px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
+}
