@@ -1,0 +1,243 @@
+
+::v-deep {
+  .cell {
+    position: relative;
+  }
+
+  .is-sortable .caret-wrapper {
+    position: absolute;
+    top: 5px;
+  }
+
+  .el-table__cell:nth-child(11) .caret-wrapper {
+    left: 104px;
+  }
+
+  //  .el-table__cell:nth-child(13) .caret-wrapper {
+  //   left: 104px;
+  // }
+  .el-table__cell:nth-child(15) .caret-wrapper {
+    left: 66px;
+  }
+
+  .el-table__cell:nth-child(17) .caret-wrapper {
+    left: 66px;
+  }
+}
+
+.need-order-table-content {
+  display: inline-block;
+  white-space: nowrap;
+
+  div {
+    white-space: nowrap;
+  }
+
+  span {
+    white-space: nowrap;
+  }
+}
+
+::v-deep {
+  .active-filter {
+    border-color: #eb3935;
+
+    .el-icon-arrow-down {
+      color: #eb3935;
+    }
+
+    .el-icon-sort {
+      color: #eb3935;
+    }
+
+    img {
+      transform: translateY(-60px);
+      filter: drop-shadow(0 60px 0 #eb3935);
+    }
+  }
+
+  .img-filtered {
+    transform: translateY(-60px);
+    filter: drop-shadow(0 60px 0 #eb3935);
+  }
+
+  .need-table-header-cell {
+    padding: 0 0 10px 8px;
+    background-color: #ffffff !important;
+    border: 0 !important;
+
+    .cell {
+      padding: 0 !important;
+    }
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+
+  .need-table-content-cell {
+    padding: 0 0 0 8px;
+
+    .cell {
+      padding: 0 !important;
+    }
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    overflow: hidden;
+  }
+
+  .group-content .need-table-content-cell {
+    border-top: 1px solid #dfe6ec;
+    border-bottom: 0 !important;
+    background: #fafafa;
+  }
+
+  .delivery-time {
+    color: #ffffff;
+    width: 100px;
+    margin: 0 auto;
+    text-align: center;
+    border-radius: 4px;
+  }
+
+  .return-status {
+    color: #727886;
+    background: #eeeeee;
+    min-width: 100px;
+    padding: 0 4px;
+    margin: 0 auto;
+    text-align: center;
+    border-radius: 2px;
+  }
+
+  .weixin-clock {
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+  }
+}
+
+.receiverAddress {
+  white-space: normal !important;
+  display: inline-block;
+  padding-right: 0.3em;
+}
+
+.del_time {
+  text-align: center;
+  border-radius: 4px;
+  width: 100px;
+}
+
+.status-text {
+  display: inline-block;
+  width: 130px;
+  padding: 1px 0;
+  text-align: center;
+  border-radius: 3px;
+}
+
+.el-table__row .need-table-content-cell .status-text {
+  display: inline-block;
+  width: 100%;
+  padding: 4px 0;
+  text-align: center;
+}
+
+.cancelCheckedHeader {
+  text-align: left;
+  border: 1px solid #e7e7e7;
+  background: #f8f8f8;
+  border-radius: 6px;
+  padding: 8.5px 8px;
+  margin-left: -4px;
+}
+
+.cancelPopoverWrap {
+  width: 180px;
+  line-height: 30px;
+
+  ::v-deep {
+    .cancelPopRadio .el-radio__label {
+      padding-left: 4px;
+    }
+  }
+
+  .cancelPopRemark {
+    width: 120px;
+    margin-left: 10px;
+  }
+}
+
+.cancelPopoverBtn {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.money {
+  display: flex;
+  width: 260px;
+  height: 31px;
+  border-radius: 3px;
+  color: #ffffff;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: left;
+}
+
+.price-item {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 2px 5px;
+  height: 26px;
+  line-height: 22px;
+  background-color: #e7e7e7;
+  margin: 3px 5px 3px 3px;
+  border-radius: 3px;
+}
+
+.canbid {
+  color: #333333;
+}
+
+.invalid {
+  color: #727886;
+  text-decoration: line-through;
+}
+
+.normal {
+  color: #140c00;
+}
+
+.low-price {
+  color: #ff2d2d;
+}
+
+.itemtooltip {
+  width: 160px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mg8 {
+  margin-right: 8px;
+}
+
+.checked-right-container {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.qualityitemtooltip {
+  width: 250px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+}

@@ -1,0 +1,216 @@
+.el-table .el-table__header th.el-table__cell > .cell {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.text-nowrap {
+  white-space: nowrap;
+}
+.btnWrap{
+  margin-bottom: 10px;
+}
+.need-order-table-content {
+  display: inline-block;
+  white-space: nowrap;
+  div {
+    white-space: nowrap;
+  }
+  span {
+    white-space: nowrap;
+  }
+}
+.red-text {
+  color: #eb3935;
+}
+::v-deep {
+  .active-filter {
+    border-color: #eb3935;
+    .el-icon-arrow-down {
+      color: #eb3935;
+    }
+    .el-icon-sort {
+      color: #eb3935;
+    }
+    img {
+      transform: translateY(-60px);
+      filter: drop-shadow(0 60px 0 #eb3935);
+    }
+  }
+  .img-filtered {
+    transform: translateY(-60px);
+    filter: drop-shadow(0 60px 0 #eb3935);
+  }
+  .group-content .need-table-content-cell {
+    border-top: 1px solid #dfe6ec;
+    border-bottom: 0 !important;
+    background: #fafafa;
+  }
+  .delivery-time {
+    color: #ffffff;
+    width: 100px;
+    margin: 0 auto;
+    text-align: center;
+    border-radius: 4px;
+  }
+  .return-status {
+    color: #727886;
+    background: #eeeeee;
+    min-width: 100px;
+    padding: 0 4px;
+    margin: 0 auto;
+    text-align: center;
+    border-radius: 2px;
+  }
+  .weixin-clock {
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+  }
+}
+.price-item {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 2px 5px;
+  background-color: #e7e7e7;
+  margin: 3px;
+  border-radius: 3px;
+  color: #333;
+  &.active {
+    color: #fff;
+    background-color: #ff2d2d;
+  }
+  &.disabled {
+    text-decoration: line-through;
+  }
+}
+.delivery_box {
+  color: #fff;
+  width: 100px;
+  margin: 0 auto;
+  text-align: center;
+  border-radius: 4px;
+  &.box_-1 {
+    background-color: #cccccc;
+  }
+  &.box_0 {
+    background-color: #eb5732;
+  }
+  &.box_1 {
+    background-color: #ffdd00;
+    color: #333333;
+  }
+  &.box_2 {
+    background-color: #ff99cc;
+  }
+  &.box_3 {
+    background-color: #cccccc;
+  }
+}
+.item_right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 12px;
+  margin-top: 12px;
+}
+.han_address_box {
+  display: flex;
+  align-items: center;
+  .han_receiverAddress {
+    white-space: normal;
+    display: inline-block;
+    padding-right: 0.3em;
+  }
+}
+.itemtooltip {
+  width: 160px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.nickclass {
+  width: 20px;
+  height: 20px;
+  color: #fff;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 20px;
+  font-size: 10px;
+  display: inline-block;
+}
+.sea {
+  background: #0084f4;
+}
+.land {
+  background: #029463;
+}
+.empty {
+  background: #c78d39;
+}
+::v-deep {
+  .cell {
+    position: relative;
+  }
+  .is-sortable .caret-wrapper {
+    position: absolute;
+    top: 5px;
+  }
+  .el-table__cell.last-shipping-time .caret-wrapper {
+    left: 104px;
+  }
+}
+
+.code_express {
+  > div {
+    display: flex;
+    .tit {
+      width: 100px;
+    }
+  }
+}
+.el-icon-circle-check {
+  color: #1dc11d;
+  font-weight: bold;
+}
+.el-icon-circle-close {
+  color: #eb3935;
+  font-weight: bold;
+}
+.el-icon-warning-outline {
+  color: #fc8b0a;
+  font-weight: bold;
+}
+.el-icon-time {
+  color: #fc8b0a;
+  font-weight: bold;
+}
+::v-deep .btn {
+  .countDown {
+    display: inline-block;
+    width: 100%;
+    font-size: 12px;
+    line-height: 1;
+  }
+}
+
+.price-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.price-btn {
+  display: inline-block;
+  background-color: #e7e7e7;
+  color: #333;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  min-width: 50px;
+  transition: all 0.2s ease;
+  &.price-btn-lowest {
+    color: #ff2d2d;
+    
+  }
+}

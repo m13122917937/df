@@ -1,0 +1,675 @@
+<!-- 新建采购 -->
+<template>
+  <div class="wrap">
+    <div class="wrap_btn">
+      <!-- <div class="btnWrap">
+        <el-button @click="onClickRule">
+          采购控制台
+        </el-button>
+      </div> -->
+      <BrandFilter
+        :status="1"
+        :current-brand="searchParams.brand"
+        :province-id="searchParams.provinceId"
+        @brand-change="handleBrandChange"
+      />
+    </div>
+    <!-- body -->
+    <div class="body">
+      <!-- 左侧省份筛选 -->
+      <div class="filter-panels-small">
+        <FilterPanel
+          title="收货地点"
+          :status="1"
+          :current-value="searchParams.provinceId"
+          :current-brand="searchParams.brand"
+          @change="handleLocationChange"
+        />
+      </div>
+      <!-- 列表 -->
+      <div class="tableList">
+        <SearchSection
+          :status="1"
+          :order-code="searchParams.orderCode"
+          :original-order-id="searchParams.originalOrderId"
+          :category="searchParams.category"
+          :shop-name="searchParams.shopName"
+          :product-name-like="searchParams.productNameLike"
+          :sku-name-like="searchParams.skuNameLike"
+          :show-order-code="true"
+          :show-original-order-id="true"
+          :show-category="true"
+          :show-shop-name="true"
+          :show-product-name-like="true"
+          :show-sku-name-like="true"
+          @search="handleSearch"
+          @reset="handleReset"
+        >
+          <template #toolbar>
+            <div class="toolbar-content">
+              <div class="toolbar-left">
+                <!-- 可以添加其他工具栏项目 -->
+              </div>
+              <div class="toolbar-right">
+                <el-button icon="el-icon-download" @click="handleExport" :loading="exportLoading"
+                  >导出</el-button
+                >
+                <el-button
+                  type="cancel"
+                  @click="batchRevocation"
+                  :disabled="multipleSelection.length == 0"
+                  :loading="revocationLoading"
+                  >撤销</el-button
+                >
+                <el-button icon="el-icon-plus" @click="onClickRule"
+                  >采购控制台</el-button
+                >
+                <el-button
+                  class="push-order-btn"
+                  type="primary"
+                  plain
+                  :disabled="multipleSelection.length === 0"
+                  @click="openPushOrderDialog"
+                  >定向推单</el-button>
+              </div>
+            </div>
+          </template>
+        </SearchSection>
+        <!-- 订单表格 -->
+        <div class="table-section">
+          <el-table
+            ref="multipleTable"
+            v-loading="tableLoading"
+            v-table-height="{ bottomOffset: 96 }"
+            size="medium"
+            stripe
+            center
+            :fit="true"
+            :data="tableDataList"
+            style="width: 100%"
+            element-loading-text="数据加载中"
+            @selection-change="handleSelectionChange"
+            :height="tableHeight"
+            :cell-style="{ height: '40px' }"
+            :header-cell-style="{
+              height: '48px',
+              background: '#f7f8fa',
+              color: '#606266',
+              fontWeight: 600,
+            }"
+          >
+            <!-- 空数据状态 -->
+            <template slot="empty">
+              <EmptyState text="暂无新建采购数据" />
+            </template>
+            <el-table-column type="selection" width="55"> </el-table-column>
+            <el-table-column
+              v-for="(item, index) in columnData"
+              :key="index"
+              :min-width="item.minWidth"
+              :sortable="item.sortShow"
+              :prop="item.prop"
+              :fixed="item.fixed || null"
+              show-overflow-tooltip
+              :align="item.align || 'center'"
+            >
+              <!-- 表头 -->
+              <template #header>
+                <div class="text">{{ item.label }}</div>
+              </template>
+              <!-- 表身 -->
+              <template slot-scope="{ row }">
+                <div v-if="item.prop === 'orderStyle'">
+                  <OrderStyleBadge
+                    :order-style="row.orderStyle"
+                  />
+                </div>
+                <!-- 单号 -->
+                <div v-else-if="item.prop === 'orderNumbers'">
+                <!-- 单号 -->
+                 <div class="order-numbers">
+                  <div class="order-number-item">内部单号:
+                    {{
+                      row.orderCode || "-"
+                    }}
+                     <i
+                      v-if="row.orderCode"
+                      class="el-icon-copy-document copy-icon"
+                      @click="copyText(row.orderCode)"
+                    ></i>
+                  </div>
+                  <div class="order-number-item"> 商家单号:
+                    {{ row.originalOrderId || "-" }}
+                    <i
+                      v-if="row.originalOrderId"
+                      class="el-icon-copy-document copy-icon"
+                      @click="copyText(row.originalOrderId)"
+                    ></i>
+                  </div>
+                </div>
+                </div>
+
+                <div v-else-if="item.prop === 'platform'">
+                  <div>{{ row.platform }}</div>
+                  <div>{{ row.shopName }}</div>
+                </div>
+                <div v-else-if="item.prop === 'brand'">
+                  <div>{{ row.brand }}</div>
+                  <div>{{ row.category }}</div>
+                </div>
+                <div v-else-if="item.prop === 'sku'">
+                  <div class="order-productName">
+                  <div class="order-productName-line">
+                    <span class="pn-model" v-if="row.skuName">{{
+                      row.productName || "-"
+                    }}</span>
+                  </div>
+                  <div class="order-sku-line">
+                    <!-- <i
+                      v-if="row.productName || row.skuName"
+                      class="el-icon-copy-document copy-icon"
+                      @click="
+                        copyText(`${row.productName}${row.skuName}`)
+                      "
+                    ></i> -->
+                    {{
+                      row.skuName
+                    }}
+                  </div>
+                  </div>
+                </div>
+                <div v-else-if="item.prop === 'address'">
+                  <el-popover
+                    placement="top"
+                    trigger="hover"
+                    popper-class="addr-popover"
+                    :open-delay="150"
+                    :close-delay="100"
+                  >
+                    <div class="addr-content">
+                      <div class="addr-line main">
+                        收件人: {{ row.addressee || "无" }}
+
+                      </div>
+                      <div class="addr-line sub">
+                        电话: {{ row.phone || "无" }}
+                      </div>
+                      <div class="addr-line sub">
+                        地址: {{ row.receivingAddress || "无" }}
+                        <i
+                          v-if="row.receivingAddress"
+                          class="el-icon-copy-document copy-icon"
+                          @click="handleCopyAddress(row)"
+                        ></i>
+                      </div>
+                    </div>
+                    <span slot="reference"
+                      >{{ row.provinceName }} {{ row.cityName }}</span
+                    >
+                  </el-popover>
+                </div>
+                <!-- 最晚发货时间 - 特殊颜色处理 -->
+                <div v-else-if="item.prop === 'lastShippingTime'" :class="getTimeStatusClass(row)">
+                  {{ row[item.prop] || "-" }}
+                </div>
+                <div v-else>
+                  {{ row[item.prop] || "-" }}
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column
+              fixed="right"
+              width="180"
+              sort-by="addressCompleted"
+            >
+              <template slot="header">
+                <div slot="reference">
+                  <div class="text">操作</div>
+                </div>
+              </template>
+              <template slot-scope="{ row }">
+                <template>
+                  <el-button
+                    type="primary"
+                    size="mini"
+                    @click="offerConfirm(row)"
+                    >报价</el-button
+                  >
+                </template>
+                <el-button @click="handleReturn(row)" type="danger" size="mini"
+                  >撤销</el-button
+                >
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <!-- 分页 -->
+        <div class="pagination-section">
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="searchParams.pageNum"
+            :page-sizes="[30, 50, 100]"
+            :page-size="searchParams.pageSize"
+            :total="totalNum"
+            layout="total, sizes, prev, pager, next, jumper"
+          />
+        </div>
+      </div>
+    </div>
+    <AddQuotation
+      :visible.sync="procurementDialogVisible"
+      :orderData="orderData"
+      :isEdit="false"
+      @confirm="handleProcurementConfirm"
+    />
+    <!-- 退货追单弹框组件 -->
+    <ReturnOrderDialog
+      :visible.sync="returnOrderDialog"
+      :current-order="currentOrder"
+      :return-reason.sync="returnReason"
+      @success="initTable"
+    >
+    </ReturnOrderDialog>
+    <PushOrderDialog
+      :visible.sync="pushOrderDialogVisible"
+      :order-code-list="pushOrderOrderCodes"
+      @confirm="handlePushOrderConfirm"
+      @close="handlePushOrderClose"
+    />
+  </div>
+</template>
+<script>
+import SearchSection from "@/views/demandManage/wholesale/components/searchSection.vue";
+import AddQuotation from "../../components/AddQuotation.vue";
+import { apiGetNewList, exportCreatingOrdersApi, apiOrderWaitPush } from "@/api/creatingOrders";
+import { getOrderListApi }  from "@/api/wholesale";
+import BrandFilter from "../../components/brandFilter.vue";
+import FilterPanel from "../../components/filterPanel.vue";
+import { column } from "./config";
+import ReturnOrderDialog from "../../components/returnOrderDialog.vue";
+import EmptyState from "@/views/demandManage/wholesale/components/emptyState.vue";
+import OrderStyleBadge from '@/components/OrderStyleBadge';
+import { blobValidate } from "@/utils/ruoyi";
+import { saveAs } from "file-saver";
+import PushOrderDialog from "../../components/pushOrder.vue";
+import {
+  createFormatDateTimeMethod,
+  createCopyTextMethod,
+  formatPrice,
+  formatNumber,
+  formatAccountingPeriod,
+  createGetTimeStatusClassMethod,
+} from "@/utils/wholesaleUtils";
+
+export default {
+  name: "creatingOrders",
+  components: {
+    BrandFilter,
+    SearchSection,
+    FilterPanel,
+    ReturnOrderDialog,
+    AddQuotation,
+    // 推单弹窗
+    PushOrderDialog,
+    EmptyState,
+    OrderStyleBadge
+  },
+
+  data() {
+    return {
+      columnData: column,
+      tableLoading: false,
+      tableDataList: [],
+      totalNum: 0,
+      tableHeight: 500,
+      returnOrderDialog: false,
+      orderData: {},
+      procurementDialogVisible: false,
+      currentOrder: null,
+        // push order state
+        pushOrderDialogVisible: false,
+        pushOrderOrderCodes: [],
+        pushOrderSubmitting: false,
+
+      cancelAllParam: {
+        // 全部撤销参数
+        radio: 0,
+        list: ["通过其他渠道已发货", "用户退单", "暂不采购", "其他"],
+        reason: "",
+      },
+      searchParams: {
+        //table列表query入参
+        pageNum: 1,
+        pageSize: 30,
+        brand: "",
+        provinceId: "",
+        orderCode: "", // 内部单号
+        originalOrderId: "", // 商家单号
+        category: "", // 品类
+        shopName: "", // 店铺名称
+        productNameLike: "", // 商品名称
+        skuNameLike: "", // SKU名称
+      },
+      multipleSelection: [],
+      revocationLoading: false,
+      returnReason: 5, // 退货追单原因
+
+      searchData: {
+        //table列表body入参
+        status: 1,
+        brand: "",
+        cityId: "",
+        orderCode: "", // 内部单号
+        originalOrderId: "", // 商家单号
+        category: "", // 品类
+        shopName: "", // 店铺名称
+        productNameLike: "", // 商品名称
+        skuNameLike: "", // SKU名称
+        provinceId: "",
+      },
+
+      exportLoading: false,
+    };
+  },
+  mounted() {
+    this.getData();
+  },
+
+  methods: {
+    formatPrice,
+    formatNumber,
+    formatAccountingPeriod,
+    /**
+     * 格式化日期时间 - 使用公用工具函数
+     * @param {string} dateTime - 日期时间字符串
+     * @returns {string} 格式化后的日期时间
+     */
+    formatDateTime: createFormatDateTimeMethod(),
+
+    /**
+     * 复制文本到剪贴板 - 使用公用工具函数
+     * @param {string} text - 要复制的文本
+     */
+    copyText: createCopyTextMethod(this),
+
+    /**
+     * 处理地址复制，避免可访问性警告
+     * @param {Object} row - 行数据
+     */
+    handleCopyAddress(row) {
+      const addressText = `收件人:${row.addressee},电话:${row.phone},地址: ${row.receivingAddress}`;
+      this.copyText(addressText);
+
+      // 延迟移除焦点，确保复制操作完成后再处理焦点
+      this.$nextTick(() => {
+        // 移除所有可能的焦点元素
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.blur) {
+          activeElement.blur();
+        }
+
+        // 将焦点转移到 body 或一个安全的元素
+        document.body.focus();
+      });
+    },
+    /**
+     * 获取时间状态样式类 - 使用公用工具函数
+     * @param {Object} row - 行数据对象
+     * @returns {string} CSS 类名
+     */
+    getTimeStatusClass: createGetTimeStatusClassMethod(),
+    handleSizeChange(val) {
+      this.searchParams.pageSize = val;
+      this.searchParams.pageNum = 1;
+      this.getData();
+    },
+    handleCurrentChange(val) {
+      this.searchParams.pageNum = val;
+      this.getData();
+    },
+    initTable() {
+      this.searchParams.pageNum = 1;
+      this.getData();
+    },
+    // 单个撤销
+    handleReturn(row) {
+      this.currentOrder = [row];
+      this.returnOrderDialog = true;
+    },
+    // 批量撤销
+    async batchRevocation() {
+      this.currentOrder = this.multipleSelection;
+      this.returnOrderDialog = true;
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    handleProcurementConfirm(formData) {
+      this.getData();
+      // 这里可以处理表单提交逻辑
+      this.$message.success("配置保存成功");
+    },
+    // 品牌筛选变化
+    handleBrandChange(brandId) {
+      this.searchParams.brand = brandId;
+      this.getData();
+    },
+    // 收货地点筛选变化
+    handleLocationChange(locationId) {
+      this.searchParams.provinceId = locationId;
+      this.getData();
+    },
+    // 搜索处理
+    handleSearch(searchData) {
+      this.searchParams.orderCode = searchData.orderCode || "";
+      this.searchParams.originalOrderId = searchData.originalOrderId || "";
+      this.searchParams.category = searchData.category || "";
+      this.searchParams.shopName = searchData.shopName || "";
+      this.searchParams.productNameLike = searchData.productNameLike || "";
+      this.searchParams.skuNameLike = searchData.skuNameLike || "";
+      this.searchParams.pageNum = 1;
+      this.getData();
+    },
+    // 重置搜索条件
+    handleReset() {
+      (this.searchParams = {
+        //table列表query入参
+        pageNum: 1,
+        pageSize: 30,
+        brand: "",
+        provinceId: "",
+        orderCode: "", // 内部单号
+        originalOrderId: "", // 商家单号
+        category: "", // 品类
+        shopName: "", // 店铺名称
+        productNameLike: "", // 商品名称
+        skuNameLike: "", // SKU名称
+      }),
+        this.getData();
+    },
+    async getData() {
+      if (this.tableLoading) {
+        this.$message.error("数据加载中，请勿操作！！！");
+        return;
+      }
+      this.tableLoading = true;
+      let pageData = {
+        pageNum: this.searchParams.pageNum,
+        pageSize: this.searchParams.pageSize,
+      }
+      let params = {
+        province: this.searchParams.provinceId,
+        brand: this.searchParams.brand,
+        orderCodeList: this.searchParams.orderCode?[this.searchParams.orderCode]:[], // 内部单号搜索
+        originalOrderId: this.searchParams.originalOrderId, // 商家单号搜索
+        category: this.searchParams.category, // 品类搜索
+        shopName: this.searchParams.shopName, // 店铺名称搜索
+        productNameLike: this.searchParams.productNameLike, // 商品名称搜索
+        skuNameLike: this.searchParams.skuNameLike, // SKU名称搜索
+        status: 1, // 新建采购订单状态
+      };
+      let res = await getOrderListApi(pageData,params);
+      const { code, rows = [], total = 0 } = res;
+      if (code != 200) {
+        return;
+      }
+      this.tableLoading = false;
+      this.tableDataList = rows || [];
+      this.totalNum = total || 0;
+    },
+    offerConfirm(row) {
+      this.procurementDialogVisible = true;
+      this.orderData = row;
+    },
+
+    // 撤销
+    async revoke(row) {},
+    async addSuccess() {},
+    hide() {
+      this.cancelAllParam.reason = "";
+    },
+    openPushOrderDialog() {
+      if (!this.multipleSelection.length) {
+        this.$message.warning("请选择至少一条订单");
+        return;
+      }
+      const codes = this.multipleSelection
+        .map((item) => item.orderCode)
+        .filter((code) => !!code);
+      if (!codes.length) {
+        this.$message.warning("所选订单缺少内部单号，无法定向推单");
+        return;
+      }
+      // 检查SKU是否相同
+      const skuNames = this.multipleSelection
+        .map((item) => item.skuName)
+        .filter((sku) => !!sku);
+      if (skuNames.length > 0) {
+        const uniqueSkus = [...new Set(skuNames)];
+        if (uniqueSkus.length > 1) {
+          this.$message.warning("不支持不同SKU的订单定向推单，请选择相同SKU的订单");
+          return;
+        }
+      }
+      this.pushOrderOrderCodes = Array.from(new Set(codes));
+      this.pushOrderDialogVisible = true;
+    },
+    async handlePushOrderConfirm(formData) {
+      if (this.pushOrderSubmitting) {
+        return;
+      }
+      const orderCodeList = formData.orderCodeList || this.pushOrderOrderCodes;
+      if (!orderCodeList || !orderCodeList.length) {
+        this.$message.warning("请选择需要推送的订单");
+        return;
+      }
+      this.pushOrderSubmitting = true;
+      try {
+        const res = await apiOrderWaitPush({
+          ...formData,
+          orderCodeList,
+        });
+        this.$message.success("定向推单成功");
+        this.handlePushOrderClose();
+        // 推单成功后刷新列表
+        this.getData();
+      } catch (error) {
+        console.error(error);
+        this.$message.error("定向推单失败，请稍后重试");
+      } finally {
+        this.pushOrderSubmitting = false;
+      }
+    },
+    handlePushOrderClose() {
+      this.pushOrderDialogVisible = false;
+      this.pushOrderOrderCodes = [];
+    },
+    // 撤销全部
+    async cancelAllSure() {},
+
+    onClickRule() {
+      this.$router.push({
+        path: "/demandManage/wholesale/ruleList",
+      });
+    },
+    // 判断字段是否需要显示省略号
+    getShowOverflowTooltip(prop) {
+      // 需要显示省略号的字段列表
+      const overflowFields = [
+        'platform',      // 平台
+        'shopName',      // 店铺名称
+        'brand',         // 品牌
+        'category',      // 品类
+        'sku',           // 产品型号
+        'address',       // 收货地
+        'lastShippingTime', // 最晚发货时间
+        'erpTradeTime',  // erp交易时间
+        'remake'         // 备注
+      ];
+
+      return overflowFields.includes(prop);
+    },
+
+    async handleExport() {
+      let params = {
+        pageNum: this.searchParams.pageNum,
+        pageSize: this.searchParams.pageSize,
+        province: this.searchParams.provinceId,
+        brand: this.searchParams.brand,
+        orderCodeList: this.searchParams.orderCode?[this.searchParams.orderCode]:[], // 内部单号搜索
+        originalOrderId: this.searchParams.originalOrderId, // 商家单号搜索
+        category: this.searchParams.category, // 品类搜索
+        shopName: this.searchParams.shopName, // 店铺名称搜索
+        productNameLike: this.searchParams.productNameLike, // 商品名称搜索
+        skuNameLike: this.searchParams.skuNameLike, // SKU名称搜索
+        status: 1, // 新建采购订单状态
+      };
+      this.exportLoading = true;
+      try {
+        const res = await exportCreatingOrdersApi(params);
+        const isBlob = blobValidate(res);
+        if (isBlob) {
+          const blob = new Blob([res]);
+          const supplierName = this.selectedSupplierName || '新建采购订单';
+          const now = new Date();
+          const timestamp =
+            now.getFullYear() +
+            String(now.getMonth() + 1).padStart(2, '0') +
+            String(now.getDate()).padStart(2, '0') +
+            '_' +
+            String(now.getHours()).padStart(2, '0') +
+            String(now.getMinutes()).padStart(2, '0')
+          const fileName = `${supplierName}_${timestamp}.xlsx`;
+          saveAs(blob, fileName);
+          this.$message.success('导出成功');
+        } else {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const result = JSON.parse(e.target.result || '{}');
+              this.$message.error(result.msg || '导出失败');
+            } catch (error) {
+              this.$message.error('导出失败');
+            }
+          };
+          reader.readAsText(res);
+        }
+      } catch (error) {
+        console.error('导出新建采购订单失败', error);
+        this.$message.error('导出失败，请稍后重试');
+      } finally {
+        this.exportLoading = false;
+      }
+
+    },
+  },
+};
+</script>
+<style lang="scss" scoped>
+@import "~@/assets/styles/variables.scss";
+@import "~@/assets/styles/warp.scss";
+@import "@/assets/styles/common/order-components.scss";
+@import "@/assets/styles/common/time-status.scss";
+@import "./index.scss";
+</style>
