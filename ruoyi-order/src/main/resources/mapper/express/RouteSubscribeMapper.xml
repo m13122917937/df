@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.express.mapper.RouteSubscribeMapper">
+    
+    <resultMap type="RouteSubscribe" id="RouteSubscribeResult">
+        <result property="id"    column="id"    />
+        <result property="logisticsCode"    column="logistics_code"    />
+        <result property="logisticsNo"    column="logistics_no"    />
+        <result property="logisticsStatus"    column="logistics_status"    />
+        <result property="phone"    column="phone"    />
+        <result property="status"    column="status"    />
+        <result property="traceStatus"    column="trace_status"    />
+        <result property="routerDetailParam"    column="detail_info" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"   />
+        <result property="newRouteDate"    column="new_route_date"    />
+        <result property="routeFrom"    column="route_from"    />
+        <result property="routeTo"    column="route_to"    />
+        <result property="routeInfo"    column="route_info"    />
+        <result property="retryNumber"    column="retry_number"    />
+        <result property="locked"    column="locked"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+
+</mapper>

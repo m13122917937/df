@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.order.mapper.OrderMapper">
+
+    <resultMap type="Order" id="OrderResult">
+        <result property="orderCode" column="order_code"/>
+        <result property="erpOrderId" column="erp_order_id"/>
+        <result property="originalOrderId" column="original_order_id"/>
+        <result property="orderMarketingId" column="order_marketing_id"/>
+        <result property="orderType" column="order_type"/>
+        <result property="shopName" column="shop_name"/>
+        <result property="addressee" column="addressee"/>
+        <result property="phone" column="phone"/>
+        <result property="receivingAddress" column="receiving_address"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="addressStatus" column="address_status"/>
+        <result property="category" column="category"/>
+        <result property="brand" column="brand"/>
+        <result property="productName" column="product_name"/>
+        <result property="skuName" column="sku_name"/>
+        <result property="skuCode" column="sku_code"/>
+        <result property="quantity" column="quantity"/>
+        <result property="platform" column="platform"/>
+        <result property="status" column="status"/>
+        <result property="subStatus" column="sub_status"/>
+        <result property="erpTradeTime" column="erp_trade_time"/>
+        <result property="lastShippingTime" column="last_shipping_time"/>
+        <result property="shipmentsTime" column="shipments_time"/>
+        <result property="signedTime" column="signed_time"/>
+        <result property="refundNotarizeTime" column="refund_notarize_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="handleApply" column="handle_apply"/>
+        <result property="returnShopStatus" column="return_shop_status"/>
+        <result property="advanceFlag" column="advance_flag"/>
+        <result property="settlementType" column="settlement_type"/>
+    </resultMap>
+
+
+    <select id="provinceCount" resultType="com.ruoyi.order.domain.dto.ProvinceCountDTO">
+        select province, sum(quantity) as sum from o_order
+        where status = #{status}
+        <if test="brand != null and brand !=''">
+            and brand = #{brand}
+        </if>
+        <if test="orderType != null">
+            and order_type = #{orderType}
+        </if>
+        <if test="createTimeStart != null">
+            and create_time >= #{createTimeStart}
+        </if>
+        GROUP BY province
+    </select>
+
+
+    <select id="customerProvinceCount" resultType="com.ruoyi.order.domain.dto.ProvinceCountDTO" >
+        SELECT
+            o.province,
+            sum(o.quantity) AS sum
+        FROM
+            o_order o
+            JOIN o_hanging_order oho ON oho.order_id = o.order_code AND oho.status = 1
+        WHERE
+            o.`status` = #{status}
+            AND oho.last_compete_company = #{companyId}
+            AND oho.create_time >  #{createTime}
+        <if test="brand != null and brand !=''">
+            and brand = #{brand}
+        </if>
+        GROUP BY
+            o.province
+    </select>
+
+
+    <select id="customerBrandCount" resultType="com.ruoyi.order.domain.dto.BrandCountDTO">
+        SELECT
+            o.brand,
+            sum(o.quantity) AS sum
+        FROM
+            o_order o
+            JOIN o_hanging_order oho ON oho.order_id = o.order_code AND oho.status = 1
+        WHERE
+            o.`status` = #{status}
+            AND oho.last_compete_company = #{companyId}
+            AND oho.create_time >  #{createTime}
+        <if test="province != null">
+            and o.province= #{province}
+        </if>
+        GROUP BY
+            o.brand
+    </select>
+
+    <select id="brandCount" resultType="com.ruoyi.order.domain.dto.BrandCountDTO">
+        select brand, sum(quantity) as sum from o_order where status = #{status}
+        <if test="province != null">
+            and province = #{province}
+        </if>
+        <if test="createTimeStart != null">
+            and create_time >= #{createTimeStart}
+        </if>
+        <if test="createTimeStart != null">
+            and create_time >= #{createTimeStart}
+        </if>
+        <if test="orderType != null">
+            and order_type = #{orderType}
+        </if>
+        GROUP BY brand
+    </select>
+
+    <select id="countHeader" resultType="com.ruoyi.order.domain.dto.OrderStatusDTO">
+        select status,count(*) as count from o_order where create_time >= #{date} GROUP BY status
+    </select>
+
+    <select id="companyListPage" resultType="com.ruoyi.order.domain.dto.CompanyOrderDTO">
+        SELECT
+            o.order_code,
+            o.erp_order_id,
+            o.status,
+            oto.trade_company_name tradeCompanyName,
+            oto.trade_user_name,
+            oto.create_time,
+            o.send_time,
+            o.shipments_time,
+            o.signed_time,
+            o.brand,
+            o.category,
+            o.product_name,
+            o.sku_name,
+            o.quantity,
+            oto.quantity warehouseQuantity,
+            o.sub_status,
+            o.province,
+            o.city,
+            o.addressee,
+            o.phone,
+            o.receiving_address,
+            o.handle_apply,
+            oto.trade_price,
+            oto.accounting_period,
+            oto.tracking_number,
+            oto.tracking_company,
+            oto.create_time lastCompeteTime ,
+            oto.trade_user_name,
+            oto.trade_user_phone,
+            o.order_style,
+            oto.delivery_code,
+            o.remark,
+            o.payer_name payerName
+        FROM
+            o_order o
+        INNER JOIN o_trade_order oto ON o.order_code = oto.order_id AND oto.`status` =  2
+        <where>
+            <if test="orderType!=null">
+                and  o.order_type = #{orderType}
+            </if>
+            <if test="deliveryCode!=null">
+               and oto.delivery_code = #{deliveryCode}
+            </if>
+            <if test="companyId!=null">
+                and oto.trade_company_id = #{companyId}
+            </if>
+            <if test="statusList != null and statusList.size > 0">
+                <foreach item="status" collection="statusList" open=" and o.status in ( " separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="orderCodeList != null and orderCodeList.size > 0">
+                <foreach item="orderCode" collection="orderCodeList" open=" and o.order_code in ( " separator="," close=")">
+                    #{orderCode}
+                </foreach>
+            </if>
+            <if test="createTime != null">
+                and o.create_time > #{createTime}
+            </if>
+            <if test="province != null and province!=0">
+                and o.province = #{province}
+            </if>
+            <if test="orderCode != null and orderCode!=''">
+                and o.order_code = #{orderCode}
+            </if>
+            <if test="brand != null and brand!=''">
+                and o.brand like concat('%',#{brand},'%')
+            </if>
+            <if test="category != null and category!=''">
+                and o.category like concat('%',#{category},'%')
+            </if>
+            <if test="productName != null and productName!=''">
+                and o.product_name like concat('%',#{productName},'%')
+            </if>
+            <if test="skuName != null and skuName!=''">
+                and o.sku_name like concat('%',#{skuName},'%')
+            </if>
+            <if test="sendStartTime!=null">
+                and o.shipments_time>= #{sendStartTime}
+            </if>
+            <if test="sendNedTime!=null">
+                <![CDATA[
+               and o.shipments_time  <= #{sendStartTime}
+            ]]>
+            </if>
+            <if test="signedStartTime!=null">
+                and o.signed_time>= #{signedStartTime}
+            </if>
+            <if test="signedEndTime!=null">
+                <![CDATA[
+               and o.signed_time  <= #{signedEndTime}
+            ]]>
+            </if>
+        </where>
+        order by  oto.create_time desc
+    </select>
+
+    <select id="provinceCityCount" resultType="com.ruoyi.order.domain.dto.ProvinceCityCountDTO">
+        SELECT
+            province,
+            city,
+            count(*) AS count
+        FROM
+            o_order
+        WHERE
+        brand = #{brand} and create_time >= #{gtCreateDateTime}
+        <foreach item="category" collection="categoryList" open=" and  category in ( " separator="," close=")">
+            #{category}
+        </foreach>
+        <foreach item="status" collection="statusList" open=" and  status in ( " separator="," close=")">
+            #{status}
+        </foreach>
+        <if test="addressStatus != null">
+           and address_status = #{addressStatus}
+        </if>
+        <if test="productName != null and productName!=''">
+            and product_name = #{productName}
+        </if>
+        <if test="skuName != null and skuName!=''">
+            and sku_name = #{skuName}
+        </if>
+        GROUP BY
+            province,
+            city
+    </select>
+
+    <select id="productCount" resultType="com.ruoyi.order.domain.dto.ProductDTO">
+        SELECT
+            product_name,
+            count(*) AS quantity
+        FROM
+            o_order
+        WHERE
+            brand = #{brand} and create_time >= #{gtCreateDateTime}
+        <if test="addressStatus != null">
+            and address_status = #{addressStatus}
+        </if>
+        <if test="province != null">
+            and province = #{province}
+        </if>
+        <if test="city != null">
+            and city = #{city}
+        </if>
+        <if test="productName != null and productName != ''">
+            and product_name like concat('%',#{productName},'%')
+        </if>
+        <foreach item="category" collection="categoryList" open=" and  category in ( " separator="," close=")">
+            #{category}
+        </foreach>
+        <foreach item="status" collection="statusList" open=" and  status in ( " separator="," close=")">
+            #{status}
+        </foreach>
+        GROUP BY
+            product_name
+        order by quantity
+    </select>
+
+
+
+
+    <select id="skuCount" resultType="com.ruoyi.order.domain.dto.SkuDTO">
+        SELECT
+            sku_name,
+            count(*) AS quantity
+        FROM
+            o_order
+        WHERE
+            brand = #{brand} and create_time >= #{gtCreateDateTime}
+        <if test="addressStatus != null">
+            and address_status = #{addressStatus}
+        </if>
+        <if test="province != null">
+            and province = #{province}
+        </if>
+        <if test="city != null">
+            and city = #{city}
+        </if>
+        <if test="productName != null and productName != ''">
+            and product_name = #{productName}
+        </if>
+        <foreach item="category" collection="categoryList" open=" and  category in ( " separator="," close=")">
+            #{category}
+        </foreach>
+        <foreach item="status" collection="statusList" open=" and  status in ( " separator="," close=")">
+            #{status}
+        </foreach>
+        GROUP BY
+            sku_name
+    </select>
+
+    <select id="sendListPage" resultType="com.ruoyi.order.domain.dto.SendOrderLisDTO">
+        SELECT
+            o.order_code,
+            o.erp_order_id,
+            o.original_order_id,
+
+            o.brand,
+            o.category,
+            o.platform,
+            o.shop_name,
+            o.product_name,
+            o.sku_name,
+            o.quantity,
+
+            o.sub_status,
+            oto.trade_company_name tradeCompanyName,
+            oto.trade_user_name,
+            oto.trade_user_phone,
+
+            oto.create_time,
+            o.send_time,
+            o.last_shipping_time,
+            o.shipments_time,
+            o.signed_time,
+            oto.create_time lastCompeteTime ,
+
+            o.province,
+            o.city,
+
+            o.addressee,
+            o.phone,
+            o.receiving_address,
+
+            o.handle_apply,
+            oho.delivery_time,
+            oho.price_highest,
+            oho.price_highest_status,
+            oho.price_hign,
+            oho.price_hign_status,
+            oho.price_low,
+            oho.price_low_status,
+            oho.price_lowest,
+            oho.price_lowest_status,
+
+            oto.trade_price,
+            oto.accounting_period,
+            oto.tracking_number,
+            oto.tracking_company,
+            oto.trade_nick_name,
+
+            o.order_style,
+            oto.tracking_number,
+            oto.tracking_company
+
+        FROM
+            o_order o
+        INNER JOIN o_hanging_order oho ON o.order_code = oho.order_id and oho.status = 1
+        INNER JOIN o_trade_order oto ON o.order_code = oto.order_id AND oto.`status` =  2
+        <where>
+            <if test="orderType!=null">
+                and  o.order_type = #{orderType}
+            </if>
+            <if test="deliveryCode!=null">
+                and oto.delivery_code = #{deliveryCode}
+            </if>
+            <if test="companyId!=null">
+                and oto.trade_company_id = #{companyId}
+            </if>
+            <if test="status!=null">
+                and o.status = #{status}
+            </if>
+            <if test="originalOrderId!=null and originalOrderId!=''">
+                and o.original_order_id = #{originalOrderId}
+            </if>
+            <if test="statusList != null and statusList.size > 0">
+                <foreach item="status" collection="statusList" open=" and o.status in ( " separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="orderCodeList != null and orderCodeList.size > 0">
+                <foreach item="orderCode" collection="orderCodeList" open=" and o.order_code in ( " separator="," close=")">
+                    #{orderCode}
+                </foreach>
+            </if>
+            <if test="originalOrderIdList != null and originalOrderIdList.size > 0">
+                <foreach item="originalOrderId" collection="originalOrderIdList" open=" and o.original_order_id in ( " separator="," close=")">
+                    #{originalOrderId}
+                </foreach>
+            </if>
+            <if test="createTime != null">
+                and o.create_time > #{createTime}
+            </if>
+            <if test="province != null and province!=0">
+                and o.province = #{province}
+            </if>
+            <if test="orderCode != null and orderCode!=''">
+                and o.order_code = #{orderCode}
+            </if>
+            <if test="brand != null and brand!=''">
+                and o.brand like concat('%',#{brand},'%')
+            </if>
+            <if test="category != null and category!=''">
+                and o.category like concat('%',#{category},'%')
+            </if>
+            <if test="productNameLike != null and productNameLike!=''">
+                and o.product_name like concat('%',#{productNameLike},'%')
+            </if>
+            <if test="skuNameLike != null and skuNameLike!=''">
+                and o.sku_name like concat('%',#{skuNameLike},'%')
+            </if>
+            <if test="sendStartTime!=null">
+                and o.shipments_time>= #{sendStartTime}
+            </if>
+            <if test="sendNedTime!=null">
+                <![CDATA[
+               and o.shipments_time  <= #{sendStartTime}
+            ]]>
+            </if>
+            <if test="signedStartTime!=null">
+                and o.signed_time>= #{signedStartTime}
+            </if>
+            <if test="signedEndTime!=null">
+                <![CDATA[
+               and o.signed_time  <= #{signedEndTime}
+            ]]>
+            </if>
+        </where>
+        order by  o.${sort}
+
+    </select>
+
+
+</mapper>

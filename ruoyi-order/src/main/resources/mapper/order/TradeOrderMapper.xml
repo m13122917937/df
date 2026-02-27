@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.order.mapper.TradeOrderMapper">
+    
+    <resultMap type="TradeOrder" id="TradeOrderResult">
+        <result property="id"    column="id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="hangOrderId"    column="hang_order_id"    />
+        <result property="tradePrice"    column="trade_price"    />
+        <result property="tradeUserId"    column="trade_user_id"    />
+        <result property="tradeCompanyId"    column="trade_company_id"    />
+        <result property="accountingPeriod"    column="accounting_period"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="productName"    column="product_name"    />
+        <result property="brand"    column="brand"    />
+        <result property="skuName"    column="sku_name"    />
+        <result property="skuCode"    column="sku_code"    />
+        <result property="province"    column="province"    />
+        <result property="quantity"    column="quantity"    />
+        <result property="orderType"    column="order_type"    />
+        <result property="tradeIndex"    column="trade_index"    />
+        <result property="electronicSheet"    column="electronic_sheet"    />
+    </resultMap>
+
+    <select id="tradePrice" resultType="com.ruoyi.order.domain.dto.TradePriceDTO">
+        select
+            trade_price,
+            sum(quantity) as quantity
+        from o_trade_order
+            where
+         sku_code = #{skuCode}
+        and status = #{status}
+        <![CDATA[
+          and create_time >= #{startCreateTime}
+
+          and create_time <= #{endCreateTime}
+        ]]>
+        group by trade_price
+    </select>
+
+
+</mapper>

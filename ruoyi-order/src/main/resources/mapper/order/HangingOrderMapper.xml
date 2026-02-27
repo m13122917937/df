@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.order.mapper.HangingOrderMapper">
+    
+    <resultMap type="HangingOrder" id="HangingOrderResult">
+        <result property="id"    column="id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="priceHighest"    column="price_highest"    />
+        <result property="priceHighestStatus"    column="price_highest_status"    />
+        <result property="priceHign"    column="price_hign"    />
+        <result property="priceHignStatus"    column="price_hign_status"    />
+        <result property="priceLow"    column="price_low"    />
+        <result property="priceLowStatus"    column="price_low_status"    />
+        <result property="priceLowest"    column="price_lowest"    />
+        <result property="priceLowestStatus"    column="price_lowest_status"    />
+        <result property="quotationDeadline"    column="quotation_deadline"    />
+        <result property="quotationInterval"    column="quotation_interval"    />
+        <result property="accountingPeriodType"    column="accounting_period_type"    />
+        <result property="accountingPeriodValue"    column="accounting_period_value"    />
+        <result property="logisticRequire"    column="logistic_require"    />
+        <result property="releaseType"    column="release_type"    />
+        <result property="releaseLater"    column="release_later"    />
+        <result property="releaseTime"    column="release_time"    />
+        <result property="status"    column="status"    />
+        <result property="lastCompeteUser"    column="last_compete_user"    />
+        <result property="lastCompeteCompany"    column="last_compete_company"    />
+        <result property="lastCompeteTime"    column="last_compete_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="taxRequire"    column="tax_require"    />
+        <result property="codeOptions"    column="code_options"    />
+        <result property="packingRequire"    column="packing_require"    />
+        <result property="otherRequire"    column="other_require"    />
+        <result property="intervalSpread"    column="interval_spread"    />
+        <result property="ruleRange"    column="rule_range"    />
+        <result property="ruleId"    column="rule_id"    />
+        <result property="deliveryTime"    column="delivery_time"    />
+        <result property="deliveryDeadline"    column="delivery_deadline"    />
+        <result property="merchantCompanyId"    column="merchant_company_id"    />
+        <result property="hangMethod"    column="hang_method"    />
+    </resultMap>
+
+
+</mapper>
