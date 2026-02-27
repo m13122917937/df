@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.capital.mapper.PaymentMapper">
+    
+    <resultMap type="Payment" id="PaymentResult">
+        <result property="id"    column="id"    />
+        <result property="companyId"    column="company_id"    />
+        <result property="tradeNo"    column="trade_no"    />
+        <result property="tradeStates"    column="trade_states"    />
+        <result property="tradeChannel"    column="trade_channel"    />
+        <result property="tradeType"    column="trade_type"    />
+        <result property="amount"    column="amount"    />
+        <result property="outNo"    column="out_no"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="notifyTime"    column="notify_time"    />
+        <result property="createBy"    column="create_by"    />
+    </resultMap>
+
+
+</mapper>

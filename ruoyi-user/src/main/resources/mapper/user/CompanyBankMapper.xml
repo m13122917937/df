@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.user.mapper.CompanyBankMapper">
+    
+    <resultMap type="CompanyBank" id="CompanyBankResult">
+        <result property="id"    column="id"    />
+        <result property="companyId"    column="company_id"    />
+        <result property="nickName"    column="nick_name"    />
+        <result property="companyName"    column="company_name"    />
+        <result property="accountBankName"    column="account_bank_name"    />
+        <result property="creditCode"    column="credit_code"    />
+        <result property="accountBank"    column="account_bank"    />
+        <result property="bankAccount"    column="bank_account"    />
+        <result property="province"    column="province"    />
+        <result property="city"    column="city"    />
+        <result property="defaulted"    column="defaulted"    />
+        <result property="valid"    column="valid"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="deleted"    column="deleted"    />
+    </resultMap>
+
+
+</mapper>
