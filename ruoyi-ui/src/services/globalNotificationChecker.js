@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { fetchGlobalNotifications } from '@/api/globalNotification'
+import { getToken } from '@/utils/auth'
 
 // 去重持久化：使用 localStorage 持久化已展示通知 ID，刷新后也不会重复弹出
 const STORAGE_KEY = 'global_notification_shown_ids_v1'
@@ -34,6 +35,11 @@ const MIN_CHECK_INTERVAL_MS = 1000
 let lastCheckTs = 0
 
 async function checkOnce(params = {}) {
+  // 如果用户未登录，不调用接口
+  if (!getToken()) {
+    return
+  }
+  
   try {
     const res = await fetchGlobalNotifications(params)
     if (!res || res.code !== 200) return
