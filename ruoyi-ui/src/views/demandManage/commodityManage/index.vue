@@ -131,6 +131,9 @@ import { getSkuListApi, createProductSkuApi, getBrandListApi, getProductCategory
 
 export default {
     name: 'CommodityManage',
+    components: {
+        EmptyState
+    },
     data() {
         return {
             loading: false,
