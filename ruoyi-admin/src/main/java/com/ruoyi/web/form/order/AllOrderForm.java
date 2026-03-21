@@ -24,9 +24,17 @@ public class AllOrderForm {
 
     @ApiModelProperty(value = "开始创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date createTimeStart;
+    private Date createStartTime;
 
     @ApiModelProperty(value = "结束创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createEndTime;
+
+    @ApiModelProperty(value = "开始创建时间（兼容字段）")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTimeStart;
+
+    @ApiModelProperty(value = "结束创建时间（兼容字段）")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTimeEnd;
 

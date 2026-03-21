@@ -9,6 +9,7 @@ import com.ruoyi.web.form.order.OrderAddForm;
 import com.ruoyi.web.form.order.OrderNewForm;
 import com.ruoyi.web.vo.order.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -34,6 +35,8 @@ public interface OrderConvert {
     List<OrderDeliveryVO> toOrderDeliveryVO(List<OrderBO> list);
 
 
+    @Mapping(source = "createStartTime", target = "createTimeStart")
+    @Mapping(source = "createEndTime", target = "createTimeEnd")
     OrderQuery allParamToQuery(AllOrderForm allOrderForm);
 
 
