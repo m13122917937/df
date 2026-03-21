@@ -9,11 +9,11 @@ chcp 65001 >nul
 
 ::---------- 可配置参数 ----------
 set ACR_REGISTRY=crpi-4norowu43xncrxa7.cn-shanghai.personal.cr.aliyuncs.com
-set ACR_NAMESPACE=default
+set ACR_NAMESPACE=fydf
 set IMAGE_NAME=ruoyi-api
 set IMAGE_TAG=1.0.2
 set ACR_USERNAME=hahhapai
-set ACR_PASSWORD=xht654321
+set ACR_PASSWORD=xht654321.
 
 :: Maven 构建参数（可选）
 set MAVEN_OPTS=-Dmaven.test.skip=true
@@ -32,7 +32,7 @@ echo.
 echo [1/5] 正在执行 Maven clean install...
 cd ../
 set MAVEN_SETTINGS=D:\work\jie\adm\setting.xml
-call mvn clean install -B -Dmaven.repo.local="D:\software\maven-rep" -s "%MAVEN_SETTINGS%" %MAVEN_OPTS%
+call mvn clean install -B -s "%MAVEN_SETTINGS%" %MAVEN_OPTS%
 if %errorlevel% neq 0 (
     echo [错误] Maven 构建失败，停止执行。
     pause
