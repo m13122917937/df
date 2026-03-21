@@ -1,5 +1,6 @@
 package com.ruoyi.biz.excel;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.ruoyi.biz.express.ExpressBizService;
@@ -46,10 +47,17 @@ public class DeliveryListener implements ReadListener<OrderImportVO> {
         log.info("导入excel数据:{}", JacksonUtil.toJson(orderVO));
 
         try {
+            if(StrUtil.isBlank(orderVO.getOrderCode())){
+                return;
+            }
+            if(StrUtil.isBlank(orderVO.getSnList()) && StrUtil.isBlank(orderVO.getImeiList())){
+                return;
+            }
             // 保存串码
             imeiBizService.verifyImei(ImeiOrderParam.builder().orderCode(orderVO.getOrderCode()).sn(orderVO.getSnList()).imeiCode(orderVO.getImeiList()).build());
             // 保存物流信息
             String expressCode = dictCache.getOrDefault(orderVO.getExpress(), LogisticsCode.SHUNFENG.getCode());
+
             expressBizService.saveExpress(ExpressOrderForm.builder().cellphone(orderVO.getSendPhone()).trackingNumber(orderVO.getExpressNO())
                     .trackingCompany(orderVO.getExpress()).trackingCompanyCode(expressCode).orderCode(orderVO.getOrderCode()).build());
         } catch (IOException | InstantiationException | IllegalAccessException | InvocationTargetException |

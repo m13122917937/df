@@ -11,7 +11,8 @@ public class CompanyForm {
     @ApiModelProperty("企业名称模糊查询")
     private String companyNameLike;
 
-
+    @ApiModelProperty("联系人昵称模糊查询")
+    private String nickNameLike;
 
     @ApiModelProperty("企业省1查询")
     private Long provinceId;

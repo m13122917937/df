@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <!-- 本地仓库路径，默认为用户目录下的 .m2/repository -->
+    <localRepository>D:\software\maven-rep</localRepository>
+
+    <!-- 是否离线模式 -->
+    <offline>false</offline>
+
+    <!-- 插件组配置 -->
+    <pluginGroups>
+        <!-- pluginGroup element 指定了一个额外的插件组，用于根据前缀查找插件 -->
+        <pluginGroup>org.sonatype.plugins</pluginGroup>
+    </pluginGroups>
+
+    <!-- 代理配置 (如果需要透过代理上网) -->
+    <proxies>
+        <!--
+        <proxy>
+            <id>optional</id>
+            <active>true</active>
+            <protocol>http</protocol>
+            <username>proxyuser</username>
+            <password>proxypass</password>
+            <host>proxy.host.net</host>
+            <port>80</port>
+            <nonProxyHosts>local.net|some.host.com</nonProxyHosts>
+        </proxy>
+        -->
+    </proxies>
+
+    <!-- 服务器认证信息 (部署到私有仓库时使用) -->
+    <servers>
+        <!--
+        <server>
+            <id>deploymentRepo</id>
+            <username>repouser</username>
+            <password>repopass</password>
+        </server>
+        -->
+    </servers>
+
+    <!-- 镜像配置 (推荐配置国内镜像以加速下载) -->
+    <mirrors>
+        <mirror>
+            <id>aliyun-maven</id>
+            <mirrorOf>central</mirrorOf>
+            <name>Aliyun Maven Mirror</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </mirror>
+    </mirrors>
+
+    <!-- 配置文件(profiles) -->
+    <profiles>
+        <profile>
+            <id>jdk-11</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <jdk>11</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.source>11</maven.compiler.source>
+                <maven.compiler.target>11</maven.compiler.target>
+                <maven.compiler.compilerVersion>11</maven.compiler.compilerVersion>
+            </properties>
+        </profile>
+    </profiles>
+
+    <!-- 激活哪些 profile -->
+    <activeProfiles>
+        <activeProfile>jdk-11</activeProfile>
+    </activeProfiles>
+</settings>

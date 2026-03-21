@@ -20,6 +20,9 @@ public class CompanyQuery {
 
     private String nickName;
 
+    @QueryField(operator = Operator.LIKE, field = "nickName")
+    private String nickNameLike;
+
     /**
      * 账期类型（1:字典；2:自定义）
      */

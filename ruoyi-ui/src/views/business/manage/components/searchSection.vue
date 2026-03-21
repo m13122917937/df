@@ -14,6 +14,16 @@
             class="search-input"
           />
         </el-form-item>
+        <el-form-item label="企业别名" class="search-item">
+          <el-input
+            v-model="searchForm.nickNameLike"
+            placeholder="请输入企业别名"
+            clearable
+            trim
+            @keyup.enter.native="handleSearch"
+            class="search-input"
+          />
+        </el-form-item>
         <el-form-item label="省" class="search-item">
           <el-select
             v-model="searchForm.provinceId"
@@ -80,6 +90,7 @@ export default {
       type: Object,
       default: () => ({
         companyNameLike: '',
+        nickNameLike: '',
         provinceId: '',
         cityId: ''
       })
@@ -89,6 +100,7 @@ export default {
     return {
       searchForm: {
         companyNameLike: '',
+        nickNameLike: '',
         provinceId: '',
         cityId: '',
       }
@@ -132,6 +144,7 @@ export default {
     handleSearch() {
       this.$emit('search', {
         companyNameLike: this.searchForm.companyNameLike,
+        nickNameLike: this.searchForm.nickNameLike,
         provinceId: this.searchForm.provinceId,
         cityId: this.searchForm.cityId
       })
@@ -140,6 +153,7 @@ export default {
     handleReset() {
       this.searchForm = {
         companyNameLike: '',
+        nickNameLike: '',
         provinceId: '',
         cityId: ''
       }
@@ -171,7 +185,7 @@ export default {
   padding: 20px;
   border: 1px solid #f0f0f0;
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -182,23 +196,23 @@ export default {
     background: linear-gradient(90deg, #409eff 0%, #66b1ff 100%);
     border-radius: 8px 8px 0 0;
   }
-  
+
   .search-form {
     .search-row {
       display: flex;
       align-items: flex-end;
-      
+
       .search-item {
         flex: 1;
         min-width: 0;
         display: flex;
-        
+
         ::v-deep .el-form-item {
           margin-bottom: 0;
           display: flex;
           align-items: center;
         }
-        
+
         ::v-deep .el-form-item__label {
           width: 82px !important;
           text-align: right !important;
@@ -209,26 +223,26 @@ export default {
           flex-shrink: 0 !important;
           line-height: 32px !important;
         }
-        
+
         ::v-deep .el-form-item__content {
           flex: 1;
           margin-left: 0;
           line-height: 32px;
         }
-        
+
         ::v-deep .el-select {
           width: 100%;
         }
-        
+
         ::v-deep .el-date-editor {
           width: 100%;
         }
-        
+
         .search-date-picker {
           flex: 1;
         }
       }
-      
+
       .button-group {
         text-align: right;
       }

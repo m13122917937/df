@@ -226,6 +226,7 @@ export default {
       isEditCompany: false,
       searchForm: {
         companyNameLike: "",
+        nickNameLike: "",
         province: "",
         city: "",
       },

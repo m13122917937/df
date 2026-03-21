@@ -23,6 +23,10 @@ echo  开始执行构建与部署任务
 echo ============================
 echo 当前时间：%date% %time%
 
+set JAVA_HOME=D:\software\javva\
+set PATH=%JAVA_HOME%\bin;%PATH%
+
+
 :: Step 1: 清理并构建 Maven 项目
 echo.
 echo [1/4] 正在执行 Maven clean install...

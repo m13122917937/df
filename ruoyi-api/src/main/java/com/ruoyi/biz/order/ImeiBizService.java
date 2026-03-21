@@ -68,7 +68,7 @@ public class ImeiBizService {
         Assert.equals(orderBO.getStatus(), OrderConsts.OrderStatus.DELIVERY_ING.getCode(), "订单状态异常");
 
         TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
-        Assert.notNull(orderBO, "抢单记录不存在");
+        Assert.notNull(tradeOrderBO, "抢单记录不存在");
         imeiFacade.delete(new ImeiQuery().setOrderId(imeiOrderParam.getOrderCode()).setTradeNo(tradeOrderBO.getId()));
         List<ImeiBO> list = new ArrayList<>();
         list.add(getImeiBO(imeiOrderParam.getImeiCode(), imeiOrderParam.getSn(), orderBO, tradeOrderBO));
