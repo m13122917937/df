@@ -27,7 +27,9 @@ echo 当前时间：%date% %time%
 echo.
 echo [1/4] 正在执行 Maven clean install...
 cd ../
-call mvn clean install -B -Dmaven.repo.local="D:\software\maven\rep" %MAVEN_OPTS%
+set MAVEN_SETTINGS=D:\work\jie\adm\setting.xml
+
+call mvn clean install -B -Dmaven.repo.local="D:\software\maven-rep" -s "%MAVEN_SETTINGS%" %MAVEN_OPTS%
 if %errorlevel% neq 0 (
     echo [错误] Maven 构建失败，停止执行。
     pause

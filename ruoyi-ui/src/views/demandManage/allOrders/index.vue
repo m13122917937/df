@@ -21,6 +21,24 @@
                     :value="item.value" />
                 </el-select>
               </div>
+            </div>
+            <!-- 第二行 -->
+            <div class="search-row">
+              <div class="search-item">
+                <label class="search-label">创建时间</label>
+                <el-date-picker
+                  v-model="searchForm.createTimeRange"
+                  type="daterange"
+                  start-placeholder="开始时间"
+                  end-placeholder="结束时间"
+                  range-separator="至"
+                  value-format="yyyy-MM-dd"
+                  unlink-panels
+                  :picker-options="createTimePickerOptions"
+                  @change="handleCreateTimeRangeChange"
+                  class="search-input"
+                />
+              </div>
               <div class="search-item">
                 <label class="search-label">发货时间</label>
                 <el-date-picker
@@ -256,11 +274,11 @@ const getDefaultSearchForm = () => {
   // 结束时间默认为当前日期
   const endDate = new Date()
   endDate.setHours(0, 0, 0, 0)
-  
+
   // 开始时间是结束时间往前推30天
   const startDate = new Date(endDate)
   startDate.setDate(startDate.getDate() - 30)
-  
+
   // 格式化为 yyyy-MM-dd
   const formatDate = (date) => {
     const year = date.getFullYear()
@@ -268,11 +286,14 @@ const getDefaultSearchForm = () => {
     const day = String(date.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
   }
-  
+
   return {
     status: '',
-    sendTimeRange: [formatDate(startDate), formatDate(endDate)],
-    orderType: ''
+    orderType: '',
+    // 创建时间：默认近一个月
+    createTimeRange: [formatDate(startDate), formatDate(endDate)],
+    // 发货时间：默认为空
+    sendTimeRange: []
   }
 }
 
@@ -306,6 +327,27 @@ export default {
           // 如果已选择开始日期，限制结束日期不能超过开始日期后一个月
           if (this.searchForm.sendTimeRange && this.searchForm.sendTimeRange.length > 0 && this.searchForm.sendTimeRange[0]) {
             const startDate = new Date(this.searchForm.sendTimeRange[0])
+            startDate.setHours(0, 0, 0, 0)
+            const oneMonthLater = new Date(startDate)
+            oneMonthLater.setMonth(oneMonthLater.getMonth() + 1)
+            oneMonthLater.setHours(23, 59, 59, 999)
+            // 禁用超过开始日期一个月后的日期
+            return time.getTime() > oneMonthLater.getTime()
+          }
+          return false
+        }
+      },
+      createTimePickerOptions: {
+        disabledDate: (time) => {
+          // 禁用未来日期
+          const today = new Date()
+          today.setHours(23, 59, 59, 999)
+          if (time.getTime() > today.getTime()) {
+            return true
+          }
+          // 如果已选择开始日期，限制结束日期不能超过开始日期后一个月
+          if (this.searchForm.createTimeRange && this.searchForm.createTimeRange.length > 0 && this.searchForm.createTimeRange[0]) {
+            const startDate = new Date(this.searchForm.createTimeRange[0])
             startDate.setHours(0, 0, 0, 0)
             const oneMonthLater = new Date(startDate)
             oneMonthLater.setMonth(oneMonthLater.getMonth() + 1)
@@ -420,7 +462,7 @@ export default {
       const oneMonthLater = new Date(startDate)
       oneMonthLater.setMonth(oneMonthLater.getMonth() + 1)
       oneMonthLater.setHours(23, 59, 59, 999)
-      
+
       // 如果结束日期超过开始日期后一个月，自动调整为一个月后的日期
       if (endDate.getTime() > oneMonthLater.getTime()) {
         // 格式化为 yyyy-MM-dd
@@ -430,14 +472,46 @@ export default {
           const day = String(date.getDate()).padStart(2, '0')
           return `${year}-${month}-${day}`
         }
-        
+
         const adjustedEndDate = new Date(oneMonthLater)
         adjustedEndDate.setHours(0, 0, 0, 0)
         const adjustedEndDateStr = formatDate(adjustedEndDate)
-        
+
         this.$message.warning('发货时间查询范围不能超过一个月，已自动调整为一个月范围')
         this.$nextTick(() => {
           this.searchForm.sendTimeRange = [value[0], adjustedEndDateStr]
+        })
+      }
+    },
+    handleCreateTimeRangeChange(value) {
+      if (!value || value.length !== 2) {
+        return
+      }
+      const startDate = new Date(value[0])
+      startDate.setHours(0, 0, 0, 0)
+      const endDate = new Date(value[1])
+      endDate.setHours(0, 0, 0, 0)
+      const oneMonthLater = new Date(startDate)
+      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1)
+      oneMonthLater.setHours(23, 59, 59, 999)
+
+      // 如果结束日期超过开始日期后一个月，自动调整为一个月后的日期
+      if (endDate.getTime() > oneMonthLater.getTime()) {
+        // 格式化为 yyyy-MM-dd
+        const formatDate = (date) => {
+          const year = date.getFullYear()
+          const month = String(date.getMonth() + 1).padStart(2, '0')
+          const day = String(date.getDate()).padStart(2, '0')
+          return `${year}-${month}-${day}`
+        }
+
+        const adjustedEndDate = new Date(oneMonthLater)
+        adjustedEndDate.setHours(0, 0, 0, 0)
+        const adjustedEndDateStr = formatDate(adjustedEndDate)
+
+        this.$message.warning('创建时间查询范围不能超过一个月，已自动调整为一个月范围')
+        this.$nextTick(() => {
+          this.searchForm.createTimeRange = [value[0], adjustedEndDateStr]
         })
       }
     },
@@ -579,7 +653,16 @@ export default {
         params.statusList = [Number(this.searchForm.status)]
       }
 
-      if (this.searchForm.sendTimeRange.length === 2) {
+      // 创建时间范围查询
+      if (this.searchForm.createTimeRange && this.searchForm.createTimeRange.length === 2) {
+        // 开始时间设置为当天的 00:00:00
+        params.createStartTime = `${this.searchForm.createTimeRange[0]} 00:00:00`
+        // 结束时间设置为当天的 23:59:59
+        params.createEndTime = `${this.searchForm.createTimeRange[1]} 23:59:59`
+      }
+
+      // 发货时间范围查询
+      if (this.searchForm.sendTimeRange && this.searchForm.sendTimeRange.length === 2) {
         // 开始时间设置为当天的 00:00:00
         params.sendStartTime = `${this.searchForm.sendTimeRange[0]} 00:00:00`
         // 结束时间设置为当天的 23:59:59
