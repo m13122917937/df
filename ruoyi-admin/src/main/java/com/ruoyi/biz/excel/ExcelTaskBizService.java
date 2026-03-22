@@ -5,7 +5,7 @@ import com.ruoyi.biz.order.OrderBizService;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.oss.cloud.CloudStorageService;
 import com.ruoyi.system.domain.SysExcelTask;
-import com.ruoyi.system.service.ISysExcelTaskService;
+import com.ruoyi.system.facade.ISysExcelTaskFacade;
 import com.ruoyi.web.form.order.AllOrderForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ import java.util.UUID;
 public class ExcelTaskBizService {
 
     @Autowired
-    private ISysExcelTaskService sysExcelTaskService;
+    private ISysExcelTaskFacade sysExcelTaskService;
 
     @Autowired
     private OrderBizService orderBizService;

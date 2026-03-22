@@ -1,11 +1,11 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.SysLogininfor;
-import com.ruoyi.system.mapper.SysLogininforMapper;
-import com.ruoyi.system.service.ISysLogininforService;
+import com.ruoyi.system.manager.SysLogininforManager;
+import com.ruoyi.system.facade.ISysLogininforFacade;
 
 /**
  * 系统访问日志情况信息 服务层处理
@@ -13,11 +13,11 @@ import com.ruoyi.system.service.ISysLogininforService;
  * @author ruoyi
  */
 @Service
-public class SysLogininforServiceImpl implements ISysLogininforService
+public class SysLogininforFacadeService implements ISysLogininforFacade
 {
 
     @Autowired
-    private SysLogininforMapper logininforMapper;
+    private SysLogininforManager sysLogininforManager;
 
     /**
      * 新增系统登录日志
@@ -27,7 +27,7 @@ public class SysLogininforServiceImpl implements ISysLogininforService
     @Override
     public void insertLogininfor(SysLogininfor logininfor)
     {
-        logininforMapper.insertLogininfor(logininfor);
+        sysLogininforManager.getBaseMapper().insertLogininfor(logininfor);
     }
 
     /**
@@ -39,7 +39,7 @@ public class SysLogininforServiceImpl implements ISysLogininforService
     @Override
     public List<SysLogininfor> selectLogininforList(SysLogininfor logininfor)
     {
-        return logininforMapper.selectLogininforList(logininfor);
+        return sysLogininforManager.getBaseMapper().selectLogininforList(logininfor);
     }
 
     /**
@@ -51,7 +51,7 @@ public class SysLogininforServiceImpl implements ISysLogininforService
     @Override
     public int deleteLogininforByIds(Long[] infoIds)
     {
-        return logininforMapper.deleteLogininforByIds(infoIds);
+        return sysLogininforManager.getBaseMapper().deleteLogininforByIds(infoIds);
     }
 
     /**
@@ -60,6 +60,6 @@ public class SysLogininforServiceImpl implements ISysLogininforService
     @Override
     public void cleanLogininfor()
     {
-        logininforMapper.cleanLogininfor();
+        sysLogininforManager.getBaseMapper().cleanLogininfor();
     }
 }

@@ -1,11 +1,11 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.SysOperLog;
-import com.ruoyi.system.mapper.SysOperLogMapper;
-import com.ruoyi.system.service.ISysOperLogService;
+import com.ruoyi.system.manager.SysOperLogManager;
+import com.ruoyi.system.facade.ISysOperLogFacade;
 
 /**
  * 操作日志 服务层处理
@@ -13,10 +13,10 @@ import com.ruoyi.system.service.ISysOperLogService;
  * @author ruoyi
  */
 @Service
-public class SysOperLogServiceImpl implements ISysOperLogService
+public class SysOperLogFacadeService implements ISysOperLogFacade
 {
     @Autowired
-    private SysOperLogMapper operLogMapper;
+    private SysOperLogManager sysOperLogManager;
 
     /**
      * 新增操作日志
@@ -26,7 +26,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public void insertOperlog(SysOperLog operLog)
     {
-        operLogMapper.insertOperlog(operLog);
+        sysOperLogManager.getBaseMapper().insertOperlog(operLog);
     }
 
     /**
@@ -38,7 +38,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public List<SysOperLog> selectOperLogList(SysOperLog operLog)
     {
-        return operLogMapper.selectOperLogList(operLog);
+        return sysOperLogManager.getBaseMapper().selectOperLogList(operLog);
     }
 
     /**
@@ -50,7 +50,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public int deleteOperLogByIds(Long[] operIds)
     {
-        return operLogMapper.deleteOperLogByIds(operIds);
+        return sysOperLogManager.getBaseMapper().deleteOperLogByIds(operIds);
     }
 
     /**
@@ -62,7 +62,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public SysOperLog selectOperLogById(Long operId)
     {
-        return operLogMapper.selectOperLogById(operId);
+        return sysOperLogManager.getBaseMapper().selectOperLogById(operId);
     }
 
     /**
@@ -71,6 +71,6 @@ public class SysOperLogServiceImpl implements ISysOperLogService
     @Override
     public void cleanOperLog()
     {
-        operLogMapper.cleanOperLog();
+        sysOperLogManager.getBaseMapper().cleanOperLog();
     }
 }

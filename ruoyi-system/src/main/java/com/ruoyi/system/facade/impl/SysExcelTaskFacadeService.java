@@ -1,14 +1,14 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
 import com.ruoyi.system.domain.SysExcelTask;
-import com.ruoyi.system.mapper.SysExcelTaskMapper;
-import com.ruoyi.system.service.ISysExcelTaskService;
+import com.ruoyi.system.manager.SysExcelTaskManager;
+import com.ruoyi.system.facade.ISysExcelTaskFacade;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,16 +18,19 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class SysExcelTaskServiceImpl extends ServiceImpl<SysExcelTaskMapper, SysExcelTask> implements ISysExcelTaskService {
+public class SysExcelTaskFacadeService implements ISysExcelTaskFacade {
+
+    @Autowired
+    private SysExcelTaskManager sysExcelTaskManager;
 
     @Override
     public SysExcelTask selectSysExcelTaskByFileId(String fileId) {
-        return baseMapper.selectSysExcelTaskByFileId(fileId);
+        return sysExcelTaskManager.getBaseMapper().selectSysExcelTaskByFileId(fileId);
     }
 
     @Override
     public List<SysExcelTask> selectSysExcelTaskList(SysExcelTask sysExcelTask) {
-        return baseMapper.selectSysExcelTaskList(sysExcelTask);
+        return sysExcelTaskManager.getBaseMapper().selectSysExcelTaskList(sysExcelTask);
     }
 
     @Override
@@ -51,6 +54,16 @@ public class SysExcelTaskServiceImpl extends ServiceImpl<SysExcelTaskMapper, Sys
         }
 
         // 再删除数据库记录
-        return baseMapper.deleteExpiredTasks();
+        return sysExcelTaskManager.getBaseMapper().deleteExpiredTasks();
+    }
+
+    @Override
+    public boolean save(SysExcelTask entity) {
+        return sysExcelTaskManager.save(entity);
+    }
+
+    @Override
+    public boolean updateById(SysExcelTask entity) {
+        return sysExcelTaskManager.updateById(entity);
     }
 }

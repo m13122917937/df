@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +23,7 @@ import com.ruoyi.system.mapper.SysRoleDeptMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysRoleMenuMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
-import com.ruoyi.system.service.ISysRoleService;
+import com.ruoyi.system.facade.ISysRoleFacade;
 
 /**
  * 角色 业务层处理
@@ -31,7 +31,7 @@ import com.ruoyi.system.service.ISysRoleService;
  * @author ruoyi
  */
 @Service
-public class SysRoleServiceImpl implements ISysRoleService
+public class SysRoleFacadeService implements ISysRoleFacade
 {
     @Autowired
     private SysRoleMapper roleMapper;

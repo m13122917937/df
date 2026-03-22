@@ -25,19 +25,18 @@ import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.common.utils.file.MimeTypeUtils;
 import com.ruoyi.framework.web.service.TokenService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysUserFacade;
 
 /**
  * 个人信息 业务处理
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/system/user/profile")
 public class SysProfileController extends BaseController {
     @Autowired
-    private ISysUserService userService;
+    private ISysUserFacade userService;
 
     @Autowired
     private TokenService tokenService;

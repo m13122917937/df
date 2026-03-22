@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 import java.util.Set;
@@ -10,7 +10,7 @@ import com.ruoyi.system.domain.SysUserRole;
  * 
  * @author ruoyi
  */
-public interface ISysRoleService
+public interface ISysRoleFacade
 {
     /**
      * 根据条件分页查询角色数据

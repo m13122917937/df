@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 import com.ruoyi.system.domain.SysNotice;
@@ -8,7 +8,7 @@ import com.ruoyi.system.domain.SysNotice;
  * 
  * @author ruoyi
  */
-public interface ISysNoticeService
+public interface ISysNoticeFacade
 {
     /**
      * 查询公告信息

@@ -19,19 +19,18 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysDictType;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.system.service.ISysDictTypeService;
+import com.ruoyi.system.facade.ISysDictTypeFacade;
 
 /**
  * 数据字典信息
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/system/dict/type")
 public class SysDictTypeController extends BaseController {
     @Autowired
-    private ISysDictTypeService dictTypeService;
+    private ISysDictTypeFacade dictTypeService;
 
     @PreAuthorize("@ss.hasPermi('system:dict:list')")
     @GetMapping("/list")

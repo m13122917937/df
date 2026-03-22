@@ -12,8 +12,8 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.service.SysLoginService;
 import com.ruoyi.framework.web.service.SysPermissionService;
 import com.ruoyi.framework.web.service.TokenService;
-import com.ruoyi.system.service.ISysConfigService;
-import com.ruoyi.system.service.ISysMenuService;
+import com.ruoyi.system.facade.ISysConfigFacade;
+import com.ruoyi.system.facade.ISysMenuFacade;
 import com.ruoyi.web.form.system.LoginBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +30,6 @@ import java.util.Set;
  *
  * @author ruoyi
  */
-@Ignore
 
 @RestController
 public class SysLoginController {
@@ -38,7 +37,7 @@ public class SysLoginController {
     private SysLoginService loginService;
 
     @Autowired
-    private ISysMenuService menuService;
+    private ISysMenuFacade menuService;
 
     @Autowired
     private SysPermissionService permissionService;
@@ -47,7 +46,7 @@ public class SysLoginController {
     private TokenService tokenService;
 
     @Autowired
-    private ISysConfigService configService;
+    private ISysConfigFacade configService;
 
     /**
      * 登录方法

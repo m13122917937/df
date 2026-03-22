@@ -10,8 +10,8 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.security.context.AuthenticationContextHolder;
-import com.ruoyi.system.service.ISysConfigService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysConfigFacade;
+import com.ruoyi.system.facade.ISysUserFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -38,10 +38,10 @@ public class SysLoginService {
     private RedisCache redisCache;
 
     @Autowired
-    private ISysUserService userService;
+    private ISysUserFacade userService;
 
     @Autowired
-    private ISysConfigService configService;
+    private ISysConfigFacade configService;
 
     /**
      * 登录验证

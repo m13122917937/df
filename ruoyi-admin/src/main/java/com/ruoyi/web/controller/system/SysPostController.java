@@ -19,19 +19,18 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.SysPost;
-import com.ruoyi.system.service.ISysPostService;
+import com.ruoyi.system.facade.ISysPostFacade;
 
 /**
  * 岗位信息操作处理
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/system/post")
 public class SysPostController extends BaseController {
     @Autowired
-    private ISysPostService postService;
+    private ISysPostFacade postService;
 
     /**
      * 获取岗位列表

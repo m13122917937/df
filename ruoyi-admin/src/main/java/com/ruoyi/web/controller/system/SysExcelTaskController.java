@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.biz.excel.ExcelTaskBizService;
 import com.ruoyi.system.domain.SysExcelTask;
-import com.ruoyi.system.service.ISysExcelTaskService;
+import com.ruoyi.system.facade.ISysExcelTaskFacade;
 import com.ruoyi.web.form.order.AllOrderForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 public class SysExcelTaskController extends BaseController {
 
     @Autowired
-    private ISysExcelTaskService sysExcelTaskService;
+    private ISysExcelTaskFacade sysExcelTaskService;
 
     @Autowired
     private ExcelTaskBizService excelTaskBizService;

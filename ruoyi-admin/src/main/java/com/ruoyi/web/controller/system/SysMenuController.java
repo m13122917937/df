@@ -20,19 +20,18 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysMenu;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.service.ISysMenuService;
+import com.ruoyi.system.facade.ISysMenuFacade;
 
 /**
  * 菜单信息
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/system/menu")
 public class SysMenuController extends BaseController {
     @Autowired
-    private ISysMenuService menuService;
+    private ISysMenuFacade menuService;
 
     /**
      * 获取菜单列表

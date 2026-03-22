@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,7 +20,7 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
-import com.ruoyi.system.service.ISysDeptService;
+import com.ruoyi.system.facade.ISysDeptFacade;
 
 /**
  * 部门管理 服务实现
@@ -28,7 +28,7 @@ import com.ruoyi.system.service.ISysDeptService;
  * @author ruoyi
  */
 @Service
-public class SysDeptServiceImpl implements ISysDeptService {
+public class SysDeptFacadeService implements ISysDeptFacade {
     @Autowired
     private SysDeptMapper deptMapper;
 

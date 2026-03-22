@@ -16,7 +16,17 @@
       "Bash(xargs grep:*)",
       "Bash(while read:*)",
       "Bash(do sed:*)",
-      "Bash(mvn clean:*)"
+      "Bash(mvn clean:*)",
+      "Bash(mvn:*)",
+      "Bash(git mv:*)",
+      "Bash(__NEW_LINE_c1175a8c761d97d2__ git:*)",
+      "Bash(__NEW_LINE_4771009606b97ed7__ git:*)",
+      "Bash(grep:*)",
+      "Bash(for file:*)",
+      "Bash(do)",
+      "Bash(if ! grep -q \"extends BaseMapper\" \"$file\")",
+      "Bash(then)",
+      "Bash(echo \"$file does NOT extend BaseMapper\")"
     ]
   }
 }

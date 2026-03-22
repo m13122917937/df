@@ -25,31 +25,30 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.service.ISysDeptService;
-import com.ruoyi.system.service.ISysPostService;
-import com.ruoyi.system.service.ISysRoleService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysDeptFacade;
+import com.ruoyi.system.facade.ISysPostFacade;
+import com.ruoyi.system.facade.ISysRoleFacade;
+import com.ruoyi.system.facade.ISysUserFacade;
 
 /**
  * 用户信息
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/system/user")
 public class SysUserController extends BaseController {
     @Autowired
-    private ISysUserService userService;
+    private ISysUserFacade userService;
 
     @Autowired
-    private ISysRoleService roleService;
+    private ISysRoleFacade roleService;
 
     @Autowired
-    private ISysDeptService deptService;
+    private ISysDeptFacade deptService;
 
     @Autowired
-    private ISysPostService postService;
+    private ISysPostFacade postService;
 
     /**
      * 获取用户列表

@@ -14,7 +14,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.mapper.bill.PayerConvert;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysUserFacade;
 import com.ruoyi.web.form.bill.PayerForm;
 import com.ruoyi.web.vo.bill.PayerVO;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class PayerBizService {
     IPayerFacade payerFacade;
 
     @Autowired
-    ISysUserService sysUserService;
+    ISysUserFacade sysUserService;
 
     @Autowired
     IPayerConfigFacade payerConfigFacade;

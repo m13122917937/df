@@ -9,8 +9,8 @@ import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysLogininfor;
 import com.ruoyi.system.domain.SysOperLog;
-import com.ruoyi.system.service.ISysLogininforService;
-import com.ruoyi.system.service.ISysOperLogService;
+import com.ruoyi.system.facade.ISysLogininforFacade;
+import com.ruoyi.system.facade.ISysOperLogFacade;
 import eu.bitwalker.useragentutils.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public class AsyncFactory {
                     logininfor.setStatus(Constants.FAIL);
                 }
                 // 插入数据
-                SpringUtils.getBean(ISysLogininforService.class).insertLogininfor(logininfor);
+                SpringUtils.getBean(ISysLogininforFacade.class).insertLogininfor(logininfor);
             }
         };
     }
@@ -86,7 +86,7 @@ public class AsyncFactory {
             public void run() {
                 // 远程查询操作地点
                 operLog.setOperLocation(AddressUtils.getRealAddressByIP(operLog.getOperIp()));
-                SpringUtils.getBean(ISysOperLogService.class).insertOperlog(operLog);
+                SpringUtils.getBean(ISysOperLogFacade.class).insertOperlog(operLog);
             }
         };
     }

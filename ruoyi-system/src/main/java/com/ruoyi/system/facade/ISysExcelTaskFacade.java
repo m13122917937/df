@@ -1,6 +1,5 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.system.domain.SysExcelTask;
 
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-public interface ISysExcelTaskService extends IService<SysExcelTask> {
+public interface ISysExcelTaskFacade {
 
     /**
      * 查询Excel导出任务 by fileId
@@ -34,4 +33,20 @@ public interface ISysExcelTaskService extends IService<SysExcelTask> {
      * @return 清理数量
      */
     public int cleanExpiredTasks();
+
+    /**
+     * 保存任务
+     *
+     * @param entity 任务实体
+     * @return 是否成功
+     */
+    public boolean save(SysExcelTask entity);
+
+    /**
+     * 根据ID更新任务
+     *
+     * @param entity 任务实体
+     * @return 是否成功
+     */
+    public boolean updateById(SysExcelTask entity);
 }

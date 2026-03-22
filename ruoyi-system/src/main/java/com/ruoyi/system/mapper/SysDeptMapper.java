@@ -1,5 +1,6 @@
 package com.ruoyi.system.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -12,7 +13,7 @@ import com.ruoyi.common.core.domain.entity.SysDept;
  * @author ruoyi
  */
 @Mapper
-public interface SysDeptMapper {
+public interface SysDeptMapper extends BaseMapper<SysDept> {
     /**
      * 查询部门管理数据
      *

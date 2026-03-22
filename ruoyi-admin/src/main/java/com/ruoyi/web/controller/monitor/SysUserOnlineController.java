@@ -22,19 +22,18 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysUserOnline;
-import com.ruoyi.system.service.ISysUserOnlineService;
+import com.ruoyi.system.facade.ISysUserOnlineFacade;
 
 /**
  * 在线用户监控
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/monitor/online")
 public class SysUserOnlineController extends BaseController {
     @Autowired
-    private ISysUserOnlineService userOnlineService;
+    private ISysUserOnlineFacade userOnlineService;
 
     @Autowired
     private RedisCache redisCache;

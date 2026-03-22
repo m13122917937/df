@@ -12,7 +12,7 @@ import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.consts.PayTypes;
 import com.ruoyi.system.model.consts.SystemConsts;
-import com.ruoyi.system.service.ISysConfigService;
+import com.ruoyi.system.facade.ISysConfigFacade;
 import com.ruoyi.user.model.consts.UserRedisKey;
 import com.ruoyi.web.form.pay.PayForm;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class PayController {
     private ThirdPayService thirdPayService;
 
     @Autowired
-    private ISysConfigService sysConfigService;
+    private ISysConfigFacade sysConfigService;
 
     @Autowired
     private RedisCache redisCache;

@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.Date;
 import java.util.List;
@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.entity.SysUser;
  *
  * @author ruoyi
  */
-public interface ISysUserService {
+public interface ISysUserFacade {
     /**
      * 根据条件分页查询用户列表
      *

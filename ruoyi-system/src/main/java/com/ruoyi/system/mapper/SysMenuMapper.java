@@ -1,5 +1,6 @@
 package com.ruoyi.system.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -12,7 +13,7 @@ import com.ruoyi.common.core.domain.entity.SysMenu;
  * @author ruoyi
  */
 @Mapper
-public interface SysMenuMapper {
+public interface SysMenuMapper extends BaseMapper<SysMenu> {
     /**
      * 查询系统菜单列表
      *

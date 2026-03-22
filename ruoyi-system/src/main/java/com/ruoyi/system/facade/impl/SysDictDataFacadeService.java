@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.system.mapper.SysDictDataMapper;
-import com.ruoyi.system.service.ISysDictDataService;
+import com.ruoyi.system.facade.ISysDictDataFacade;
 
 /**
  * 字典 业务层处理
@@ -15,7 +15,7 @@ import com.ruoyi.system.service.ISysDictDataService;
  * @author ruoyi
  */
 @Service
-public class SysDictDataServiceImpl implements ISysDictDataService {
+public class SysDictDataFacadeService implements ISysDictDataFacade {
     @Autowired
     private SysDictDataMapper dictDataMapper;
 

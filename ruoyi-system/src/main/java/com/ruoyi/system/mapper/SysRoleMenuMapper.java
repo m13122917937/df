@@ -1,5 +1,6 @@
 package com.ruoyi.system.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import java.util.List;
 
 import com.ruoyi.system.domain.SysRoleMenu;
@@ -11,7 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
  * @author ruoyi
  */
 @Mapper
-public interface SysRoleMenuMapper {
+public interface SysRoleMenuMapper extends BaseMapper<SysRoleMenu> {
     /**
      * 查询菜单使用数量
      *

@@ -1,5 +1,6 @@
 package com.ruoyi.system.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import java.util.List;
 
 import com.ruoyi.system.domain.SysRoleDept;
@@ -11,7 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
  * @author ruoyi
  */
 @Mapper
-public interface SysRoleDeptMapper {
+public interface SysRoleDeptMapper extends BaseMapper<SysRoleDept> {
     /**
      * 通过角色ID删除角色和部门关联
      *

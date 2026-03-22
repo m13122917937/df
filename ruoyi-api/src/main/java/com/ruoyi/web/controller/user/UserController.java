@@ -21,6 +21,7 @@ import com.ruoyi.web.vo.user.UserVO;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.table.TableColumnModel;
@@ -114,7 +115,7 @@ public class UserController extends BaseController {
 
 
     @PostMapping("/user/add")
-    public AjaxResult userAdd(
+    public AjaxResult userAdd(@RequestBody @Validated CompanyUserForm companyUserForm) throws WxErrorException {
         ValidatorUtils.validateEntity(companyUserForm, AddGroup.class);
         userBizService.checkUserMaster(getUserId(), getDeptId());
         companyUserForm.setCompanyId(getDeptId());

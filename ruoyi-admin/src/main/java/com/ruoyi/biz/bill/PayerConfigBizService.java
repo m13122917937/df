@@ -13,7 +13,7 @@ import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.mapper.bill.PayerConfigConvert;
 import com.ruoyi.mapper.bill.PayerConvert;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysUserFacade;
 import com.ruoyi.web.form.bill.PayerConfigForm;
 import com.ruoyi.web.form.bill.PayerForm;
 import com.ruoyi.web.vo.bill.PayerConfigVO;
@@ -36,7 +36,7 @@ public class PayerConfigBizService {
     IPayerConfigFacade payerConfigFacade;
 
     @Autowired
-    ISysUserService sysUserService;
+    ISysUserFacade sysUserService;
 
     @Autowired
     IPayerFacade payerFacade;

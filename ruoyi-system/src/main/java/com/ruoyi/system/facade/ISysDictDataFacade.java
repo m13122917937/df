@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import com.ruoyi.common.core.domain.entity.SysDictData;
  *
  * @author ruoyi
  */
-public interface ISysDictDataService {
+public interface ISysDictDataFacade {
     /**
      * 根据条件分页查询字典数据
      *

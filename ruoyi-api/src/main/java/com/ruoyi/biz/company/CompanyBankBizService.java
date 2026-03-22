@@ -8,7 +8,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.mapper.user.CompanyBankConvert;
 import com.ruoyi.system.model.bo.DictDistrictBO;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysUserFacade;
 import com.ruoyi.user.domain.User;
 import com.ruoyi.user.facade.ICompanyBankFacade;
 import com.ruoyi.user.facade.ICompanyFacade;
@@ -39,7 +39,7 @@ public class CompanyBankBizService {
     ICompanyBankFacade companyBankFacade;
 
     @Autowired
-    ISysUserService sysUserService;
+    ISysUserFacade sysUserService;
 
     @Autowired
     ICompanyFacade companyFacade;
