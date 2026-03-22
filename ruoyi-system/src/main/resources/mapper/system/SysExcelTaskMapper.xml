@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysExcelTaskMapper">
+
+    <resultMap type="SysExcelTask" id="SysExcelTaskResult">
+        <id property="taskId" column="task_id" />
+        <result property="fileId" column="file_id" />
+        <result property="fileName" column="file_name" />
+        <result property="localPath" column="local_path" />
+        <result property="ossUrl" column="oss_url" />
+        <result property="fileSize" column="file_size" />
+        <result property="moduleName" column="module_name" />
+        <result property="queryParams" column="query_params" />
+        <result property="status" column="status" />
+        <result property="errorMsg" column="error_msg" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="expireTime" column="expire_time" />
+        <result property="downloaded" column="downloaded" />
+    </resultMap>
+
+    <select id="selectSysExcelTaskByFileId" parameterType="String" resultMap="SysExcelTaskResult">
+        SELECT * FROM sys_excel_task WHERE file_id = #{fileId}
+    </select>
+
+    <select id="selectSysExcelTaskList" parameterType="SysExcelTask" resultMap="SysExcelTaskResult">
+        SELECT * FROM sys_excel_task
+        <where>
+            <if test="fileId != null and fileId != ''">
+                AND file_id LIKE CONCAT('%', #{fileId}, '%')
+            </if>
+            <if test="fileName != null and fileName != ''">
+                AND file_name LIKE CONCAT('%', #{fileName}, '%')
+            </if>
+            <if test="moduleName != null and moduleName != ''">
+                AND module_name = #{moduleName}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="createBy != null">
+                AND create_by = #{createBy}
+            </if>
+            <if test="expireTime != null">
+                AND expire_time &lt;= #{expireTime}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 清理过期任务 -->
+    <delete id="deleteExpiredTasks">
+        DELETE FROM sys_excel_task WHERE expire_time &lt;= NOW()
+    </delete>
+</mapper>

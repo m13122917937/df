@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Read(//c/Users/m1312/.claude/skills/thread-manager/**)",
+      "Bash(node dist/index.js create_thread \"全部订单列表页面，增加查询字段-创建时间查询，默认取近一个月创建时间，取消发货时间默认值，并完成接口联调\")",
+      "Bash(node dist/index.js)",
+      "Bash(node \"C:\\\\Users\\\\m1312\\\\.claude\\\\skills\\\\thread-manager\\\\dist\\\\server.js\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(controller)",
+      "Bash(service)",
+      "Bash(query)",
+      "Bash(mvn compile:*)",
+      "Bash(xargs grep:*)",
+      "Bash(while read:*)",
+      "Bash(do sed:*)",
+      "Bash(mvn clean:*)"
+    ]
+  }
+}
