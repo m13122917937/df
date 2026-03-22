@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.SysLogininfor;
-import com.ruoyi.system.manager.SysLogininforManager;
+import com.ruoyi.system.mapper.SysLogininforMapper;
 import com.ruoyi.system.facade.ISysLogininforFacade;
 
 /**
@@ -17,7 +17,7 @@ public class SysLogininforFacadeService implements ISysLogininforFacade
 {
 
     @Autowired
-    private SysLogininforManager sysLogininforManager;
+    private SysLogininforMapper logininforMapper;
 
     /**
      * 新增系统登录日志
@@ -27,7 +27,7 @@ public class SysLogininforFacadeService implements ISysLogininforFacade
     @Override
     public void insertLogininfor(SysLogininfor logininfor)
     {
-        sysLogininforManager.getBaseMapper().insertLogininfor(logininfor);
+        logininforMapper.insertLogininfor(logininfor);
     }
 
     /**
@@ -39,7 +39,7 @@ public class SysLogininforFacadeService implements ISysLogininforFacade
     @Override
     public List<SysLogininfor> selectLogininforList(SysLogininfor logininfor)
     {
-        return sysLogininforManager.getBaseMapper().selectLogininforList(logininfor);
+        return logininforMapper.selectLogininforList(logininfor);
     }
 
     /**
@@ -51,7 +51,7 @@ public class SysLogininforFacadeService implements ISysLogininforFacade
     @Override
     public int deleteLogininforByIds(Long[] infoIds)
     {
-        return sysLogininforManager.getBaseMapper().deleteLogininforByIds(infoIds);
+        return logininforMapper.deleteLogininforByIds(infoIds);
     }
 
     /**
@@ -60,6 +60,6 @@ public class SysLogininforFacadeService implements ISysLogininforFacade
     @Override
     public void cleanLogininfor()
     {
-        sysLogininforManager.getBaseMapper().cleanLogininfor();
+        logininforMapper.cleanLogininfor();
     }
 }

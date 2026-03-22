@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.SysOperLog;
-import com.ruoyi.system.manager.SysOperLogManager;
+import com.ruoyi.system.mapper.SysOperLogMapper;
 import com.ruoyi.system.facade.ISysOperLogFacade;
 
 /**
@@ -16,7 +16,7 @@ import com.ruoyi.system.facade.ISysOperLogFacade;
 public class SysOperLogFacadeService implements ISysOperLogFacade
 {
     @Autowired
-    private SysOperLogManager sysOperLogManager;
+    private SysOperLogMapper operLogMapper;
 
     /**
      * 新增操作日志
@@ -26,7 +26,7 @@ public class SysOperLogFacadeService implements ISysOperLogFacade
     @Override
     public void insertOperlog(SysOperLog operLog)
     {
-        sysOperLogManager.getBaseMapper().insertOperlog(operLog);
+        operLogMapper.insertOperlog(operLog);
     }
 
     /**
@@ -38,7 +38,7 @@ public class SysOperLogFacadeService implements ISysOperLogFacade
     @Override
     public List<SysOperLog> selectOperLogList(SysOperLog operLog)
     {
-        return sysOperLogManager.getBaseMapper().selectOperLogList(operLog);
+        return operLogMapper.selectOperLogList(operLog);
     }
 
     /**
@@ -50,7 +50,7 @@ public class SysOperLogFacadeService implements ISysOperLogFacade
     @Override
     public int deleteOperLogByIds(Long[] operIds)
     {
-        return sysOperLogManager.getBaseMapper().deleteOperLogByIds(operIds);
+        return operLogMapper.deleteOperLogByIds(operIds);
     }
 
     /**
@@ -62,7 +62,7 @@ public class SysOperLogFacadeService implements ISysOperLogFacade
     @Override
     public SysOperLog selectOperLogById(Long operId)
     {
-        return sysOperLogManager.getBaseMapper().selectOperLogById(operId);
+        return operLogMapper.selectOperLogById(operId);
     }
 
     /**
@@ -71,6 +71,6 @@ public class SysOperLogFacadeService implements ISysOperLogFacade
     @Override
     public void cleanOperLog()
     {
-        sysOperLogManager.getBaseMapper().cleanOperLog();
+        operLogMapper.cleanOperLog();
     }
 }

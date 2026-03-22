@@ -13,7 +13,7 @@ import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysConfig;
-import com.ruoyi.system.manager.SysConfigManager;
+import com.ruoyi.system.mapper.SysConfigMapper;
 import com.ruoyi.system.facade.ISysConfigFacade;
 
 /**
@@ -24,7 +24,7 @@ import com.ruoyi.system.facade.ISysConfigFacade;
 @Service
 public class SysConfigFacadeService implements ISysConfigFacade {
     @Autowired
-    private SysConfigManager sysConfigManager;
+    private SysConfigMapper configMapper;
 
     @Autowired
     private RedisCache redisCache;
@@ -47,7 +47,7 @@ public class SysConfigFacadeService implements ISysConfigFacade {
     public SysConfig selectConfigById(Long configId) {
         SysConfig config = new SysConfig();
         config.setConfigId(configId);
-        return sysConfigManager.getBaseMapper().selectConfig(config);
+        return configMapper.selectConfig(config);
     }
 
     /**
@@ -64,7 +64,7 @@ public class SysConfigFacadeService implements ISysConfigFacade {
         }
         SysConfig config = new SysConfig();
         config.setConfigKey(configKey);
-        SysConfig retConfig = sysConfigManager.getBaseMapper().selectConfig(config);
+        SysConfig retConfig = configMapper.selectConfig(config);
         if (StringUtils.isNotNull(retConfig)) {
             redisCache.setCacheObject(getCacheKey(configKey), retConfig.getConfigValue());
             return retConfig.getConfigValue();
@@ -94,7 +94,7 @@ public class SysConfigFacadeService implements ISysConfigFacade {
      */
     @Override
     public List<SysConfig> selectConfigList(SysConfig config) {
-        return sysConfigManager.getBaseMapper().selectConfigList(config);
+        return configMapper.selectConfigList(config);
     }
 
     /**
@@ -105,7 +105,7 @@ public class SysConfigFacadeService implements ISysConfigFacade {
      */
     @Override
     public int insertConfig(SysConfig config) {
-        int row = sysConfigManager.getBaseMapper().insertConfig(config);
+        int row = configMapper.insertConfig(config);
         if (row > 0) {
             redisCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }
@@ -120,12 +120,12 @@ public class SysConfigFacadeService implements ISysConfigFacade {
      */
     @Override
     public int updateConfig(SysConfig config) {
-        SysConfig temp = sysConfigManager.getBaseMapper().selectConfigById(config.getConfigId());
+        SysConfig temp = configMapper.selectConfigById(config.getConfigId());
         if (!StringUtils.equals(temp.getConfigKey(), config.getConfigKey())) {
             redisCache.deleteObject(getCacheKey(temp.getConfigKey()));
         }
 
-        int row = sysConfigManager.getBaseMapper().updateConfig(config);
+        int row = configMapper.updateConfig(config);
         if (row > 0) {
             redisCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }
@@ -144,7 +144,7 @@ public class SysConfigFacadeService implements ISysConfigFacade {
             if (StringUtils.equals(UserConstants.YES, config.getConfigType())) {
                 throw new ServiceException(String.format("内置参数【%1$s】不能删除 ", config.getConfigKey()));
             }
-            sysConfigManager.getBaseMapper().deleteConfigById(configId);
+            configMapper.deleteConfigById(configId);
             redisCache.deleteObject(getCacheKey(config.getConfigKey()));
         }
     }
@@ -154,7 +154,7 @@ public class SysConfigFacadeService implements ISysConfigFacade {
      */
     @Override
     public void loadingConfigCache() {
-        List<SysConfig> configsList = sysConfigManager.getBaseMapper().selectConfigList(new SysConfig());
+        List<SysConfig> configsList = configMapper.selectConfigList(new SysConfig());
         for (SysConfig config : configsList) {
             redisCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }
@@ -187,7 +187,7 @@ public class SysConfigFacadeService implements ISysConfigFacade {
     @Override
     public boolean checkConfigKeyUnique(SysConfig config) {
         Long configId = StringUtils.isNull(config.getConfigId()) ? -1L : config.getConfigId();
-        SysConfig info = sysConfigManager.getBaseMapper().checkConfigKeyUnique(config.getConfigKey());
+        SysConfig info = configMapper.checkConfigKeyUnique(config.getConfigKey());
         if (StringUtils.isNotNull(info) && info.getConfigId().longValue() != configId.longValue()) {
             return UserConstants.NOT_UNIQUE;
         }
