@@ -1,11 +1,11 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.SysOperLog;
 import com.ruoyi.system.mapper.SysOperLogMapper;
-import com.ruoyi.system.service.ISysOperLogService;
+import com.ruoyi.system.facade.ISysOperLogFacade;
 
 /**
  * 操作日志 服务层处理
@@ -13,7 +13,7 @@ import com.ruoyi.system.service.ISysOperLogService;
  * @author ruoyi
  */
 @Service
-public class SysOperLogServiceImpl implements ISysOperLogService
+public class SysOperLogFacadeService implements ISysOperLogFacade
 {
     @Autowired
     private SysOperLogMapper operLogMapper;

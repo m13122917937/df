@@ -19,19 +19,18 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.SysNotice;
-import com.ruoyi.system.service.ISysNoticeService;
+import com.ruoyi.system.facade.ISysNoticeFacade;
 
 /**
  * 公告 信息操作处理
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/system/notice")
 public class SysNoticeController extends BaseController {
     @Autowired
-    private ISysNoticeService noticeService;
+    private ISysNoticeFacade noticeService;
 
     /**
      * 获取通知公告列表

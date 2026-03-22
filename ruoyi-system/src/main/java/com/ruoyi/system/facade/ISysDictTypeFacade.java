@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import com.ruoyi.common.core.domain.entity.SysDictType;
  *
  * @author ruoyi
  */
-public interface ISysDictTypeService {
+public interface ISysDictTypeFacade {
     /**
      * 根据条件分页查询字典类型
      *

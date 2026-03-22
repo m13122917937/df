@@ -15,7 +15,7 @@ import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.kuaidi100.ExpressClient;
 import com.ruoyi.kuaidi100.model.SubscribeExpressCode;
 import com.ruoyi.kuaidi100.model.SubscribeExpressParam;
-import com.ruoyi.system.service.ISysDictTypeService;
+import com.ruoyi.system.facade.ISysDictTypeFacade;
 import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class ApplicationIntegrationTest {
     @Autowired
     ExpressClient expressClient;
     @Autowired
-    ISysDictTypeService dictTypeService;
+    ISysDictTypeFacade dictTypeService;
     @Autowired
     private MsgClient msgClient;
 

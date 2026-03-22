@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 import com.ruoyi.system.domain.SysOperLog;
@@ -8,7 +8,7 @@ import com.ruoyi.system.domain.SysOperLog;
  * 
  * @author ruoyi
  */
-public interface ISysOperLogService
+public interface ISysOperLogFacade
 {
     /**
      * 新增操作日志

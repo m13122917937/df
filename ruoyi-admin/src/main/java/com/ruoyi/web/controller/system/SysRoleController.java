@@ -26,21 +26,20 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.service.SysPermissionService;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.domain.SysUserRole;
-import com.ruoyi.system.service.ISysDeptService;
-import com.ruoyi.system.service.ISysRoleService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysDeptFacade;
+import com.ruoyi.system.facade.ISysRoleFacade;
+import com.ruoyi.system.facade.ISysUserFacade;
 
 /**
  * 角色信息
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/system/role")
 public class SysRoleController extends BaseController {
     @Autowired
-    private ISysRoleService roleService;
+    private ISysRoleFacade roleService;
 
     @Autowired
     private TokenService tokenService;
@@ -49,10 +48,10 @@ public class SysRoleController extends BaseController {
     private SysPermissionService permissionService;
 
     @Autowired
-    private ISysUserService userService;
+    private ISysUserFacade userService;
 
     @Autowired
-    private ISysDeptService deptService;
+    private ISysDeptFacade deptService;
 
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/list")

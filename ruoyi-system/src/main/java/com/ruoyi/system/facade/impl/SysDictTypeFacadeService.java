@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.Comparator;
 import java.util.List;
@@ -17,7 +17,7 @@ import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.mapper.SysDictDataMapper;
 import com.ruoyi.system.mapper.SysDictTypeMapper;
-import com.ruoyi.system.service.ISysDictTypeService;
+import com.ruoyi.system.facade.ISysDictTypeFacade;
 
 /**
  * 字典 业务层处理
@@ -25,7 +25,7 @@ import com.ruoyi.system.service.ISysDictTypeService;
  * @author ruoyi
  */
 @Service
-public class SysDictTypeServiceImpl implements ISysDictTypeService {
+public class SysDictTypeFacadeService implements ISysDictTypeFacade {
     @Autowired
     private SysDictTypeMapper dictTypeMapper;
 

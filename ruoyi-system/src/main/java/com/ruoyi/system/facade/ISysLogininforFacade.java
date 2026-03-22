@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import com.ruoyi.system.domain.SysLogininfor;
  *
  * @author ruoyi
  */
-public interface ISysLogininforService {
+public interface ISysLogininforFacade {
     /**
      * 新增系统登录日志
      *

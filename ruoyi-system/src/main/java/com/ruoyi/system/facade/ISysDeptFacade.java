@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import com.ruoyi.common.core.domain.entity.SysDept;
  *
  * @author ruoyi
  */
-public interface ISysDeptService {
+public interface ISysDeptFacade {
     /**
      * 查询部门管理数据
      *

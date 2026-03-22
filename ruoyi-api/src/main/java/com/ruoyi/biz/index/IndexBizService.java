@@ -43,7 +43,7 @@ import com.ruoyi.order.model.query.OrderTabCountQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
 import com.ruoyi.system.model.bo.DictDistrictBO;
 import com.ruoyi.system.model.consts.DictDataConsts;
-import com.ruoyi.system.service.ISysDictTypeService;
+import com.ruoyi.system.facade.ISysDictTypeFacade;
 import com.ruoyi.user.facade.ICompanyFacade;
 import com.ruoyi.user.facade.IUserFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
@@ -71,7 +71,7 @@ import java.util.stream.Collectors;
 public class IndexBizService {
 
     @Autowired
-    ISysDictTypeService dictTypeService;
+    ISysDictTypeFacade dictTypeService;
 
     @Autowired
     IOrderFacade orderFacade;

@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,9 +30,9 @@ import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.mapper.SysUserPostMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
-import com.ruoyi.system.service.ISysConfigService;
-import com.ruoyi.system.service.ISysDeptService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysConfigFacade;
+import com.ruoyi.system.facade.ISysDeptFacade;
+import com.ruoyi.system.facade.ISysUserFacade;
 
 /**
  * 用户 业务层处理
@@ -40,8 +40,8 @@ import com.ruoyi.system.service.ISysUserService;
  * @author ruoyi
  */
 @Service
-public class SysUserServiceImpl implements ISysUserService {
-    private static final Logger log = LoggerFactory.getLogger(SysUserServiceImpl.class);
+public class SysUserFacadeService implements ISysUserFacade {
+    private static final Logger log = LoggerFactory.getLogger(SysUserFacadeService.class);
 
     @Autowired
     private SysUserMapper userMapper;
@@ -59,10 +59,10 @@ public class SysUserServiceImpl implements ISysUserService {
     private SysUserPostMapper userPostMapper;
 
     @Autowired
-    private ISysConfigService configService;
+    private ISysConfigFacade configService;
 
     @Autowired
-    private ISysDeptService deptService;
+    private ISysDeptFacade deptService;
 
     @Autowired
     protected Validator validator;

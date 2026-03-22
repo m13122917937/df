@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +14,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.mapper.SysConfigMapper;
-import com.ruoyi.system.service.ISysConfigService;
+import com.ruoyi.system.facade.ISysConfigFacade;
 
 /**
  * 参数配置 服务层实现
@@ -22,7 +22,7 @@ import com.ruoyi.system.service.ISysConfigService;
  * @author ruoyi
  */
 @Service
-public class SysConfigServiceImpl implements ISysConfigService {
+public class SysConfigFacadeService implements ISysConfigFacade {
     @Autowired
     private SysConfigMapper configMapper;
 

@@ -5,8 +5,8 @@ import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.exception.user.CaptchaException;
 import com.ruoyi.common.exception.user.CaptchaExpireException;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.service.ISysConfigService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysConfigFacade;
+import com.ruoyi.system.facade.ISysUserFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +18,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class SysRegisterService {
     @Autowired
-    private ISysUserService userService;
+    private ISysUserFacade userService;
 
     @Autowired
-    private ISysConfigService configService;
+    private ISysConfigFacade configService;
 
     @Autowired
     private RedisCache redisCache;

@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.system.domain.SysExcelTask;
@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
-public interface ISysExcelTaskService extends IService<SysExcelTask> {
+public interface ISysExcelTaskFacade extends IService<SysExcelTask> {
 
     /**
      * 查询Excel导出任务 by fileId

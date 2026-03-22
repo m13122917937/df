@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.system.domain.SysUserOnline;
@@ -8,7 +8,7 @@ import com.ruoyi.system.domain.SysUserOnline;
  *
  * @author ruoyi
  */
-public interface ISysUserOnlineService {
+public interface ISysUserOnlineFacade {
     /**
      * 通过登录地址查询信息
      *

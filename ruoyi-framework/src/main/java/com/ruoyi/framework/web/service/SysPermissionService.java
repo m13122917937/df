@@ -4,8 +4,8 @@ import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.service.ISysMenuService;
-import com.ruoyi.system.service.ISysRoleService;
+import com.ruoyi.system.facade.ISysMenuFacade;
+import com.ruoyi.system.facade.ISysRoleFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -22,10 +22,10 @@ import java.util.Set;
 @Component
 public class SysPermissionService {
     @Autowired
-    private ISysRoleService roleService;
+    private ISysRoleFacade roleService;
 
     @Autowired
-    private ISysMenuService menuService;
+    private ISysMenuFacade menuService;
 
     /**
      * 获取角色数据权限

@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import com.ruoyi.system.domain.SysConfig;
  *
  * @author ruoyi
  */
-public interface ISysConfigService {
+public interface ISysConfigFacade {
     /**
      * 查询参数配置信息
      *

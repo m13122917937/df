@@ -15,19 +15,18 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.SysLogininfor;
-import com.ruoyi.system.service.ISysLogininforService;
+import com.ruoyi.system.facade.ISysLogininforFacade;
 
 /**
  * 系统访问记录
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/monitor/logininfor")
 public class SysLogininforController extends BaseController {
     @Autowired
-    private ISysLogininforService logininforService;
+    private ISysLogininforFacade logininforService;
 
 
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:list')")

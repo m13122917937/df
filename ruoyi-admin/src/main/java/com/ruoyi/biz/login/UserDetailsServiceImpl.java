@@ -6,7 +6,7 @@ import com.ruoyi.common.enums.UserStatus;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.service.SysPermissionService;
-import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.facade.ISysUserFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
     @Autowired
-    private ISysUserService userService;
+    private ISysUserFacade userService;
 
 
     @Autowired

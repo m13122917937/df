@@ -55,9 +55,7 @@ public class CompanyController extends BaseController {
 
 
     @PostMapping("/list")
-
-
-    public TableDataInfo list(
+    public TableDataInfo list(@RequestBody CompanyForm companyForm) {
 
         PageBO<CompanyBO> companyBOPageBO = companyService.listPage(CompanyConvert.INSTANCE.toCompanyParam(companyForm), startParamV2("create_time desc"));
 
@@ -67,9 +65,9 @@ public class CompanyController extends BaseController {
 
 
     @PostMapping("/add")
-    public AjaxResult add(
-        ValidatorUtils.validateEntity(companyForm, AddGroup.class);
+    public AjaxResult add(@RequestBody @Validated CompanyAddForm companyForm) throws IOException {
 
+        ValidatorUtils.validateEntity(companyForm, AddGroup.class);
 
         CompanyBO companyBO = companyService.queryOne(new CompanyQuery().setCompanyName(companyForm.getCompanyName()));
         Assert.isNull(companyBO, "企业已经存在，请重新添加");
@@ -86,7 +84,7 @@ public class CompanyController extends BaseController {
 
 
     @PostMapping("/update")
-    public AjaxResult update(
+    public AjaxResult update(@RequestBody @Validated CompanyAddForm companyForm) throws IOException {
 
         CompanyParam companyParam = CompanyConvert.INSTANCE.toCompanyAddParam(companyForm);
         companyService.update(companyParam, new CompanyQuery().setId(companyParam.getId()));
@@ -113,7 +111,8 @@ public class CompanyController extends BaseController {
 
 
     @PostMapping("/user/add")
-    public AjaxResult userAdd(
+    public AjaxResult userAdd(@RequestBody @Validated CompanyUserForm companyUserForm) throws WxErrorException {
+
         ValidatorUtils.validateEntity(companyUserForm, AddGroup.class);
 
         userBizService.checkCompany(companyUserForm.getCompanyId());

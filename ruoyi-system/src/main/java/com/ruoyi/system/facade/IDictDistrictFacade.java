@@ -8,16 +8,16 @@ import com.ruoyi.system.model.query.DictDistrictQuery;
 
 /**
  * 【请填写功能名称】Service接口
- * 
+ *
  * @author ruoyi
  * @date 2025-09-09
  */
 public interface IDictDistrictFacade {
 
-	public List<DictDistrictBO> list(DictDistrictQuery query);
+    List<DictDistrictBO> list(DictDistrictQuery query);
 
-	public DictDistrictBO getOne(DictDistrictQuery query);
+    DictDistrictBO getOne(DictDistrictQuery query);
 
-	public boolean update(DictDistrictParam param,DictDistrictQuery query);
+    boolean update(DictDistrictParam param, DictDistrictQuery query);
 
 }

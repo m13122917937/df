@@ -1,4 +1,4 @@
-package com.ruoyi.system.service;
+package com.ruoyi.system.facade;
 
 import java.util.List;
 import java.util.Set;
@@ -12,7 +12,7 @@ import com.ruoyi.system.domain.vo.RouterVo;
  *
  * @author ruoyi
  */
-public interface ISysMenuService {
+public interface ISysMenuFacade {
     /**
      * 根据用户查询系统菜单列表
      *

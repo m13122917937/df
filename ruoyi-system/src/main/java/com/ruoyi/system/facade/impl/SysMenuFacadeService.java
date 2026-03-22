@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +23,7 @@ import com.ruoyi.system.domain.vo.RouterVo;
 import com.ruoyi.system.mapper.SysMenuMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysRoleMenuMapper;
-import com.ruoyi.system.service.ISysMenuService;
+import com.ruoyi.system.facade.ISysMenuFacade;
 
 /**
  * 菜单 业务层处理
@@ -31,7 +31,7 @@ import com.ruoyi.system.service.ISysMenuService;
  * @author ruoyi
  */
 @Service
-public class SysMenuServiceImpl implements ISysMenuService
+public class SysMenuFacadeService implements ISysMenuFacade
 {
     public static final String PREMISSION_STRING = "perms[\"{0}\"]";
 

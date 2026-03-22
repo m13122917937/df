@@ -21,23 +21,22 @@ import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.service.ISysDictDataService;
-import com.ruoyi.system.service.ISysDictTypeService;
+import com.ruoyi.system.facade.ISysDictDataFacade;
+import com.ruoyi.system.facade.ISysDictTypeFacade;
 
 /**
  * 数据字典信息
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/system/dict/data")
 public class SysDictDataController extends BaseController {
     @Autowired
-    private ISysDictDataService dictDataService;
+    private ISysDictDataFacade dictDataService;
 
     @Autowired
-    private ISysDictTypeService dictTypeService;
+    private ISysDictTypeFacade dictTypeService;
 
     @PreAuthorize("@ss.hasPermi('system:dict:list')")
     @GetMapping("/list")

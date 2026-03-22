@@ -1,4 +1,4 @@
-package com.ruoyi.system.service.impl;
+package com.ruoyi.system.facade.impl;
 
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 import com.ruoyi.system.domain.SysExcelTask;
 import com.ruoyi.system.mapper.SysExcelTaskMapper;
-import com.ruoyi.system.service.ISysExcelTaskService;
+import com.ruoyi.system.facade.ISysExcelTaskFacade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class SysExcelTaskServiceImpl extends ServiceImpl<SysExcelTaskMapper, SysExcelTask> implements ISysExcelTaskService {
+public class SysExcelTaskFacadeService extends ServiceImpl<SysExcelTaskMapper, SysExcelTask> implements ISysExcelTaskFacade {
 
     @Override
     public SysExcelTask selectSysExcelTaskByFileId(String fileId) {

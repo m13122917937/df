@@ -28,7 +28,6 @@ import java.util.TreeSet;
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 @RequestMapping("/monitor/cache")
 public class CacheController {

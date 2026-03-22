@@ -27,7 +27,6 @@ import java.util.List;
  *
  * @author ruoyi
  */
-@Ignore
 @RestController
 
 @RequestMapping("/common/v2")

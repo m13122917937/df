@@ -43,6 +43,7 @@ public class ErrorOrderController extends BaseController {
 
     @Autowired
     IImeiFacade imeiFacade;
+
     @Autowired
     IOrderFacade orderFacade;
 
@@ -75,7 +76,7 @@ public class ErrorOrderController extends BaseController {
 
 
     @GetMapping("error2wait")
-    public AjaxResult error2revoke(
+    public AjaxResult error2revoke(String orderCode) {
         Assert.notBlank(orderCode, "订单编号不能为空");
 
         orderBizService.error2Wait(orderCode, getUserId());
@@ -86,7 +87,7 @@ public class ErrorOrderController extends BaseController {
 
 
     @GetMapping("error2ending")
-    public AjaxResult error2Ending(
+    public AjaxResult error2Ending(String orderCode, Integer refund) {
 
         Assert.notBlank(orderCode, "订单编号不能为空");
         Assert.notNull(refund, "请选择是否退还保证金");
