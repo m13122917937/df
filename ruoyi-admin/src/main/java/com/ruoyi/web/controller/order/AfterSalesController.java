@@ -4,8 +4,6 @@ import com.ruoyi.biz.order.AfterSalesBizService;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.web.form.order.AftersalesForm;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -15,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@Api(tags = "售后订单接口")
+
 @RestController
 @RequestMapping("order/aftersales")
 public class AfterSalesController extends BaseController {
@@ -23,7 +21,7 @@ public class AfterSalesController extends BaseController {
     @Autowired
     AfterSalesBizService afterSalesBizService;
 
-    @ApiOperation("添加售后订单")
+
     @PostMapping("add")
     public AjaxResult add(@Validated @RequestBody AftersalesForm aftersalesForm) {
 

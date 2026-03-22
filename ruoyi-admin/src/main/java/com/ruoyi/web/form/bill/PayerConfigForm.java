@@ -2,7 +2,6 @@ package com.ruoyi.web.form.bill;
 
 import com.ruoyi.common.validator.group.AddGroup;
 import com.ruoyi.common.validator.group.UpdateGroup;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -24,49 +23,49 @@ public class PayerConfigForm {
     /**
      * $column.columnComment
      */
-    @ApiModelProperty("id")
+
     @NotNull(message = "id不能为空", groups = {UpdateGroup.class})
     private Long id;
 
     /**
      * 平台
      */
-    @ApiModelProperty("平台")
+
     @NotNull(message = "平台不能为空", groups = {AddGroup.class})
     private String platform;
     /**
      * 关键字
      */
-    @ApiModelProperty("店铺名称")
+
     @NotBlank(message = "店铺名称不能为空", groups = {AddGroup.class})
     private String keyWord;
 
     /**
      * 付款主体
      */
-    @ApiModelProperty("付款主体ID")
+
     @NotNull(message = "付款主体ID不能为空", groups = {AddGroup.class})
     private Long payerId;
 
     /**
      * 创建时间
      */
-    @ApiModelProperty(hidden = true)
+
     private Date createTime;
     /**
      * 创建人
      */
-    @ApiModelProperty(hidden = true)
+
     private Long createBy;
     /**
      * 修改时间
      */
-    @ApiModelProperty(hidden = true)
+
     private Date updateTime;
     /**
      * 修改人
      */
-    @ApiModelProperty(hidden = true)
+
     private Long updateBy;
 
 }

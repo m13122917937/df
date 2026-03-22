@@ -15,10 +15,6 @@ import com.ruoyi.mapper.user.CapitalConvert;
 import com.ruoyi.web.form.user.CompanyCapitalLogForm;
 import com.ruoyi.web.util.ExcelUtil;
 import com.ruoyi.web.vo.user.CompanyCapitalLogVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,7 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
-@Api(tags = "用户保证金")
+
 @Controller
 @RequestMapping("company/capital")
 public class CompanyCapitalController extends BaseController {
@@ -42,7 +38,7 @@ public class CompanyCapitalController extends BaseController {
     ICompanyCapitalFacade companyCapitalFacade;
 
 
-    @ApiOperation("查询保证金类型")
+
     @GetMapping("/type/info")
     @ResponseBody
     public AjaxResult typeInfo() {
@@ -57,7 +53,7 @@ public class CompanyCapitalController extends BaseController {
     }
 
 
-    @ApiOperation("查询保证金余额")
+
     @GetMapping("/info")
     @ResponseBody
     public AjaxResult info() {
@@ -66,10 +62,10 @@ public class CompanyCapitalController extends BaseController {
         return Objects.isNull(companyCapitalBO) ? AjaxResult.success(BigDecimal.ZERO) : AjaxResult.success(companyCapitalBO.getAvailableAmount());
     }
 
-    @ApiOperation("查询保证金记录")
+
     @PostMapping("/list")
     @ResponseBody
-    @ApiResponses({@ApiResponse(code = 200, message = "成功", response = CompanyCapitalLogVO.class)})
+
     public TableDataInfo list(@RequestBody CompanyCapitalLogForm logParam) {
         CompanyCapitalLogQuery query = CapitalConvert.INSTANCE.toLogQuery(logParam).setCompanyId(getDeptId());
         ;
@@ -79,7 +75,7 @@ public class CompanyCapitalController extends BaseController {
     }
 
 
-    @ApiOperation("导出")
+
     @GetMapping("/export")
     public void export(CompanyCapitalLogForm logParam) throws IOException {
 

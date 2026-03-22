@@ -1,6 +1,5 @@
 package com.ruoyi.web.form.system;
 
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 /**
@@ -8,7 +7,7 @@ import lombok.Data;
  *
  * @author ruoyi
  */
-@ApiModel(description = "企业查询实体")
+
 @Data
 public class LoginBody {
     /**

@@ -11,10 +11,6 @@ import com.ruoyi.web.form.index.ProductForm;
 import com.ruoyi.web.form.index.TabProvinceForm;
 import com.ruoyi.web.form.index.TradeForm;
 import com.ruoyi.web.vo.index.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-@Api(tags = "首页接口")
+
 @RestController
 @RequestMapping("index")
 public class IndexController extends BaseController {
@@ -31,15 +27,15 @@ public class IndexController extends BaseController {
     @Autowired
     IndexBizService indexBizService;
 
-    @ApiResponses({@ApiResponse(code = 200, message = "成功", response = IndexTabVO.class)})
+
     @GetMapping("tab")
-    @ApiOperation("首页tab分类")
+
     public AjaxResult index() {
         return AjaxResult.success(indexBizService.tab());
     }
 
-    @ApiResponses({@ApiResponse(code = 200, message = "成功", response = ProvinceVO.class)})
-    @ApiOperation("首页省市下面的数据")
+
+
     @PostMapping("province")
     public AjaxResult province(@RequestBody TabProvinceForm tabProvinceForm) {
 
@@ -49,8 +45,8 @@ public class IndexController extends BaseController {
     }
 
 
-    @ApiResponses({@ApiResponse(code = 200, message = "成功", response = IndexProductVO.class)})
-    @ApiOperation("首页查询tab下面的product list")
+
+
     @PostMapping("tab/product")
     public AjaxResult product(@RequestBody ProductForm productForm) {
 
@@ -65,8 +61,8 @@ public class IndexController extends BaseController {
     }
 
 
-    @ApiResponses({@ApiResponse(code = 200, message = "成功", response = IndexSkuVO.class)})
-    @ApiOperation("首页商品下面的sku数据")
+
+
     @PostMapping("tab/product/sku")
     public AjaxResult skuCount(@RequestBody ProductForm productForm) {
 
@@ -81,8 +77,8 @@ public class IndexController extends BaseController {
         return AjaxResult.success(indexSkuVOList);
     }
 
-    @ApiResponses({@ApiResponse(code = 200, message = "成功", response = IndexSkuListVO.class)})
-    @ApiOperation("首页商品下面的sku-list")
+
+
     @PostMapping("tab/product/sku/list")
     public TableDataInfo skuList(@RequestBody ProductForm productForm) {
 
@@ -98,8 +94,8 @@ public class IndexController extends BaseController {
     }
 
 
-    @ApiResponses({@ApiResponse(code = 200, message = "成功", response = IndexOrderInfoVO.class)})
-    @ApiOperation("sku,订单详情信息，弹窗")
+
+
     @GetMapping("sku/{orderId}/{hangingId}")
     public AjaxResult infoSku(@PathVariable("orderId") String orderId, @PathVariable("hangingId") Long hangingId) {
 
@@ -109,8 +105,8 @@ public class IndexController extends BaseController {
     }
 
 
-    @ApiResponses({@ApiResponse(code = 200, message = "成功", response = IndexOrderInfoVO.class)})
-    @ApiOperation("抢单接口")
+
+
     @PostMapping("trade")
     public AjaxResult trade(@RequestBody TradeForm tradeForm) {
 

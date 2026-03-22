@@ -15,8 +15,6 @@ import com.ruoyi.web.vo.express.DetailInfoVO;
 import com.ruoyi.web.vo.express.RouteInfoVO;
 import com.ruoyi.web.vo.express.RouteSubscribeVO;
 import com.ruoyi.web.vo.order.OrderExpressVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -27,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Api(tags = "快递信息相关")
+
 @RestController
 @RequestMapping("/express/company")
 public class ExpressController {
@@ -38,7 +36,7 @@ public class ExpressController {
     @Autowired
     ExpressBizService expressBizService;
 
-    @ApiOperation("查询快递信息")
+
     @GetMapping("/info/{logisticsNo}")
     public RouteSubscribeVO info(@PathVariable("logisticsNo") String logisticsNo) {
 
@@ -61,7 +59,7 @@ public class ExpressController {
 
     }
 
-    @ApiOperation("查询快递公司编码")
+
     @GetMapping("/{orderCode}")
     public AjaxResult listCode(@PathVariable("orderCode") String orderCode) {
 
@@ -70,7 +68,7 @@ public class ExpressController {
         return AjaxResult.success(expressInfo);
     }
 
-    @ApiOperation("保存物流单号,并且订阅快递信息")
+
     @PostMapping("/order")
     public AjaxResult saveOrder(@Validated @RequestBody ExpressOrderForm expressOrderForm) throws IOException {
 
@@ -85,7 +83,7 @@ public class ExpressController {
      * @param orderCode
      * @return
      */
-    @ApiOperation("查询订单快递单号")
+
     @GetMapping("express/{orderCode}")
     public AjaxResult queryExpressInfo(@PathVariable("orderCode") String orderCode) {
 

@@ -12,10 +12,6 @@ import com.ruoyi.common.validator.group.UpdateGroup;
 import com.ruoyi.web.form.bill.PayerConfigForm;
 import com.ruoyi.web.vo.bill.PayerConfigVO;
 import com.ruoyi.web.vo.company.CompanyBankVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,17 +21,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@Api(tags = "付款配置")
+
 @RequestMapping("/bill/payer/config")
 public class PayerConfigController extends BaseController {
 
     @Autowired
     PayerConfigBizService payerConfigBizService;
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = PayerConfigVO.class)
-    })
-    @ApiOperation("列表")
+
+
+
     @GetMapping("/list")
     public TableDataInfo list(@RequestParam(value = "keyword", required = false) String keyword) {
 
@@ -45,10 +40,9 @@ public class PayerConfigController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功")
-    })
-    @ApiOperation("更新")
+
+
+
     @PostMapping("/update")
     public AjaxResult update(@Validated(value = UpdateGroup.class) @RequestBody PayerConfigForm payerConfigForm) {
 
@@ -59,10 +53,9 @@ public class PayerConfigController extends BaseController {
         return AjaxResult.success();
     }
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功")
-    })
-    @ApiOperation("保存")
+
+
+
     @PostMapping("/save")
     public AjaxResult save(@Validated(value = AddGroup.class) @RequestBody PayerConfigForm payerConfigForm) {
 
@@ -73,10 +66,9 @@ public class PayerConfigController extends BaseController {
         return AjaxResult.success();
     }
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功")
-    })
-    @ApiOperation("平台列表")
+
+
+
     @PostMapping("/platform")
     public AjaxResult platform() {
 

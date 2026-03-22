@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
-import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 /**
  * 启动程序
@@ -15,7 +14,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
  */
 @Slf4j
 @EnableAsync // 启用异步支持
-@EnableSwagger2WebMvc
 @SpringBootApplication
 @EnableAspectJAutoProxy(exposeProxy = true)
 public class ApiApplication {

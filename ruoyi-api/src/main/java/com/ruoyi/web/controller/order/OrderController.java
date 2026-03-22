@@ -19,10 +19,6 @@ import com.ruoyi.order.model.consts.OrderConsts;
 import com.ruoyi.system.model.consts.DictDataConsts;
 import com.ruoyi.web.form.order.OrderForm;
 import com.ruoyi.web.vo.order.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Api(tags = "订单接口")
+
 @RestController
 @RequestMapping("order")
 public class OrderController extends BaseController {
@@ -48,11 +44,10 @@ public class OrderController extends BaseController {
     @Autowired
     AgeBizService ageBizService;
 
-    @ApiOperation("查询待发货订单")
+
     @PostMapping("delivery/ing/list")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
+
+
     public TableDataInfo deliveryIng(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.DELIVERY_ING.getCode()));
         orderForm.setCompanyId(getDeptId());
@@ -61,11 +56,10 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiOperation("查询待发货订单")
+
     @PostMapping("delivery/ing/list/export")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
+
+
     public void deliveryIngExport(@RequestBody OrderForm orderForm) throws IOException {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.DELIVERY_ING.getCode()));
         orderForm.setCompanyId(getDeptId());
@@ -80,7 +74,7 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiOperation("待发货订单导入")
+
     @PostMapping("delivery/ing/list/import")
     public AjaxResult deliveryImport(@RequestParam("file") MultipartFile file) throws IOException {
 
@@ -92,10 +86,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
-    @ApiOperation("查询当日发货订单")
+
+
+
     @PostMapping("delivery/end/list")
     public TableDataInfo deliveryEnd(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.DELIVERY_END.getCode()));
@@ -106,10 +99,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
-    @ApiOperation("查询当日发货订单导出")
+
+
+
     @PostMapping("delivery/end/list/export")
     public void deliveryEndExport(@RequestBody OrderForm orderForm) throws IOException {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.DELIVERY_END.getCode()));
@@ -124,10 +116,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
-    @ApiOperation("查询在途订单")
+
+
+
     @PostMapping("transit/list")
     public TableDataInfo transit(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.TRANSIT.getCode()));
@@ -138,10 +129,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
-    @ApiOperation("查询追单订单")
+
+
+
     @PostMapping("chase/list")
     public TableDataInfo chase(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.CHASE_ORDER.getCode()));
@@ -152,10 +142,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
-    @ApiOperation("查询异常订单")
+
+
+
     @PostMapping("error/list")
     public TableDataInfo errorList(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.ERROR.getCode()));
@@ -166,10 +155,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
-    @ApiOperation("查询确认收货列表")
+
+
+
     @PostMapping("receipt/list")
     public TableDataInfo ending(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.ENDING.getCode()));
@@ -180,10 +168,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
-    @ApiOperation("查询售后列表")
+
+
+
     @PostMapping("afterSales/list")
     public TableDataInfo afterSales(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.AFTER_SALES.getCode()));
@@ -194,10 +181,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderVO.class)
-    })
-    @ApiOperation("省列表数据")
+
+
+
     @GetMapping("province/{status}")
     public AjaxResult provinceCount(@PathVariable("status") Integer status, @RequestParam(value = "brand", required = false) String brand) {
 
@@ -207,10 +193,9 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderBrandCountVO.class)
-    })
-    @ApiOperation("品牌列表数据")
+
+
+
     @GetMapping("brand/{status}")
     public AjaxResult brandCount(@PathVariable("status") Integer status, @RequestParam(value = "province", required = false) Long province) {
 
@@ -220,11 +205,10 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiOperation("查询订单串码")
+
     @GetMapping("list/{orderId}/imei")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = ImeiVO.class)
-    })
+
+
     public AjaxResult imei(@PathVariable("orderId") String orderCode) {
 
         List<ImeiVO> list = imeiBizService.list(orderCode);
@@ -232,11 +216,10 @@ public class OrderController extends BaseController {
         return AjaxResult.success(list);
     }
 
-    @ApiOperation("确认追单")
+
     @GetMapping("confirmRevoke/{orderCode}")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = ImeiVO.class)
-    })
+
+
     public AjaxResult confirmRevoke(@PathVariable("orderCode") String orderCode) {
         orderBizService.confirmRevoke(orderCode);
         return AjaxResult.success();

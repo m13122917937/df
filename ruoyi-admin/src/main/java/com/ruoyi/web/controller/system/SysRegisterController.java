@@ -1,6 +1,5 @@
 package com.ruoyi.web.controller.system;
 
-import com.github.xiaoymin.knife4j.annotations.Ignore;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.framework.web.service.SysRegisterService;
 import com.ruoyi.system.service.ISysConfigService;

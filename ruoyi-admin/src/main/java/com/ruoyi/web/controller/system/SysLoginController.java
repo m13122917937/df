@@ -1,6 +1,5 @@
 package com.ruoyi.web.controller.system;
 
-import com.github.xiaoymin.knife4j.annotations.Ignore;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysMenu;
@@ -16,8 +15,6 @@ import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysMenuService;
 import com.ruoyi.web.form.system.LoginBody;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +31,7 @@ import java.util.Set;
  * @author ruoyi
  */
 @Ignore
-@Api(tags = "用户登录")
+
 @RestController
 public class SysLoginController {
     @Autowired
@@ -58,7 +55,7 @@ public class SysLoginController {
      * @param loginBody 登录信息
      * @return 结果
      */
-    @ApiOperation("登录")
+
     @PostMapping("/login")
     public AjaxResult login(@RequestBody LoginBody loginBody) {
         AjaxResult ajax = AjaxResult.success();

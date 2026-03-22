@@ -27,7 +27,6 @@
         <rocketmq.version>5.0.7</rocketmq.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <bitwalker.version>1.21</bitwalker.version>
-        <swagger.version>3.0.0</swagger.version>
         <kaptcha.version>2.3.3</kaptcha.version>
         <pagehelper.boot.version>1.4.7</pagehelper.boot.version>
         <fastjson.version>2.0.58</fastjson.version>
@@ -51,7 +50,6 @@
         <spring-framework.version>5.3.39</spring-framework.version>
         <weixin-java.version>4.6.0</weixin-java.version>
         <weixin-java-cp.version>4.6.0</weixin-java-cp.version>
-        <knife4j.version>4.4.0</knife4j.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 
     </properties>
@@ -69,7 +67,6 @@
         <module>ruoyi-framework</module>
         <module>ruoyi-system</module>
         <module>ruoyi-quartz</module>
-        <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
         <module>ruoyi-user</module>
         <module>ruoyi-order</module>
@@ -82,14 +79,6 @@
     <!-- 依赖声明 -->
     <dependencyManagement>
         <dependencies>
-
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-dependencies</artifactId>
-                <version>${knife4j.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
             <!-- SpringCloudAlibaba的依赖配置-->
             <dependency>
@@ -340,19 +329,6 @@
                 <groupId>com.github.oshi</groupId>
                 <artifactId>oshi-core</artifactId>
                 <version>${oshi.version}</version>
-            </dependency>
-
-            <!-- Swagger3依赖 -->
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-boot-starter</artifactId>
-                <version>${swagger.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>io.swagger</groupId>
-                        <artifactId>swagger-models</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- io常用工具类 -->

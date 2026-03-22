@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.github.xiaoymin.knife4j.annotations.Ignore;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.core.redis.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;

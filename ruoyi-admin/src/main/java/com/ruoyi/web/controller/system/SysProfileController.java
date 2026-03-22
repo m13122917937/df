@@ -2,7 +2,6 @@ package com.ruoyi.web.controller.system;
 
 import java.util.Map;
 
-import com.github.xiaoymin.knife4j.annotations.Ignore;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

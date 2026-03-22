@@ -22,16 +22,12 @@ import com.ruoyi.web.form.rule.RuleListForm;
 import com.ruoyi.web.form.rule.RuleQueryForm;
 import com.ruoyi.web.vo.order.RuleVO;
 import com.ruoyi.web.vo.order.SKURuleVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "订单规则接口")
+
 @RestController
 @RequestMapping("/rule")
 public class RuleController extends BaseController {
@@ -39,11 +35,8 @@ public class RuleController extends BaseController {
     @Autowired
     private RuleBizService ruleBizService;
 
-    @ApiOperation("规则列表")
+
     @GetMapping("list")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = RuleVO.class)
-    })
     public TableDataInfo list(RuleQueryForm ruleQueryForm) {
         DateTime dateTime = DateUtil.yesterday().setField(DateField.HOUR, 18).setField(DateField.MINUTE, 0);
 
@@ -52,11 +45,8 @@ public class RuleController extends BaseController {
         return getDataTable(ruleVOS.getData(), ruleVOS.getTotal());
     }
 
-    @ApiOperation("商品列表")
+
     @GetMapping("/sku/list")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = SKURuleVO.class)
-    })
     public AjaxResult skuList() {
         DateTime dateTime = DateUtil.yesterday().setField(DateField.HOUR, 18).setField(DateField.MINUTE, 0);
 
@@ -65,7 +55,7 @@ public class RuleController extends BaseController {
         return AjaxResult.success(ruleVOS);
     }
 
-    @ApiOperation("禁用规则")
+
     @PutMapping("disable")
     public AjaxResult disable(@RequestBody RuleListForm ruleListForm) {
 
@@ -76,7 +66,7 @@ public class RuleController extends BaseController {
         return super.success();
     }
 
-    @ApiOperation("启用规则")
+
     @PutMapping("enable")
     public AjaxResult enable(@RequestBody RuleListForm ruleListForm) {
         Assert.notEmpty(ruleListForm.getRuleIdList(), "参数不能为空");
@@ -86,7 +76,7 @@ public class RuleController extends BaseController {
         return super.success();
     }
 
-    @ApiOperation("删除规则")
+
     @DeleteMapping("del")
     public AjaxResult del(@RequestBody RuleListForm ruleListForm) {
 
@@ -97,7 +87,7 @@ public class RuleController extends BaseController {
         return AjaxResult.success();
     }
 
-    @ApiOperation("新增规则")
+
     @PostMapping("save")
     public AjaxResult save(@RequestBody RuleForm ruleParam) {
         ValidatorUtils.validateEntity(ruleParam, AddGroup.class);
@@ -110,7 +100,7 @@ public class RuleController extends BaseController {
     }
 
 
-    @ApiOperation("修改规则")
+
     @PutMapping("update")
     public AjaxResult update(@RequestBody RuleForm ruleParam) {
         ValidatorUtils.validateEntity(ruleParam, UpdateGroup.class);
@@ -122,7 +112,7 @@ public class RuleController extends BaseController {
         return AjaxResult.success();
     }
 
-    @ApiOperation("品牌")
+
     @GetMapping("/brand/list")
     public AjaxResult brand() {
         DateTime dateTime = DateUtil.yesterday().setField(DateField.HOUR, 18).setField(DateField.MINUTE, 0);
@@ -133,7 +123,7 @@ public class RuleController extends BaseController {
     }
 
 
-    @ApiOperation("品类")
+
     @GetMapping("/category/list")
     public AjaxResult category() {
         DateTime dateTime = DateUtil.yesterday().setField(DateField.HOUR, 18).setField(DateField.MINUTE, 0);

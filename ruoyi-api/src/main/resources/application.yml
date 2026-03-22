@@ -120,25 +120,6 @@ xss:
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
 
-knife4j:
-  openapi:
-    setting:
-      language: zh_cn
-    title: Knife4j官方文档
-    description: 风扬
-    email: xiaoymin@foxmail.com
-    concat: 八一菜刀
-    url: https://docs.xiaominfo.com
-    version: v4.0
-    license: Apache 2.0
-    license-url: https://stackoverflow.com/
-    terms-of-service-url: https://stackoverflow.com/
-    group:
-      test1:
-        group-name: 分组名称
-        api-rule: package
-        api-rule-resources:
-          - com.ruoyi
 fy:
   express:
     subscribeUrl:

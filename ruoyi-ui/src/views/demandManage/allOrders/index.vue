@@ -65,8 +65,11 @@
               <el-button icon="el-icon-refresh-left" @click="handleReset" class="reset-btn">
                 重置
               </el-button>
-              <el-button type="success" icon="el-icon-download" @click="handleExport" :loading="exportLoading" class="export-btn">
-                导出
+              <el-button type="warning" icon="el-icon-document" @click="handleGenerateExcel" :loading="generating" class="generate-btn">
+                生成Excel
+              </el-button>
+              <el-button type="success" icon="el-icon-download" @click="handleOpenExcelDialog" class="download-btn">
+                导出记录
               </el-button>
             </div>
           </div>
@@ -247,6 +250,52 @@
       @confirm="applyBatchErpOrderSearch"
       @cancel="closeBatchErpOrderDialog"
     />
+
+    <!-- Excel生成记录对话框 -->
+    <el-dialog
+      title="Excel导出记录"
+      :visible.sync="excelDialogVisible"
+      width="600px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="true"
+    >
+      <div class="excel-dialog-content">
+        <div class="excel-tip">
+          <i class="el-icon-info"></i>
+          <span>Excel生成完成后，点击对应记录即可下载</span>
+        </div>
+        <el-table :data="excelTaskList" border stripe size="small" style="width: 100%">
+          <el-table-column prop="fileName" label="文件名" min-width="200" />
+          <el-table-column label="状态" width="100" align="center">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.status === 0" type="warning" size="small">生成中</el-tag>
+              <el-tag v-else-if="scope.row.status === 1" type="success" size="small">已完成</el-tag>
+              <el-tag v-else type="danger" size="small">生成失败</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createTime" label="创建时间" width="160" :formatter="formatDateTime" />
+          <el-table-column label="操作" width="100" align="center">
+            <template slot-scope="scope">
+              <el-button
+                type="text"
+                size="small"
+                :disabled="scope.row.status !== 1"
+                @click="handleDownloadExcelTask(scope.row)"
+              >
+                下载
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div v-if="loadingTasks" class="loading-tip">
+          <i class="el-icon-loading" />
+          <span>正在加载...</span>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="excelDialogVisible = false">关闭</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -260,7 +309,11 @@ import {
   getProvinceListApi,
   getCityListApi,
   getAllOrderListApi,
-  getAllOrderExportApi
+  getAllOrderExportApi,
+  generateOrderExcelApi,
+  downloadOrderExcelApi,
+  getExcelTaskStatusApi,
+  getRecentExcelTasksApi
 } from '@/api/wholesale'
 import {
   createCopyTextMethod,
@@ -309,7 +362,7 @@ export default {
   data() {
     return {
       loading: false,
-      exportLoading: false,
+      generating: false,
       tableData: [],
       pagination: {
         currentPage: 1,
@@ -391,7 +444,12 @@ export default {
       batchErpOrderCodeList: [],
       currentOrder: null,
       imeiDialogVisible: false,
-      logisticsDialogVisible: false
+      logisticsDialogVisible: false,
+      // Excel导出相关
+      excelDialogVisible: false,
+      excelTaskList: [],
+      loadingTasks: false,
+      pollTimer: null
     }
   },
   created() {
@@ -762,12 +820,103 @@ export default {
     handleBillDetails(row) {
       this.$message.info(`账单详情开发中：${row.orderCode || '-'}`)
     },
-    handleGenerateExcel() {
-      this.$message.info('生成Excel功能开发中，敬请期待')
+    // 打开Excel导出记录对话框
+    async handleOpenExcelDialog() {
+      this.excelDialogVisible = true
+      await this.loadRecentExcelTasks()
     },
-    handleDownloadExcel() {
-      this.$message.info('请先生成Excel后再下载')
+    // 加载最近的Excel导出任务列表
+    async loadRecentExcelTasks() {
+      this.loadingTasks = true
+      try {
+        const res = await getRecentExcelTasksApi()
+        if (res && res.code === 200) {
+          this.excelTaskList = res.data || []
+          // 对所有生成中的任务启动轮询
+          this.excelTaskList.forEach(task => {
+            if (task.status === 0) {
+              this.startPolling(task.fileId)
+            }
+          })
+        }
+      } catch (error) {
+        console.error('加载导出任务列表失败', error)
+        this.$message.error('加载导出任务列表失败')
+      } finally {
+        this.loadingTasks = false
+      }
     },
+    // 第一步：生成Excel文件到服务器（异步生成，打开对话框查看进度）
+    async handleGenerateExcel() {
+      this.generating = true
+      try {
+        const params = this.buildQueryParams()
+        const res = await generateOrderExcelApi(params)
+        if (res && res.code === 200) {
+          const { fileId, fileName } = res.data
+          // 打开对话框，加载任务列表
+          this.excelDialogVisible = true
+          // 重新加载最近任务列表（包含新创建的任务）
+          await this.loadRecentExcelTasks()
+          // 启动轮询检查状态
+          this.startPolling(fileId)
+          this.$message.info('Excel正在后台生成，请稍候...生成完成后点击下载')
+        } else {
+          this.$message.error(res?.msg || '生成Excel失败')
+        }
+      } catch (error) {
+        console.error('生成Excel失败', error)
+        this.$message.error('生成Excel失败，请稍后重试')
+      } finally {
+        this.generating = false
+      }
+    },
+    // 开始轮询任务状态
+    startPolling(fileId) {
+      // 清除已有定时器
+      if (this.pollTimer) {
+        clearInterval(this.pollTimer)
+        this.pollTimer = null
+      }
+      // 每2秒查询一次状态
+      this.pollTimer = setInterval(async () => {
+        try {
+          const res = await getExcelTaskStatusApi(fileId)
+          if (res && res.code === 200) {
+            const task = res.data
+            // 更新列表中的状态
+            const index = this.excelTaskList.findIndex(t => t.fileId === task.fileId)
+            if (index >= 0) {
+              this.$set(this.excelTaskList, index, task)
+            }
+            // 如果生成完成或失败，停止轮询
+            if (task.status === 1 || task.status === 2) {
+              clearInterval(this.pollTimer)
+              this.pollTimer = null
+              if (task.status === 1) {
+                this.$message.success('Excel生成完成，请点击下载')
+              }
+            }
+          }
+        } catch (error) {
+          console.error('轮询任务状态失败', error)
+        }
+      }, 2000)
+    },
+    // 点击下载Excel任务
+    handleDownloadExcelTask(task) {
+      if (task.status !== 1) {
+        this.$message.warning('文件尚未生成完成')
+        return
+      }
+      // 直接跳转下载，后端返回302重定向到OSS
+      window.open(task.ossUrl, '_blank')
+      // 更新下载状态
+      if (task.downloaded !== 1) {
+        task.downloaded = 1
+      }
+    },
+    // 兼容原有直接导出方式
     async handleExport() {
       this.exportLoading = true
       try {
@@ -946,7 +1095,9 @@ export default {
 
 .reset-btn,
 .batch-btn,
-.export-btn {
+.export-btn,
+.generate-btn,
+.download-btn {
   min-height: 32px;
   font-size: 14px;
   border-radius: 8px;

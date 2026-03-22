@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 /**
  * 启动程序
@@ -13,7 +12,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
  * @author ruoyi
  */
 @Slf4j
-@EnableSwagger2WebMvc
 @SpringBootApplication
 @EnableAspectJAutoProxy(exposeProxy = true)
 public class AdminApplication {

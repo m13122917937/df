@@ -410,13 +410,47 @@ export function getAllOrderListApi(pageData,data) {
       data,
     });
   }
-  // 导出 全部订单列表
+  // 导出 全部订单列表 - 直接下载（兼容旧版）
   export function getAllOrderExportApi(data) {
     return request({
       url: `/order/all/export`,
       method: "post",
       data,
       responseType: "blob",
+    });
+  }
+
+  // 第一步：生成Excel文件到服务器
+  export function generateOrderExcelApi(data) {
+    return request({
+      url: `/system/excel/generate`,
+      method: "post",
+      data,
+    });
+  }
+
+  // 第二步：下载已生成的Excel文件
+  export function downloadOrderExcelApi(fileId) {
+    return request({
+      url: `/system/excel/download/${fileId}`,
+      method: "get",
+      responseType: "blob",
+    });
+  }
+
+  // 查询Excel生成任务状态
+  export function getExcelTaskStatusApi(fileId) {
+    return request({
+      url: `/system/excel/status/${fileId}`,
+      method: "get",
+    });
+  }
+
+  // 获取当前用户最近的Excel导出任务列表（最近5条）
+  export function getRecentExcelTasksApi() {
+    return request({
+      url: `/system/excel/recent`,
+      method: "get",
     });
   }
 

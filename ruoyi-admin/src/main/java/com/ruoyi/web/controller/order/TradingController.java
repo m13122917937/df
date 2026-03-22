@@ -6,8 +6,6 @@ import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.web.form.order.OrderNewForm;
 import com.ruoyi.web.vo.order.OrderDeliveryVO;
 import com.ruoyi.web.vo.order.OrderListVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@Api(tags = "报价中")
+
 @RestController
 @RequestMapping("/order/trading")
 public class TradingController {
@@ -26,7 +24,7 @@ public class TradingController {
     @Autowired
     OrderBizService orderBizService;
 
-    @ApiOperation("报价中订单导出")
+
     @PostMapping("export")
     public void export(@RequestBody OrderNewForm orderNewParam) throws IOException {
         HttpServletResponse response = ServletUtils.getResponse();

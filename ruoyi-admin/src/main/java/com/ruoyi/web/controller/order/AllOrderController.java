@@ -11,10 +11,6 @@ import com.ruoyi.web.form.order.AllOrderForm;
 import com.ruoyi.web.vo.bill.BillPayPlanVO;
 import com.ruoyi.web.vo.order.AllOrderVO;
 import com.ruoyi.web.vo.order.OrderListVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -28,7 +24,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Slf4j
-@Api(tags = "全部订单接口")
+
 @RestController
 @RequestMapping("order/all")
 public class AllOrderController extends BaseController {
@@ -36,10 +32,6 @@ public class AllOrderController extends BaseController {
     @Autowired
     OrderBizService orderBizService;
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = AllOrderVO.class)
-    })
-    @ApiOperation("全部订单")
     @PostMapping("list")
     public TableDataInfo list(@Validated @RequestBody AllOrderForm allOrderForm) {
 
@@ -48,10 +40,6 @@ public class AllOrderController extends BaseController {
         return getDataTable(allList.getData(), allList.getTotal());
     }
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = AllOrderVO.class)
-    })
-    @ApiOperation("导出订单")
     @PostMapping("export")
     public void export(@Validated @RequestBody AllOrderForm allOrderForm) throws IOException {
 
@@ -61,6 +49,5 @@ public class AllOrderController extends BaseController {
 
         EasyExcel.write(response.getOutputStream(), OrderListVO.class).sheet("sheet1").doWrite(allOrderVOList);
     }
-
 
 }

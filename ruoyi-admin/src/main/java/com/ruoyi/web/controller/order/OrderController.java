@@ -21,10 +21,6 @@ import com.ruoyi.web.form.order.OrderNewForm;
 import com.ruoyi.web.form.order.ProvinceForm;
 import com.ruoyi.web.form.rule.RuleForm;
 import com.ruoyi.web.vo.order.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -36,7 +32,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Slf4j
-@Api(tags = "新建中订单的接口")
+
 @RestController
 @RequestMapping("/order/new")
 public class OrderController extends BaseController {
@@ -74,33 +70,30 @@ public class OrderController extends BaseController {
         return AjaxResult.success();
     }
 
-    @ApiOperation("查询订单列表")
+
     @PostMapping("list")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderListVO.class)
-    })
+
+
     public TableDataInfo list(@RequestBody OrderNewForm orderNewParam) {
         orderNewParam.setOrderType(OrderConsts.OrderType.O2O.getCode());
         PageBO<OrderListVO> orderWaitVOPageBO = orderBizService.orderList(orderNewParam, startParamV2(orderBizService.sortField(orderNewParam.getStatus())));
         return getDataTable(orderWaitVOPageBO.getData(), orderWaitVOPageBO.getTotal());
     }
 
-    @ApiOperation("查询订单列表")
+
     @PostMapping("send/list")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderListVO.class)
-    })
+
+
     public TableDataInfo sendList(@RequestBody OrderNewForm orderNewParam) {
         orderNewParam.setOrderType(OrderConsts.OrderType.O2O.getCode());
         PageBO<OrderListVO> orderWaitVOPageBO = orderBizService.orderSendList(orderNewParam, startParamV2(orderBizService.sortField(orderNewParam.getStatus())));
         return getDataTable(orderWaitVOPageBO.getData(), orderWaitVOPageBO.getTotal());
     }
 
-    @ApiOperation("查询订单列表导出")
+
     @PostMapping("list/export")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderListVO.class)
-    })
+
+
     public void listExport(@RequestBody OrderNewForm orderNewParam) throws IOException {
         HttpServletResponse response = ServletUtils.getResponse();
         ServletUtils.renderExcel(response, "订单列表");
@@ -109,10 +102,10 @@ public class OrderController extends BaseController {
         EasyExcel.write(response.getOutputStream(), OrderListVO.class).sheet("sheet1").doWrite(orderListExport);
     }
 
-//    @ApiOperation("查询订单列表导出")
+//
 //    @PostMapping("list/error/export")
-//    @ApiResponses({
-//            @ApiResponse(code = 200, message = "成功", response = OrderListVO.class)
+//
+//
 //    })
 //    public void listErrorExport(@RequestBody OrderNewForm orderNewParam) throws IOException {
 //        HttpServletResponse response = ServletUtils.getResponse();
@@ -122,11 +115,10 @@ public class OrderController extends BaseController {
 //        EasyExcel.write(response.getOutputStream(), OrderListVO.class).sheet("sheet1").doWrite(orderListExport);
 //    }
 
-    @ApiOperation("查询订单串码")
+
     @GetMapping("list/{orderId}/imei")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = ImeiVO.class)
-    })
+
+
     public AjaxResult imei(@PathVariable("orderId") String orderCode) {
 
         List<ImeiVO> list = imeiBizService.list(orderCode);
@@ -135,7 +127,7 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiOperation("报价")
+
     @PostMapping("quotation")
     public AjaxResult quotation(@RequestBody RuleForm ruleParam) {
         ValidatorUtils.validateEntity(ruleParam, AddGroup.class);
@@ -147,11 +139,10 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiOperation("省市订单数量")
+
     @GetMapping("/province/count")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = OrderAreaCountVO.class)
-    })
+
+
     public AjaxResult provinceCount(ProvinceForm provinceForm) {
 
         ValidatorUtils.validateEntity(provinceForm);
@@ -162,11 +153,10 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiOperation("品牌订单数量")
+
     @GetMapping("/brand/count")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = BrandCountVO.class)
-    })
+
+
     public AjaxResult brandCount(BrandForm provinceForm) {
 
         ValidatorUtils.validateEntity(provinceForm);
@@ -177,7 +167,7 @@ public class OrderController extends BaseController {
     }
 
 
-    @ApiOperation("确认收货接口")
+
     @GetMapping("/ending/confirm")
     public AjaxResult success(String orderCode) {
 

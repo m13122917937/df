@@ -73,6 +73,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -938,6 +939,16 @@ public class OrderBizService {
         return allOrderVOList;
     }
 
+    /**
+     * 将全部订单导出到指定文件（用于两步导出模式）
+     *
+     * @param allOrderForm 查询条件
+     * @param file         目标文件
+     */
+    public void exportExcelToFile(AllOrderForm allOrderForm, File file) {
+        List<AllOrderVO> allOrderVOList = allListExport(allOrderForm);
+        com.alibaba.excel.EasyExcel.write(file, com.ruoyi.web.vo.order.AllOrderVO.class).sheet("sheet1").doWrite(allOrderVOList);
+    }
 
 }
 

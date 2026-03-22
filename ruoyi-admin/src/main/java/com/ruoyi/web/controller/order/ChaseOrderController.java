@@ -9,12 +9,10 @@ import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.web.form.order.RevokeHangingForm;
 import com.ruoyi.web.form.order.RevokeOriParam;
 import com.ruoyi.web.form.order.RevokeParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-@Api(tags = "追单/撤销接口")
+
 @RestController
 @RequestMapping("/order/chase")
 public class ChaseOrderController extends BaseController {
@@ -23,7 +21,7 @@ public class ChaseOrderController extends BaseController {
     @Autowired
     OrderBizService orderBizService;
 
-    @ApiOperation("追单订单转正常")
+
     @GetMapping("chase2normal")
     public AjaxResult chase2normal(String orderCode) {
         orderBizService.chase2normal(orderCode, getUserId());
@@ -31,7 +29,7 @@ public class ChaseOrderController extends BaseController {
     }
 
 
-    @ApiOperation("撤销订单/追单")
+
     @PostMapping("/revoke")
     public AjaxResult revoke(@RequestBody RevokeParam revokeParam) {
         Assert.notEmpty(revokeParam.getOrderCodeList(), "订单编号参数不能为空");
@@ -43,7 +41,7 @@ public class ChaseOrderController extends BaseController {
     }
 
     @Anonymous
-    @ApiOperation("撤销订单/追单")
+
     @PostMapping("/revoke/ori")
     public AjaxResult revokeOriginal(@RequestBody RevokeOriParam revokeOriParam) {
         Assert.notEmpty(revokeOriParam.getOriginalOrderIdList(), "订单编号参数不能为空");
@@ -53,7 +51,7 @@ public class ChaseOrderController extends BaseController {
         return AjaxResult.success();
     }
 
-    @ApiOperation("撤销订单报价")
+
     @PostMapping("hanging")
     public AjaxResult revokeHanging(@RequestBody RevokeHangingForm revokeParam) {
 

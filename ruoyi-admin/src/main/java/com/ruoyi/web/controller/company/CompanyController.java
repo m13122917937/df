@@ -28,7 +28,6 @@ import com.ruoyi.web.form.company.CompanyForm;
 import com.ruoyi.web.form.company.CompanyUserForm;
 import com.ruoyi.web.vo.UserVO;
 import com.ruoyi.web.vo.company.CompanyVO;
-import io.swagger.annotations.*;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +37,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@Api(tags = "企业相关")
+
 @RequestMapping("/company")
 public class CompanyController extends BaseController {
 
@@ -54,12 +53,11 @@ public class CompanyController extends BaseController {
     @Autowired
     CompanyBizService companyBizService;
 
-    @ApiOperation("查询企业列表")
+
     @PostMapping("/list")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = CompanyVO.class)
-    })
-    public TableDataInfo list(@ApiParam(value = "用户信息", required = true) @RequestBody CompanyForm companyForm) {
+
+
+    public TableDataInfo list(
 
         PageBO<CompanyBO> companyBOPageBO = companyService.listPage(CompanyConvert.INSTANCE.toCompanyParam(companyForm), startParamV2("create_time desc"));
 
@@ -67,9 +65,9 @@ public class CompanyController extends BaseController {
     }
 
 
-    @ApiOperation("添加企业")
+
     @PostMapping("/add")
-    public AjaxResult add(@ApiParam(value = "用户信息") @RequestBody CompanyAddForm companyForm) throws IOException {
+    public AjaxResult add(
         ValidatorUtils.validateEntity(companyForm, AddGroup.class);
 
 
@@ -86,9 +84,9 @@ public class CompanyController extends BaseController {
         return AjaxResult.success(CompanyConvert.INSTANCE.toVo(companyBO));
     }
 
-    @ApiOperation("更改企业信息")
+
     @PostMapping("/update")
-    public AjaxResult update(@ApiParam(value = "用户信息") @Validated(value = UpdateGroup.class) @RequestBody CompanyAddForm companyForm) throws IOException {
+    public AjaxResult update(
 
         CompanyParam companyParam = CompanyConvert.INSTANCE.toCompanyAddParam(companyForm);
         companyService.update(companyParam, new CompanyQuery().setId(companyParam.getId()));
@@ -99,11 +97,10 @@ public class CompanyController extends BaseController {
     }
 
 
-    @ApiOperation("企业用户列表")
+
     @GetMapping("/user/list/{companyId}")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = UserVO.class)
-    })
+
+
     public TableDataInfo userList(@PathVariable("companyId") Long companyId,
                                   @RequestParam(value = "phone", required = false) String phone,
                                   @RequestParam(value = "nickName", required = false)String nickName) {
@@ -114,9 +111,9 @@ public class CompanyController extends BaseController {
         return getDataTable(userVoList, userBOPageBO.getTotal());
     }
 
-    @ApiOperation("添加用户")
+
     @PostMapping("/user/add")
-    public AjaxResult userAdd(@ApiParam(value = "用户信息") @RequestBody CompanyUserForm companyUserForm) throws WxErrorException {
+    public AjaxResult userAdd(
         ValidatorUtils.validateEntity(companyUserForm, AddGroup.class);
 
         userBizService.checkCompany(companyUserForm.getCompanyId());
@@ -127,7 +124,7 @@ public class CompanyController extends BaseController {
     }
 
 
-    @ApiOperation("删除用户")
+
     @DeleteMapping("/{companyId}/{userId}")
     public AjaxResult userAdd(@PathVariable("companyId") Long companyId, @PathVariable("userId") Long userId) throws WxErrorException {
 
@@ -136,7 +133,7 @@ public class CompanyController extends BaseController {
         return AjaxResult.success();
     }
 
-    @ApiOperation("修改用户账号类型")
+
     @PutMapping("/{companyId}/{userId}/{owner}")
     public AjaxResult update(@PathVariable("companyId") Long companyId, @PathVariable("userId") Long userId, @PathVariable("owner") Integer owner) {
 

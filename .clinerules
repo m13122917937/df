@@ -6,7 +6,7 @@
 
 # 1. 技术栈 (Tech Stack)
 - **JDK 版本**: 必须基于 **Java 11** (首选)
-- **核心框架**: Spring Boot 2.7+ (基于 Spring Framework 5+)。
+- **核心框架**: Spring Boot 2.7+ (基于 Spring Framework 5+)。LOMBOK使用简化代码
 - **构建工具**: Maven (推荐) 或 Gradle (Kotlin DSL)。
 - **数据库ORM**:  MyBatis-Plus (最新版)。
 - **日志框架**: SLF4J + Logback (默认) 或 Log4j2。严禁使用 `System.out.println`。

@@ -18,7 +18,6 @@ import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.order.ErrorOrder;
 import com.ruoyi.web.form.order.ExcelForm;
 import com.ruoyi.web.vo.order.ExcelPlatformVO;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +27,7 @@ import java.io.IOException;
 import java.rmi.ServerException;
 import java.util.List;
 
-@Api(tags = "异常订单接口")
+
 @RestController
 @RequestMapping("/order/error")
 public class ErrorOrderController extends BaseController {
@@ -63,7 +62,7 @@ public class ErrorOrderController extends BaseController {
      * @param errorOrder
      * @return
      */
-    @ApiOperation("订单转异常")
+
     @GetMapping("error")
     public AjaxResult error(ErrorOrder errorOrder) {
         ValidatorUtils.validateEntity(errorOrder);
@@ -74,9 +73,9 @@ public class ErrorOrderController extends BaseController {
     }
 
 
-    @ApiOperation("异常订单转待发布")
+
     @GetMapping("error2wait")
-    public AjaxResult error2revoke(@ApiParam(name = "orderCode", value = "orderCode", required = true) @RequestParam("orderCode") String orderCode) {
+    public AjaxResult error2revoke(
         Assert.notBlank(orderCode, "订单编号不能为空");
 
         orderBizService.error2Wait(orderCode, getUserId());
@@ -85,10 +84,10 @@ public class ErrorOrderController extends BaseController {
     }
 
 
-    @ApiOperation("异常订单转已经收货")
+
     @GetMapping("error2ending")
-    public AjaxResult error2Ending(@ApiParam(name = "orderCode", value = "orderCode", required = true) @RequestParam("orderCode") String orderCode,
-                                   @ApiParam(name = "refund", value = "refund", required = true) @RequestParam("refund") Integer refund) {
+    public AjaxResult error2Ending(
+
         Assert.notBlank(orderCode, "订单编号不能为空");
         Assert.notNull(refund, "请选择是否退还保证金");
 
@@ -97,10 +96,9 @@ public class ErrorOrderController extends BaseController {
         return AjaxResult.success();
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "导出成功，返回 Excel 文件流", response = Void.class, responseContainer = "File"),
-    })
-    @ApiOperation("导出excel")
+
+
+
     @PostMapping("/export")
     public void export(@RequestBody ExcelForm excelForm, HttpServletResponse response) throws IOException {
 
@@ -111,7 +109,7 @@ public class ErrorOrderController extends BaseController {
     }
 
 
-    @ApiOperation("导入excel")
+
     @PostMapping("/import")
     public AjaxResult importE(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {

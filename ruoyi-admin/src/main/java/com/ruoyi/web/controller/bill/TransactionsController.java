@@ -20,10 +20,6 @@ import com.ruoyi.web.form.bill.TransactionsForm;
 import com.ruoyi.web.form.bill.TransactionsQForm;
 import com.ruoyi.web.vo.bill.TransactionsVO;
 import com.ruoyi.web.vo.order.OrderListVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +29,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@Api(tags = "流水记录")
+
 @RequestMapping("/bill/transaction")
 public class TransactionsController extends BaseController {
 
@@ -43,10 +39,9 @@ public class TransactionsController extends BaseController {
     @Autowired
     private ITransactionsFacade transactionsFacade;
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = TransactionsVO.class)
-    })
-    @ApiOperation("分页列表")
+
+
+
     @PostMapping("/page/list")
     public TableDataInfo pageList(@RequestBody @Validated TransactionsQForm transactionsQForm) {
 
@@ -60,10 +55,9 @@ public class TransactionsController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = TransactionsVO.class)
-    })
-    @ApiOperation("导出数据")
+
+
+
     @PostMapping("/page/list/export")
     public void export(@RequestBody @Validated TransactionsQForm transactionsQForm) throws IOException {
         HttpServletResponse response = ServletUtils.getResponse();
@@ -78,10 +72,9 @@ public class TransactionsController extends BaseController {
 
     }
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = TransactionsVO.class)
-    })
-    @ApiOperation("添加资金流水记录")
+
+
+
     @PostMapping("/save")
     public AjaxResult save(@Validated(value = AddGroup.class) @RequestBody TransactionsForm transactionsForm) {
         TransactionsParam param = TransactionsConvert.INSTANCE.toParam(transactionsForm);
@@ -91,10 +84,9 @@ public class TransactionsController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = TransactionsVO.class)
-    })
-    @ApiOperation("删除资金流水记录")
+
+
+
     @DeleteMapping("/del/{id}")
     public AjaxResult del(@PathVariable("id") Long id) {
         transactionsBizService.del(id, getUserId());
@@ -102,10 +94,9 @@ public class TransactionsController extends BaseController {
     }
 
 
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "成功", response = TransactionsVO.class)
-    })
-    @ApiOperation("更新资金流水记录")
+
+
+
     @PostMapping("/update")
     public AjaxResult update(@Validated(value = UpdateGroup.class) @RequestBody TransactionsForm transactionsForm) {
         transactionsBizService.update(transactionsForm, getUserId());

@@ -12,15 +12,22 @@
           :province-id="selectedRegion"
           @change="handleBrandChange"
         />
-        <OrderSearch
-          :value="searchForm"
-          @search="handleSearch"
-          @reset="handleReset"
-        >
+      <SearchSection
+        :status="currentStatus"
+        :product-name-like="searchParams.productNameLike"
+        :company-id="searchParams.companyId"
+        :show-order-code="false"
+        :show-original-order-id="false"
+        :show-product-name-like="true"
+        :show-sku-name-like="false"
+        :show-company="true"
+        @search="handleSearch"
+        @reset="handleReset"
+      >
         <template #toolbar>
           <el-button type="primary" @click="$refs.newOrderDialog.open()">新建订单</el-button>
         </template>
-        </OrderSearch>
+      </SearchSection>
         <!-- 订单表格 -->
         <div class="order-table-container table-section">
           <el-table
@@ -188,7 +195,7 @@
 import EmptyState from './components/EmptyState'
 import ImeiDialog from './components/ImeiDialog'
 import BrandFilter from './components/brandFilter'
-import OrderSearch from './components/OrderSearch'
+import SearchSection from '@/views/demandManage/wholesale/components/searchSection.vue'
 import NewOrderDialog from './components/NewOrderDialog'
 import CopyDialog from './components/CopyDialog'
 import { getPutinList, putinRevokeOrder, getProductBrandList, getProductNameList, getSkuList, saveOrder } from '@/api/putin'
@@ -201,7 +208,7 @@ export default {
     EmptyState,
     ImeiDialog,
     BrandFilter,
-    OrderSearch,
+    SearchSection,
     NewOrderDialog,
     CopyDialog
   },
@@ -213,8 +220,8 @@ export default {
       selectedBrand: '',
       currentStatus: 5, // 当日发货状态
       // 搜索表单
-      searchForm: {
-        productName: '',
+      searchParams: {
+        productNameLike: '',
         companyId: ''
       },
       pagination: {
@@ -252,13 +259,13 @@ export default {
     },
     // 搜索处理
     handleSearch(searchData) {
-      this.searchForm = { ...searchData }
+      this.searchParams = { ...this.searchParams, ...searchData }
       this.pagination.current = 1
       this.fetchOrderList()
     },
     // 重置搜索
     handleReset(searchData) {
-      this.searchForm = { ...searchData }
+      this.searchParams = { ...this.searchParams, ...searchData }
       this.pagination.current = 1
       this.fetchOrderList()
     },
@@ -267,8 +274,8 @@ export default {
       const res = await getPutinList({
         // province: this.selectedRegion,
         brand: this.selectedBrand,
-        companyId: this.searchForm.companyId,
-        productName: this.searchForm.productName,
+        companyId: this.searchParams.companyId,
+        productName: this.searchParams.productNameLike,
         statusList: [this.currentStatus]
       }, {
         pageNum: this.pagination.current,

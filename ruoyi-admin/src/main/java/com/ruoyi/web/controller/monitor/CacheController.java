@@ -1,6 +1,5 @@
 package com.ruoyi.web.controller.monitor;
 
-import com.github.xiaoymin.knife4j.annotations.Ignore;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.StringUtils;

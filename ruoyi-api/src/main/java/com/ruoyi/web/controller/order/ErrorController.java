@@ -4,8 +4,6 @@ import com.ruoyi.biz.order.ErrorOrderBizService;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.web.form.order.LogisticsSubscribeParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@Api(tags = "异常订单接口")
+
 @RestController
 @RequestMapping("order/error")
 public class ErrorController extends BaseController {
@@ -27,7 +25,7 @@ public class ErrorController extends BaseController {
     /**
      * 订阅物流信息并修改订单状态
      */
-    @ApiOperation("订阅物流信息并修改订单状态")
+
     @PostMapping("/change")
     public AjaxResult subscribeLogistics(@RequestBody LogisticsSubscribeParam param) {
         errorOrderBizService.subscribeLogisticsAndUpdateOrderStatus(param);
