@@ -1,6 +1,6 @@
 package com.ruoyi.framework.config;
 
-import com.ruoyi.common.core.redis.FastJson2JsonRedisSerializer;
+import com.ruoyi.common.core.redis.Jackson2JsonRedisSerializer;
 import com.ruoyi.common.core.redis.RedisCache;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -30,7 +30,7 @@ public class RedisConfig extends CachingConfigurerSupport {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        FastJson2JsonRedisSerializer serializer = new FastJson2JsonRedisSerializer(Object.class);
+        Jackson2JsonRedisSerializer serializer = new Jackson2JsonRedisSerializer(Object.class);
 
         // 使用StringRedisSerializer来序列化和反序列化redis的key值
         template.setKeySerializer(new StringRedisSerializer());

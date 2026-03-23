@@ -1,7 +1,8 @@
 package com.ruoyi.common.utils.ip;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.StringUtils;
@@ -35,12 +36,15 @@ public class AddressUtils {
                     log.error("获取地理位置异常 {}", ip);
                     return UNKNOWN;
                 }
-                JSONObject obj = JSON.parseObject(rspStr);
-                String region = obj.getString("pro");
-                String city = obj.getString("city");
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode obj = mapper.readTree(rspStr);
+                String region = obj.get("pro").asText();
+                String city = obj.get("city").asText();
                 return String.format("%s %s", region, city);
+            } catch (JsonProcessingException e) {
+                log.error("解析JSON异常 {}", ip, e);
             } catch (Exception e) {
-                log.error("获取地理位置异常 {}", ip);
+                log.error("获取地理位置异常 {}", ip, e);
             }
         }
         return UNKNOWN;

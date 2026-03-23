@@ -1,13 +1,16 @@
 package com.ruoyi.framework.aspectj;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessStatus;
 import com.ruoyi.common.enums.HttpMethod;
-import com.ruoyi.common.filter.PropertyPreExcludeFilter;
 import com.ruoyi.common.utils.ExceptionUtil;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.ServletUtils;
@@ -16,14 +19,13 @@ import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.system.domain.SysOperLog;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -39,11 +41,10 @@ import java.util.Map;
  *
  * @author ruoyi
  */
+@Slf4j
 @Aspect
 @Component
 public class LogAspect {
-    private static final Logger log = LoggerFactory.getLogger(LogAspect.class);
-
     /**
      * 排除敏感属性字段
      */
@@ -52,7 +53,7 @@ public class LogAspect {
     /**
      * 计算操作消耗时间
      */
-    private static final ThreadLocal<Long> TIME_THREADLOCAL = new NamedThreadLocal<Long>("Cost Time");
+    private static final ThreadLocal<Long> TIME_THREADLOCAL = new NamedThreadLocal<>("Cost Time");
 
     /**
      * 处理请求前执行
@@ -149,7 +150,13 @@ public class LogAspect {
         }
         // 是否需要保存response，参数和值
         if (log.isSaveResponseData() && StringUtils.isNotNull(jsonResult)) {
-            operLog.setJsonResult(StringUtils.substring(JSON.toJSONString(jsonResult), 0, 2000));
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                operLog.setJsonResult(StringUtils.substring(mapper.writeValueAsString(jsonResult), 0, 2000));
+            } catch (JsonProcessingException e) {
+                this.log.error("JSON序列化失败: {}", e.getMessage());
+                operLog.setJsonResult("");
+            }
         }
     }
 
@@ -162,11 +169,20 @@ public class LogAspect {
     private void setRequestValue(JoinPoint joinPoint, SysOperLog operLog, String[] excludeParamNames) throws Exception {
         Map<?, ?> paramsMap = ServletUtils.getParamMap(ServletUtils.getRequest());
         String requestMethod = operLog.getRequestMethod();
+        ObjectMapper mapper = new ObjectMapper();
         if (StringUtils.isEmpty(paramsMap) && StringUtils.equalsAny(requestMethod, HttpMethod.PUT.name(), HttpMethod.POST.name(), HttpMethod.DELETE.name())) {
             String params = argsArrayToString(joinPoint.getArgs(), excludeParamNames);
             operLog.setOperParam(StringUtils.substring(params, 0, 2000));
         } else {
-            operLog.setOperParam(StringUtils.substring(JSON.toJSONString(paramsMap, excludePropertyPreFilter(excludeParamNames)), 0, 2000));
+            try {
+                SimpleBeanPropertyFilter filter = excludePropertyPreFilter(excludeParamNames);
+                FilterProvider filters = new SimpleFilterProvider().addFilter("propertyExcludeFilter", filter);
+                String json = mapper.writer(filters).writeValueAsString(paramsMap);
+                operLog.setOperParam(StringUtils.substring(json, 0, 2000));
+            } catch (JsonProcessingException e) {
+                log.error("JSON序列化失败: {}", e.getMessage());
+                operLog.setOperParam("");
+            }
         }
     }
 
@@ -176,12 +192,15 @@ public class LogAspect {
     private String argsArrayToString(Object[] paramsArray, String[] excludeParamNames) {
         String params = "";
         if (paramsArray != null && paramsArray.length > 0) {
+            ObjectMapper mapper = new ObjectMapper();
             for (Object o : paramsArray) {
                 if (StringUtils.isNotNull(o) && !isFilterObject(o)) {
                     try {
-                        String jsonObj = JSON.toJSONString(o, excludePropertyPreFilter(excludeParamNames));
-                        params += jsonObj.toString() + " ";
-                    } catch (Exception e) {
+                        SimpleBeanPropertyFilter filter = excludePropertyPreFilter(excludeParamNames);
+                        FilterProvider filters = new SimpleFilterProvider().addFilter("propertyExcludeFilter", filter);
+                        String jsonObj = mapper.writer(filters).writeValueAsString(o);
+                        params += jsonObj + " ";
+                    } catch (JsonProcessingException e) {
                     }
                 }
             }
@@ -192,8 +211,8 @@ public class LogAspect {
     /**
      * 忽略敏感属性
      */
-    public PropertyPreExcludeFilter excludePropertyPreFilter(String[] excludeParamNames) {
-        return new PropertyPreExcludeFilter().addExcludes(ArrayUtils.addAll(EXCLUDE_PROPERTIES, excludeParamNames));
+    public SimpleBeanPropertyFilter excludePropertyPreFilter(String[] excludeParamNames) {
+        return SimpleBeanPropertyFilter.serializeAllExcept(ArrayUtils.addAll(EXCLUDE_PROPERTIES, excludeParamNames));
     }
 
     /**

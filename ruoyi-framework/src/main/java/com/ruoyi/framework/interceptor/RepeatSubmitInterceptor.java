@@ -1,9 +1,12 @@
 package com.ruoyi.framework.interceptor;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.ServletUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -19,6 +22,8 @@ import java.lang.reflect.Method;
  */
 @Component
 public abstract class RepeatSubmitInterceptor implements HandlerInterceptor {
+    private static final Logger log = LoggerFactory.getLogger(RepeatSubmitInterceptor.class);
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
@@ -28,7 +33,13 @@ public abstract class RepeatSubmitInterceptor implements HandlerInterceptor {
             if (annotation != null) {
                 if (this.isRepeatSubmit(request, annotation)) {
                     AjaxResult ajaxResult = AjaxResult.error(annotation.message());
-                    ServletUtils.renderString(response, JSON.toJSONString(ajaxResult));
+                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+                        ServletUtils.renderString(response, mapper.writeValueAsString(ajaxResult));
+                    } catch (JsonProcessingException e) {
+                        log.error("JSON序列化失败: {}", e.getMessage());
+                        ServletUtils.renderString(response, "{}");
+                    }
                     return false;
                 }
             }

@@ -1,6 +1,7 @@
 package com.ruoyi.framework.interceptor.impl;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.redis.RedisCache;
@@ -8,6 +9,8 @@ import com.ruoyi.common.filter.RepeatedlyRequestWrapper;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.HttpHelper;
 import com.ruoyi.framework.interceptor.RepeatSubmitInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -25,6 +28,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class SameUrlDataInterceptor extends RepeatSubmitInterceptor {
+    private static final Logger log = LoggerFactory.getLogger(SameUrlDataInterceptor.class);
+
     public final String REPEAT_PARAMS = "repeatParams";
 
     public final String REPEAT_TIME = "repeatTime";
@@ -47,7 +52,13 @@ public class SameUrlDataInterceptor extends RepeatSubmitInterceptor {
 
         // body参数为空，获取Parameter的数据
         if (StringUtils.isEmpty(nowParams)) {
-            nowParams = JSON.toJSONString(request.getParameterMap());
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                nowParams = mapper.writeValueAsString(request.getParameterMap());
+            } catch (JsonProcessingException e) {
+                log.error("JSON序列化失败: {}", e.getMessage());
+                nowParams = "";
+            }
         }
         Map<String, Object> nowDataMap = new HashMap<String, Object>();
         nowDataMap.put(REPEAT_PARAMS, nowParams);

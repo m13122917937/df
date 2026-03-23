@@ -9,7 +9,7 @@ RUN sed -i 's|http://deb.debian.org|https://mirrors.tuna.tsinghua.edu.cn|g' /etc
 RUN apt-get update  && apt-get install -y --no-install-recommends  fontconfig libfreetype6 libfontconfig1  && rm -rf /var/lib/apt/lists/* && fc-cache -fv
 VOLUME /tmp
 ENV PARAMS=""
-ENV JAVA_OPTS "-Xms1024m -Xmx2048m -Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=test "
+ENV JAVA_OPTS "-Xms1024m -Xmx2048m -Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=prod "
 ADD target/*.jar /data/app.jar
 RUN bash -c "touch /data/app.jar"
 WORKDIR /data

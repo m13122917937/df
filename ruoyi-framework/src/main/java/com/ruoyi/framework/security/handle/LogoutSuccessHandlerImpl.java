@@ -1,6 +1,7 @@
 package com.ruoyi.framework.security.handle;
 
-import com.alibaba.fastjson2.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.user.LoginUser;
@@ -9,6 +10,8 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.framework.web.service.TokenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
@@ -26,6 +29,8 @@ import java.io.IOException;
  */
 @Configuration
 public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
+    private static final Logger log = LoggerFactory.getLogger(LogoutSuccessHandlerImpl.class);
+
     @Autowired
     private TokenService tokenService;
 
@@ -45,6 +50,12 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
             // 记录用户退出日志
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(userName, Constants.LOGOUT, "退出成功"));
         }
-        ServletUtils.renderString(response, JSON.toJSONString(AjaxResult.success("退出成功")));
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ServletUtils.renderString(response, mapper.writeValueAsString(AjaxResult.success("退出成功")));
+        } catch (JsonProcessingException e) {
+            log.error("JSON序列化失败: {}", e.getMessage());
+            ServletUtils.renderString(response, "{}");
+        }
     }
 }
