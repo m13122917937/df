@@ -1,5 +1,7 @@
 package com.ruoyi.system.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -18,6 +20,7 @@ public class SysExcelTask implements Serializable {
     /**
      * 任务ID
      */
+    @TableId(type = IdType.AUTO)
     private Long taskId;
 
     /**

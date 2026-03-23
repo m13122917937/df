@@ -45,18 +45,28 @@ public class PermitAllUrlProperties implements InitializingBean, ApplicationCont
             // 获取方法上边的注解 替代path variable 为 *
             Anonymous method = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Anonymous.class);
             Optional.ofNullable(method).ifPresent(anonymous -> {
+                // 兼容 Spring Boot 2.6+ 的两种路径匹配方式
                 if (info.getPatternsCondition() != null) {
                     Objects.requireNonNull(info.getPatternsCondition().getPatterns())
                         .forEach(url -> urls.add(RegExUtils.replaceAll(url, PATTERN, ASTERISK)));
+                }
+                if (info.getPathPatternsCondition() != null) {
+                    Objects.requireNonNull(info.getPathPatternsCondition().getPatterns())
+                        .forEach(url -> urls.add(RegExUtils.replaceAll(url.getPatternString(), PATTERN, ASTERISK)));
                 }
             });
 
             // 获取类上边的注解, 替代path variable 为 *
             Anonymous controller = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Anonymous.class);
             Optional.ofNullable(controller).ifPresent(anonymous -> {
+                // 兼容 Spring Boot 2.6+ 的两种路径匹配方式
                 if (info.getPatternsCondition() != null) {
                     Objects.requireNonNull(info.getPatternsCondition().getPatterns())
                         .forEach(url -> urls.add(RegExUtils.replaceAll(url, PATTERN, ASTERISK)));
+                }
+                if (info.getPathPatternsCondition() != null) {
+                    Objects.requireNonNull(info.getPathPatternsCondition().getPatterns())
+                        .forEach(url -> urls.add(RegExUtils.replaceAll(url.getPatternString(), PATTERN, ASTERISK)));
                 }
             });
         });

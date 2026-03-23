@@ -37,20 +37,14 @@ public class UserController extends BaseController {
     UserBizService userBizService;
 
     @Anonymous
-
     @GetMapping("/loginQrCode")
-
-
     public AjaxResult loginQrCode() throws WxErrorException {
         return AjaxResult.success(userBizService.loginQrCode());
     }
 
 
     @Anonymous
-
     @GetMapping("/loginStatus/{uuid}")
-
-
     public AjaxResult loginStatus(@PathVariable("uuid") String uuid) {
         LoginCompanyVO loginCompanyVO = userBizService.loginStatus(uuid);
         return AjaxResult.success(loginCompanyVO);
@@ -58,10 +52,7 @@ public class UserController extends BaseController {
 
 
     @Anonymous
-
     @GetMapping("/login/{uuid}/{companyId}")
-
-
     public AjaxResult login(@PathVariable("uuid") String uuid, @PathVariable("companyId") Long companyId) {
         String login = userBizService.login(uuid, companyId);
         return AjaxResult.success(AjaxResult.SUCCESS, login);
@@ -69,8 +60,6 @@ public class UserController extends BaseController {
 
 
     @GetMapping("/login/{companyId}")
-
-
     public AjaxResult info(@PathVariable("companyId") Long companyId) {
         LoginUser loginUser = getLoginUser();
         String login = userBizService.login(companyId, loginUser);
@@ -80,8 +69,6 @@ public class UserController extends BaseController {
 
 
     @GetMapping("/login/info")
-
-
     public AjaxResult info() {
         LoginUser loginUser = getLoginUser();
         LoginCompanyVO loginCompanyVO = userBizService.loginInfo(loginUser);
@@ -89,15 +76,12 @@ public class UserController extends BaseController {
     }
 
 
-    @Anonymous
-
-    @GetMapping("/login/test")
-
-
-    public AjaxResult loginTest() {
-        String login = userBizService.loginTest();
-        return AjaxResult.success(login);
-    }
+//    @Anonymous
+//    @GetMapping("/login/test")
+//    public AjaxResult loginTest() {
+//        String login = userBizService.loginTest();
+//        return AjaxResult.success(login);
+//    }
 
 
 
