@@ -1,5 +1,7 @@
 package com.ruoyi.common.core.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.xss.Xss;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -22,6 +24,7 @@ public class SysUser extends BaseEntity {
     /**
      * 用户ID
      */
+    @TableId(type = IdType.AUTO)
     private Long userId;
 
     /**

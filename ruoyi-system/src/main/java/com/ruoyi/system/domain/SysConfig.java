@@ -3,6 +3,7 @@ package com.ruoyi.system.domain;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -19,7 +20,7 @@ public class SysConfig extends BaseEntity {
     /**
      * 参数主键
      */
-    @TableId
+    @TableId(type = IdType.AUTO)
     private Long configId;
 
     /**

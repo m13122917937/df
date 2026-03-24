@@ -1,5 +1,7 @@
 package com.ruoyi.system.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -19,6 +21,7 @@ public class SysPost extends BaseEntity {
     /**
      * 岗位序号
      */
+    @TableId(type = IdType.AUTO)
     private Long postId;
 
     /**

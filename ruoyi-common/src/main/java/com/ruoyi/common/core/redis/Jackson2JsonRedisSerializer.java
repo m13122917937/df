@@ -1,9 +1,11 @@
 package com.ruoyi.common.core.redis;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 
@@ -12,7 +14,7 @@ import java.nio.charset.Charset;
 
 /**
  * Redis使用Jackson2序列化
- * 简单直接的实现，依赖Jackson自动类型推断
+ * 解决泛型集合反序列化类型转换问题
  *
  * @author ruoyi
  */
@@ -25,11 +27,15 @@ public class Jackson2JsonRedisSerializer<T> implements RedisSerializer<T> {
     public Jackson2JsonRedisSerializer(Class<T> clazz) {
         this.clazz = clazz;
         this.objectMapper = new ObjectMapper();
+        // 启用类型信息存储在 @type 属性中，这样反序列化时能正确获取类型
+        this.objectMapper.activateDefaultTyping(
+            LaissezFaireSubTypeValidator.instance,
+            ObjectMapper.DefaultTyping.NON_FINAL,
+            JsonTypeInfo.As.PROPERTY
+        );
         // 基础配置
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        // 允许JSON中出现Long类型带L后缀（兼容旧fastjson格式）
-        objectMapper.configure(DeserializationFeature.ALLOW_COERCION_OF_SCALARS, true);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.ruoyi.quartz.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import java.util.Date;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -23,6 +25,7 @@ public class SysJob extends BaseEntity {
     /**
      * 任务ID
      */
+    @TableId(type = IdType.AUTO)
     private Long jobId;
 
     /**
