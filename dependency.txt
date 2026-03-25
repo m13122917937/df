@@ -1,0 +1,2 @@
+com.ruoyi:ruoyi:pom:3.9.0
+\- org.projectlombok:lombok:jar:1.18.22:compile
