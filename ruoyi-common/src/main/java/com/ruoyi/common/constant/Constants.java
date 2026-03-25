@@ -91,10 +91,6 @@ public class Constants
      */
     public static final String PERMISSION_DELIMETER = ",";
 
-    /**
-     * 验证码有效期（分钟）
-     */
-    public static final Integer CAPTCHA_EXPIRATION = 2;
 
     /**
      * 令牌
@@ -112,11 +108,6 @@ public class Constants
     public static final String LOGIN_USER_KEY = "login_user_key";
 
     /**
-     * 用户ID
-     */
-    public static final String JWT_USERID = "userid";
-
-    /**
      * 用户名称
      */
     public static final String JWT_USERNAME = Claims.SUBJECT;
@@ -130,11 +121,6 @@ public class Constants
      * 创建时间
      */
     public static final String JWT_CREATED = "created";
-
-    /**
-     * 用户权限
-     */
-    public static final String JWT_AUTHORITIES = "authorities";
 
     /**
      * 资源映射路径 前缀
@@ -156,10 +142,6 @@ public class Constants
      */
     public static final String LOOKUP_LDAPS = "ldaps:";
 
-    /**
-     * 自动识别json对象白名单配置（仅允许解析的包名，范围越小越安全）
-     */
-    public static final String[] JSON_WHITELIST_STR = { "com.ruoyi" };
 
     /**
      * 定时任务白名单配置（仅允许访问的包名，如其他需要可以自行添加）
