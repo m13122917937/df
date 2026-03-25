@@ -23,18 +23,20 @@ server:
   tomcat:
     # tomcat的URI编码
     uri-encoding: UTF-8
-    # 连接数满后的排队数，默认为100
-    accept-count: 300
+    # 连接数满后的排队数，默认为100 - 合理缩减队列大小
+    accept-count: 100
     threads:
-      # tomcat最大线程数，默认为200
-      max: 300
-      # Tomcat启动初始化的线程数，默认值10
-      min-spare: 50
+      # tomcat最大线程数 - 从300改为200，足够应对一般负载
+      max: 200
+      # Tomcat启动初始化的线程数 - 从50改为10，减少启动时预创建线程开销
+      min-spare: 10
 
 # Spring配置
 spring:
   mian:
     allow-circular-references: true
+  # 开启全局懒加载 - 大幅减少启动时初始化Bean数量，加快启动速度
+  lazy-initialization: true
   jackson:
     time-zone: GMT+8
     default-property-inclusion: non_null

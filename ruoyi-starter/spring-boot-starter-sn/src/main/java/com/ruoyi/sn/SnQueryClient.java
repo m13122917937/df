@@ -73,7 +73,7 @@ public class SnQueryClient {
         HuaweiResult huawei = query("huawei", snOrImei, HuaweiResult.class);
         huawei.setExits(ObjectUtil.defaultIfNull(huawei.getExits(), true));
         if (huawei.getExits()) {
-            huawei.setModel(huawei.getDescription());
+            huawei.setModel(huawei.getModel() + " " + huawei.getColor() + " " + huawei.getStorage());
         }
         return huawei;
     }
@@ -83,7 +83,7 @@ public class SnQueryClient {
         OppoResult oppo = query("oppo", snOrImei, OppoResult.class);
         oppo.setExits(ObjectUtil.defaultIfNull(oppo.getExits(), true));
         if (oppo.getExits()) {
-            oppo.setModel(oppo.getDescription());
+            oppo.setModel(oppo.getModel() + " " + oppo.getColor() + " " + oppo.getStorage());
         }
         return oppo;
     }
@@ -92,7 +92,7 @@ public class SnQueryClient {
         VivoResult vivo = query("vivo", snOrImei, VivoResult.class);
         vivo.setExits(ObjectUtil.defaultIfNull(vivo.getExits(), true));
         if (vivo.getExits()) {
-            vivo.setModel(vivo.getDescription());
+            vivo.setModel(vivo.getModel() + " " + vivo.getColor() + " " + vivo.getStorage());
         }
         return vivo;
     }
@@ -101,7 +101,7 @@ public class SnQueryClient {
         HonorResult honor = query("honor", snOrImei, HonorResult.class);
         honor.setExits(ObjectUtil.defaultIfNull(honor.getExits(), true));
         if (honor.getExits()) {
-            honor.setModel(honor.getDescription());
+            honor.setModel(honor.getModel() + " " + honor.getColor() + " " + honor.getStorage());
         }
         return honor;
     }

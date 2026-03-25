@@ -17,6 +17,7 @@ public class OppoResult extends WarrantyResult {
     private String covered;
     private Integer daysleft;
     private String color;
+    private String storage;
     private String productDate;
     private Right[] right;
 

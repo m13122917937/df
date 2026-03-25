@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.Properties;
 
@@ -29,6 +30,7 @@ public class RocketMQConfig {
 
 
     @Bean
+    @Lazy
     public Producer producer() {
         Properties properties = new Properties();
         // 实例用户名和密码在消息队列RocketMQ版控制台访问控制的智能身份识别页签中获取。
@@ -48,6 +50,7 @@ public class RocketMQConfig {
 
 
     @Bean
+    @Lazy
     public Consumer consumer() {
         Properties properties = new Properties();
         // 实例用户名和密码在消息队列RocketMQ版控制台访问控制的智能身份识别页签中获取。

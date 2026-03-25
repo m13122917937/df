@@ -12,6 +12,8 @@ public class HuaweiResult extends WarrantyResult {
     private String productCategoryCode;
     private TypeDetail type;
     private boolean hasCare;
+    private String color;
+    private String storage;
     private PurchaseDetail purchase;
     private String warrStatus;
     private String covered;

@@ -50,6 +50,7 @@ adm/
    - Controller 层 → 只能调用 Biz 层
    - Biz 层 → 只能调用 Service 层
    - Service 层 → 只能调用 Mapper 层
+   - Job层→ 只能调用 Service 层
    - **严禁跨层调用**
 
 2. **职责分工**：

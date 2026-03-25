@@ -6,12 +6,12 @@ spring:
         url: jdbc:mysql://rm-wz9750v58imj89ts0lo.mysql.rds.aliyuncs.com:3306/df?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
         username: op_user
         password: Fy123Fy321!!!
-        # 初始连接数
-        initialSize: 5
-        # 最小连接池数量
-        minIdle: 10
-        # 最大连接池数量
-        maxActive: 20
+        # 初始连接数 - 减少启动时预创建连接数量
+        initialSize: 1
+        # 最小连接池数量 - 减少空闲连接维护
+        minIdle: 2
+        # 最大连接池数量 - 开发环境足够使用
+        maxActive: 10
         # 配置获取连接等待超时的时间
         maxWait: 60000
         # 配置连接超时时间
@@ -26,7 +26,7 @@ spring:
         maxEvictableIdleTimeMillis: 900000
         # 配置检测连接是否有效
         validationQuery: SELECT 1 FROM DUAL
-        testWhileIdle: false
+        testWhileIdle: true
         testOnBorrow: false
         testOnReturn: false
         webStatFilter:

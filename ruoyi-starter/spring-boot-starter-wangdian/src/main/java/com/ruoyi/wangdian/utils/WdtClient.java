@@ -10,10 +10,12 @@ import com.ruoyi.wangdian.param.base.ProductParams;
 import com.ruoyi.wangdian.param.base.ProviderParams;
 import com.ruoyi.wangdian.param.base.product.GoodsInfo;
 import com.ruoyi.wangdian.param.base.product.SpecInfo;
+import com.ruoyi.wangdian.param.goods.GoodsQueryParams;
 import com.ruoyi.wangdian.param.order.TradeQueryParams;
 import com.ruoyi.wangdian.param.stock.StockInInfoParam;
 import com.ruoyi.wangdian.properties.WdProperties;
 import com.ruoyi.wangdian.rep.WDRep;
+import com.ruoyi.wangdian.rep.goods.GoodsQueryWithSpecRep;
 import com.ruoyi.wangdian.rep.stock.StockInRep;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,61 +29,11 @@ public class WdtClient {
 
     private WdProperties wdProperties;
 
-
-//    /**
-//     * 采购单新建
-//     *
-//     * @param param
-//     * @return
-//     * @throws IOException
-//     */
-//    public PurchaseOrderCreateRep.CreateRep purchaseOrderCreate(PurchaseOrderParam param) throws IOException {
-//        String response = execute("purchase.PurchaseOrder.createOrder", param);
-//        log.info("创建采购单，返回结果：{}", response);
-//        PurchaseOrderCreateRep purchaseOrderCreateRep = JacksonUtil.parse(response, PurchaseOrderCreateRep.class);
-//        if (Objects.isNull(purchaseOrderCreateRep) || !purchaseOrderCreateRep.isSuccess()) {
-//            throw new ServiceException(purchaseOrderCreateRep.getMessage());
-//        }
-//        return purchaseOrderCreateRep.getData();
-//
-//    }
-//
-//
-//    /**
-//     * 采购入库单
-//     *
-//     * @param param
-//     * @return
-//     * @throws IOException
-//     */
-//    public PurchaseInRep.InRep purchaseOrderIn(PurchaseOrderInParam param) throws IOException {
-//        String response = execute("wms.stockin.Purchase.upload", param);
-//        log.info("创建采购入库单，返回结果：{}", response);
-//        PurchaseInRep purchaseInRep = JacksonUtil.parse(response, PurchaseInRep.class);
-//        if (Objects.isNull(purchaseInRep) || !purchaseInRep.isSuccess()) {
-//            throw new ServiceException(purchaseInRep.getMessage());
-//        }
-//        return purchaseInRep.getData();
-//
-//    }
-
-
     public void orderList(TradeQueryParams params, Pager pager){
         Map<String, Object> pagerMap = JacksonUtil.beanToMap(pager);
         String response = execute("sales.TradeQuery.queryWithDetail",  params, pagerMap);
         System.out.println( response );
     }
-
-
-//    public void goodsList(GoodsInfo goodsInfo,SpecInfo specInfoList) throws IOException {
-//        String response = execute("goods.Goods.queryWithSpec", goodsInfo,List.of(specInfoList), null);
-//        log.info("创建商品，返回结果：{}", response);
-//        WDRep wdRep = JacksonUtil.parse(response, WDRep.class);
-//        if (Objects.isNull(wdRep) || !wdRep.isSuccess()) {
-//            throw new ServiceException(wdRep.getMessage());
-//        }
-//
-//    }
 
     public void goods(GoodsInfo goodsInfo,SpecInfo specInfoList) throws IOException {
         String response = execute("goods.Goods.push", goodsInfo,List.of(specInfoList), null);
@@ -227,11 +179,31 @@ public class WdtClient {
             url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0", wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp);
         }else {
             url = String.format("http://wdt.wangdian.cn/openapi?key=%s&method=%s&salt=%s&sid=%s&sign=%s&timestamp=%d&v=1.0&page_size=%d&page_no=%d&calc_total=%d",
-                    wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp, pager.get("page_size"), pager.get("page_no"), pager.get("calc_total"));
-        }        String json = JacksonUtil.toJson(bodyParams);
+                    wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp, (Integer) pager.get("page_size"), (Integer) pager.get("page_no"), (Integer) pager.get("calc_total"));
+        }
+        String json = JacksonUtil.toJson(bodyParams);
         log.info("旺店通请求地址：{},请求参数：{}", url, json);
         String body = HttpRequest.post(url).body(json).timeout(wdProperties.getConnectTimeout()).execute().body();
         return body;
+    }
+
+    /**
+     * 查询商品列表（带规格信息）
+     *
+     * @param params 查询条件
+     * @param pager  分页参数
+     * @return 查询结果（包含商品列表和规格信息）
+     * @throws IOException 网络请求异常
+     */
+    public GoodsQueryWithSpecRep queryGoodsWithSpec(GoodsQueryParams params, Pager pager) throws IOException {
+        Map<String, Object> pagerMap = JacksonUtil.beanToMap(pager);
+        String response = execute("goods.Goods.queryWithSpec", params, pagerMap);
+        log.info("旺店通查询商品，返回结果：{}", response);
+        GoodsQueryWithSpecRep result = JacksonUtil.parse(response, GoodsQueryWithSpecRep.class);
+        if (Objects.isNull(result) || !result.isSuccess()) {
+            throw new ServiceException(result != null ? result.getMessage() : "查询商品失败");
+        }
+        return result;
     }
 
 }

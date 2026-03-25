@@ -17,6 +17,7 @@ public class VivoResult extends WarrantyResult {
     private String warrStatus;
     private String covered;
     private String color;
+    private String storage;
     private Integer daysleft;
     private String productDate;
     private Right[] right;

@@ -4,60 +4,43 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import com.ruoyi.biz.address.SmartParse;
-import com.ruoyi.biz.address.domain.AddressInfo;
 import com.ruoyi.biz.order.OrderAddressBizService;
 import com.ruoyi.biz.pdd.PddBizService;
 import com.ruoyi.capital.facade.ICompanyCapitalFacade;
-import com.ruoyi.capital.model.consts.CompanyCapitalConsts;
-import com.ruoyi.capital.model.param.CompanyCapitalLogParam;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
-import com.ruoyi.express.manager.RouteSubscribeManager;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
-import com.ruoyi.generator.domain.GenTable;
-import com.ruoyi.generator.service.IGenTableService;
 import com.ruoyi.job.*;
 import com.ruoyi.product.facade.IProductSkuFacade;
-import com.ruoyi.product.model.bo.ProductSkuBO;
-import com.ruoyi.product.model.query.ProductSkuQuery;
 import com.ruoyi.wangdian.param.Pager;
 import com.ruoyi.wangdian.param.base.ProviderParams;
 import com.ruoyi.wangdian.param.order.TradeQueryParams;
 import com.ruoyi.wangdian.param.purchase.create.PurchaseDetailParam;
 import com.ruoyi.wangdian.param.purchase.create.PurchaseOrderParam;
-import com.ruoyi.wangdian.param.purchase.in.PurchaseOrderInParam;
-import com.ruoyi.wangdian.param.purchase.in.StockinOrderHeader;
 import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.order.AddressCompletedParams;
 import com.ruoyi.web.form.order.OrderAddForm;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static cn.hutool.core.date.DatePattern.NORM_DATETIME_PATTERN;
 import static com.ruoyi.consts.DictEnum.WEB_HOOK_FOLLOW_ORDER;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration
 @SpringBootTest(classes = AdminApplication.class)
@@ -68,9 +51,6 @@ public class ApplicationIntegrationTest {
 
     @Autowired
     IRouteSubscribeFacade routeSubscribeFacade;
-
-    @Autowired
-    private IGenTableService genTableService;
 
     @Autowired
     DeliveryOrderJob deliveryOrderJob;
@@ -99,27 +79,34 @@ public class ApplicationIntegrationTest {
     @Autowired
     SmartParse smartParse;
 
+    @Autowired
+    SyncGoodsJob syncGoodsJob;
+
+    @Test
+    public void x1111xxxxx() throws IOException {
+        syncGoodsJob.execute();
+
+    }
 
     @Test
     public void x1111xx() {
 
         for (int i = 0; i < 1000; i++) {
             TradeQueryParams tradeQueryParams = new TradeQueryParams();
-            DateTime endTime = DateUtil.offsetHour(DateUtil.date(), -i);;
+            DateTime endTime = DateUtil.offsetHour(DateUtil.date(), -i);
+            ;
             DateTime startTime = DateUtil.offsetHour(endTime, -1);
             tradeQueryParams.setStatus("110");
-            tradeQueryParams.setStartTime( DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
-            tradeQueryParams.setEndTime(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN) );
+            tradeQueryParams.setStartTime(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
+            tradeQueryParams.setEndTime(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
             Pager pager = new Pager();
             pager.setPageNo(0);
             pager.setPageSize(200);
             pager.setCalcTotal(0);
 
-            wdtClient.orderList(tradeQueryParams , pager);
+            wdtClient.orderList(tradeQueryParams, pager);
 
         }
-
-
 
 
     }
@@ -222,18 +209,6 @@ public class ApplicationIntegrationTest {
         orderAddressBizService.parse(addressCompletedParams);
     }
 
-    @Test
-    public void testHealthEndpoint() throws IOException {
-
-        String[] tableNames = {"f_deduction"};
-        genTableService.truncateTable();
-
-        List<GenTable> tableList = genTableService.selectDbTableListByNames(tableNames);
-        genTableService.importGenTable(tableList, "2121");
-        byte[] data = genTableService.downloadCode(tableNames);
-        IOUtils.write(data, new FileOutputStream("C:\\Users\\lenovo\\Desktop\\z.zip"));
-        ZipUtil.unzip(new File("C:\\Users\\lenovo\\Desktop\\z.zip"), new File("C:\\Users\\lenovo\\Desktop\\z"));
-    }
 
     @Test
     public void testApiEndpoint() {

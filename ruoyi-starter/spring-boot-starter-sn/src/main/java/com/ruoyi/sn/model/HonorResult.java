@@ -18,6 +18,8 @@ public class HonorResult extends WarrantyResult {
     private String covered;
     private Integer daysleft;
     private String productDate;
+    private String color;
+    private String storage;
     private Right[] right;
 
     {

@@ -26,7 +26,10 @@
       "Bash(do)",
       "Bash(if ! grep -q \"extends BaseMapper\" \"$file\")",
       "Bash(then)",
-      "Bash(echo \"$file does NOT extend BaseMapper\")"
+      "Bash(echo \"$file does NOT extend BaseMapper\")",
+      "Bash(xargs ls:*)",
+      "Bash(find \"D:/work/jie/adm\" -name \"pom.xml\" -exec grep -l \"mybatis-plus-boot-starter\" {})",
+      "WebFetch(domain:open.wangdian.cn)"
     ]
   }
 }

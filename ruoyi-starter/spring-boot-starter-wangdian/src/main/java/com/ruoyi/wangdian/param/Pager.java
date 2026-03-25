@@ -1,13 +1,17 @@
 package com.ruoyi.wangdian.param;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.*;
+
 import java.io.Serializable;
 
 /**
  * 分页参数 (pager 对象)
  */
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Pager implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,4 +35,6 @@ public class Pager implements Serializable {
      */
     @JsonProperty("calc_total")
     private Integer calcTotal;
+
+
 }
