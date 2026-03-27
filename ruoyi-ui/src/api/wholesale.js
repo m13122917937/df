@@ -426,6 +426,7 @@ export function getAllOrderListApi(pageData,data) {
       url: `/system/excel/generate`,
       method: "post",
       data,
+      timeout: 30000, // 给异步导出单独设置30秒超时，确保接口有足够时间立即返回
     });
   }
 

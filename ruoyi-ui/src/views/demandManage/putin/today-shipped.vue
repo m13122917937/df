@@ -21,6 +21,7 @@
         :show-product-name-like="true"
         :show-sku-name-like="false"
         :show-company="true"
+        :product-name-like-row2="true"
         @search="handleSearch"
         @reset="handleReset"
       >

@@ -2,13 +2,31 @@ import { Message } from 'element-ui'
 
 /**
  * 格式化日期时间
- * @param {string} dateTime - 日期时间字符串
+ * @param {string|number|Date} dateTime - 日期时间字符串、时间戳或Date对象
  * @returns {string} 格式化后的日期时间
  */
 export function formatDateTime(dateTime) {
   if (!dateTime) return '-'
   try {
-    const date = new Date(dateTime)
+    let date
+    if (typeof dateTime === 'number') {
+      // 时间戳
+      date = new Date(dateTime)
+    } else if (dateTime instanceof Date) {
+      // Date 对象
+      date = dateTime
+    } else {
+      // 字符串处理，兼容 yyyy-MM-dd HH:mm:ss 格式
+      if (dateTime.includes(' ')) {
+        date = new Date(dateTime.replace(' ', 'T'))
+      } else {
+        date = new Date(dateTime)
+      }
+    }
+    // 检查日期是否有效
+    if (isNaN(date.getTime())) {
+      return String(dateTime)
+    }
     return date.toLocaleString('zh-CN', {
       year: 'numeric',
       month: '2-digit',
@@ -18,7 +36,8 @@ export function formatDateTime(dateTime) {
       second: '2-digit'
     })
   } catch (error) {
-    return dateTime
+    console.warn('formatDateTime error:', dateTime, error)
+    return String(dateTime)
   }
 }
 
@@ -120,8 +139,8 @@ export function formatAccountingPeriod(val) {
  * @returns {Function} formatDateTime 方法
  */
 export function createFormatDateTimeMethod() {
-  return function(dateTime) {
-    return formatDateTime(dateTime)
+  return function(row, column, cellValue) {
+    return formatDateTime(cellValue)
   }
 }
 

@@ -448,8 +448,7 @@ export default {
       // Excel导出相关
       excelDialogVisible: false,
       excelTaskList: [],
-      loadingTasks: false,
-      pollTimer: null
+      loadingTasks: false
     }
   },
   created() {
@@ -832,12 +831,6 @@ export default {
         const res = await getRecentExcelTasksApi()
         if (res && res.code === 200) {
           this.excelTaskList = res.data || []
-          // 对所有生成中的任务启动轮询
-          this.excelTaskList.forEach(task => {
-            if (task.status === 0) {
-              this.startPolling(task.fileId)
-            }
-          })
         }
       } catch (error) {
         console.error('加载导出任务列表失败', error)
@@ -852,56 +845,46 @@ export default {
       try {
         const params = this.buildQueryParams()
         const res = await generateOrderExcelApi(params)
-        if (res && res.code === 200) {
-          const { fileId, fileName } = res.data
+        console.log('generateExcel response:', res)
+        // 同时支持 code 是数字 200 或字符串 "200"
+        if (res && (res.code === 200 || res.code === '200')) {
+          const { fileId, fileName } = res
           // 打开对话框，加载任务列表
           this.excelDialogVisible = true
-          // 重新加载最近任务列表（包含新创建的任务）
-          await this.loadRecentExcelTasks()
-          // 启动轮询检查状态
-          this.startPolling(fileId)
-          this.$message.info('Excel正在后台生成，请稍候...生成完成后点击下载')
+          // 重新加载最近任务列表（包含新创建的任务）- 即使加载失败也要继续，不影响生成结果
+          try {
+            await this.loadRecentExcelTasks()
+          } catch (e) {
+            console.warn('加载任务列表失败，不影响生成', e)
+          }
+          this.$message.info('Excel正在后台生成，请点击刷新按钮查看状态')
         } else {
+          console.warn('generateExcel failed response:', res)
           this.$message.error(res?.msg || '生成Excel失败')
         }
       } catch (error) {
         console.error('生成Excel失败', error)
-        this.$message.error('生成Excel失败，请稍后重试')
+        // 如果response已经返回了数据，说明实际成功了，只是判断有问题
+        if (error.response && error.response.data) {
+          const data = error.response.data
+          if (data.code === 200 || data.code === '200') {
+            this.excelDialogVisible = true
+            // 加载失败也要继续，不影响生成结果
+            try {
+              await this.loadRecentExcelTasks()
+            } catch (e) {
+              console.warn('加载任务列表失败，不影响生成', e)
+            }
+            this.$message.info('Excel正在后台生成，请点击刷新按钮查看状态')
+          } else {
+            this.$message.error(data.msg || '生成Excel失败，请稍后重试')
+          }
+        } else {
+          this.$message.error('生成Excel失败，请稍后重试')
+        }
       } finally {
         this.generating = false
       }
-    },
-    // 开始轮询任务状态
-    startPolling(fileId) {
-      // 清除已有定时器
-      if (this.pollTimer) {
-        clearInterval(this.pollTimer)
-        this.pollTimer = null
-      }
-      // 每2秒查询一次状态
-      this.pollTimer = setInterval(async () => {
-        try {
-          const res = await getExcelTaskStatusApi(fileId)
-          if (res && res.code === 200) {
-            const task = res.data
-            // 更新列表中的状态
-            const index = this.excelTaskList.findIndex(t => t.fileId === task.fileId)
-            if (index >= 0) {
-              this.$set(this.excelTaskList, index, task)
-            }
-            // 如果生成完成或失败，停止轮询
-            if (task.status === 1 || task.status === 2) {
-              clearInterval(this.pollTimer)
-              this.pollTimer = null
-              if (task.status === 1) {
-                this.$message.success('Excel生成完成，请点击下载')
-              }
-            }
-          }
-        } catch (error) {
-          console.error('轮询任务状态失败', error)
-        }
-      }, 2000)
     },
     // 点击下载Excel任务
     handleDownloadExcelTask(task) {

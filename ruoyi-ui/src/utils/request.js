@@ -135,7 +135,7 @@ service.interceptors.response.use(
     } else if (code === 601) {
       Message({ message: msg, type: "warning" });
       return Promise.reject("error");
-    } else if (code !== 200) {
+    } else if (code != 200) {
       Notification.error({ title: msg });
       return Promise.reject("error");
     } else {

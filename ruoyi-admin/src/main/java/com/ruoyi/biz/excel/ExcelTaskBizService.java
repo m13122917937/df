@@ -45,7 +45,7 @@ public class ExcelTaskBizService {
      * @param userId 当前用户ID
      * @return 任务信息
      */
-    public SysExcelTask createTask(AllOrderForm query, Long userId) {
+    public SysExcelTask createTask( Long userId) {
         // 生成文件ID和文件名
         String fileId = UUID.randomUUID().toString().replace("-", "");
         String timestamp = DateUtil.format(new Date(), "yyyyMMdd_HHmmss");
@@ -80,12 +80,11 @@ public class ExcelTaskBizService {
     }
 
     /**
-     * 异步生成Excel并上传到OSS（异步）
+     * 异步生成Excel并上传到OSS（异步，由AsyncManager调度执行）
      *
      * @param task  任务信息
      * @param query 查询条件
      */
-    @Async
     public void generateAllOrderExcelAsync(SysExcelTask task, AllOrderForm query) {
         String localPath = task.getLocalPath();
         try {
@@ -107,16 +106,16 @@ public class ExcelTaskBizService {
                 log.warn("删除本地临时Excel文件失败: {}", localPath);
             }
 
-            // 更新任务状态为成功
+            // 更新任务状态为成功 - 使用fileId更新避免主键为空问题
             task.setStatus(1);
-            sysExcelTaskService.updateById(task);
+            sysExcelTaskService.updateByFileId(task);
             log.info("Excel生成完成，fileId: {}, ossUrl: {}", task.getFileId(), task.getOssUrl());
         } catch (Exception e) {
             log.error("生成Excel失败，fileId: {}", task.getFileId(), e);
-            // 更新任务状态为失败
+            // 更新任务状态为失败 - 使用fileId更新避免主键为空问题
             task.setStatus(2);
             task.setErrorMsg(e.getMessage());
-            sysExcelTaskService.updateById(task);
+            sysExcelTaskService.updateByFileId(task);
         }
     }
 

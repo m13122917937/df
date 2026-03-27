@@ -36,4 +36,12 @@ public interface SysExcelTaskMapper extends BaseMapper<SysExcelTask> {
      * @return 结果
      */
     public int deleteExpiredTasks();
+
+    /**
+     * 根据fileId更新任务
+     *
+     * @param entity 任务实体
+     * @return 结果
+     */
+    public int updateByFileId(SysExcelTask entity);
 }

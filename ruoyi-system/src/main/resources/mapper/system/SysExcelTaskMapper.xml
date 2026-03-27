@@ -52,4 +52,17 @@
     <delete id="deleteExpiredTasks">
         DELETE FROM sys_excel_task WHERE expire_time &lt;= NOW()
     </delete>
+
+    <!-- 根据fileId更新任务 -->
+    <update id="updateByFileId" parameterType="SysExcelTask">
+        UPDATE sys_excel_task
+        <set>
+            <if test="ossUrl != null">oss_url = #{ossUrl},</if>
+            <if test="fileSize != null">file_size = #{fileSize},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="errorMsg != null">error_msg = #{errorMsg},</if>
+            <if test="downloaded != null">downloaded = #{downloaded},</if>
+        </set>
+        WHERE file_id = #{fileId}
+    </update>
 </mapper>

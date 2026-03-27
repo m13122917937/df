@@ -213,7 +213,9 @@ public interface OrderConsts {
 
         PROVIDER_INTERCEPT(4,"供应商私自拦截"),
 
-        OTHER_CHANNEL_SHIPPING(5,"已经从其他渠道发货");
+        OTHER_CHANNEL_SHIPPING(5,"已经从其他渠道发货"),
+
+        OTHER_CHANNEL_USER(6,"手动追单");
 
         private Integer code;
 

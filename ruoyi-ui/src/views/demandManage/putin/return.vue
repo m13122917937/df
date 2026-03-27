@@ -12,15 +12,21 @@
           :province-id="selectedRegion"
           @change="handleBrandChange"
         />
-        <OrderSearch
-          :value="searchForm"
+        <SearchSection
+          :status="currentStatus"
+          :product-name-like="searchParams.productNameLike"
+          :company-id="searchParams.companyId"
+          :show-order-code="false"
+          :show-original-order-id="false"
+          :show-product-name-like="true"
+          :show-sku-name-like="false"
+          :show-company="true"
+          :product-name-like-row2="true"
           @search="handleSearch"
           @reset="handleReset"
-        >
-        
-        </OrderSearch>
+        />
         <!-- 订单表格 -->
-        <div class="order-table-containe table-section">
+        <div class="order-table-container table-section">
           <el-table
             ref="table"
             v-loading="loading"
@@ -191,7 +197,7 @@
 import EmptyState from './components/EmptyState'
 import ImeiDialog from './components/ImeiDialog'
 import BrandFilter from './components/brandFilter'
-import OrderSearch from './components/OrderSearch'
+import SearchSection from '@/views/demandManage/wholesale/components/searchSection.vue'
 import CopyDialog from './components/CopyDialog'
 import { getPutinList, putinRevokeOrder } from '@/api/putin'
 import { getDeliveryTimeText } from '@/utils/deliveryTime'
@@ -202,7 +208,7 @@ export default {
     EmptyState,
     ImeiDialog,
     BrandFilter,
-    OrderSearch,
+    SearchSection,
     CopyDialog,
   },
   data() {
@@ -213,8 +219,8 @@ export default {
       selectedBrand: '',
       currentStatus: 11, // 撤销订单
       // 搜索表单
-      searchForm: {
-        productName: '',
+      searchParams: {
+        productNameLike: '',
         companyId: ''
       },
       pagination: {
@@ -252,13 +258,13 @@ export default {
     },
     // 搜索处理
     handleSearch(searchData) {
-      this.searchForm = { ...searchData }
+      this.searchParams = { ...this.searchParams, ...searchData }
       this.pagination.current = 1
       this.fetchOrderList()
     },
     // 重置搜索
     handleReset(searchData) {
-      this.searchForm = { ...searchData }
+      this.searchParams = { ...this.searchParams, ...searchData }
       this.pagination.current = 1
       this.fetchOrderList()
     },
@@ -267,8 +273,8 @@ export default {
       const res = await getPutinList({
         // province: this.selectedRegion,
         brand: this.selectedBrand,
-        companyId: this.searchForm.companyId,
-        productName: this.searchForm.productName,
+        companyId: this.searchParams.companyId,
+        productName: this.searchParams.productNameLike,
         statusList: [this.currentStatus]
       }, {
         pageNum: this.pagination.current,
@@ -588,6 +594,14 @@ export default {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+  }
+
+  .pagination-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px;
+    background: #fff;
+    border-radius: 0 0 8px 8px;
   }
 
   // 响应式布局

@@ -32,7 +32,8 @@
             </div>
           </div>
 
-          <div v-if="showProductNameLike" class="search-item">
+          <!-- 商品名称不在第二行时，显示在第一行 -->
+          <div v-if="showProductNameLike && !productNameLikeRow2" class="search-item">
             <label class="search-label">商品名称</label>
             <div class="search-input-wrapper">
               <el-input
@@ -113,6 +114,21 @@
                 value-format="yyyy-MM-dd HH:mm:ss"
                 :picker-options="datePickerOptions"
                 class="search-input"
+              />
+            </div>
+          </div>
+
+          <!-- 商品名称在第二行时，显示在供应商前面 -->
+          <div v-if="showProductNameLike && productNameLikeRow2" class="search-item">
+            <label class="search-label">商品名称</label>
+            <div class="search-input-wrapper">
+              <el-input
+                v-model="productNameLikeValue"
+                placeholder="请输入商品名称"
+                @keyup.enter.native="handleSearch"
+                clearable
+                class="search-input"
+                prefix-icon="el-icon-search"
               />
             </div>
           </div>
@@ -257,6 +273,11 @@ export default {
     companyId: {
       type: [String, Number],
       default: undefined,
+    },
+    // 商品名称是否显示在第二行（与供应商同行）
+    productNameLikeRow2: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

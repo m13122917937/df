@@ -104,7 +104,8 @@ export default {
         { value: 2, label: '派送未联系到顾客，退回' },
         { value: 3, label: '24小时物流无揽收信息' },
         { value: 4, label: '供应商私自拦截' },
-        { value: 5, label: '已经从其他渠道发货' }
+        { value: 5, label: '已经从其他渠道发货' },
+        { value: 6, label: '手动追单' },
       ]
     }
   },

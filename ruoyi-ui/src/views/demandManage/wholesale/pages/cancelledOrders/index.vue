@@ -431,6 +431,7 @@ export default {
         3: "24小时物流无揽收信息",
         4: "供应商私自拦截",
         5: "已经从其他渠道发货",
+        6: "手动追单",
       };
       return revokeReasonMap[revokeType] || "-";
     },

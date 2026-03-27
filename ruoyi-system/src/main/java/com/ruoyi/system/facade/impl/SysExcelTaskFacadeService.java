@@ -66,4 +66,9 @@ public class SysExcelTaskFacadeService implements ISysExcelTaskFacade {
     public boolean updateById(SysExcelTask entity) {
         return sysExcelTaskManager.updateById(entity);
     }
+
+    @Override
+    public boolean updateByFileId(SysExcelTask entity) {
+        return sysExcelTaskManager.getBaseMapper().updateByFileId(entity) > 0;
+    }
 }

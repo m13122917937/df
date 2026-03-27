@@ -3,9 +3,11 @@ package com.ruoyi.web.controller.system;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.TimerTask;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.biz.excel.ExcelTaskBizService;
+import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.system.domain.SysExcelTask;
 import com.ruoyi.system.facade.ISysExcelTaskFacade;
 import com.ruoyi.web.form.order.AllOrderForm;
@@ -47,9 +49,16 @@ public class SysExcelTaskController extends BaseController {
     @PostMapping("/generate")
     public AjaxResult generateExcel(AllOrderForm query) {
         Long userId = getUserId();
-        SysExcelTask task = excelTaskBizService.createTask(query, userId);
-        // 提交异步任务
-        excelTaskBizService.generateAllOrderExcelAsync(task, query);
+        // 设置公司ID，数据权限过滤
+        query.setCompanyId(getDeptId());
+        SysExcelTask task = excelTaskBizService.createTask(userId);
+        // 使用AsyncManager提交异步任务，确保真正异步执行
+        AsyncManager.me().execute(new TimerTask() {
+            @Override
+            public void run() {
+                excelTaskBizService.generateAllOrderExcelAsync(task, query);
+            }
+        });
         AjaxResult data = AjaxResult.success();
         data.put("fileId", task.getFileId());
         data.put("fileName", task.getFileName());

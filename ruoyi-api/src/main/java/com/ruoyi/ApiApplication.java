@@ -13,9 +13,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * @author ruoyi
  */
 @Slf4j
-@EnableAsync // 启用异步支持
+@EnableAsync(proxyTargetClass = true) // 启用异步支持，使用CGLIB代理支持类级别的异步
 @SpringBootApplication
-@EnableAspectJAutoProxy(exposeProxy = true)
+@EnableAspectJAutoProxy(exposeProxy = true, proxyTargetClass = true)
 public class ApiApplication {
     public static void main(String[] args) {
         // System.setProperty("spring.devtools.restart.enabled", "false");

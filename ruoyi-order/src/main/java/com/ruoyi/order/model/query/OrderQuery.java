@@ -256,6 +256,7 @@ public class OrderQuery {
     /**
      * 企业Id
      */
+    @QueryField(ignore = true)
     private Long companyId;
 
     /**

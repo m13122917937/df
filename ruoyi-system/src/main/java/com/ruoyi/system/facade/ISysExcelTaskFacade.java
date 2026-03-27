@@ -49,4 +49,12 @@ public interface ISysExcelTaskFacade {
      * @return 是否成功
      */
     public boolean updateById(SysExcelTask entity);
+
+    /**
+     * 根据fileId更新任务
+     *
+     * @param entity 任务实体（必须包含fileId）
+     * @return 是否成功
+     */
+    public boolean updateByFileId(SysExcelTask entity);
 }
