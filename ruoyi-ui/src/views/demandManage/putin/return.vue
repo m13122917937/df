@@ -632,20 +632,7 @@ export default {
     }
 
     .pagination-wrapper {
-      margin-top: 20px;
-      text-align: right;
-      padding: 20px;
-      background: #fff;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      border: 1px solid #f0f0f0;
-
-      .custom-pagination {
-        .el-pagination__sizes,
-        .el-pagination__jump {
-          display: none;
-        }
-      }
+      justify-content: flex-end;
     }
   }
 
