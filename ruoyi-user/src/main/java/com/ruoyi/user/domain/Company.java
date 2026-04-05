@@ -93,6 +93,10 @@ public class Company {
      */
     private String licenseUrl;
 
+    /**
+     * 合同认证状态（0:未认证 1:已认证）
+     */
+    private Integer contractAuthStatus;
 
     private Date createTime;
 

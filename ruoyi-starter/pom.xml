@@ -16,6 +16,7 @@
         <module>spring-boot-starter-kuaidi100</module>
         <module>spring-boot-starter-wangdian</module>
         <module>spring-boot-starter-oss</module>
+        <module>spring-boot-starter-esign</module>
     </modules>
 
     <properties>

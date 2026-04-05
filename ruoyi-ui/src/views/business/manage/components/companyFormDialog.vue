@@ -91,6 +91,17 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="合同认证状态" prop="contractAuthStatus">
+            <el-radio-group v-model="form.contractAuthStatus" disabled>
+              <el-radio :label="0">未认证</el-radio>
+              <el-radio :label="1">已认证</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <div slot="footer" class="dialog-footer">
@@ -134,7 +145,8 @@ export default {
         establishedTime: '',
         stopPurchase: 1,
         accountingPeriod: null,
-        grabStatus: 0
+        grabStatus: 0,
+        contractAuthStatus: 0
       },
       rules: {
         companyName: [
@@ -301,7 +313,8 @@ export default {
         establishedTime: '',
         stopPurchase: 1,
         accountingPeriod: null,
-        grabStatus: 0
+        grabStatus: 0,
+        contractAuthStatus: 0
       }
       // 清空城市列表通过store
       this.$store.commit('SET_CITY_LIST', [])

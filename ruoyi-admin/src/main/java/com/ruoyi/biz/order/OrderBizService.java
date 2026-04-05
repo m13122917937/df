@@ -414,7 +414,8 @@ public class OrderBizService {
     private void sendMessage(Integer revokeCode, String logisticsNo, OrderBO orderBo, TradeOrderBO tradeOrderBO) {
         OrderConsts.RevokeType revokeType = OrderConsts.RevokeType.getByCode(revokeCode);
         String uncollectedKey = DictUtils.getDictValue(WEB_HOOK_FOLLOW_ORDER.getValue(), WEB_HOOK_FOLLOW_ORDER.getLabel());
-        if (StrUtil.isNotBlank(uncollectedKey)) {
+        if (StrUtil.isNotBlank(uncollectedKey) && Objects.nonNull(revokeType)
+                && Objects.nonNull(orderBo) && Objects.nonNull(tradeOrderBO)) {
             String sb = "**订单已自动退货追单 [" + "<font color='warning'>  " + revokeType.getDesc() + "</font>]**\r\n" +
                     ">内部单号：<font color='info'>" + orderBo.getOrderCode() + "</font>\r\n" +
                     ">物流单号：<font color='info'>" + logisticsNo + "</font>\r\n" +

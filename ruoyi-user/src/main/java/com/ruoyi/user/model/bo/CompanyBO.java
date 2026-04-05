@@ -58,6 +58,10 @@ public class CompanyBO {
     private String licenseUrl;
 
     /**
+     * 合同认证状态（0:未认证 1:已认证 */
+    private Integer contractAuthStatus;
+
+    /**
      * 是否负责人
      */
     private Integer owner;

@@ -289,12 +289,12 @@
               </template>
               <template slot-scope="scope">
                 <div class="operation-buttons">
-                  <!-- <el-button
+                  <el-button
                     type="primary"
                     size="small"
                     @click="handleReturn(scope.row, 1)"
                     >退货追单</el-button
-                  > -->
+                  >
                   <!-- <el-button
                     type="danger"
                     size="small"

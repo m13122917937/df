@@ -29,7 +29,12 @@
       "Bash(echo \"$file does NOT extend BaseMapper\")",
       "Bash(xargs ls:*)",
       "Bash(find \"D:/work/jie/adm\" -name \"pom.xml\" -exec grep -l \"mybatis-plus-boot-starter\" {})",
-      "WebFetch(domain:open.wangdian.cn)"
+      "WebFetch(domain:open.wangdian.cn)",
+      "WebFetch(domain:open.esign.cn)",
+      "WebSearch",
+      "Bash(find:*)",
+      "Bash(xargs file:*)",
+      "Bash(ls -la D:/work/jie/adm/*.iml)"
     ]
   }
 }

@@ -49,17 +49,6 @@
           show-overflow-tooltip
         />
         <el-table-column
-          prop="corporateName"
-          label="法人名称"
-          width="150"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="creditCode"
-          label="统一社会信用代码"
-          min-width="200"
-        />
-        <el-table-column
           prop="province"
           label="省"
           width="120"
@@ -70,11 +59,6 @@
           label="市"
           width="120"
           show-overflow-tooltip
-        />
-        <el-table-column
-          prop="establishedTime"
-          label="企业成立时间"
-          min-width="150"
         />
         <el-table-column label="停款状态" width="120">
           <template slot-scope="scope">
@@ -98,6 +82,16 @@
               size="small"
             >
               {{ scope.row.grabStatus === 1 ? "禁止" : "未禁止" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="合同认证" width="100">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.contractAuthStatus === 1 ? 'success' : 'warning'"
+              size="small"
+            >
+              {{ scope.row.contractAuthStatus === 1 ? "已认证" : "未认证" }}
             </el-tag>
           </template>
         </el-table-column>
