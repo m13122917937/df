@@ -82,8 +82,6 @@ public class OrderController extends BaseController {
 
 
     @PostMapping("send/list")
-
-
     public TableDataInfo sendList(@RequestBody OrderNewForm orderNewParam) {
         orderNewParam.setOrderType(OrderConsts.OrderType.O2O.getCode());
         PageBO<OrderListVO> orderWaitVOPageBO = orderBizService.orderSendList(orderNewParam, startParamV2(orderBizService.sortField(orderNewParam.getStatus())));
@@ -92,8 +90,6 @@ public class OrderController extends BaseController {
 
 
     @PostMapping("list/export")
-
-
     public void listExport(@RequestBody OrderNewForm orderNewParam) throws IOException {
         HttpServletResponse response = ServletUtils.getResponse();
         ServletUtils.renderExcel(response, "订单列表");
@@ -102,23 +98,9 @@ public class OrderController extends BaseController {
         EasyExcel.write(response.getOutputStream(), OrderListVO.class).sheet("sheet1").doWrite(orderListExport);
     }
 
-//
-//    @PostMapping("list/error/export")
-//
-//
-//    })
-//    public void listErrorExport(@RequestBody OrderNewForm orderNewParam) throws IOException {
-//        HttpServletResponse response = ServletUtils.getResponse();
-//        ServletUtils.renderExcel(response, "异常订单列表");
-//        orderNewParam.setOrderType(OrderConsts.OrderType.O2O.getCode());
-//        List<OrderListVO> orderListExport = orderBizService.orderListExport(orderNewParam);
-//        EasyExcel.write(response.getOutputStream(), OrderListVO.class).sheet("sheet1").doWrite(orderListExport);
-//    }
 
 
     @GetMapping("list/{orderId}/imei")
-
-
     public AjaxResult imei(@PathVariable("orderId") String orderCode) {
 
         List<ImeiVO> list = imeiBizService.list(orderCode);
@@ -155,8 +137,6 @@ public class OrderController extends BaseController {
 
 
     @GetMapping("/brand/count")
-
-
     public AjaxResult brandCount(BrandForm provinceForm) {
 
         ValidatorUtils.validateEntity(provinceForm);

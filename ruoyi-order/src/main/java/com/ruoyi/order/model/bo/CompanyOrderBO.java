@@ -54,6 +54,8 @@ public class CompanyOrderBO {
 
     private String remark;
 
+    private String createBy;
+
     private String payerName;
 
 }

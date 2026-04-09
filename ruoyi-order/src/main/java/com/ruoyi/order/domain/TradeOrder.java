@@ -59,6 +59,10 @@ public class TradeOrder {
      */
     private Long tradeCompanyId;
     /**
+     * 成交企业名称（供应商名称）
+     */
+    private String tradeCompanyName;
+    /**
      * 账期
      */
     private Long accountingPeriod;

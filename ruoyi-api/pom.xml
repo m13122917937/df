@@ -172,12 +172,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
-                <!--                <configuration>-->
-                <!--                    <finalName>${project.name}</finalName>-->
-                <!--                    <layout>JAR</layout>-->
-                <!--                    <classifier>exec</classifier>-->
-                <!--                    <mainClass>${starter-class}</mainClass>-->
-                <!--                </configuration>-->
                 <executions>
                     <execution>
                         <goals>
@@ -189,7 +183,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M9</version> <!-- 使用最新稳定版本 -->
+                <version>3.0.0-M9</version>
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>

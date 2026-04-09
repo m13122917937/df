@@ -1,6 +1,7 @@
 package com.ruoyi.biz.order;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
@@ -17,6 +18,7 @@ import com.ruoyi.capital.model.consts.CapitalConsts;
 import com.ruoyi.capital.model.consts.CompanyCapitalConsts;
 import com.ruoyi.capital.model.param.CompanyCapitalLogParam;
 import com.ruoyi.common.constant.OrderSortConsts;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
@@ -55,11 +57,15 @@ import com.ruoyi.product.model.bo.ProductSkuBO;
 import com.ruoyi.product.model.query.ProductSkuQuery;
 import com.ruoyi.rule.model.bo.RuleBO;
 import com.ruoyi.rule.model.consts.RuleConsts;
+import com.ruoyi.system.facade.ISysUserFacade;
 import com.ruoyi.system.model.bo.DictDistrictBO;
 import com.ruoyi.user.domain.User;
 import com.ruoyi.user.facade.ICompanyFacade;
+import com.ruoyi.user.facade.IUserFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
+import com.ruoyi.user.model.bo.UserBO;
 import com.ruoyi.user.model.query.CompanyQuery;
+import com.ruoyi.user.model.query.UserQuery;
 import com.ruoyi.wangdian.param.stock.StockInInfoGoodsList;
 import com.ruoyi.wangdian.param.stock.StockInInfoParam;
 import com.ruoyi.wangdian.utils.WdtClient;
@@ -76,6 +82,7 @@ import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.ruoyi.consts.DictEnum.WEB_HOOK_FOLLOW_ORDER;
@@ -86,6 +93,9 @@ public class WarehousingOrderBizService {
 
     @Autowired
     IOrderFacade orderFacade;
+
+    @Autowired
+    ISysUserFacade sysUserFacade;
 
     @Autowired
     IHangingOrderFacade hangingOrderFacade;
@@ -122,7 +132,14 @@ public class WarehousingOrderBizService {
                 .setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode()).setDeliveryCode(warehousingOrderParam.getDeliveryCode())
                 .setCompanyId(warehousingOrderParam.getCompanyId()).setBrand(warehousingOrderParam.getBrand()).setCreateTime(dateTime).setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode());
         PageBO<CompanyOrderBO> companyOrderBOPageBO = orderFacade.companyListPage(orderQuery, pageParamV2);
-        return new PageBO<>(WarehousingConvert.INSTANCE.toVO(companyOrderBOPageBO.getData()), companyOrderBOPageBO.getTotal());
+        List<WarehousingOrderVO> vo = WarehousingConvert.INSTANCE.toVO(companyOrderBOPageBO.getData());
+        Set<Long> userIds = vo.stream().map(e -> Convert.toLong(e.getCreateBy())).collect(Collectors.toSet());
+        List<SysUser> userBOS = sysUserFacade.selectUserByIds(userIds);
+        Map<Long, String> userBOMap = userBOS.stream().collect(Collectors.toMap(userBO -> userBO.getUserId(), userBO -> userBO.getNickName()));
+        for (WarehousingOrderVO warehousingOrderVO : vo) {
+            warehousingOrderVO.setCreateBy(String.valueOf(userBOMap.get(Convert.toLong(warehousingOrderVO.getCreateBy()))));
+        }
+        return new PageBO<>(vo, companyOrderBOPageBO.getTotal());
     }
 
     /**
@@ -167,8 +184,8 @@ public class WarehousingOrderBizService {
         // 构建trade 对象
         TradeOrderParam tradeOrderParam = new TradeOrderParam().setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode()).setTradeCompanyId(warehousingSaveParam.getCompanyId());
         tradeOrderParam.setTradeUserId(user.getUserId()).setTradeUserPhone(user.getPhone()).setTradeUserName(user.getNickName()).setAccountingPeriod(warehousingSaveParam.getAccountingPeriod());
-        tradeOrderParam.setTradeCompanyId(companyBO.getId()).setTradeNickName(companyBO.getNickName()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode());
-        tradeOrderParam.setUpdateTime(DateUtil.date()).setUpdateBy(user.getUserId()).setDeliveryCode(RandomUtil.randomInt(100000, 1000000));
+        tradeOrderParam.setTradeCompanyId(companyBO.getId()).setTradeCompanyName(companyBO.getCompanyName()).setTradeNickName(companyBO.getNickName()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode());
+        tradeOrderParam.setUpdateTime(DateUtil.date()).setUpdateBy(loginUser.getUserId()).setDeliveryCode(RandomUtil.randomInt(100000, 1000000));
         tradeOrderParam.setOrderId(orderBO.getOrderCode()).setTradePrice(warehousingSaveParam.getPrice()).setBrand(orderBO.getBrand()).setProductName(orderBO.getProductName());
         tradeOrderParam.setSkuName(orderBO.getSkuName()).setSkuCode(orderBO.getSkuCode()).setProvince(orderBO.getProvince()).setQuantity(0);
         tradeOrderParam.setOrderType(orderBO.getOrderType()).setTradeIndex(4).setHangOrderId(hangingOrderBO.getId()).setOrderId(orderBO.getOrderCode());

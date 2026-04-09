@@ -111,6 +111,9 @@ public class ImeiBizService {
                     imeiBO.setActivated(ImeiConsts.Activated.SUCCESS.getCode());
                 } else {
                     imeiBO.setActivated(ImeiConsts.Activated.MODEL_NOT_CONSISTENT.getCode());
+                    // 设置识别出来的商品名和型号，返回给前端提示
+                    imeiBO.setRecognizedProductName(imeiSkuRelBO.getProductName());
+                    imeiBO.setRecognizedSkuName(imeiSkuRelBO.getSkuName());
                 }
             }
         }

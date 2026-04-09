@@ -55,7 +55,7 @@
             <el-table-column
               label="全部单号"
               prop="orderCode"
-              min-width="200"
+              width="230"
               fixed="left"
             >
               <template slot-scope="scope">
@@ -73,7 +73,7 @@
                 </div>
               </template>
             </el-table-column>
-             <el-table-column prop="tradeCompanyName" label="供应商" width="300" align="center" :show-overflow-tooltip="true">
+             <el-table-column prop="tradeCompanyName" label="供应商" width="400" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
                 {{ scope.row.tradeCompanyName || '-' }}
               </template>
@@ -81,12 +81,12 @@
              <el-table-column
               label="采购人/成交时间"
               prop="createTime"
-              min-width="200"
+              width="250"
             >
               <template slot-scope="scope">
                 <div class="order-numbers">
                   <div class="order-number-item">
-                    {{ scope.row.tradeUserName || "-" }}
+                    {{ scope.row.createBy || "-" }}
                   </div>
                   <div class="order-number-item">
                      {{
@@ -96,7 +96,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="brand" label="品牌/品类" width="120" align="center">
+            <el-table-column prop="brand" label="品牌/品类" width="100" align="center">
               <template slot-scope="scope">
                 <div class="order-productName">
                   <div class="order-productName-line">
@@ -115,7 +115,7 @@
             <el-table-column
               label="产品型号"
               prop="productName"
-              min-width="200"
+              min-width="250"
               :show-overflow-tooltip="true"
               align="center"
             >
@@ -134,18 +134,18 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="quantity" label="入库数量/成交数量" width="180" align="center" >
+            <el-table-column prop="quantity" label="入库/成交" width="90" align="center" >
               <template slot-scope="scope">
                 {{ scope.row.warehouseQuantity || 0 }} / {{ scope.row.quantity || 0 }}
               </template>
             </el-table-column>
-            <el-table-column label="成交价" prop="tradePrice" min-width="120" align="center" />
-            <el-table-column prop="deliveryCode" label="送货码" width="120" align="center" >
+            <el-table-column label="成交价" prop="tradePrice" width="90" align="center" />
+            <el-table-column prop="deliveryCode" label="送货码" width="90" align="center" >
               <template slot-scope="scope">
                 {{ scope.row.deliveryCode || '-' }}
               </template>
             </el-table-column>
-            <el-table-column prop="deliveryCode" label="备注" width="120" align="center" >
+            <el-table-column prop="remark" label="备注" width="300" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
                 {{ scope.row.remark || '-' }}
               </template>
@@ -446,18 +446,22 @@ export default {
         this.$message.error('撤销失败，请稍后重试')
       }
     },
-    
+
     handleConfirmImei() {
       this.imeiDialogVisible = false
     },
     handleCancelImei() {
       this.imeiDialogVisible = false
     },
-    
-    // 打开一键复制弹窗
+
+    // 一键复制订单信息
     handleCopy(row) {
-      this.copyDialogData = { ...row }
-      this.copyDialogVisible = true
+      const copyText = `订单号：${row.orderCode}
+供应商：${row.tradeCompanyName || '-'}
+产品型号：${row.productName || '-'} ${row.skuName || '-'}
+数量：${row.quantity || 0}
+送货码：${row.deliveryCode || '-'}`
+      this.copyText(copyText)
     },
 
     handleBatchDownload() {
@@ -516,7 +520,7 @@ export default {
         this.$message.warning('请选择账期')
         return
       }
-      
+
 
       // companyId 从新建弹窗选择的供应商获取
       const companyId = this.newOrderForm?.supplierId
@@ -634,7 +638,7 @@ export default {
       }
     }
     ,
-    
+
     // 供应商远程搜索（用于新建订单弹窗）
     async handleSupplierRemote(keyword = '') {
       const trimmed = (keyword || '').trim()

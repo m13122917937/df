@@ -149,6 +149,7 @@
             o.order_style,
             oto.delivery_code,
             o.remark,
+           oto.update_by createBy,
             o.payer_name payerName
         FROM
             o_order o

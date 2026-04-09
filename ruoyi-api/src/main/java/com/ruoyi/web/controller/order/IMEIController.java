@@ -20,10 +20,7 @@ public class IMEIController {
     @Autowired
     private ImeiBizService imeiBizService;
 
-
     @PostMapping("/save")
-
-
     public AjaxResult imei(@RequestBody ImeiOrderParam imeiOrderParam) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         // 验证串码
         List<ImeiVO> imeiVOS = imeiBizService.verifyImei(imeiOrderParam);
@@ -31,15 +28,10 @@ public class IMEIController {
         return AjaxResult.success(imeiVOS);
     }
 
-
     @GetMapping("/{orderCode}")
-
-
     public AjaxResult list(@PathVariable("orderCode") String orderCode) {
         List<ImeiVO> imeiVOS = imeiBizService.list(orderCode);
         return AjaxResult.success(imeiVOS);
     }
-
-
 
 }

@@ -31,11 +31,7 @@ public class WarehousingController extends BaseController {
 
 
     @GetMapping("/brand/count")
-
-
     public AjaxResult brandCount(BrandForm provinceForm) {
-
-//        ValidatorUtils.validateEntity(provinceForm);
 
         List<BrandCountVO> brandCountVOS = wOrderBizService.brandCount(provinceForm);
 
@@ -44,8 +40,6 @@ public class WarehousingController extends BaseController {
 
 
     @PostMapping("list")
-
-
     public TableDataInfo list(@RequestBody WarehousingOrderParam warehousingOrderParam) {
         PageBO<WarehousingOrderVO> orderWaitVOPageBO = wOrderBizService.orderList(warehousingOrderParam, startParamV2("create_time desc"));
         return getDataTable(orderWaitVOPageBO.getData(), orderWaitVOPageBO.getTotal());
@@ -53,8 +47,6 @@ public class WarehousingController extends BaseController {
 
 
     @PostMapping("save")
-
-
     public AjaxResult add(@Validated @RequestBody WarehousingSaveParam warehousingSaveParam) {
 
         wOrderBizService.save(warehousingSaveParam, getLoginUser());
@@ -65,8 +57,6 @@ public class WarehousingController extends BaseController {
 
 
     @PostMapping("revoke/{orderCode}")
-
-
     public AjaxResult revoke(@PathVariable("orderCode") String orderCode) {
 
         wOrderBizService.revoke(orderCode, getLoginUser());

@@ -58,5 +58,7 @@ public class CompanyOrderDTO {
 
     private String remark;
 
+    private String createBy;
+
     private String payerName;
 }

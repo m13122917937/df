@@ -78,5 +78,14 @@ public class ImeiBO {
      */
     private Integer deleted;
 
+    /**
+     * 识别出来的商品名称
+     */
+    private String recognizedProductName;
+
+    /**
+     * 识别出来的型号规格
+     */
+    private String recognizedSkuName;
 
 }

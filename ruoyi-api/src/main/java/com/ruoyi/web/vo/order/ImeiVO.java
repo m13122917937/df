@@ -47,6 +47,14 @@ public class ImeiVO {
 
     private Date createTime;
 
+    /**
+     * 识别出来的商品名称（型号不一致时返回）
+     */
+    private String recognizedProductName;
 
+    /**
+     * 识别出来的型号规格（型号不一致时返回）
+     */
+    private String recognizedSkuName;
 
 }
