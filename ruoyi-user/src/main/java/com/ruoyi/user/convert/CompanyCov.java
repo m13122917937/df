@@ -3,11 +3,10 @@ package com.ruoyi.user.convert;
 
 import com.github.pagehelper.Page;
 import com.ruoyi.user.domain.Company;
-import com.ruoyi.user.domain.UserCompany;
+import com.ruoyi.user.domain.MemberCompany;
 import com.ruoyi.user.model.bo.CompanyBO;
 import com.ruoyi.user.model.param.CompanyParam;
-import com.ruoyi.user.model.param.UserCompanyParam;
-import com.ruoyi.user.model.query.CompanyQuery;
+import com.ruoyi.user.model.param.MemberCompanyParam;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -31,8 +30,6 @@ public interface CompanyCov {
     Company paramToDomain(CompanyParam companyParam);
 
 
-    UserCompany paramToUserDomain(UserCompanyParam userCompanyParam);
-
-
+    MemberCompany paramToUserDomain(MemberCompanyParam memberCompanyParam);
 
 }

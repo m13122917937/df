@@ -58,12 +58,13 @@ import com.ruoyi.product.model.query.ProductSkuQuery;
 import com.ruoyi.rule.model.bo.RuleBO;
 import com.ruoyi.rule.model.consts.RuleConsts;
 import com.ruoyi.system.model.bo.DictDistrictBO;
-import com.ruoyi.user.domain.User;
 import com.ruoyi.user.facade.ICompanyFacade;
-import com.ruoyi.user.facade.IUserFacade;
+import com.ruoyi.user.facade.IMemberFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
+import com.ruoyi.user.model.bo.MemberBO;
 import com.ruoyi.user.model.bo.UserBO;
 import com.ruoyi.user.model.query.CompanyQuery;
+import com.ruoyi.user.model.query.MemberQuery;
 import com.ruoyi.user.model.query.UserQuery;
 import com.ruoyi.web.form.order.*;
 import com.ruoyi.web.form.rule.RuleForm;
@@ -127,7 +128,7 @@ public class OrderBizService {
     IPayerFacade payerFacade;
 
     @Autowired
-    IUserFacade userFacade;
+    IMemberFacade memberFacade;
 
     @Autowired
     IPayerConfigFacade payerConfigFacade;
@@ -209,30 +210,6 @@ public class OrderBizService {
             return new PageBO<OrderListVO>().setData(orderNewVOList).setTotal(pageBO.getTotal());
         }
 
-//        // 完善挂单
-//        for (OrderListVO orderListVO : orderNewVOList) {
-//            HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(orderListVO.getOrderCode()).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
-//            if (Objects.isNull(hangingOrderBO)) {
-//                continue;
-//            }
-//            // 设置每次报价时间, 履约时效、价格等等
-//            orderListVO.setQuotationInterval(hangingOrderBO.getQuotationInterval()).setDeliveryTime(hangingOrderBO.getDeliveryTime());
-//            orderListVO.setAccountingPeriod(hangingOrderBO.getAccountingPeriod()).setOtherRequire(hangingOrderBO.getOtherRequire());
-//            orderListVO.setPriceHighest(hangingOrderBO.getPriceHighest()).setPriceHign(hangingOrderBO.getPriceHign()).setPriceLow(hangingOrderBO.getPriceLow()).setPriceLowest(hangingOrderBO.getPriceLowest());
-//            orderListVO.setPriceHighestStatus(hangingOrderBO.getPriceHighestStatus()).setPriceHignStatus(hangingOrderBO.getPriceHignStatus()).setPriceLowStatus(hangingOrderBO.getPriceLowStatus()).setPriceLowestStatus(hangingOrderBO.getPriceLowestStatus());
-//            // 判断是否需要倒计时
-//            List<Integer> codeList = List.of(TradeOrderConsts.TradeStatus.EXPIRED.getCode(), TradeOrderConsts.TradeStatus.SUCCESS.getCode());
-//            if (codeList.contains(hangingOrderBO.getPriceHighestStatus()) || codeList.contains(hangingOrderBO.getPriceHignStatus()) || codeList.contains(hangingOrderBO.getPriceLowStatus()) || codeList.contains(hangingOrderBO.getPriceLowestStatus())) {
-//                List<Integer> statusList = List.of(TradeOrderConsts.TradeStatus.SUCCESS.getCode(), TradeOrderConsts.TradeStatus.EXPIRED.getCode());
-//                TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setHangOrderId(hangingOrderBO.getId()).setOrderId(orderListVO.getOrderCode()).setStatusList(statusList));
-//                if (Objects.isNull(tradeOrderBO)) {
-//                    continue;
-//                }
-//                orderListVO.setLastCompeteTime(tradeOrderBO.getCreateTime()).setTradePrice(tradeOrderBO.getTradePrice()).setTradeNickName(tradeOrderBO.getTradeNickName())
-//                        .setTradeUserName(tradeOrderBO.getTradeUserName()).setTradeUserPhone(tradeOrderBO.getTradeUserPhone())
-//                        .setTrackingNumber(tradeOrderBO.getTrackingNumber()).setTrackingCompany(tradeOrderBO.getTrackingCompany()).setTradeCompanyName(tradeOrderBO.getTradeCompanyName());
-//            }
-//        }
         return new PageBO<OrderListVO>().setData(orderNewVOList).setTotal(pageBO.getTotal());
     }
 
@@ -824,7 +801,7 @@ public class OrderBizService {
      */
     @Transactional
     public void pushCompany(WaitPushForm waitPushForm, LoginUser loginUser) {
-        UserBO user = userFacade.queryOne(new UserQuery().setUserId(waitPushForm.getUserId()));
+        MemberBO user = memberFacade.queryOne(new MemberQuery().setUserId(waitPushForm.getUserId()));
         Assert.notNull(user, "企业下不存在账号");
 
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(waitPushForm.getCompanyId()));

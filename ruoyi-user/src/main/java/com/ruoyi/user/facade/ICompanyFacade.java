@@ -2,14 +2,11 @@ package com.ruoyi.user.facade;
 
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
-import com.ruoyi.common.model.page.PageParam;
-import com.ruoyi.user.domain.User;
-import com.ruoyi.user.domain.UserCompany;
 import com.ruoyi.user.model.bo.CompanyBO;
 import com.ruoyi.user.model.param.CompanyParam;
-import com.ruoyi.user.model.param.UserCompanyParam;
+import com.ruoyi.user.model.param.MemberCompanyParam;
 import com.ruoyi.user.model.query.CompanyQuery;
-import com.ruoyi.user.model.query.UserCompanyQuery;
+import com.ruoyi.user.model.query.MemberCompanyQuery;
 
 import java.util.List;
 
@@ -29,9 +26,6 @@ public interface ICompanyFacade {
 
     CompanyBO add(CompanyParam companyParam);
 
-
-    User companyMasterUser(Long companyId);
-
     /**
      * 查询用户x下面所有的部门
      *
@@ -44,9 +38,8 @@ public interface ICompanyFacade {
 
     void update(CompanyParam companyParam, CompanyQuery companyQuery);
 
-    void update(UserCompanyParam userCompanyParam, UserCompanyQuery userCompanyQuery);
+    void update(MemberCompanyParam memberCompanyParam, MemberCompanyQuery userCompanyQuery);
 
-    Long countUser(UserCompanyQuery userCompanyQuery);
 
 
 }

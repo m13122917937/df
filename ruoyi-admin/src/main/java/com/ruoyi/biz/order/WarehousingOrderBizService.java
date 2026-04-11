@@ -1,6 +1,5 @@
 package com.ruoyi.biz.order;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -8,84 +7,58 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import com.ruoyi.biz.address.SmartParse;
-import com.ruoyi.biz.address.domain.AddressInfo;
 import com.ruoyi.biz.bill.BillBizService;
-import com.ruoyi.biz.company.CompanyCapitalBizService;
-import com.ruoyi.biz.sys.IDictDistrictBizService;
-import com.ruoyi.capital.facade.ICompanyCapitalFacade;
-import com.ruoyi.capital.model.consts.CapitalConsts;
-import com.ruoyi.capital.model.consts.CompanyCapitalConsts;
-import com.ruoyi.capital.model.param.CompanyCapitalLogParam;
-import com.ruoyi.common.constant.OrderSortConsts;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.user.LoginUser;
-import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.Arith;
-import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.JacksonUtil;
-import com.ruoyi.common.utils.weebhook.QWRobotUtil;
-import com.ruoyi.consts.AdminConsts;
-import com.ruoyi.express.facade.IRouteSubscribeFacade;
-import com.ruoyi.express.model.bo.RouteSubscribeBO;
-import com.ruoyi.express.model.consts.LogisticsCode;
-import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.mapper.order.OrderConvert;
 import com.ruoyi.mapper.order.WarehousingConvert;
-import com.ruoyi.mapper.rule.RuleConvert;
-import com.ruoyi.order.domain.dto.OrderStatusDTO;
 import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.facade.ITradeOrderFacade;
 import com.ruoyi.order.model.bo.*;
 import com.ruoyi.order.model.consts.HandingOrderConsts;
-import com.ruoyi.order.model.consts.ImeiConsts;
 import com.ruoyi.order.model.consts.OrderConsts;
 import com.ruoyi.order.model.consts.TradeOrderConsts;
-import com.ruoyi.order.model.param.*;
-import com.ruoyi.order.model.param.RuleParam;
+import com.ruoyi.order.model.param.HangingOrderParam;
+import com.ruoyi.order.model.param.ImeiParam;
+import com.ruoyi.order.model.param.OrderParam;
+import com.ruoyi.order.model.param.TradeOrderParam;
 import com.ruoyi.order.model.query.HangingOrderQuery;
-import com.ruoyi.order.model.query.ImeiQuery;
 import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
-import com.ruoyi.product.domain.ProductSku;
 import com.ruoyi.product.facade.IProductSkuFacade;
 import com.ruoyi.product.model.bo.ProductSkuBO;
 import com.ruoyi.product.model.query.ProductSkuQuery;
-import com.ruoyi.rule.model.bo.RuleBO;
-import com.ruoyi.rule.model.consts.RuleConsts;
 import com.ruoyi.system.facade.ISysUserFacade;
-import com.ruoyi.system.model.bo.DictDistrictBO;
-import com.ruoyi.user.domain.User;
 import com.ruoyi.user.facade.ICompanyFacade;
-import com.ruoyi.user.facade.IUserFacade;
+import com.ruoyi.user.facade.IMemberFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
-import com.ruoyi.user.model.bo.UserBO;
+import com.ruoyi.user.model.bo.MemberBO;
 import com.ruoyi.user.model.query.CompanyQuery;
-import com.ruoyi.user.model.query.UserQuery;
+import com.ruoyi.user.model.query.MemberQuery;
 import com.ruoyi.wangdian.param.stock.StockInInfoGoodsList;
 import com.ruoyi.wangdian.param.stock.StockInInfoParam;
 import com.ruoyi.wangdian.utils.WdtClient;
-import com.ruoyi.web.form.order.*;
-import com.ruoyi.web.form.rule.RuleForm;
-import com.ruoyi.web.vo.order.*;
+import com.ruoyi.web.form.order.BrandForm;
+import com.ruoyi.web.form.order.PickingOrderForm;
+import com.ruoyi.web.form.order.WarehousingOrderParam;
+import com.ruoyi.web.form.order.WarehousingSaveParam;
+import com.ruoyi.web.vo.order.BrandCountVO;
+import com.ruoyi.web.vo.order.WarehousingOrderVO;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.mp.bean.card.Sku;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.ruoyi.consts.DictEnum.WEB_HOOK_FOLLOW_ORDER;
 
 @Slf4j
 @Service
@@ -96,6 +69,9 @@ public class WarehousingOrderBizService {
 
     @Autowired
     ISysUserFacade sysUserFacade;
+
+    @Autowired
+    IMemberFacade memberFacade;
 
     @Autowired
     IHangingOrderFacade hangingOrderFacade;
@@ -153,8 +129,9 @@ public class WarehousingOrderBizService {
         ProductSkuBO productSkuBO = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(warehousingSaveParam.getSkuCode()));
         Assert.notNull(productSkuBO, "商品编码不存在");
 
-        User user = companyFacade.companyMasterUser(warehousingSaveParam.getCompanyId());
-        Assert.notNull(user, "企业不存在主账号，请先添加主账号后在推单");
+        PageBO<MemberBO> memberBOPageBO = memberFacade.memberList(new MemberQuery().setCompanyId(warehousingSaveParam.getCompanyId()), new PageParamV2());
+        Assert.notNull(memberBOPageBO.getData(), "企业不存在主账号，请先添加主账号后在推单");
+        MemberBO memberBO = memberBOPageBO.getData().get(0);
 
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(warehousingSaveParam.getCompanyId()));
         Assert.notNull(companyBO, "企业不存在,请重新选择企业");
@@ -174,7 +151,7 @@ public class WarehousingOrderBizService {
         hangingOrderParam.setPriceLow(Arith.sub(hangingOrderParam.getPriceHign(), new BigDecimal(1))).setPriceLowStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode());
         hangingOrderParam.setPriceLowest(Arith.sub(hangingOrderParam.getPriceLow(), new BigDecimal(1))).setPriceLowestStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode());
         hangingOrderParam.setQuotationInterval(5L).setAccountingPeriod(warehousingSaveParam.getAccountingPeriod()).setStatus(HandingOrderConsts.Status.NORMAL.getCode());
-        hangingOrderParam.setLastCompeteUser(user.getUserId()).setLastCompeteCompany(warehousingSaveParam.getCompanyId()).setLastCompeteTime(DateUtil.date()).setCreateBy(loginUser.getUserId());
+        hangingOrderParam.setLastCompeteUser(memberBO.getUserId()).setLastCompeteCompany(warehousingSaveParam.getCompanyId()).setLastCompeteTime(DateUtil.date()).setCreateBy(loginUser.getUserId());
         hangingOrderParam.setCreateTime(DateUtil.date()).setUpdateTime(DateUtil.date()).setUpdateBy(loginUser.getUserId()).setIntervalSpread(new BigDecimal(10));
         hangingOrderParam.setCodeOptions(HandingOrderConsts.CodeOptions.SEND_BEFORE_NEED.getCode()).setMerchantCompanyId(warehousingSaveParam.getCompanyId());
         hangingOrderParam.setDeliveryTime(0).setDeliveryDeadline(DateUtil.offsetDay(DateUtil.endOfDay(DateUtil.date()), 0));
@@ -183,7 +160,7 @@ public class WarehousingOrderBizService {
 
         // 构建trade 对象
         TradeOrderParam tradeOrderParam = new TradeOrderParam().setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode()).setTradeCompanyId(warehousingSaveParam.getCompanyId());
-        tradeOrderParam.setTradeUserId(user.getUserId()).setTradeUserPhone(user.getPhone()).setTradeUserName(user.getNickName()).setAccountingPeriod(warehousingSaveParam.getAccountingPeriod());
+        tradeOrderParam.setTradeUserId(memberBO.getUserId()).setTradeUserPhone(memberBO.getPhone()).setTradeUserName(memberBO.getNickName()).setAccountingPeriod(warehousingSaveParam.getAccountingPeriod());
         tradeOrderParam.setTradeCompanyId(companyBO.getId()).setTradeCompanyName(companyBO.getCompanyName()).setTradeNickName(companyBO.getNickName()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode());
         tradeOrderParam.setUpdateTime(DateUtil.date()).setUpdateBy(loginUser.getUserId()).setDeliveryCode(RandomUtil.randomInt(100000, 1000000));
         tradeOrderParam.setOrderId(orderBO.getOrderCode()).setTradePrice(warehousingSaveParam.getPrice()).setBrand(orderBO.getBrand()).setProductName(orderBO.getProductName());
@@ -308,12 +285,6 @@ public class WarehousingOrderBizService {
 
 
     private StockInInfoParam builderStockIn(OrderBO orderBO, Integer quantity, String warehouseNo, List<String> snList, String remark) {
-//        List<String> imeiList = null;
-//        if (Objects.equals("小米", orderBO.getBrand())) {
-//            imeiList = list.stream().map(ImeiBO::getImel).collect(Collectors.toList());
-//        } else {
-//            imeiList = list.stream().map(ImeiBO::getSn).collect(Collectors.toList());
-//        }
         TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
         String companyName = tradeOrderBO.getTradeNickName();
 

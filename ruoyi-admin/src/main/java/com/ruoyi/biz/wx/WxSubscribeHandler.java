@@ -1,7 +1,6 @@
 package com.ruoyi.biz.wx;
 
 import cn.hutool.core.util.StrUtil;
-import com.ruoyi.biz.company.UserBizService;
 import com.ruoyi.biz.company.WxBizService;
 import com.ruoyi.common.utils.JacksonUtil;
 import lombok.extern.slf4j.Slf4j;

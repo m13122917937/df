@@ -1,6 +1,6 @@
 package com.ruoyi.user.model.consts;
 
-public class UserEnum {
+public class MemberEnum {
 
 
     public enum UserDisable {

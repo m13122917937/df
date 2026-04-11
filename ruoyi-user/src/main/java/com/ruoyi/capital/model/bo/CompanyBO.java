@@ -45,9 +45,6 @@ public class CompanyBO {
     private Long cityId;
 
     /** 企业成立时间 */
-    private Date establishedTime;
-
-    /** 营业执照相对路径 */
-    private String licenseUrl;
+    private Date establishment;
 
 }

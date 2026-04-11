@@ -18,6 +18,19 @@ public class PayForm implements Serializable {
     @NotNull(message = "支付金额不能为空")
     private BigDecimal amount;
 
+    /**
+     * 订单标题
+     */
+    private String subject;
 
-    private Integer tradeType;
+    /**
+     * 订单描述
+     */
+    private String body;
+
+    /**
+     * 客户端IP
+     */
+    private String clientIp;
+
 }

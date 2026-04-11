@@ -9,12 +9,10 @@ import com.aliyun.openservices.ons.api.Message;
 import com.ruoyi.biz.common.IDictDistrictBizService;
 import com.ruoyi.biz.company.CompanyCapitalBizService;
 import com.ruoyi.biz.mq.MsgClient;
-import com.ruoyi.biz.mq.OrderTradeListener;
 import com.ruoyi.capital.facade.ICompanyCapitalFacade;
 import com.ruoyi.capital.model.consts.CompanyCapitalConsts;
 import com.ruoyi.capital.model.param.CompanyCapitalLogParam;
 import com.ruoyi.common.constant.HttpStatus;
-import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.exception.ServiceException;
@@ -24,7 +22,6 @@ import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.config.properties.OnsProperties;
 import com.ruoyi.consts.ApiRedisKey;
-import com.ruoyi.consts.DictConstants;
 import com.ruoyi.mapper.index.IndexConvert;
 import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IOrderFacade;
@@ -41,15 +38,15 @@ import com.ruoyi.order.model.query.HangingOrderQuery;
 import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.OrderTabCountQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
+import com.ruoyi.system.facade.ISysDictTypeFacade;
 import com.ruoyi.system.model.bo.DictDistrictBO;
 import com.ruoyi.system.model.consts.DictDataConsts;
-import com.ruoyi.system.facade.ISysDictTypeFacade;
 import com.ruoyi.user.facade.ICompanyFacade;
-import com.ruoyi.user.facade.IUserFacade;
+import com.ruoyi.user.facade.IMemberFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
-import com.ruoyi.user.model.bo.UserBO;
+import com.ruoyi.user.model.bo.MemberBO;
 import com.ruoyi.user.model.query.CompanyQuery;
-import com.ruoyi.user.model.query.UserQuery;
+import com.ruoyi.user.model.query.MemberQuery;
 import com.ruoyi.web.form.index.ProductForm;
 import com.ruoyi.web.form.index.TradeForm;
 import com.ruoyi.web.vo.index.*;
@@ -60,7 +57,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -83,7 +79,7 @@ public class IndexBizService {
     ICompanyFacade companyFacade;
 
     @Autowired
-    IUserFacade userFacade;
+    IMemberFacade memberFacade;
 
     @Autowired
     IHangingOrderFacade hangingOrderFacade;
@@ -403,8 +399,8 @@ public class IndexBizService {
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(loginUser.getDeptId()));
         Assert.notNull(companyBO, "企业信息异常,请联系管理员");
 
-        UserBO userBO = userFacade.queryOne(new UserQuery().setUserId(loginUser.getUserId()));
-        Assert.notNull(userBO, "企业信息异常,请联系管理员");
+        MemberBO memberBO = memberFacade.queryOne(new MemberQuery().setUserId(loginUser.getUserId()));
+        Assert.notNull(memberBO, "企业信息异常,请联系管理员");
 
         OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(tradeForm.getOrderCode()));
         Assert.notNull(orderBO, "订单信息已过期,请刷新列表");
@@ -429,8 +425,8 @@ public class IndexBizService {
         }
         // 保存tarde
         TradeOrderParam tradeOrderParam = new TradeOrderParam().setOrderId(tradeForm.getOrderCode()).setHangOrderId(tradeForm.getHangingOrderId()).setTradePrice(tradeForm.getTradePrice())
-                .setTradeUserId(loginUser.getUserId()).setTradeUserName(userBO.getNickName()).setTradeCompanyId(loginUser.getDeptId())
-                .setTradeUserPhone(userBO.getPhone()).setAccountingPeriod(hangingOrderBO.getAccountingPeriod()).setBrand(orderBO.getBrand()).setProductName(orderBO.getProductName())
+                .setTradeUserId(loginUser.getUserId()).setTradeUserName(memberBO.getNickName()).setTradeCompanyId(loginUser.getDeptId())
+                .setTradeUserPhone(memberBO.getPhone()).setAccountingPeriod(hangingOrderBO.getAccountingPeriod()).setBrand(orderBO.getBrand()).setProductName(orderBO.getProductName())
                 .setSkuName(orderBO.getSkuName()).setSkuCode(orderBO.getSkuCode()).setProvince(orderBO.getProvince()).setTradeIndex(tradeForm.getTradeIndex())
                 .setTradeNickName(companyBO.getNickName()).setQuantity(orderBO.getQuantity());
         // 如果是价4直接成交

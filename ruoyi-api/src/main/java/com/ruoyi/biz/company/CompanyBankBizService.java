@@ -3,15 +3,14 @@ package com.ruoyi.biz.company;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.ruoyi.biz.common.IDictDistrictBizService;
-import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.mapper.user.CompanyBankConvert;
-import com.ruoyi.system.model.bo.DictDistrictBO;
 import com.ruoyi.system.facade.ISysUserFacade;
-import com.ruoyi.user.domain.User;
+import com.ruoyi.system.model.bo.DictDistrictBO;
 import com.ruoyi.user.facade.ICompanyBankFacade;
 import com.ruoyi.user.facade.ICompanyFacade;
+import com.ruoyi.user.facade.IMemberFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
 import com.ruoyi.user.model.consts.CompanyBankConsts;
 import com.ruoyi.user.model.param.CompanyBankParam;
@@ -42,6 +41,9 @@ public class CompanyBankBizService {
     ISysUserFacade sysUserService;
 
     @Autowired
+    IMemberFacade memberFacade;
+
+    @Autowired
     ICompanyFacade companyFacade;
 
     public List<CompanyBankVO> list(Long companyId) {
@@ -52,12 +54,6 @@ public class CompanyBankBizService {
             companyBankVO.setProvinceName(provinceMap.get(companyBankVO.getProvince()));
             Map<Long, String> cityMap = dictDistrictBizService.listCity(companyBankVO.getProvince()).stream().collect(Collectors.toMap(DictDistrictBO::getDistrictId, DictDistrictBO::getDistrict));
             companyBankVO.setCityName(cityMap.get(companyBankVO.getCity()));
-
-//            SysUser sysUser = sysUserService.selectUserById(companyBankVO.getCreateBy());
-//            companyBankVO.setCreateByName(sysUser.getNickName());
-
-//            sysUser = sysUserService.selectUserById(companyBankVO.getUpdateBy());
-//            companyBankVO.setUpdateByName(sysUser.getNickName());
         }
         return listVO;
 
@@ -65,11 +61,10 @@ public class CompanyBankBizService {
 
     public void save(CompanyBankForm companyBankForm, Long userId) {
         // 检查当前用户是否为该企业的管理员
-        User masterUser = companyFacade.companyMasterUser(companyBankForm.getCompanyId());
-        if (masterUser == null || !Objects.equals(masterUser.getUserId(), userId)) {
+        if (!memberFacade.companyMasterUser(companyBankForm.getCompanyId(), userId)) {
             throw new ServiceException("只有企业管理员才能删除用户");
         }
-        log.info("用户{}，添加银行卡，{}" , JacksonUtil.toJson(companyBankForm));
+        log.info("用户{}，添加银行卡，{}", JacksonUtil.toJson(companyBankForm));
 
         DateTime date = DateUtil.date();
         CompanyBankParam param = CompanyBankConvert.INSTANCE.toParam(companyBankForm);

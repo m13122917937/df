@@ -6,11 +6,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -101,6 +97,51 @@ public class RedisCache {
     }
 
     /**
+     * SETNX 原子操作 - 只有当 key 不存在时才设置值，key 存在则不操作
+     * 利用 Redis 原生原子性保证操作安全
+     *
+     * @param key   Redis键
+     * @param value 要设置的值
+     * @return true 设置成功 (key不存在), false 设置失败 (key已存在)
+     */
+    public <T> Boolean setIfAbsent(final String key, final T value) {
+        return redisTemplate.opsForValue().setIfAbsent(key, value);
+    }
+
+    /**
+     * SETNX 原子操作 - 只有当 key 不存在时才设置值并设置过期时间，key 存在则不操作
+     * 利用 Redis 原生原子性保证操作安全
+     *
+     * @param key      Redis键
+     * @param value    要设置的值
+     * @param timeout  过期时间
+     * @param timeUnit 时间单位
+     * @return true 设置成功 (key不存在), false 设置失败 (key已存在)
+     */
+    public <T> Boolean setIfAbsent(final String key, final T value, final Long timeout, final TimeUnit timeUnit) {
+        return redisTemplate.opsForValue().setIfAbsent(key, value, timeout, timeUnit);
+    }
+
+    /**
+     * 查询 key 是否存在，不存在则设置值，存在则返回当前值
+     * 原子操作，并发安全
+     *
+     * @param key   Redis键
+     * @param value 要设置的值 (当key不存在时)
+     * @return key存在返回当前值，key不存在返回新设置的值
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getAndSetIfAbsent(final String key, final T value) {
+        // 先尝试SETNX，如果成功说明key不存在，直接返回新值
+        Boolean success = redisTemplate.opsForValue().setIfAbsent(key, value);
+        if (Boolean.TRUE.equals(success)) {
+            return value;
+        }
+        // key已存在，返回当前值
+        return (T) redisTemplate.opsForValue().get(key);
+    }
+
+    /**
      * 删除单个对象
      *
      * @param key
@@ -160,8 +201,8 @@ public class RedisCache {
     /**
      * 获得缓存的set
      *
-     * @param key
-     * @return
+     * @param key 缓存键
+     * @return 缓存的set集合
      */
     public <T> Set<T> getCacheSet(final String key) {
         return redisTemplate.opsForSet().members(key);

@@ -45,6 +45,7 @@ public class PageParamV2 implements Serializable {
     private Boolean count;
 
     public PageParamV2() {
+        this(DEFAULT_PAGE, DEFAULT_SIZE, SPACE, false);
     }
 
     public PageParamV2(final Integer page, final Integer size) {

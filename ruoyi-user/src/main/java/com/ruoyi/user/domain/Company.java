@@ -86,12 +86,7 @@ public class Company {
     /**
      * 企业成立时间
      */
-    private Date establishedTime;
-
-    /**
-     * 营业执照相对路径
-     */
-    private String licenseUrl;
+    private Date establishment;
 
     /**
      * 合同认证状态（0:未认证 1:已认证）

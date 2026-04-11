@@ -22,7 +22,7 @@ public interface WebConstants {
     /**
      * 支付回调地址
      */
-    String PAY_NOTIFY_URL = "%s/pay/notify/%s/%s";
+    String PAY_NOTIFY_URL = "%s/pay/notify/%s";
 
 
     /**

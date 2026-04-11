@@ -2,7 +2,7 @@ package com.ruoyi.web.controller.company;
 
 import cn.hutool.core.lang.Assert;
 import com.ruoyi.biz.company.CompanyBizService;
-import com.ruoyi.biz.company.UserBizService;
+import com.ruoyi.biz.company.MemberBizService;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.user.LoginUser;
@@ -10,19 +10,18 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.validator.ValidatorUtils;
 import com.ruoyi.common.validator.group.AddGroup;
-import com.ruoyi.common.validator.group.UpdateGroup;
-import com.ruoyi.mapper.UserConvert;
 import com.ruoyi.mapper.company.CompanyConvert;
+import com.ruoyi.mapper.company.MemberConvert;
 import com.ruoyi.user.facade.ICompanyFacade;
-import com.ruoyi.user.facade.IUserFacade;
+import com.ruoyi.user.facade.IMemberFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
-import com.ruoyi.user.model.bo.UserBO;
+import com.ruoyi.user.model.bo.MemberBO;
 import com.ruoyi.user.model.consts.UserApiConsts;
 import com.ruoyi.user.model.param.CompanyParam;
-import com.ruoyi.user.model.param.UserCompanyParam;
+import com.ruoyi.user.model.param.MemberCompanyParam;
 import com.ruoyi.user.model.query.CompanyQuery;
-import com.ruoyi.user.model.query.UserCompanyQuery;
-import com.ruoyi.user.model.query.UserQuery;
+import com.ruoyi.user.model.query.MemberCompanyQuery;
+import com.ruoyi.user.model.query.MemberQuery;
 import com.ruoyi.web.form.company.CompanyAddForm;
 import com.ruoyi.web.form.company.CompanyForm;
 import com.ruoyi.web.form.company.CompanyUserForm;
@@ -45,10 +44,10 @@ public class CompanyController extends BaseController {
     private ICompanyFacade companyService;
 
     @Autowired
-    private IUserFacade userFacade;
+    private IMemberFacade memberFacade;
 
     @Autowired
-    private UserBizService userBizService;
+    private MemberBizService memberBizService;
 
     @Autowired
     CompanyBizService companyBizService;
@@ -61,8 +60,6 @@ public class CompanyController extends BaseController {
 
         return getDataTable(CompanyConvert.INSTANCE.toVoListPage(companyBOPageBO.getData()), companyBOPageBO.getTotal());
     }
-
-
 
     @PostMapping("/add")
     public AjaxResult add(@RequestBody @Validated CompanyAddForm companyForm) throws IOException {
@@ -82,7 +79,6 @@ public class CompanyController extends BaseController {
         return AjaxResult.success(CompanyConvert.INSTANCE.toVo(companyBO));
     }
 
-
     @PostMapping("/update")
     public AjaxResult update(@RequestBody @Validated CompanyAddForm companyForm) throws IOException {
 
@@ -94,57 +90,41 @@ public class CompanyController extends BaseController {
         return AjaxResult.success();
     }
 
-
-
     @GetMapping("/user/list/{companyId}")
-
-
     public TableDataInfo userList(@PathVariable("companyId") Long companyId,
                                   @RequestParam(value = "phone", required = false) String phone,
                                   @RequestParam(value = "nickName", required = false)String nickName) {
 
-        PageBO<UserBO> userBOPageBO = userFacade.userList(new UserQuery().setNickName(nickName).setMobile(phone).setCompanyId(companyId), startParamV2());
+        PageBO<MemberBO> memberBOPageBO = memberFacade.memberList(new MemberQuery().setNickName(nickName).setMobile(phone).setCompanyId(companyId), startParamV2());
 
-        List<UserVO> userVoList = UserConvert.INSTANCE.toUserVoList(userBOPageBO.getData());
-        return getDataTable(userVoList, userBOPageBO.getTotal());
+        List<UserVO> userVoList = MemberConvert.INSTANCE.toVoList(memberBOPageBO.getData());
+        return getDataTable(userVoList, memberBOPageBO.getTotal());
     }
 
-
     @PostMapping("/user/add")
-    public AjaxResult userAdd(@RequestBody @Validated CompanyUserForm companyUserForm) throws WxErrorException {
+    public AjaxResult memberAdd(@RequestBody @Validated CompanyUserForm companyUserForm) throws WxErrorException {
 
         ValidatorUtils.validateEntity(companyUserForm, AddGroup.class);
 
-        userBizService.checkCompany(companyUserForm.getCompanyId());
-        String bo = userBizService.channelCode(userBizService.buildQrCodeParam(companyUserForm.getCompanyId(), UserApiConsts.INVITATION_SUB_QR_CODE,
-                companyUserForm.getPhone(), companyUserForm.getNickName(), companyUserForm.getOwner()), UserApiConsts.INVITATION_SUB_QR_CODE);
-
-        return AjaxResult.success(AjaxResult.SUCCESS, bo);
+        memberBizService.checkCompany(companyUserForm.getCompanyId());
+        return AjaxResult.success(AjaxResult.SUCCESS, memberBizService.channelCode(memberBizService.buildQrCodeParam(companyUserForm.getCompanyId(), UserApiConsts.INVITATION_SUB_QR_CODE,
+                companyUserForm.getPhone(), companyUserForm.getNickName(), companyUserForm.getOwner(), null), UserApiConsts.INVITATION_SUB_QR_CODE));
     }
 
-
-
     @DeleteMapping("/{companyId}/{userId}")
-    public AjaxResult userAdd(@PathVariable("companyId") Long companyId, @PathVariable("userId") Long userId) throws WxErrorException {
+    public AjaxResult memberDelete(@PathVariable("companyId") Long companyId, @PathVariable("userId") Long userId) throws WxErrorException {
 
-        userBizService.removeUserCompany(companyId, userId);
+        memberBizService.removeUserCompany(companyId, userId);
 
         return AjaxResult.success();
     }
-
 
     @PutMapping("/{companyId}/{userId}/{owner}")
     public AjaxResult update(@PathVariable("companyId") Long companyId, @PathVariable("userId") Long userId, @PathVariable("owner") Integer owner) {
 
-//        Long l = companyService.countUser(new UserCompanyQuery().setCompanyId(companyId).setOwner(owner));
-//        if (l > 0 && Objects.equals(UserEnum.UserOwner.MASTER.getValue(), owner)) {
-//            throw new ServiceException("企业已经存在主账号");
-//        }
-
-        companyService.update(new UserCompanyParam().setOwner(owner), new UserCompanyQuery().setCompanyId(companyId).setUserId(userId));
+        companyService.update(new MemberCompanyParam().setOwner(owner), new MemberCompanyQuery().setCompanyId(companyId).setUserId(userId));
 
         return AjaxResult.success();
     }
-
 
 }

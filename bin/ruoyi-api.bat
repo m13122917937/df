@@ -11,7 +11,7 @@ chcp 65001 >nul
 set ACR_REGISTRY=crpi-4norowu43xncrxa7.cn-shanghai.personal.cr.aliyuncs.com
 set ACR_NAMESPACE=fydf
 set IMAGE_NAME=ruoyi-api
-set IMAGE_TAG=1.0.2
+set IMAGE_TAG=1.0.3
 set ACR_USERNAME=hahhapai
 set ACR_PASSWORD=xht654321.
 

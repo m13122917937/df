@@ -17,8 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="provinceId"    column="province_id"    />
         <result property="city"    column="city"    />
         <result property="cityId"    column="city_id"    />
-        <result property="establishedTime"    column="established_time"    />
-        <result property="licenseUrl"    column="license_url"    />
+        <result property="establishment"    column="establishment"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
     </resultMap>

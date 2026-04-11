@@ -21,9 +21,6 @@ public class CompanyBankController extends BaseController {
     @Autowired
     CompanyBankBizService companyBankBizService;
 
-
-
-
     @GetMapping("/list/{companyId}")
     public AjaxResult list(@PathVariable("companyId") Long companyId) {
 
@@ -42,8 +39,6 @@ public class CompanyBankController extends BaseController {
         return AjaxResult.success();
     }
 
-
-
     @PutMapping("/update")
     public AjaxResult update(@RequestBody CompanyBankForm companyBankForm) {
         ValidatorUtils.validateEntity(companyBankForm, UpdateGroup.class);
@@ -52,6 +47,5 @@ public class CompanyBankController extends BaseController {
 
         return AjaxResult.success();
     }
-
 
 }
