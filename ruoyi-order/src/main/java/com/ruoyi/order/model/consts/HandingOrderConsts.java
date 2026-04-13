@@ -8,7 +8,7 @@ public interface HandingOrderConsts {
 
     @Getter
     @AllArgsConstructor
-    public enum Status {
+    enum Status {
 
         /**
          * 订单类型

@@ -87,7 +87,7 @@ public class CompanyAddForm {
     @NotNull(groups = AddGroup.class)
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date establishedTime;
+    private Date establishment;
 
 
 }

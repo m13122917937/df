@@ -1,7 +1,7 @@
 package com.ruoyi.bill.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -37,7 +37,7 @@ public class BillPayPlanQuery {
     /**
      * 供应商ID
      */
-    @QueryField(operator = Operator.IN, field = "supplier_id")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "supplier_id")
     private Set<Long> supplierIdSet;
     /**
      * 供应商名称
@@ -76,7 +76,7 @@ public class BillPayPlanQuery {
     /**
      * 状态（1:待付款；2:待确认；3:手工确认；4:默认确认；5:异常）
      */
-    @QueryField(operator = Operator.IN, field = "status")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "status")
     private List<Integer> statusList;
     /**
      * 异常原因
@@ -96,11 +96,11 @@ public class BillPayPlanQuery {
     private Date createTime;
 
     /** 创建时间 */
-    @QueryField(operator = Operator.GT, field = "create_time")
+    @QueryField(operator = DynamicCondition.Operator.GT, field = "create_time")
     private Date gtCreateTime;
 
     /** 创建时间 */
-    @QueryField(operator = Operator.LTE, field = "create_time")
+    @QueryField(operator = DynamicCondition.Operator.LTE, field = "create_time")
     private Date lteCreateTime;
     /**
      * 更新者

@@ -1,11 +1,9 @@
 package com.ruoyi.order.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.math.BigDecimal;
 
 import java.util.Date;
 
@@ -48,7 +46,7 @@ public class ImeiSkuRelQuery {
     /**
      * 型号
      */
-    @QueryField(operator = Operator.LIKE, field = "product_name")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "product_name")
     private String productNameLike;
     /**
      * 型号
@@ -79,7 +77,7 @@ public class ImeiSkuRelQuery {
     /**
      * 修改时间
      */
-    @QueryField(operator = Operator.LIMIT)
+    @QueryField(operator = DynamicCondition.Operator.LIMIT)
     private Integer limit;
 
 

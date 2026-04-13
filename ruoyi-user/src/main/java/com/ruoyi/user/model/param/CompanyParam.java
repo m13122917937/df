@@ -1,7 +1,5 @@
 package com.ruoyi.user.model.param;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

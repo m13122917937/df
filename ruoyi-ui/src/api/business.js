@@ -124,7 +124,7 @@ export function getBusinessUserListApi(companyId,data) {
  */
 export function addBusinessUserApi(data) {
   return request({
-    url: "/company/member/add",
+    url: "/company/user/add",
     method: "POST",
     data,
   });

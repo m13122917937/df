@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.List;
 
 @Slf4j
-
 @RestController
 @RequestMapping("/order/new")
 public class OrderController extends BaseController {
@@ -72,8 +71,6 @@ public class OrderController extends BaseController {
 
 
     @PostMapping("list")
-
-
     public TableDataInfo list(@RequestBody OrderNewForm orderNewParam) {
         orderNewParam.setOrderType(OrderConsts.OrderType.O2O.getCode());
         PageBO<OrderListVO> orderWaitVOPageBO = orderBizService.orderList(orderNewParam, startParamV2(orderBizService.sortField(orderNewParam.getStatus())));

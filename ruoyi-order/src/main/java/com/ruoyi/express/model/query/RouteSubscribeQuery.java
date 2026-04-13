@@ -1,11 +1,9 @@
 package com.ruoyi.express.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.math.BigDecimal;
 
 import java.util.Date;
 
@@ -85,7 +83,7 @@ public class RouteSubscribeQuery {
     /**
      * 创建时间
      */
-    @QueryField( operator = Operator.GTE, field = "create_time")
+    @QueryField( operator = DynamicCondition.Operator.GTE, field = "create_time")
     private Date gtCreateTime;
     /**
      * 修改时间
@@ -97,7 +95,7 @@ public class RouteSubscribeQuery {
 
 
 
-    @QueryField( operator = Operator.NE, field = "order_code")
+    @QueryField( operator = DynamicCondition.Operator.NE, field = "order_code")
     private String notEqOrderCode;
 
 }

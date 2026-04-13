@@ -1,7 +1,7 @@
 package com.ruoyi.bill.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,6 +11,8 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import static com.ruoyi.framework.mybatis.DynamicCondition.Operator.IN;
 
 /**
  * 账单对象 f_bill
@@ -31,7 +33,7 @@ public class BillQuery {
     /**
      * id
      */
-    @QueryField(operator = Operator.IN, field = "id")
+    @QueryField(operator = IN, field = "id")
     private Set<Long> idSet;
     /**
      * 供应商id
@@ -87,7 +89,7 @@ public class BillQuery {
      * 默认状态（1:未付款；2:已付款；3:已收款；4:异常收款；5：异常账单；6:售后退货；7：停款；）
      * 预付款状态（1待扣款；2已扣款；3已充值；4已退款;5取消扣款）
      */
-    @QueryField(operator = Operator.IN, field = "status")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "status")
     private List<Integer> statusList;
     /**
      * 账单金额

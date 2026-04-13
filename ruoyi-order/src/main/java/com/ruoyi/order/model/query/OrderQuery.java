@@ -1,7 +1,7 @@
 package com.ruoyi.order.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -27,7 +27,7 @@ public class OrderQuery {
     /**
      * 订单编码
      */
-    @QueryField(operator = Operator.IN, field = "order_code")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "order_code")
     private List<String> orderCodeList;
     /**
      * 管家订单号
@@ -38,10 +38,10 @@ public class OrderQuery {
     /**
      * 管家订单号
      */
-    @QueryField(operator = Operator.IN, field = "erp_order_id")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "erp_order_id")
     private List<String> erpOrderIdList;
 
-    @QueryField(operator = Operator.IN, field = "original_order_id")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "original_order_id")
     private List<String> originalOrderIdList;
 
     /**
@@ -98,7 +98,7 @@ public class OrderQuery {
     /**
      * 类别
      */
-    @QueryField(operator = Operator.IN, field = "category")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "category")
     private List<String> categoryList;
     /**
      * 品牌
@@ -108,7 +108,7 @@ public class OrderQuery {
     /**
      * 品牌
      */
-    @QueryField(operator = Operator.IN, field = "brand")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "brand")
     private List<String> brandSet;
 
     /**
@@ -123,12 +123,12 @@ public class OrderQuery {
     /**
      * 产品型号
      */
-    @QueryField(operator = Operator.LIKE, field = "product_name")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "product_name")
     private String productNameLike;
     /**
      * 产品型号
      */
-    @QueryField(operator = Operator.LIKE, field = "sku_name")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "sku_name")
     private String skuNameLike;
 
     /**
@@ -147,7 +147,7 @@ public class OrderQuery {
     /**
      * 平台
      */
-    @QueryField(operator = Operator.IN, field = "platform")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "platform")
     private List<String> platformList;
     /**
      * 状态(1: 未报价；2: 待提交；3:报价中；4:待发货；5: 已发货；6:已完成；7：退货退单；8：待补全地址；9：串码异常；10：售后；11：在途；12：物流异常；13：撤销；14：未追回订单)
@@ -157,13 +157,13 @@ public class OrderQuery {
     /**
      * 状态(1: 未报价；2: 待提交；3:报价中；4:待发货；5: 已发货；6:已完成；7：退货退单；8：待补全地址；9：串码异常；10：售后；11：在途；12：物流异常；13：撤销；14：未追回订单)
      */
-    @QueryField(operator = Operator.IN, field = "status")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "status")
     private List<Integer> statusList;
 
     /**
      * 状态(1: 未报价；2: 待提交；3:报价中；4:待发货；5: 已发货；6:已完成；7：退货退单；8：待补全地址；9：串码异常；10：售后；11：在途；12：物流异常；13：撤销；14：未追回订单)
      */
-    @QueryField(operator = Operator.NOT_IN, field = "status")
+    @QueryField(operator = DynamicCondition.Operator.NOT_IN, field = "status")
     private List<Integer> noStatusList;
 
     /**
@@ -174,7 +174,7 @@ public class OrderQuery {
     /**
      * 子状态（20:新建；21:撤销；22:超时发货；23:超时流拍，30:待抢单 ，31:待确认）
      */
-    @QueryField(operator = Operator.IN, field = "sub_status")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "sub_status")
     private List<Integer> subStatusList;
 
     /**
@@ -190,13 +190,13 @@ public class OrderQuery {
     /**
      * 最晚发货时间
      */
-    @QueryField(operator = Operator.GTE, field = "last_shipping_time")
+    @QueryField(operator = DynamicCondition.Operator.GTE, field = "last_shipping_time")
     private Date lastShippingTimeStart;
 
     /**
      * 最晚发货时间
      */
-    @QueryField(operator = Operator.LTE, field = "last_shipping_time")
+    @QueryField(operator = DynamicCondition.Operator.LTE, field = "last_shipping_time")
     private Date lastShippingTimeEnd;
 
     /**
@@ -241,11 +241,11 @@ public class OrderQuery {
     private Long handleApply;
 
 
-    @QueryField(operator = Operator.GTE, field = "createTime")
+    @QueryField(operator = DynamicCondition.Operator.GTE, field = "createTime")
     private Date createTimeStart;
 
 
-    @QueryField(operator = Operator.LTE, field = "createTime")
+    @QueryField(operator = DynamicCondition.Operator.LTE, field = "createTime")
     private Date createTimeEnd;
 
     /**
@@ -262,25 +262,25 @@ public class OrderQuery {
     /**
      * 发货开始时间
      */
-    @QueryField(operator = Operator.GTE, field = "send_time")
+    @QueryField(operator = DynamicCondition.Operator.GTE, field = "send_time")
     private Date sendStartTime;
 
     /**
      * 发货时间
      */
-    @QueryField(operator = Operator.LTE, field = "send_time")
+    @QueryField(operator = DynamicCondition.Operator.LTE, field = "send_time")
     private Date sendNedTime;
 
     /**
      * 收货时间-开始
      */
-    @QueryField(operator = Operator.GTE, field = "signed_time")
+    @QueryField(operator = DynamicCondition.Operator.GTE, field = "signed_time")
     private Date signedStartTime;
 
     /**
      * 收货时间-结束
      */
-    @QueryField(operator = Operator.LTE, field = "signed_time")
+    @QueryField(operator = DynamicCondition.Operator.LTE, field = "signed_time")
     private Date signedEndTime;
 
     /**

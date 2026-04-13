@@ -1,7 +1,7 @@
 package com.ruoyi.bill.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -43,13 +43,13 @@ public class DeductionQuery {
      * 订单编号
      *
      */
-    @QueryField( operator = Operator.IN, field = "order_code")
+    @QueryField( operator = DynamicCondition.Operator.IN, field = "order_code")
     private List<String> orderCodeList;
 
     /**
      * 商家单号
      */
-    @QueryField( operator = Operator.IN, field = "original_order_id")
+    @QueryField( operator = DynamicCondition.Operator.IN, field = "original_order_id")
     private List<String> originalOrderIdList;
     /**
      * 旺店通id

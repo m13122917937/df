@@ -1,12 +1,7 @@
 package com.ruoyi;
 
-import cn.hutool.core.date.DateUtil;
-import com.fasc.open.api.exception.ApiException;
-import com.ruoyi.biz.fadada.FadadaBizService;
 import com.ruoyi.biz.mq.MsgClient;
 import com.ruoyi.capital.facade.ICompanyCapitalFacade;
-import com.ruoyi.capital.model.consts.CompanyCapitalConsts;
-import com.ruoyi.capital.model.param.CompanyCapitalLogParam;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.consts.WebConstants;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
@@ -16,13 +11,10 @@ import com.ruoyi.kuaidi100.ExpressClient;
 import com.ruoyi.kuaidi100.model.SubscribeExpressCode;
 import com.ruoyi.kuaidi100.model.SubscribeExpressParam;
 import com.ruoyi.system.facade.ISysDictTypeFacade;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-
-import java.math.BigDecimal;
 
 @ContextConfiguration
 @SpringBootTest(classes = ApiApplication.class)
@@ -45,8 +37,7 @@ public class ApplicationIntegrationTest {
     @Autowired
     RuoYiConfig ruoYiConfig;
 
-    @Autowired
-    FadadaBizService fadadaBizService;
+
 
 
 //    @Test

@@ -49,6 +49,18 @@
           show-overflow-tooltip
         />
         <el-table-column
+          prop="corporateName"
+          label="法人"
+          width="150"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="establishment"
+          label="企业成立时间"
+          width="140"
+          show-overflow-tooltip
+        />
+        <el-table-column
           prop="province"
           label="省"
           width="120"

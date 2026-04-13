@@ -52,8 +52,8 @@
 
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="企业成立时间" prop="establishedTime">
-            <el-date-picker v-model="form.establishedTime" type="date" placeholder="请选择企业成立时间" format="yyyy-MM-dd"
+          <el-form-item label="企业成立时间" prop="establishment">
+            <el-date-picker v-model="form.establishment" type="date" placeholder="请选择企业成立时间" format="yyyy-MM-dd"
               value-format="yyyy-MM-dd" style="width: 100%" />
           </el-form-item>
         </el-col>
@@ -142,7 +142,7 @@ export default {
         provinceId: '',
         city: '',
         cityId: '',
-        establishedTime: '',
+        establishment: '',
         stopPurchase: 1,
         accountingPeriod: null,
         grabStatus: 0,
@@ -167,7 +167,7 @@ export default {
         cityId: [
           { required: true, message: '请选择市', trigger: 'change' }
         ],
-        establishedTime: [
+        establishment: [
           { required: true, message: '请选择企业成立时间', trigger: 'change' }
         ],
         stopPurchase: [
@@ -310,7 +310,7 @@ export default {
         provinceId: '',
         city: '',
         cityId: '',
-        establishedTime: '',
+        establishment: '',
         stopPurchase: 1,
         accountingPeriod: null,
         grabStatus: 0,

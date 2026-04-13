@@ -1,12 +1,9 @@
 package com.ruoyi.product.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.Query;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.math.BigDecimal;
 
 import java.util.Date;
 
@@ -48,7 +45,7 @@ public class ProductSkuQuery {
     /**
      * 商品名
      */
-    @QueryField(operator = Operator.LIKE, field = "product_name")
+    @QueryField(operator = DynamicCondition.Operator.LIKE, field = "product_name")
     private String productNameLike;
     /**
      * 规格名
@@ -90,10 +87,10 @@ public class ProductSkuQuery {
     /**
      * 排序
      */
-    @QueryField(operator = Operator.LIMIT)
+    @QueryField(operator = DynamicCondition.Operator.LIMIT)
     private Integer limit;
 
-    @QueryField(operator = Operator.GROUP, field = "sku_code")
+    @QueryField(operator = DynamicCondition.Operator.GROUP, field = "sku_code")
     private String group;
 
 

@@ -1,7 +1,7 @@
 package com.ruoyi.bill.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -31,7 +31,7 @@ public class PayerQuery {
     /**
      * 付款户名
      */
-    @QueryField(operator = Operator.LIKE, field = "pay_name")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "pay_name")
     private String payNameLike;
     /**
      * 付款户名

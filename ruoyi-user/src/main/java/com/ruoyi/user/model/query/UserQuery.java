@@ -1,7 +1,7 @@
 package com.ruoyi.user.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public class UserQuery {
 
     private Long userId;
-    @QueryField(operator = Operator.IN, field = "user_id")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "user_id")
     private List<Long> userIdSet;
 
     private String openId;
@@ -23,7 +23,7 @@ public class UserQuery {
 
     private String nickName;
 
-    @QueryField(operator = Operator.LIKE, field = "nick_name")
+    @QueryField(operator = DynamicCondition.Operator.LIKE, field = "nick_name")
     private String nickNameLike;
 
 

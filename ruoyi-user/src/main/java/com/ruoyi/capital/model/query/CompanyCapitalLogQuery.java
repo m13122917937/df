@@ -1,8 +1,7 @@
 package com.ruoyi.capital.model.query;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -50,10 +49,10 @@ public class CompanyCapitalLogQuery {
     private Integer type;
 
 
-    @QueryField(operator = Operator.GTE, field = "create_time")
+    @QueryField(operator = DynamicCondition.Operator.GTE, field = "create_time")
     private Date startDate;
 
-    @QueryField(operator = Operator.LT, field = "create_time")
+    @QueryField(operator = DynamicCondition.Operator.LT, field = "create_time")
     private Date endDate;
 
 }

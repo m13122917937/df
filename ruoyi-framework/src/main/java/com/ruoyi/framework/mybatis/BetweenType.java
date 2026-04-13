@@ -1,11 +1,5 @@
 package com.ruoyi.framework.mybatis;
 
-/**
- * 范围查询类型操作符.
- *
- * @author Luo
- * @date 2023-8-11 11:19
- */
 public enum BetweenType {
 
     /**

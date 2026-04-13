@@ -1,11 +1,9 @@
 package com.ruoyi.user.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.math.BigDecimal;
 
 import java.util.Date;
 import java.util.Set;
@@ -33,7 +31,7 @@ public class CompanyBankQuery {
     /**
      * 企业主键
      */
-    @QueryField(operator = Operator.IN, field = "company_id")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "company_id")
     private Set<Long> companyIdSet;
     /**
      * 企业主体name

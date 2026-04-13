@@ -1,7 +1,7 @@
 package com.ruoyi.order.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -28,7 +28,7 @@ public class RuleQuery {
     /**
      * 主键
      */
-    @QueryField(operator = Operator.IN, field = "id")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "id")
     private List<Long> idList;
     /**
      * 省
@@ -147,7 +147,7 @@ public class RuleQuery {
     private Date updateTime;
 
 
-    @QueryField(operator = Operator.GT, field = "create_time")
+    @QueryField(operator = DynamicCondition.Operator.GT, field = "create_time")
     private Date gtCreateTime;
 
 

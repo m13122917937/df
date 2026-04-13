@@ -1,7 +1,7 @@
 package com.ruoyi.order.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -32,7 +32,7 @@ public class TradeOrderQuery {
     /**
      * 订单id
      */
-    @QueryField(field = "order_id" , operator = Operator.IN)
+    @QueryField(field = "order_id" , operator = DynamicCondition.Operator.IN)
     private List<String> orderIdList;
     /**
      * 挂价单id
@@ -82,7 +82,7 @@ public class TradeOrderQuery {
     /**
      * 状态 1.待确认 2.已失效 3.已成交 4.被抢走
      */
-    @QueryField(field = "status" , operator = Operator.IN)
+    @QueryField(field = "status" , operator = DynamicCondition.Operator.IN)
     private List<Integer> statusList;
     /**
      * 创建时间

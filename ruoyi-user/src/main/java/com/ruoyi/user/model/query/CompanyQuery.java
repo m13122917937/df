@@ -1,7 +1,7 @@
 package com.ruoyi.user.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,7 +11,7 @@ import java.util.Date;
 @Accessors(chain = true)
 public class CompanyQuery {
 
-    @QueryField(operator = Operator.LIKE, field = "companyName")
+    @QueryField(operator = DynamicCondition.Operator.LIKE, field = "companyName")
     private String companyNameLike;
 
     private Long id;
@@ -20,7 +20,7 @@ public class CompanyQuery {
 
     private String nickName;
 
-    @QueryField(operator = Operator.LIKE, field = "nickName")
+    @QueryField(operator = DynamicCondition.Operator.LIKE, field = "nickName")
     private String nickNameLike;
 
     /**

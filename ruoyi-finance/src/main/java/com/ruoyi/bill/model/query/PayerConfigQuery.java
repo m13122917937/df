@@ -1,11 +1,9 @@
 package com.ruoyi.bill.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.math.BigDecimal;
 
 import java.util.Date;
 
@@ -27,7 +25,7 @@ public class PayerConfigQuery {
     /**
      * 关键字
      */
-    @QueryField(operator = Operator.LIKE, field = "key_word")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "key_word")
     private String keyWordLike;
     /**
      * 平台

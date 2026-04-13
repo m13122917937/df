@@ -34,7 +34,8 @@
       "WebSearch",
       "Bash(find:*)",
       "Bash(xargs file:*)",
-      "Bash(ls -la D:/work/jie/adm/*.iml)"
+      "Bash(ls -la D:/work/jie/adm/*.iml)",
+      "Bash(javac -cp \"ruoyi-order/target/classes:../.m2/repository/*\" ruoyi-order/src/main/java/com/ruoyi/rule/domain/Rule.java -d ruoyi-order/target/classes)"
     ]
   }
 }

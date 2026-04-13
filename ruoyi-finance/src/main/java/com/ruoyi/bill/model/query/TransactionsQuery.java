@@ -1,7 +1,7 @@
 package com.ruoyi.bill.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -32,30 +32,30 @@ public class TransactionsQuery {
     /**
      * 所属账户ID，外键关联 accounts.account_id
      */
-    @QueryField(operator = Operator.LIMIT)
+    @QueryField(operator = DynamicCondition.Operator.LIMIT)
     private Integer Limit;
     /**
      * 交易日期
      */
     private Date transactionDate;
 
-    @QueryField(operator = Operator.LT, field = "transaction_date")
+    @QueryField(operator = DynamicCondition.Operator.LT, field = "transaction_date")
     private Date ltTransactionDate;
 
     /**
      * 交易日期
      */
-    @QueryField(operator = Operator.GTE, field = "transaction_date")
+    @QueryField(operator = DynamicCondition.Operator.GTE, field = "transaction_date")
     private Date transactionDateStart;
 
     /**
      * 交易日期
      */
-    @QueryField(operator = Operator.LTE, field = "transaction_date")
+    @QueryField(operator = DynamicCondition.Operator.LTE, field = "transaction_date")
     private Date transactionDateEnd;
 
 
-    @QueryField(operator = Operator.GT, field = "transaction_date")
+    @QueryField(operator = DynamicCondition.Operator.GT, field = "transaction_date")
     private Date gtTransactionDate;
     /**
      * 类别，0收入，1支出
@@ -85,7 +85,7 @@ public class TransactionsQuery {
     /**
      * 交易对方（如“星巴克”、“张三”、“工资入账”）
      */
-    @QueryField(operator = Operator.LIKE, field = "counterparty")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "counterparty")
     private String counterpartyLike;
     /**
      * 备注
@@ -95,25 +95,25 @@ public class TransactionsQuery {
     /**
      * $column.columnComment
      */
-    @QueryField(operator = Operator.GTE, field = "created_at")
+    @QueryField(operator = DynamicCondition.Operator.GTE, field = "created_at")
     private Date gteCreatedAt;
 
     /**
      * $column.columnComment
      */
-    @QueryField(operator = Operator.GT, field = "created_at")
+    @QueryField(operator = DynamicCondition.Operator.GT, field = "created_at")
     private Date gtCreatedAt;
 
     /**
      * $column.columnComment
      */
-    @QueryField(operator = Operator.LTE, field = "created_at")
+    @QueryField(operator = DynamicCondition.Operator.LTE, field = "created_at")
     private Date lteCreatedAt;
 
     /**
      * $column.columnComment
      */
-    @QueryField(operator = Operator.LT, field = "created_at")
+    @QueryField(operator = DynamicCondition.Operator.LT, field = "created_at")
     private Date ltCreatedAt;
     /**
      * $column.columnComment

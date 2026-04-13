@@ -9,8 +9,6 @@ import java.io.Serializable;
 /**
  * 范围查询.
  *
- * @author Luo
- * @date 2023-8-11 10:56
  */
 @Getter
 @NoArgsConstructor

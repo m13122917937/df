@@ -1,7 +1,7 @@
 package com.ruoyi.order.model.query;
 
-import com.ruoyi.framework.annotation.Operator;
-import com.ruoyi.framework.annotation.QueryField;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import com.ruoyi.framework.mybatis.QueryField;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -51,13 +51,13 @@ public class ImeiQuery {
     /**
      * 订单id
      */
-    @QueryField(operator = Operator.NE, field = "order_id")
+    @QueryField(operator = DynamicCondition.Operator.NE, field = "order_id")
     private String notEqOrderId;
 
     /**
      * 订单id
      */
-    @QueryField(operator = Operator.IN, field = "order_id")
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "order_id")
     private List<String> orderIdList;
 
     /**
@@ -76,7 +76,7 @@ public class ImeiQuery {
     /**
      * 激活状态
      */
-    @QueryField(operator = Operator.NE, field = "activated")
+    @QueryField(operator = DynamicCondition.Operator.NE, field = "activated")
     private Integer noActivated;
 
     /**
@@ -100,7 +100,7 @@ public class ImeiQuery {
     /**
      * 创建时间
      */
-    @QueryField(operator = Operator.GT, field = "create_time")
+    @QueryField(operator = DynamicCondition.Operator.GT, field = "create_time")
     private Date gtCreateTime;
 
     /**

@@ -94,5 +94,5 @@ echo ✅ 镜像已成功推送至阿里云 ACR:
 echo     %FULL_IMAGE%
 echo.
 echo 🚀 部署完成！
-docker system prune -a -f --volumes
+::docker system prune -a -f --volumes
 pause

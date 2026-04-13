@@ -1,32 +1,31 @@
 package com.ruoyi.rule.model.consts;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 public interface RuleConsts {
 
-    @Getter
-    @AllArgsConstructor
     public enum Status {
         /**
          * 订单类型
          */
         NORMAL(1, "有效"),
-
         /**
          * 团购订单
          */
         FAILURE(2, "失效");
 
-        int code;
+        @Getter
+        private final int code;
+        @Getter
+        private final String msg;
 
-        String msg;
-
+        Status(int code, String msg) {
+            this.code = code;
+            this.msg = msg;
+        }
     }
 
 
-    @Getter
-    @AllArgsConstructor
     public enum Range {
         /**
          * 订单类型
@@ -37,42 +36,53 @@ public interface RuleConsts {
 //        PLATFORM(3, "平台");
         ;
 
-        int code;
+        @Getter
+        private final int code;
+        @Getter
+        private final String msg;
 
-        String msg;
-
+        Range(int code, String msg) {
+            this.code = code;
+            this.msg = msg;
+        }
     }
 
-    @Getter
-    @AllArgsConstructor
-    public enum PeriodType {
+    enum PeriodType {
 
         ZERO(0, "到货就款"),
-        ONE(0, "1天"),
-        TWO(0, "2天"),
-        THREE(0, "3天"),
-        FOUR(0, "4天"),
-        FIVE(0, "5天");
+        ONE(1, "1天"),
+        TWO(2, "2天"),
+        THREE(3, "3天"),
+        FOUR(4, "4天"),
+        FIVE(5, "5天");
 
-        int code;
-        String msg;
+        @Getter
+        private final int code;
+        @Getter
+        private final String msg;
+
+        PeriodType(int code, String msg) {
+            this.code = code;
+            this.msg = msg;
+        }
     }
 
-    @Getter
-    @AllArgsConstructor
-    public enum CodeOptions {
+    enum CodeOptions {
 
         BEFORE_SHIPMENT(0, "发货前提供串码"),
-
         AFTER_SHIPMENT(1, "发货后提供串码"),
-
         NOT(2, "发货后提供串码"),
-
         ;
 
-        int code;
-        String msg;
-    }
+        @Getter
+        private final int code;
+        @Getter
+        private final String msg;
 
+        CodeOptions(int code, String msg) {
+            this.code = code;
+            this.msg = msg;
+        }
+    }
 
 }

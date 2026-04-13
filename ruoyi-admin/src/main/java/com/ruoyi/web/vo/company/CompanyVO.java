@@ -86,7 +86,7 @@ public class CompanyVO {
      */
 
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date establishedTime;
+    private Date establishment;
 
     /**
      * 营业执照相对路径

@@ -90,7 +90,7 @@ public class ImeiBizService {
                 .setSkuCode(orderBO.getSkuCode()).setImel(imei).setSn(sn).setHangingOrderId(tradeOrderBO.getHangOrderId()).setCreateTime(DateUtil.date());
         ImeiBO imeiBO = imeiFacade.save(imeiParam);
         // 判断是否激活
-        String snQ = BrandConsts.VIVO.equalsIgnoreCase(orderBO.getBrand()) ? imeiBO.getImel() : imeiBO.getSn();
+        String snQ = BrandConsts.SN_LIST.contains(orderBO.getBrand())? imeiBO.getImel() : imeiBO.getSn();
         WarrantyResult warranty = snQueryClient.query(snQ, orderBO.getBrand());
         imeiBO.setActivatedTime(DateUtil.date());
         imeiBO.setActivated(warranty.getExits() ? (warranty.isActivated() ? ImeiConsts.Activated.ACTIVATED.getCode() : ImeiConsts.Activated.NOT_ACTIVATED.getCode())

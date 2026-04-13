@@ -18,11 +18,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 @EnableCaching
 public class RedisConfig extends CachingConfigurerSupport {
-//    @Bean
-//    @ConditionalOnMissingBean
-//    public RedisTemplate redisTemplate(RedisConnectionFactory connectionFactory) {
-//        return new JsonRedisTemplate(connectionFactory);
-//    }
+
 
     @Bean
     @SuppressWarnings(value = {"unchecked", "rawtypes"})

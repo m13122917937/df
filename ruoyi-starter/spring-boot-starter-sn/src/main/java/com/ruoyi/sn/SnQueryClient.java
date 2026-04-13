@@ -123,6 +123,8 @@ public class SnQueryClient {
             return queryHuawei(snOrImei);
         } else if (Objects.equals("小米", brand)) {
             return queryXiaomi(snOrImei);
+        } else if (Objects.equals("红米", brand)) {
+            return queryXiaomi(snOrImei);
         } else if (Objects.equals("荣耀", brand)) {
             return queryHonor(snOrImei);
         } else if ("Oppo".equalsIgnoreCase(brand)) {
