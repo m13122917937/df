@@ -1,11 +1,10 @@
 package com.ruoyi.order.convert;
 
 
-import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.order.domain.ImeiSkuRel;
 import com.ruoyi.order.model.bo.ImeiSkuRelBO;
-import com.ruoyi.order.model.query.ImeiSkuRelQuery;
 import com.ruoyi.order.model.param.ImeiSkuRelParam;
+import com.ruoyi.order.model.query.ImeiSkuRelQuery;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

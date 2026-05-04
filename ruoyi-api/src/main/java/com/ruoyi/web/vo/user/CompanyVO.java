@@ -26,12 +26,15 @@ public class CompanyVO {
     private String nickName;
 
 
-
     private Boolean curr;
 
 
-
     private Integer owner;
+
+    /**
+     * 合同认证状态
+     */
+    private Integer contractAuthStatus;
 
 
     /**

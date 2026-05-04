@@ -1,4 +1,4 @@
-package com.ruoyi.order.domain;
+package com.ruoyi.rule.domain;
 
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;

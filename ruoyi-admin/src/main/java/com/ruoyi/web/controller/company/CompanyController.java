@@ -75,6 +75,8 @@ public class CompanyController extends BaseController {
         companyBO = companyService.add(companyParam);
         // erp创建对象
         companyBizService.createProvider(companyBO);
+        // e 签宝 添加
+//        companyBizService.contractAuth(companyBO);
 
         return AjaxResult.success(CompanyConvert.INSTANCE.toVo(companyBO));
     }

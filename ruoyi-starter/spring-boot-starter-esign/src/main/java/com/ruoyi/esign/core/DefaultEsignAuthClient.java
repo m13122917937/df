@@ -1,22 +1,29 @@
 package com.ruoyi.esign.core;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.codec.Base64;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.digest.Digester;
+import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import com.alibaba.fastjson2.JSON;
+import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.esign.api.EsignAuthApi;
 import com.ruoyi.esign.exception.EsignException;
-import com.ruoyi.esign.model.*;
+import com.ruoyi.esign.model.v3.OrgAuthUrlRequest;
 import com.ruoyi.esign.properties.EsignProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
- * 默认e签宝认证客户端实现
+ * 默认e签宝认证客户端实现（V3版本）
+ * 只实现：获取企业认证授权链接
  *
  * @author ruoyi
  */
@@ -26,208 +33,159 @@ public class DefaultEsignAuthClient implements EsignAuthApi {
 
     private final EsignProperties properties;
 
-    /**
-     * 缓存的accessToken
-     */
-    private volatile String accessToken;
-
-    /**
-     * accessToken过期时间戳
-     */
-    private volatile long expireTimestamp;
-
     public DefaultEsignAuthClient(EsignProperties properties) {
         this.properties = properties;
     }
 
     @Override
-    public AccessTokenResponse getAccessToken() {
-        // 如果token未过期，直接返回缓存
-        if (StrUtil.isNotBlank(accessToken) && System.currentTimeMillis() < expireTimestamp) {
-            AccessTokenResponse response = new AccessTokenResponse();
-            response.setAccessToken(accessToken);
-            response.setSuccess(true);
-            return response;
-        }
-
-        AccessTokenRequest request = new AccessTokenRequest();
-        request.setAppId(properties.getAppId());
-        request.setAppSecret(properties.getAppSecret());
-
-        String url = properties.getAccessTokenUrl();
-        String body = JSON.toJSONString(request);
-
-        try {
-            HttpResponse response = HttpRequest.post(url)
-                    .body(body)
-                    .contentType("application/json")
-                    .timeout(properties.getReadTimeout().intValue())
-                    .execute();
-
-            if (!response.isOk()) {
-                throw new EsignException("获取accessToken失败，HTTP状态码：" + response.getStatus());
-            }
-
-            String responseBody = response.body();
-            AccessTokenResponse tokenResponse = JSON.parseObject(responseBody, AccessTokenResponse.class);
-
-            if (Boolean.TRUE.equals(tokenResponse.getSuccess())) {
-                // 缓存token，提前5秒过期
-                this.accessToken = tokenResponse.getAccessToken();
-                this.expireTimestamp = System.currentTimeMillis() + (tokenResponse.getExpiresIn() - 5) * 1000L;
-            } else {
-                log.error("获取e签宝accessToken失败，code:{}, message:{}", tokenResponse.getCode(), tokenResponse.getMessage());
-            }
-
-            return tokenResponse;
-        } catch (Exception e) {
-            log.error("获取e签宝accessToken异常", e);
-            throw new EsignException("获取accessToken异常", e);
-        }
-    }
-
-    @Override
-    public String buildPersonalAuthUrl(PersonalAuthRequest request) {
-        // 使用配置中的回调地址，如果请求中没有指定
-        if (StrUtil.isBlank(request.getRedirectUri())) {
-            request.setRedirectUri(properties.getRedirectUri());
-        }
-
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("appId", properties.getAppId());
-        params.put("redirectUri", request.getRedirectUri());
-        params.put("thirdPartyUserId", request.getThirdPartyUserId());
-        params.put("name", request.getName());
-        params.put("idCard", request.getIdCard());
-        if (StrUtil.isNotBlank(request.getMobile())) {
-            params.put("mobile", request.getMobile());
-        }
-        if (StrUtil.isNotBlank(request.getEmail())) {
-            params.put("email", request.getEmail());
-        }
-        params.put("faceRecognition", request.getFaceRecognition());
-        params.put("expireTime", request.getExpireTime());
-        if (StrUtil.isNotBlank(request.getState())) {
-            params.put("state", request.getState());
-        }
-
-        return buildUrl(properties.getPersonalAuthUrl(), params);
-    }
-
-    @Override
-    public String buildOrgAuthUrl(OrgAuthRequest request) {
-        // 使用配置中的回调地址，如果请求中没有指定
-        if (StrUtil.isBlank(request.getRedirectUri())) {
-            request.setRedirectUri(properties.getRedirectUri());
-        }
-
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("appId", properties.getAppId());
-        params.put("redirectUri", request.getRedirectUri());
-        params.put("thirdPartyUserId", request.getThirdPartyUserId());
-        params.put("agentName", request.getAgentName());
-        params.put("agentIdCard", request.getAgentIdCard());
-        params.put("agentMobile", request.getAgentMobile());
-        params.put("orgName", request.getOrgName());
-        params.put("orgCertType", request.getOrgCertType());
-        params.put("orgCertNo", request.getOrgCertNo());
-        if (StrUtil.isNotBlank(request.getLegalRepName())) {
-            params.put("legalRepName", request.getLegalRepName());
-        }
-        if (StrUtil.isNotBlank(request.getLegalRepIdCard())) {
-            params.put("legalRepIdCard", request.getLegalRepIdCard());
-        }
-        params.put("legalRepAuth", request.getLegalRepAuth());
-        params.put("expireTime", request.getExpireTime());
-        if (StrUtil.isNotBlank(request.getState())) {
-            params.put("state", request.getState());
-        }
-
-        return buildUrl(properties.getOrganizationalAuthUrl(), params);
-    }
-
-    @Override
-    public AuthInfoResponse getAuthInfo(String authFlowId) {
-        if (StrUtil.isBlank(authFlowId)) {
-            throw new IllegalArgumentException("authFlowId不能为空");
-        }
-
-        // 获取accessToken
-        AccessTokenResponse tokenResponse = getAccessToken();
-        if (!Boolean.TRUE.equals(tokenResponse.getSuccess()) || StrUtil.isBlank(tokenResponse.getAccessToken())) {
-            throw new EsignException(tokenResponse.getCode(), tokenResponse.getMessage());
-        }
-
-        String url = properties.getAuthInfoUrl();
-        AuthInfoRequest request = new AuthInfoRequest();
-        request.setAuthFlowId(authFlowId);
-
-        String body = JSON.toJSONString(request);
-
-        try {
-            HttpResponse response = HttpRequest.post(url)
-                    .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
-                    .body(body)
-                    .contentType("application/json")
-                    .timeout(properties.getReadTimeout().intValue())
-                    .execute();
-
-            if (!response.isOk()) {
-                throw new EsignException("查询认证信息失败，HTTP状态码：" + response.getStatus());
-            }
-
-            String responseBody = response.body();
-            AuthInfoResponse authInfoResponse = JSON.parseObject(responseBody, AuthInfoResponse.class);
-
-            if (!Boolean.TRUE.equals(authInfoResponse.getSuccess())) {
-                log.error("查询e签宝认证信息失败，code:{}, message:{}", authInfoResponse.getCode(), authInfoResponse.getMessage());
-            }
-
-            return authInfoResponse;
-        } catch (Exception e) {
-            log.error("查询e签宝认证信息异常", e);
-            throw new EsignException("查询认证信息异常", e);
-        }
-    }
-
-    @Override
-    public AuthCallbackResult parseCallbackResult(String callbackJson) {
-        if (StrUtil.isBlank(callbackJson)) {
-            throw new IllegalArgumentException("回调参数不能为空");
-        }
-        return JSON.parseObject(callbackJson, AuthCallbackResult.class);
+    public String createOrgAuthUrl(OrgAuthUrlRequest request) {
+        String url = properties.getCreateOrgAuthUrlV3();
+        return extractRedirectUrl(postWithSignature(url, request));
     }
 
     /**
-     * 构建URL参数
-     *
-     * @param baseUrl 基础URL
-     * @param params  参数Map
-     * @return 完整URL
+     * 使用请求签名鉴权发送POST请求并返回结果Map
+     * 签名规则参考：https://open.esign.cn/doc/opendoc/dev-guide3/tggw2e
      */
-    private String buildUrl(String baseUrl, Map<String, Object> params) {
-        StringBuilder sb = new StringBuilder(baseUrl);
-        if (!baseUrl.contains("?")) {
-            sb.append("?");
-        } else {
-            sb.append("&");
+    private Map<String, Object> postWithSignature(String fullUrl, Object request) {
+        String body = JacksonUtil.toJson(request);
+        if (body == null) {
+            throw new EsignException("序列化请求失败");
         }
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String accept = "application/json";
+        String contentType = "application/json; charset=UTF-8";
+        // 生成RFC 1123格式的Date头
+        String date = formatDate();
+        // 提取路径部分用于签名计算（签名只需要路径，不需要host）
+        String pathUrl = extractPath(fullUrl);
+        String contentMd5 = generateContentMd5(body);
+        String signature = generateSignature("POST", pathUrl, contentMd5, accept, contentType, date);
 
-        boolean first = true;
+        try {
+            HttpRequest httpRequest = HttpRequest.post(fullUrl)
+                    .body(body)
+                    .header("Accept", accept)
+                    .header("Date", date)
+                    .contentType(contentType)
+                    .header("Content-MD5", contentMd5)
+                    .header("X-Tsign-Open-App-Id", properties.getAppId().trim())
+                    .header("X-Tsign-Open-Ca-Timestamp", timestamp)
+                    .header("X-Tsign-Open-Ca-Signature", signature)
+                    .header("X-Tsign-Open-Auth-Mode", "Signature")
+                    .timeout(properties.getReadTimeout().intValue());
 
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            if (!first) {
-                sb.append("&");
+            HttpResponse response = httpRequest.execute();
+
+            if (!response.isOk()) {
+                throw new EsignException("请求失败，请求响应：" + response.body());
             }
-            first = false;
-            Object value = entry.getValue();
-            if (value != null) {
-                sb.append(entry.getKey())
-                        .append("=")
-                        .append(cn.hutool.core.net.URLEncodeUtil.encode(value.toString(), StandardCharsets.UTF_8));
-            }
+
+            return JacksonUtil.parse(response.body(), Map.class);
+        } catch (EsignException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("e签宝API请求异常", e);
+            throw new EsignException("API请求异常", e);
         }
-
-        return sb.toString();
     }
+
+    /**
+     * 格式化Date为RFC 1123格式 (GMT时区)
+     * 示例: Thu, 11 Jul 2015 15:32:24 GMT
+     */
+    private String formatDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat(
+                "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+                Locale.US
+        );
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return sdf.format(new Date());
+    }
+
+    /**
+     * 从完整URL中提取路径部分（去除scheme和host）
+     */
+    private String extractPath(String fullUrl) {
+        int pathStart = fullUrl.indexOf("//");
+        if (pathStart >= 0) {
+            pathStart += 2;
+            int pathEnd = fullUrl.indexOf('/', pathStart);
+            if (pathEnd >= 0) {
+                return fullUrl.substring(pathEnd);
+            }
+        }
+        return fullUrl;
+    }
+
+    /**
+     * 提取跳转链接
+     */
+    private String extractRedirectUrl(Map<String, Object> result) {
+        checkApiResultCode(result);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> data = (Map<String, Object>) result.get("data");
+        log.info("e签宝返回data: {}", data);
+        return (String) data.get("authUrl");
+    }
+
+    /**
+     * 检查API返回码
+     */
+    private void checkApiResultCode(Map<String, Object> result) {
+        Object codeObj = result.get("code");
+        if (codeObj != null && !"0".equals(String.valueOf(codeObj))) {
+            String message = String.valueOf(result.get("message"));
+            log.error("e签宝API调用失败，code:{}, message:{}", codeObj, message);
+            throw new EsignException(String.valueOf(codeObj), message);
+        }
+    }
+
+    /**
+     * 生成Content-MD5
+     * 对body进行MD5计算后，将二进制结果进行Base64编码
+     */
+    private String generateContentMd5(String body) {
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        Digester digester = new Digester(DigestAlgorithm.MD5);
+        byte[] md5Bytes = digester.digest(bytes);
+        return Base64.encode(md5Bytes);
+    }
+
+    /**
+     * 生成请求签名
+     * 签名规则（V3标准）：
+     * 1. 拼接待签名字符串：HTTP_METHOD\naccept\ncontentMd5\ncontentType\ndate\nurl
+     * 2. 使用HmacSHA256算法对拼接字符串进行签名
+     * 3. 将签名结果进行Base64编码
+     */
+    private String generateSignature(String httpMethod, String url, String contentMd5,
+            String accept, String contentType, String date) {
+        // 按照标准格式拼接待签名字符串
+        StringBuilder sb = new StringBuilder();
+        sb.append(httpMethod).append("\n")
+          .append(accept).append("\n")
+          .append(contentMd5).append("\n")
+          .append(contentType).append("\n")
+          .append(date).append("\n")
+          .append(url);
+
+        String message = sb.toString();
+        log.debug("e签宝待签名字符串: {}", message);
+        // appSecret去除前后空格
+        String appSecret = properties.getAppSecret().trim();
+        return doSignatureBase64(message, appSecret);
+    }
+
+    /**
+     * 使用HmacSHA256计算签名并进行Base64编码
+     */
+    private String doSignatureBase64(String message, String secret) {
+        byte[] hmac = SecureUtil.hmacSha256(secret.getBytes(StandardCharsets.UTF_8))
+                .digest(message.getBytes(StandardCharsets.UTF_8));
+        return Base64.encode(hmac);
+    }
+
+
+
 }

@@ -1,8 +1,10 @@
 package com.ruoyi.esign.config;
 
 import com.ruoyi.esign.api.EsignAuthApi;
+import com.ruoyi.esign.api.EsignFileApi;
 import com.ruoyi.esign.api.EsignSignApi;
 import com.ruoyi.esign.core.DefaultEsignAuthClient;
+import com.ruoyi.esign.core.DefaultEsignFileClient;
 import com.ruoyi.esign.core.DefaultEsignSignClient;
 import com.ruoyi.esign.properties.EsignProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -35,12 +37,24 @@ public class EsignAutoConfiguration {
      * 配置e签宝合同签署客户端
      *
      * @param properties 配置属性
-     * @param esignAuthApi 认证API实例
      * @return 合同签署API实例
      */
     @Bean
     @ConditionalOnMissingBean
-    public EsignSignApi esignSignApi(EsignProperties properties, EsignAuthApi esignAuthApi) {
-        return new DefaultEsignSignClient(properties, esignAuthApi);
+    public EsignSignApi esignSignApi(EsignProperties properties) {
+        return new DefaultEsignSignClient(properties);
+    }
+
+    /**
+     * 配置e签宝文件服务客户端
+     * 使用V3版本签名方式
+     *
+     * @param properties 配置属性
+     * @return 文件服务API实例
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public EsignFileApi esignFileApi(EsignProperties properties) {
+        return new DefaultEsignFileClient(properties);
     }
 }

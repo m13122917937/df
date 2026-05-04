@@ -16,4 +16,5 @@ public interface CompanyConvert {
     List<CompanyVO> toVoList(List<CompanyBO> companyBOS);
 
 
+    CompanyVO toVo(CompanyBO companyBO);
 }

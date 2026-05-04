@@ -10,7 +10,6 @@ import com.ruoyi.common.utils.weebhook.QWRobotUtil;
 import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.facade.ITradeOrderFacade;
-import com.ruoyi.order.facade.impl.TradeOrderFacadeService;
 import com.ruoyi.order.model.bo.HangingOrderBO;
 import com.ruoyi.order.model.bo.OrderBO;
 import com.ruoyi.order.model.consts.HandingOrderConsts;

@@ -1,6 +1,6 @@
 package com.ruoyi.esign.model;
 
-import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -29,6 +29,6 @@ public class CreateFlowResponse {
     /**
      * 签署流程ID
      */
-    @JSONField(name = "flowId")
+    @JsonProperty("flowId")
     private String flowId;
 }

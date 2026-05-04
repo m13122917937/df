@@ -1,6 +1,6 @@
 package com.ruoyi.esign.model;
 
-import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class AddSignerResponse {
     /**
      * 签署人信息列表
      */
-    @JSONField(name = "signers")
+    @JsonProperty("signers")
     private List<SignerResult> signers;
 
     /**
@@ -43,13 +43,13 @@ public class AddSignerResponse {
         /**
          * 签署人ID
          */
-        @JSONField(name = "signerId")
+        @JsonProperty("signerId")
         private String signerId;
 
         /**
          * 签署链接
          */
-        @JSONField(name = "signUrl")
+        @JsonProperty("signUrl")
         private String signUrl;
     }
 }

@@ -1,9 +1,8 @@
 package com.ruoyi.bill.mapper;
 
-import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Mapper;
 import com.ruoyi.bill.domain.Transactions;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 财务流水明细Mapper接口

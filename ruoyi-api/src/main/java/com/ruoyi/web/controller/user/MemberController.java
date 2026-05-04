@@ -89,10 +89,6 @@ public class MemberController extends BaseController {
         return getDataTable(pageBO.getData(), pageBO.getTotal());
     }
 
-
-
-
-
     @PostMapping("/member/add")
     public AjaxResult memberAdd(@RequestBody @Validated CompanyUserForm companyUserForm) throws WxErrorException {
         ValidatorUtils.validateEntity(companyUserForm, AddGroup.class);

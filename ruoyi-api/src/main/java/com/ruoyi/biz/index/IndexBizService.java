@@ -165,10 +165,10 @@ public class IndexBizService {
             Optional<ProvinceVO> provinceVOOptional = provinceVOList.stream().filter(provinceVO -> Objects.equals(provinceCityCountBO.getProvince(), provinceVO.getDistrict())).findFirst();
             // 添加对象
             if (!provinceVOOptional.isPresent()) {
+                List<CityVO> cityList = new ArrayList<>();
+                cityList.add(new CityVO().setDistrict(provinceCityCountBO.getCity()).setCityName(queryCity(provinceMap, provinceCityCountBO.getProvince(), provinceCityCountBO.getCity())).setQuantity(provinceCityCountBO.getCount()));
                 ProvinceVO provinceVO = new ProvinceVO().setName(provinceMap.get(provinceCityCountBO.getProvince())).setDistrict(provinceCityCountBO.getProvince())
-                        .setQuantity(provinceCityCountBO.getCount()).setChild(new ArrayList<>() {{
-                            add(new CityVO().setDistrict(provinceCityCountBO.getCity()).setCityName(queryCity(provinceMap, provinceCityCountBO.getProvince(), provinceCityCountBO.getCity())).setQuantity(provinceCityCountBO.getCount()));
-                        }});
+                        .setQuantity(provinceCityCountBO.getCount()).setChild(cityList);
                 provinceVOList.add(provinceVO);
             } else {
                 ProvinceVO provinceVO = provinceVOOptional.get();

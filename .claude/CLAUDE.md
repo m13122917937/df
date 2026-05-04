@@ -103,6 +103,6 @@ adm/
 - [ ] 配置是否使用@ConfigurationProperties绑定？
 - [ ] 是否禁用了var，所有变量都显式声明类型？
 - [ ] 所有公共方法都有JavaDoc注释？
-- [ ] 函数长度不超过50行？
+- 函数长度不超过50行
 - [ ] 没有使用System.out.println，只用SLF4J日志？
 - [ ] 编码是UTF-8？

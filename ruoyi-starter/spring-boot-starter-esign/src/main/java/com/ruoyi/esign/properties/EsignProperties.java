@@ -33,6 +33,11 @@ public class EsignProperties {
     private String redirectUri;
 
     /**
+     * 通知域名（用于接收认证结果异步通知）
+     */
+    private String notify;
+
+    /**
      * 连接超时时间（毫秒）
      */
     private Integer connectTimeout = 10000;
@@ -50,24 +55,46 @@ public class EsignProperties {
     }
 
     /**
-     * 获取个人认证URL
+     * 创建个人认证流程(v2)
      */
-    public String getPersonalAuthUrl() {
-        return host + "/oauth/authorize/personal";
+    public String getCreatePersonalAuthUrl() {
+        return host + "/v2/identity/personal/create-auth";
     }
 
     /**
-     * 获取机构认证URL
+     * 创建机构认证流程(v2)
      */
-    public String getOrganizationalAuthUrl() {
-        return host + "/oauth/authorize/organization";
+    public String getCreateOrgAuthUrl() {
+        return host + "/v2/identity/organization/create-auth";
     }
 
     /**
-     * 查询认证信息URL
+     * 创建机构认证流程(v3)
+     * 文档：https://open.esign.cn/doc/opendoc/auth3/kcbdu7
+     */
+    public String getCreateOrgAuthUrlV3() {
+        return host + "/v3/org-auth-url";
+    }
+
+    /**
+     * 查询企业认证授权状态(v3)
+     */
+    public String getGetOrgAuthInfoUrl() {
+        return host + "/v3/get-organize-auth-info";
+    }
+
+    /**
+     * 查询认证信息URL(v2)
      */
     public String getAuthInfoUrl() {
-        return host + "/v1/oauth-authorization/get-auth-info";
+        return host + "/v2/identity/get-auth-info";
+    }
+
+    /**
+     * 认证跳转页面前缀
+     */
+    public String getAuthRedirectPrefix() {
+        return "https://esign.aliyun.com/auth-identity";
     }
 
     /**
@@ -110,5 +137,29 @@ public class EsignProperties {
      */
     public String getSignUrl() {
         return host + "/v1/sign-flow/get-sign-url";
+    }
+
+    /**
+     * 上传文件URL
+     * 文档：https://open.esign.cn/doc/opendoc/file-and-template/qxq4td
+     */
+    public String getFileUploadUrl() {
+        return host + "/v1/files/upload";
+    }
+
+    /**
+     * 查询文件信息URL
+     * 文档：https://open.esign.cn/doc/opendoc/file-and-template/bl03hx
+     */
+    public String getFileGetInfoUrl() {
+        return host + "/v1/files/get-info";
+    }
+
+    /**
+     * 获取文件下载链接URL
+     * 文档：https://open.esign.cn/doc/opendoc/file-and-template/fmpsge
+     */
+    public String getFileGetDownloadUrl() {
+        return host + "/v1/files/get-download-url";
     }
 }

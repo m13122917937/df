@@ -35,10 +35,6 @@ public class Order {
      */
     private String originalOrderId;
     /**
-     * 接龙订单ID
-     */
-    private Long orderMarketingId;
-    /**
      * 采购类型（1:批量采购，2:一件代发,3:接龙抢单,4:群接龙,5:采购入仓,6:预付采购）
      */
     private Integer orderType;
@@ -133,10 +129,6 @@ public class Order {
      * 签收时间
      */
     private Date signedTime;
-    /**
-     * 确认追单时间
-     */
-    private Date refundNotarizeTime;
     /**
      * 创建时间
      */

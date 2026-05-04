@@ -1,13 +1,12 @@
 @echo off
-:: 自动切换到 UTF-8 编码
 chcp 65001 >nul
+@echo off
 ::============================================================
-:: 阿里云 ACR 自动化构建与推送脚本 (Windows)
-:: 功能：Maven 构建 + Docker 登录 + 构建镜像 + 推送 ACR
-:: 使用前请修改下方配置项
+:: Alibaba Cloud ACR Build & Push Script (Windows)
+:: Func: Maven Build + Docker Login + Build Image + Push ACR
 ::============================================================
 
-::---------- 可配置参数 ----------
+::---------- Config ----------
 set ACR_REGISTRY=crpi-4norowu43xncrxa7.cn-shanghai.personal.cr.aliyuncs.com
 set ACR_NAMESPACE=fydf
 set IMAGE_NAME=ruoyi-api
@@ -15,82 +14,73 @@ set IMAGE_TAG=1.0.3
 set ACR_USERNAME=hahhapai
 set ACR_PASSWORD=xht654321.
 
-:: Maven 构建参数（可选）
 set MAVEN_OPTS=-Dmaven.test.skip=true
 ::--------------------------------
 
 echo ============================
-echo  开始执行构建与部署任务
+echo   Start build and deploy
 echo ============================
-echo 当前时间：%date% %time%
+echo Current time: %date% %time%
 
 set JAVA_HOME=D:\software\javva\
 set PATH=%JAVA_HOME%\bin;%PATH%
 
-:: Step 1: 清理并构建 Maven 项目
+:: Step 1: Maven clean install
 echo.
-echo [1/5] 正在执行 Maven clean install...
-cd ../
+echo [1/4] Running Maven clean install...
+cd ..\
 set MAVEN_SETTINGS=D:\work\jie\adm\setting.xml
+
 call mvn clean install -B -s "%MAVEN_SETTINGS%" %MAVEN_OPTS%
 if %errorlevel% neq 0 (
-    echo [错误] Maven 构建失败，停止执行。
+    echo [ERROR] Maven build failed, stop.
     pause
     exit /b 1
 )
-echo [成功] Maven 构建完成。
+echo [SUCCESS] Maven build completed.
 
-:: Step 2: 登录阿里云 ACR
+:: Step 2: Login Alibaba Cloud ACR
 echo.
-echo [2/5] 正在登录阿里云容器镜像服务...
+echo [2/4] Logging into Alibaba Cloud ACR...
 docker login --username=%ACR_USERNAME% %ACR_REGISTRY% -p %ACR_PASSWORD%
 if %errorlevel% neq 0 (
-    echo [错误] Docker 登录失败，请检查用户名密码。
+    echo [ERROR] Docker login failed, check username and password.
     pause
     exit /b 1
 )
-echo [成功] 阿里云 ACR 登录成功。
+echo [SUCCESS] ACR login succeeded.
 
-:: Step 3: 构建 Docker 镜像（假设 Dockerfile 在项目根目录）
+:: Step 3: Build Docker image
+set FULL_IMAGE=%ACR_REGISTRY%/%ACR_NAMESPACE%/%IMAGE_NAME%:%IMAGE_TAG%
 echo.
-echo [3/5] 正在构建 Docker 镜像: %IMAGE_NAME%:%IMAGE_TAG%
+echo [3/4] Building Docker image: %FULL_IMAGE%
 cd ./%IMAGE_NAME%/
 set DOCKER_BUILDKIT=0
 set DOCKER_CONTENT_TRUST=0
-docker build --no-cache  -t %IMAGE_NAME%:%IMAGE_TAG% .
+docker build --no-cache -t %FULL_IMAGE% .
 if %errorlevel% neq 0 (
-    echo [错误] Docker 构建失败，请检查 Dockerfile。
+    echo [ERROR] Docker build failed, check Dockerfile.
     pause
     exit /b 1
 )
-echo [成功] Docker 镜像构建完成。
+echo [SUCCESS] Docker image build completed.
 
-:: Step 4: 打标签（Tag 镜像到 ACR 仓库）
-set FULL_IMAGE=%ACR_REGISTRY%/%ACR_NAMESPACE%/%IMAGE_NAME%:%IMAGE_TAG%
+:: Step 4: Push image to ACR
 echo.
-echo [4/5] 正在为镜像打标签: %FULL_IMAGE%
-docker tag %IMAGE_NAME%:%IMAGE_TAG% %FULL_IMAGE%
-if %errorlevel% neq 0 (
-    echo [错误] 镜像打标签失败。
-    pause
-    exit /b 1
-)
-echo [成功] 镜像已打标签。
-
-:: Step 5: 推送镜像到 ACR
-echo.
-echo [5/5] 正在推送镜像到阿里云 ACR...
+echo [4/4] Pushing image to Alibaba Cloud ACR...
 docker push %FULL_IMAGE%
 if %errorlevel% neq 0 (
-    echo [错误] 镜像推送失败，请检查权限或网络。
+    echo [ERROR] Push failed, check permission or network.
     pause
     exit /b 1
 )
 
 echo.
-echo ✅ 镜像已成功推送至阿里云 ACR:
+echo Success: Image pushed to Alibaba Cloud ACR
 echo     %FULL_IMAGE%
 echo.
-echo 🚀 部署完成！
-::docker system prune -a -f --volumes
+echo [Cleanup] Cleaning up dangling images...
+for /f "tokens=*" %%i in ('docker images -f "dangling=true" -q') do docker rmi -f %%i >nul 2>&1
+echo.
+echo Done! Deployment finished.
 pause

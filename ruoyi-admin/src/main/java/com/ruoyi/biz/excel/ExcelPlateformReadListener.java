@@ -64,7 +64,8 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
             return;
         }
         //
-        boolean update = imeiFacade.update(new ImeiParam().setPlatformImei(platformImei.getCode()).setPlatformTime(DateUtil.date()), new ImeiQuery().setOrderId(excelPlatformVO.getOrderCode()).setImel(excelPlatformVO.getImei()));
+        boolean update = imeiFacade.update(new ImeiParam().setPlatformImei(platformImei.getCode()).setPlatformTime(DateUtil.date()), new ImeiQuery()
+                .setOrderId(excelPlatformVO.getOrderCode()).setSn(excelPlatformVO.getSn()).setImel(excelPlatformVO.getImei()));
         if (!update) {
             return;
         }

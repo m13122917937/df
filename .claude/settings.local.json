@@ -35,7 +35,15 @@
       "Bash(find:*)",
       "Bash(xargs file:*)",
       "Bash(ls -la D:/work/jie/adm/*.iml)",
-      "Bash(javac -cp \"ruoyi-order/target/classes:../.m2/repository/*\" ruoyi-order/src/main/java/com/ruoyi/rule/domain/Rule.java -d ruoyi-order/target/classes)"
+      "Bash(javac -cp \"ruoyi-order/target/classes:../.m2/repository/*\" ruoyi-order/src/main/java/com/ruoyi/rule/domain/Rule.java -d ruoyi-order/target/classes)",
+      "Bash(ls -la pom.xml */pom.xml)",
+      "Bash(del:*)",
+      "Bash(iconv -f UTF-8 -t GBK D:/work/jie/adm/bin/ruoyi-admin.bat)",
+      "Bash(dos2unix -c ascii bin/ruoyi-api.bat)",
+      "Bash(node scripts/cli.js generate --project D:/work/jie/adm --source-file D:/work/jie/adm/ruoyi-admin/src/main/java/com/ruoyi/web/controller/company/AuthLoginController.java --title \"AuthLoginController 接口文档\" --output D:/work/jie/adm/output)",
+      "Read(//c/Users/m1312/.claude/skills/softcopyright/**)",
+      "Bash(node scripts/cli.js generate --project D:/work/jie/adm --source-file D:/work/jie/adm/ruoyi-admin/src/main/java/com/ruoyi/web/controller/company/AuthLoginController.java --title \"AuthLoginController 授权登录接口文档\" --output D:/work/jie/adm/output)",
+      "Bash(node scripts/cli.js generate --project D:/work/jie/adm --output D:/work/jie/adm/softcopyright-output --auto-pdf)"
     ]
   }
 }

@@ -55,8 +55,8 @@ public class CompanyBO {
     private Date establishment;
 
     /**
-     * 合同认证状态（0:未认证 1:已认证 */
-    private Integer contractAuthStatus;
+     * 合同认证状态（0:未认证 1:认证中 2:认证成功 3:认证失败 4:认证取消 */
+    private Integer contractAuthStatus ;
 
     /**
      * 是否负责人

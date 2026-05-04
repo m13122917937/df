@@ -61,7 +61,7 @@ spring:
     password: rN8_iR44
 aliyun:
   rocketmq:
-    nameServer: rmq-cn-2104h8w2701.cn-shenzhen.rmq.aliyuncs.com:8080
+    nameServer: ep-wz9i73e33de582c314ba.epsrv-wz9d6klnzdmxpcpvz0qn.cn-shenzhen.privatelink.aliyuncs.com:8080
     instanceId: rmq-cn-2104h8w2701
     accessKey: EWHsr62jbzI2mAQF
     secretKey: 10FlOp8R1077FW7p
@@ -92,5 +92,10 @@ fy:
     connectTimeout: 3000
     readTimeout: 15000
     warehouseNo: 005
-
-
+# e 签宝
+esign:
+  host: https://smlopenapi.esign.cn
+  appId: 7439107862
+  appSecret: 2029fe9458ab9ce47b139127a6279849
+  redirectUri: https://www.wujievip.cn/
+  notify: https://api.wujievip.cn/company/auth/%s

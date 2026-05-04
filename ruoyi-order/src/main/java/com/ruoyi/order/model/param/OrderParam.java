@@ -29,10 +29,6 @@ public class OrderParam {
      */
     private String originalOrderId;
     /**
-     * 接龙订单ID
-     */
-    private Long orderMarketingId;
-    /**
      * 采购类型（1:一件代发,2:群接龙）
      */
     private Integer orderType;
@@ -127,10 +123,6 @@ public class OrderParam {
      * 签收时间
      */
     private Date signedTime;
-    /**
-     * 确认追单时间
-     */
-    private Date refundNotarizeTime;
     /**
      * 创建时间
      */

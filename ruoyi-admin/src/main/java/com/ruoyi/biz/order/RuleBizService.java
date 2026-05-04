@@ -11,23 +11,22 @@ import com.ruoyi.mapper.order.HangingOrderConvert;
 import com.ruoyi.mapper.rule.RuleConvert;
 import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IOrderFacade;
-import com.ruoyi.order.model.bo.HangingOrderBO;
 import com.ruoyi.order.model.bo.OrderBO;
 import com.ruoyi.order.model.consts.HandingOrderConsts;
 import com.ruoyi.order.model.consts.OrderConsts;
 import com.ruoyi.order.model.consts.TradeOrderConsts;
 import com.ruoyi.order.model.param.HangingOrderParam;
 import com.ruoyi.order.model.param.OrderParam;
-import com.ruoyi.order.model.param.RuleParam;
 import com.ruoyi.order.model.query.HangingOrderQuery;
 import com.ruoyi.order.model.query.OrderQuery;
-import com.ruoyi.order.model.query.RuleQuery;
 import com.ruoyi.product.facade.IProductSkuFacade;
 import com.ruoyi.product.model.bo.ProductSkuBO;
 import com.ruoyi.product.model.query.ProductSkuQuery;
 import com.ruoyi.rule.facade.IRuleFacade;
 import com.ruoyi.rule.model.bo.RuleBO;
 import com.ruoyi.rule.model.consts.RuleConsts;
+import com.ruoyi.rule.model.param.RuleParam;
+import com.ruoyi.rule.model.query.RuleQuery;
 import com.ruoyi.system.model.bo.DictDistrictBO;
 import com.ruoyi.web.form.rule.RuleQueryForm;
 import com.ruoyi.web.vo.order.RuleVO;
@@ -93,7 +92,6 @@ public class RuleBizService {
         return ruleFacade.save(param);
     }
 
-
     /**
      * 执行规则
      *
@@ -135,6 +133,5 @@ public class RuleBizService {
             orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));
         }
     }
-
 
 }

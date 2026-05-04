@@ -1,6 +1,6 @@
 package com.ruoyi.esign.model;
 
-import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -29,18 +29,18 @@ public class GetSignUrlResponse {
     /**
      * 签署流程ID
      */
-    @JSONField(name = "flowId")
+    @JsonProperty("flowId")
     private String flowId;
 
     /**
      * 签署人ID
      */
-    @JSONField(name = "signerId")
+    @JsonProperty("signerId")
     private String signerId;
 
     /**
      * 签署页面URL
      */
-    @JSONField(name = "signUrl")
+    @JsonProperty("signUrl")
     private String signUrl;
 }

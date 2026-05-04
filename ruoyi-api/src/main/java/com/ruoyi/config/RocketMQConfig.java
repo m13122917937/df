@@ -50,7 +50,6 @@ public class RocketMQConfig {
 
 
     @Bean
-    @Lazy
     public Consumer consumer() {
         Properties properties = new Properties();
         // 实例用户名和密码在消息队列RocketMQ版控制台访问控制的智能身份识别页签中获取。

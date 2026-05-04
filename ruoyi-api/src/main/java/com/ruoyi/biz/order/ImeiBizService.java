@@ -89,8 +89,9 @@ public class ImeiBizService {
         ImeiParam imeiParam = new ImeiParam().setOrderId(orderBO.getOrderCode()).setTradeNo(tradeOrderBO.getId()).setProductName(orderBO.getProductName()).setSkuName(orderBO.getSkuName())
                 .setSkuCode(orderBO.getSkuCode()).setImel(imei).setSn(sn).setHangingOrderId(tradeOrderBO.getHangOrderId()).setCreateTime(DateUtil.date());
         ImeiBO imeiBO = imeiFacade.save(imeiParam);
-        // 判断是否激活
-        String snQ = BrandConsts.SN_LIST.contains(orderBO.getBrand())? imeiBO.getImel() : imeiBO.getSn();
+        //  ov 都是 86（imei） 码查询 ， 其他都是sn
+        String snQ = BrandConsts.SN_LIST.contains(orderBO.getBrand()) ? imeiBO.getImel() : imeiBO.getSn();
+        snQ = StrUtil.isBlank(snQ) ? imeiBO.getSn() : snQ;
         WarrantyResult warranty = snQueryClient.query(snQ, orderBO.getBrand());
         imeiBO.setActivatedTime(DateUtil.date());
         imeiBO.setActivated(warranty.getExits() ? (warranty.isActivated() ? ImeiConsts.Activated.ACTIVATED.getCode() : ImeiConsts.Activated.NOT_ACTIVATED.getCode())

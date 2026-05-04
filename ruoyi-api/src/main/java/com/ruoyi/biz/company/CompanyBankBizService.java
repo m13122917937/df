@@ -38,9 +38,6 @@ public class CompanyBankBizService {
     ICompanyBankFacade companyBankFacade;
 
     @Autowired
-    ISysUserFacade sysUserService;
-
-    @Autowired
     IMemberFacade memberFacade;
 
     @Autowired

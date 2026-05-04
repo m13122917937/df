@@ -96,5 +96,11 @@ fy:
     readTimeout: 15000
     warehouseNo: 005
 
+esign:
+  host: https://smlopenapi.esign.cn
+  appId: 7439107862
+  appSecret: 2029fe9458ab9ce47b139127a6279849
+  redirectUri: https://www.wujievip.cn/
+  notify: https://api.wujievip.cn/company/auth/%s
 
 

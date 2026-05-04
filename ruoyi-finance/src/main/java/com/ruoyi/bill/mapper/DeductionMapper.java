@@ -1,9 +1,8 @@
 package com.ruoyi.bill.mapper;
 
-import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Mapper;
 import com.ruoyi.bill.domain.Deduction;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 【请填写功能名称】Mapper接口

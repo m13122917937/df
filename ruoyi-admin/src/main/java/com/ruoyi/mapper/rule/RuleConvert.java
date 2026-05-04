@@ -1,7 +1,7 @@
 package com.ruoyi.mapper.rule;
 
-import com.ruoyi.order.model.param.RuleParam;
-import com.ruoyi.order.model.query.RuleQuery;
+import com.ruoyi.rule.model.param.RuleParam;
+import com.ruoyi.rule.model.query.RuleQuery;
 import com.ruoyi.rule.model.bo.RuleBO;
 import com.ruoyi.web.form.rule.RuleForm;
 import com.ruoyi.web.form.rule.RuleQueryForm;

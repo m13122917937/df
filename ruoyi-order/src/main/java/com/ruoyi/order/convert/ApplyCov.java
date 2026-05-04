@@ -1,10 +1,9 @@
 package com.ruoyi.order.convert;
 
-import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.order.domain.Apply;
 import com.ruoyi.order.model.bo.ApplyBO;
-import com.ruoyi.order.model.query.ApplyQuery;
 import com.ruoyi.order.model.param.ApplyParam;
+import com.ruoyi.order.model.query.ApplyQuery;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

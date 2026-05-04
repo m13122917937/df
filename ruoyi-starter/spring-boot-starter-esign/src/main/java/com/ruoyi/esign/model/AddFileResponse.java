@@ -1,6 +1,6 @@
 package com.ruoyi.esign.model;
 
-import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -29,12 +29,12 @@ public class AddFileResponse {
     /**
      * 文件ID
      */
-    @JSONField(name = "fileId")
+    @JsonProperty("fileId")
     private String fileId;
 
     /**
      * 文件下载地址，有效期为永久
      */
-    @JSONField(name = "fileUrl")
+    @JsonProperty("fileUrl")
     private String fileUrl;
 }

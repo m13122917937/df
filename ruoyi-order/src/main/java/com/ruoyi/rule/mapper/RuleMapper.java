@@ -1,7 +1,7 @@
 package com.ruoyi.rule.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ruoyi.order.domain.Rule;
+import com.ruoyi.rule.domain.Rule;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

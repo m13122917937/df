@@ -62,4 +62,9 @@ public class ImeiRelVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
+    /**
+     * 确认人姓名
+     */
+    private String confirmName;
+
 }

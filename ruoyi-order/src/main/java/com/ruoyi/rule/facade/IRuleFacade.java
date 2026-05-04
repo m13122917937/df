@@ -4,8 +4,8 @@ import cn.hutool.core.date.DateTime;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.model.page.PageParam;
-import com.ruoyi.order.model.param.RuleParam;
-import com.ruoyi.order.model.query.RuleQuery;
+import com.ruoyi.rule.model.param.RuleParam;
+import com.ruoyi.rule.model.query.RuleQuery;
 import com.ruoyi.rule.model.bo.RuleBO;
 
 import java.util.List;

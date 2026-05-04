@@ -1,6 +1,5 @@
 package com.ruoyi.order.convert;
 
-import com.github.pagehelper.Page;
 import com.ruoyi.order.domain.Order;
 import com.ruoyi.order.domain.dto.*;
 import com.ruoyi.order.model.bo.*;
@@ -29,21 +28,15 @@ public interface OrderCov {
 
     List<BrandCountBO> toBrandCount(List<BrandCountDTO> brandCountBOS);
 
-    Page<OrderBO> listToBOPage(List<Order> list);
-
     List<CompanyOrderBO> companyTOBO(List<CompanyOrderDTO> companyOrderDTOS);
 
-
     List<ProvinceCityCountBO> toProvinceCityCount(List<ProvinceCityCountDTO> provinceCountDTOS);
-
 
     List<ProductBO> toProductCount(List<ProductDTO> productBOList);
 
     List<SkuBO> toSkuCount(List<SkuDTO> provinceCountDTOS);
 
-
     List<SendOrderLisBO> sendTOBO(List<SendOrderLisDTO> sendOrderLisDTOS);
-
 
 }
 

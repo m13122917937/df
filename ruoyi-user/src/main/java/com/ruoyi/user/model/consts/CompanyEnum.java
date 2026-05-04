@@ -26,4 +26,23 @@ public class CompanyEnum {
     }
 
 
+    @Getter
+    @AllArgsConstructor
+    public enum ContractAuthStatus {
+        /**
+         * 0:. 未认证
+         */
+        NO(0),
+        /**
+         * 1:已经认证
+         */
+        USE(1),
+
+        ;
+        private Integer value;
+
+
+    }
+
+
 }

@@ -67,5 +67,14 @@ public class ImeiSkuRelParam {
      */
     private Date updateTime;
 
+    /**
+     * 确认人ID
+     */
+    private Long confirmBy;
+
+    /**
+     * 确认人姓名
+     */
+    private String confirmName;
 
 }

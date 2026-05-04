@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.order;
 import com.ruoyi.biz.order.ImeiBizService;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.web.form.order.ImeiForm;
@@ -22,8 +23,6 @@ public class IMEIController extends BaseController {
 
 
     @PostMapping("/imei/rel")
-
-
     public TableDataInfo list(@RequestBody ImeiForm form) {
 
         PageBO<ImeiRelVO> page = imeiBizService.listRel(form, startParamV2("create_time desc"));
@@ -49,8 +48,8 @@ public class IMEIController extends BaseController {
 
     @PostMapping("/agree/{id}")
     public AjaxResult agree(@PathVariable("id") Long id) {
-
-        imeiBizService.agree(id);
+        LoginUser loginUser = getLoginUser();
+        imeiBizService.agree(id,loginUser.getUserId(), loginUser.getUsername());
 
         return AjaxResult.success();
     }

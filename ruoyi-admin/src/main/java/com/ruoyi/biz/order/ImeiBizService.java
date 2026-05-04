@@ -1,9 +1,9 @@
 package com.ruoyi.biz.order;
 
 import cn.hutool.core.lang.Assert;
-import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.mapper.order.ImeiConvert;
 import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IImeiFacade;
@@ -68,10 +68,14 @@ public class ImeiBizService {
     }
 
     @Transactional
-    public void agree(Long id) {
+    public void agree(Long id, Long userId, String userName) {
         ImeiSkuRelBO imeiSkuRelBO = imeiSkuRelFacade.getOne(new ImeiSkuRelQuery().setId(id));
         Assert.notNull(imeiSkuRelBO, "订单不存在");
-        imeiSkuRelFacade.update(new ImeiSkuRelParam().setStatus(ImeiConsts.ImeiRel.OK.getCode()), new ImeiSkuRelQuery().setId(id));
+        ImeiSkuRelParam param = new ImeiSkuRelParam()
+                .setStatus(ImeiConsts.ImeiRel.OK.getCode())
+                .setConfirmBy(userId)
+                .setConfirmName(userName);
+        imeiSkuRelFacade.update(param, new ImeiSkuRelQuery().setId(id));
         List<ImeiBO> imeiBOS = imeiFacade.list(new ImeiQuery().setActivated(ImeiConsts.Activated.NOT_ACTIVATED.getCode()).setProductName(imeiSkuRelBO.getProductName()).setSkuName(imeiSkuRelBO.getSkuName()));
         for (ImeiBO imeiBO : imeiBOS) {
             imeiFacade.update(new ImeiParam().setActivated(ImeiConsts.Activated.SUCCESS.getCode()), new ImeiQuery().setId(imeiBO.getId()));

@@ -92,6 +92,12 @@
           min-width="180"
           align="center"
         />
+        <el-table-column
+          prop="confirmName"
+          label="确认人"
+          min-width="120"
+          align="center"
+        />
         <el-table-column  label="操作" fixed="right" width="180" align="center">
         <!-- <el-table-column  label="操作" fixed="right" width="180" align="center"> -->
           <template slot-scope="{ row }">

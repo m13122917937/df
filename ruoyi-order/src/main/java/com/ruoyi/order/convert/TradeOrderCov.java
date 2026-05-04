@@ -27,6 +27,5 @@ public interface TradeOrderCov {
 
     List<TradePriceBO> toTradePriceBO(List<TradePriceDTO> tradePriceDTO);
 
-
 }
 

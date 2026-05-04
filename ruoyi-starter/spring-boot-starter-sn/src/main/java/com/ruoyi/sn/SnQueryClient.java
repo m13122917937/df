@@ -37,6 +37,9 @@ public class SnQueryClient {
         log.info("返回结果: {}", response);
         ApiResponse<T> result = (ApiResponse) JacksonUtil.parseGeneric(response, ApiResponse.class, clazz);
         if (result.getCode() == 0) {
+            if (Objects.isNull(result.getData().getExits())){
+                result.getData().setExits(Boolean.TRUE);
+            }
             return result.getData();
         } else {
             if (Objects.equals(result.getCode(), 611)) {

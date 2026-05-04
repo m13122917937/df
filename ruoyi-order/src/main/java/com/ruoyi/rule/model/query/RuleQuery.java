@@ -1,4 +1,4 @@
-package com.ruoyi.order.model.query;
+package com.ruoyi.rule.model.query;
 
 import com.ruoyi.framework.mybatis.DynamicCondition;
 import com.ruoyi.framework.mybatis.QueryField;

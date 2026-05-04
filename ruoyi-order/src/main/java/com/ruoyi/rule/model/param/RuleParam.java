@@ -1,4 +1,4 @@
-package com.ruoyi.order.model.param;
+package com.ruoyi.rule.model.param;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
