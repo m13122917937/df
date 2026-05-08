@@ -35,7 +35,7 @@ public class Order {
      */
     private String originalOrderId;
     /**
-     * 采购类型（1:批量采购，2:一件代发,3:接龙抢单,4:群接龙,5:采购入仓,6:预付采购）
+     * 采购类型（1:入仓，2:一件代发）
      */
     private Integer orderType;
     /**

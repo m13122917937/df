@@ -30,6 +30,9 @@ public class OrderVO {
     @ExcelProperty(value = "订单类型", converter = OrderStyleConvert.class)
     private Integer orderStyle;
 
+    @ExcelIgnore
+    private Integer orderType;
+
     @ExcelProperty(value = "付款主体简称")
 
     private String payerName;

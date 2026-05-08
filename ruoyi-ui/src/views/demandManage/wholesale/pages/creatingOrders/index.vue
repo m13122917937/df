@@ -71,6 +71,12 @@
                   :disabled="multipleSelection.length === 0"
                   @click="openPushOrderDialog"
                   >定向推单</el-button>
+                <el-button
+                  class="batch-order-btn"
+                  type="success"
+                  plain
+                  @click="openBatchOriginalDialog"
+                  >批量商家单号搜索</el-button>
               </div>
             </div>
           </template>
@@ -277,6 +283,32 @@
       @confirm="handlePushOrderConfirm"
       @close="handlePushOrderClose"
     />
+    <el-dialog
+      title="批量商家单号搜索"
+      :visible.sync="batchOriginalDialogVisible"
+      width="420px"
+      @close="handleBatchOriginalClose"
+      :close-on-click-modal="false"
+      :modal="true"
+      :append-to-body="true"
+      :z-index="3000"
+    >
+      <el-input
+        type="textarea"
+        :rows="6"
+        v-model="batchOriginalInput"
+        maxlength="2000"
+        show-word-limit
+        placeholder="请输入商家单号"
+      />
+      <div class="batch-order-tips">
+        每行输入一条商家单号,不要出现，、。等符号。
+      </div>
+      <div slot="footer">
+        <el-button @click="handleBatchOriginalClose">取消</el-button>
+        <el-button type="primary" @click="handleBatchOriginalSearch">查询</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -370,6 +402,9 @@ export default {
       },
 
       exportLoading: false,
+      batchOriginalDialogVisible: false,
+      batchOriginalInput: "",
+      batchOriginalList: [],
     };
   },
   mounted() {
@@ -473,7 +508,7 @@ export default {
     },
     // 重置搜索条件
     handleReset() {
-      (this.searchParams = {
+      this.searchParams = {
         //table列表query入参
         pageNum: 1,
         pageSize: 30,
@@ -485,8 +520,10 @@ export default {
         shopName: "", // 店铺名称
         productNameLike: "", // 商品名称
         skuNameLike: "", // SKU名称
-      }),
-        this.getData();
+      };
+      this.batchOriginalList = [];
+      this.batchOriginalInput = "";
+      this.getData();
     },
     async getData() {
       if (this.tableLoading) {
@@ -498,25 +535,39 @@ export default {
         pageNum: this.searchParams.pageNum,
         pageSize: this.searchParams.pageSize,
       }
+      const originalOrderIdList =
+        this.batchOriginalList.length > 0
+          ? this.batchOriginalList
+          : this.searchParams.originalOrderId
+          ? [this.searchParams.originalOrderId]
+          : [];
+
       let params = {
         province: this.searchParams.provinceId,
         brand: this.searchParams.brand,
         orderCodeList: this.searchParams.orderCode?[this.searchParams.orderCode]:[], // 内部单号搜索
-        originalOrderId: this.searchParams.originalOrderId, // 商家单号搜索
+        originalOrderIdList, // 商家单号搜索
         category: this.searchParams.category, // 品类搜索
         shopName: this.searchParams.shopName, // 店铺名称搜索
         productNameLike: this.searchParams.productNameLike, // 商品名称搜索
         skuNameLike: this.searchParams.skuNameLike, // SKU名称搜索
         status: 1, // 新建采购订单状态
       };
-      let res = await getOrderListApi(pageData,params);
-      const { code, rows = [], total = 0 } = res;
-      if (code != 200) {
-        return;
+      try {
+        let res = await getOrderListApi(pageData,params);
+        const { code, rows = [], total = 0 } = res;
+        if (code != 200) {
+          return;
+        }
+        this.tableDataList = rows || [];
+        this.totalNum = total || 0;
+      } catch (error) {
+        console.error('获取新建采购列表失败', error);
+        this.tableDataList = [];
+        this.totalNum = 0;
+      } finally {
+        this.tableLoading = false;
       }
-      this.tableLoading = false;
-      this.tableDataList = rows || [];
-      this.totalNum = total || 0;
     },
     offerConfirm(row) {
       this.procurementDialogVisible = true;
@@ -611,14 +662,48 @@ export default {
       return overflowFields.includes(prop);
     },
 
+    openBatchOriginalDialog() {
+      this.batchOriginalInput = this.batchOriginalList.join("\n");
+      this.batchOriginalDialogVisible = true;
+    },
+    handleBatchOriginalClose() {
+      this.batchOriginalDialogVisible = false;
+      this.batchOriginalInput = "";
+    },
+    handleBatchOriginalSearch() {
+      if (!this.batchOriginalInput.trim()) {
+        this.$message.warning("请输入至少一个商家单号");
+        return;
+      }
+      const orderCodes = this.batchOriginalInput
+        .split(/\n+/)
+        .map((code) => code.trim())
+        .filter((code) => !!code);
+      if (!orderCodes.length) {
+        this.$message.warning("请输入有效的商家单号");
+        return;
+      }
+      this.batchOriginalList = Array.from(new Set(orderCodes));
+      this.searchParams.pageNum = 1;
+      this.batchOriginalDialogVisible = false;
+      this.getData();
+    },
+
     async handleExport() {
+      const originalOrderIdList =
+        this.batchOriginalList.length > 0
+          ? this.batchOriginalList
+          : this.searchParams.originalOrderId
+          ? [this.searchParams.originalOrderId]
+          : [];
+
       let params = {
         pageNum: this.searchParams.pageNum,
         pageSize: this.searchParams.pageSize,
         province: this.searchParams.provinceId,
         brand: this.searchParams.brand,
         orderCodeList: this.searchParams.orderCode?[this.searchParams.orderCode]:[], // 内部单号搜索
-        originalOrderId: this.searchParams.originalOrderId, // 商家单号搜索
+        originalOrderIdList, // 商家单号搜索
         category: this.searchParams.category, // 品类搜索
         shopName: this.searchParams.shopName, // 店铺名称搜索
         productNameLike: this.searchParams.productNameLike, // 商品名称搜索
@@ -672,4 +757,15 @@ export default {
 @import "@/assets/styles/common/order-components.scss";
 @import "@/assets/styles/common/time-status.scss";
 @import "./index.scss";
+
+.batch-order-btn {
+  margin-left: 12px;
+}
+
+.batch-order-tips {
+  margin-top: 8px;
+  color: #909399;
+  font-size: 12px;
+  line-height: 18px;
+}
 </style>

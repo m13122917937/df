@@ -163,7 +163,7 @@ public class WdtClient {
                     wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp, pager.get("page_size"), pager.get("page_no"), pager.get("calc_total"));
         }
         String json = JacksonUtil.toJson(bodyParams);
-//        log.info("旺店通请求地址：{},请求参数：{}", url, json);
+        log.info("旺店通请求地址：{},请求参数：{}", url, json);
         String body = HttpRequest.post(url).body(json).timeout(wdProperties.getConnectTimeout()).execute().body();
         return body;
     }

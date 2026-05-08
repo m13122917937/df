@@ -19,7 +19,7 @@
             uc.owner
         from u_member u
         join u_member_company uc on u.user_id = uc.user_id
-            where
+        where
         uc.company_id = #{companyId}
         <if test="mobile!=null and mobile!=''">
             and u.phone like concat('%',#{mobile},'%')

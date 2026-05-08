@@ -30,4 +30,6 @@ public class OrderForm {
 
 
     private Long companyId;
+
+    private Integer orderType;
 }

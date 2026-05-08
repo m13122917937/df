@@ -13,7 +13,7 @@ public interface ImeiConsts {
         NOT_ACTIVATED(2, "未激活"),
         MODEL_NOT_CONSISTENT(3, "型号不一致"),
         SUCCESS(4, "查询没问题"),
-        NOT_EXITS(5, "串码不存在"),
+        NOT_EXITS (5, "串码不存在"),
         EXITS(6, "串码已经存在"),
         CANCEL(7, "串码已经撤销")
         ;

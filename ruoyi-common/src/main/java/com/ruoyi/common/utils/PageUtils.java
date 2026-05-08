@@ -8,6 +8,7 @@ import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.model.page.PageParam;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.sql.SqlUtil;
 
 import java.util.List;
@@ -35,10 +36,14 @@ public class PageUtils extends PageHelper {
 
     public static void startPage(PageParamV2 pageParam) {
         if (Objects.nonNull(pageParam)) {
-            String orderBy = SqlUtil.escapeOrderBySql(pageParam.getOrderBy());
-            PageHelper.startPage(pageParam.getPage(), pageParam.getSize(), orderBy).setReasonable(pageParam.getReasonable());
+            String orderBy = pageParam.getOrderBy();
+            if (StringUtils.isNotEmpty(orderBy)) {
+                orderBy = SqlUtil.escapeOrderBySql(orderBy);
+                PageHelper.startPage(pageParam.getPage(), pageParam.getSize(), orderBy).setReasonable(pageParam.getReasonable());
+            } else {
+                PageHelper.startPage(pageParam.getPage(), pageParam.getSize()).setReasonable(pageParam.getReasonable());
+            }
         }
-
     }
 
     /**

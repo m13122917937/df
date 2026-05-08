@@ -33,9 +33,6 @@
         <result property="updateTime" column="update_time"/>
         <result property="deleted" column="deleted"/>
         <result property="handleApply" column="handle_apply"/>
-        <result property="returnShopStatus" column="return_shop_status"/>
-        <result property="advanceFlag" column="advance_flag"/>
-        <result property="settlementType" column="settlement_type"/>
     </resultMap>
 
 
@@ -145,6 +142,7 @@
             oto.trade_user_name,
             oto.trade_user_phone,
             o.order_style,
+            o.order_type,
             oto.delivery_code,
             o.remark,
            oto.update_by createBy,

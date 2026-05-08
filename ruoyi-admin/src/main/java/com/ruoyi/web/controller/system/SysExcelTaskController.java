@@ -133,6 +133,7 @@ public class SysExcelTaskController extends BaseController {
      * GET /system/excel/recent
      * 返回最近5条记录，按创建时间倒序
      */
+    @PreAuthorize("@ss.hasPermi('system:excel:generate')")
     @GetMapping("/recent")
     public AjaxResult getRecentTasks() {
         Long userId = getUserId();

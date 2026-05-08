@@ -53,6 +53,7 @@ public class CompanyOrderDTO {
     private Integer subStatus;
 
     private Integer orderStyle;
+    private Integer orderType;
     private Integer warehouseQuantity;
     private Integer deliveryCode;
 

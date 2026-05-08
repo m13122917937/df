@@ -54,9 +54,9 @@ public class AuthLoginBizService {
         if (authInfoBO.getExpired().compareTo(new Date()) <= 0) {
             return new AuthLoginInfoVO().setType(0);
         }
-        if (StrUtil.isNotEmpty(authInfoBO.getMacId()) && !authInfoBO.getMacId().equals(form.getMacId())) {
-            throw new ServiceException("登录设备异常");
-        }
+//        if (StrUtil.isNotEmpty(authInfoBO.getMacId()) && !authInfoBO.getMacId().equals(form.getMacId())) {
+//            throw new ServiceException("登录设备异常");
+//        }
 
         return new AuthLoginInfoVO()
                 .setType(authInfoBO.getType())
