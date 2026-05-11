@@ -148,6 +148,9 @@ public class AllOrderVO {
     @ExcelProperty(value = "订单状态", converter = OrderStatusConvert.class)
     private Integer status;
 
+    @ExcelIgnore
+    private Integer orderType;
+
     /**
      * 数量
      */

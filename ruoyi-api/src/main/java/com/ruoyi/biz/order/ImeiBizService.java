@@ -74,7 +74,7 @@ public class ImeiBizService {
         list.add(getImeiBO(imeiOrderParam.getImeiCode(), imeiOrderParam.getSn(), orderBO, tradeOrderBO));
 
         //修改订单子状态
-        orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode()), new OrderQuery().setOrderCode(orderBO.getOrderCode()));
+        orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES.getCode()), new OrderQuery().setOrderCode(orderBO.getOrderCode()));
         return ImeiConvert.INSTANCE.listvo(list);
     }
 

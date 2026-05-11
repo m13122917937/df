@@ -26,8 +26,6 @@ public class AllOrderController extends BaseController {
 
 
     @PostMapping("list")
-
-
     public TableDataInfo list(@RequestBody AllOrderForm allOrderForm) {
         allOrderForm.setCompanyId(getDeptId());
 

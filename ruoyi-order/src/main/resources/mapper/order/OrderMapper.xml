@@ -355,6 +355,7 @@
             oto.trade_nick_name,
 
             o.order_style,
+            o.order_type,
             oto.tracking_number,
             oto.tracking_company
 

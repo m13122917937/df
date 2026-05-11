@@ -162,8 +162,21 @@
                     </div>
                   </div>
                 </div>
-                 <div v-else-if="item.prop === 'subStatus'">
-                  {{ getSubStatus(row[item.prop]) }}
+                 <div v-else-if="item.prop === 'subStatus'" style="text-align: left;">
+                  <div style="line-height: 1.8; display: inline-block;">
+                    <!-- 串码验证码状态 -->
+                    <div style="margin-bottom: 2px;">
+                      <span>串码状态：</span>
+                      <el-tag v-if="row.subStatus === 42 || row.subStatus === 43" size="mini" type="warning">平台二销验证中</el-tag>
+                      <el-tag v-else size="mini" type="info">{{ getSubStatus(row[item.prop]) }}</el-tag>
+                    </div>
+                    <!-- 物流单号状态 -->
+                    <div>
+                      <span v-if="row.trackingNumber">物流单号：</span>
+                      <el-tag v-if="row.trackingNumber" size="mini" type="success">{{ row.trackingNumber }}</el-tag>
+                      <el-tag v-else size="mini" type="danger">待上传物流单号</el-tag>
+                    </div>
+                  </div>
                 </div>
                 <div v-else-if="item.prop === 'address'">
                   <el-popover
@@ -394,7 +407,7 @@ export default {
       batchOriginalDialogVisible: false,
       batchOriginalInput: "",
       batchOriginalList: [],
-      
+
     };
   },
 

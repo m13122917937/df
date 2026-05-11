@@ -79,12 +79,9 @@ public class ErrorOrderBizService {
             if (CollectionUtil.isEmpty(imeiBOS)) {
                 continue;
             }
-            RouteSubscribeBO one = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setOrderCode(orderBO.getOrderCode()));
 
             for (ImeiBO imeiBO : imeiBOS) {
-                if (Objects.isNull(one)) {
-                    continue;
-                }
+
                 ExcelPlatformVO excelPlatformVO = new ExcelPlatformVO();
                 excelPlatformVO.setOrderCode(orderBO.getOrderCode());
                 excelPlatformVO.setOriginalOrderId(orderBO.getOriginalOrderId());
@@ -100,32 +97,5 @@ public class ErrorOrderBizService {
 
 
     }
-
-    /**
-     * @param excelPlatformVOS
-     */
-    public void importExcel(final List<ExcelPlatformVO> excelPlatformVOS) {
-
-        if (CollectionUtil.isEmpty(excelPlatformVOS)) {
-            return;
-        }
-        for (ExcelPlatformVO excelPlatformVO : excelPlatformVOS) {
-            ImeiConsts.PlatformImei platformImei = ImeiConsts.PlatformImei.getByName(excelPlatformVO.getPlatform());
-            if (Objects.isNull(platformImei)) {
-                continue;
-            }
-            //
-            imeiFacade.update(new ImeiParam().setPlatformImei(platformImei.getCode()).setPlatformTime(DateUtil.date()), new ImeiQuery().setOrderId(excelPlatformVO.getOrderCode()).setImel(excelPlatformVO.getImei()));
-            // 修改订单状态
-            if (Objects.equals(platformImei.getCode(), ImeiConsts.PlatformImei.NORMAL.getCode())) {
-                orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_ING.getCode()), new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
-            }
-        }
-    }
-
-
-
-
-
 
 }

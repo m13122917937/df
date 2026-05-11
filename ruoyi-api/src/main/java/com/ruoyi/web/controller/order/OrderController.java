@@ -1,9 +1,7 @@
 package com.ruoyi.web.controller.order;
 
 import com.alibaba.excel.EasyExcel;
-import com.ruoyi.biz.excel.DeliveryListener;
 import com.ruoyi.biz.excel.DropdownWriteHandler;
-import com.ruoyi.biz.express.ExpressBizService;
 import com.ruoyi.biz.order.AgeBizService;
 import com.ruoyi.biz.order.ImeiBizService;
 import com.ruoyi.biz.order.OrderBizService;
@@ -14,7 +12,6 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.ServletUtils;
-import com.ruoyi.mapper.order.OrderConvert;
 import com.ruoyi.order.model.consts.OrderConsts;
 import com.ruoyi.system.model.consts.DictDataConsts;
 import com.ruoyi.web.form.order.OrderForm;
@@ -46,8 +43,6 @@ public class OrderController extends BaseController {
 
 
     @PostMapping("delivery/ing/list")
-
-
     public TableDataInfo deliveryIng(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.DELIVERY_ING.getCode()));
         orderForm.setCompanyId(getDeptId());
@@ -55,11 +50,7 @@ public class OrderController extends BaseController {
         return getDataTable(pageBO.getData(), pageBO.getTotal());
     }
 
-
-
     @PostMapping("delivery/ing/list/export")
-
-
     public void deliveryIngExport(@RequestBody OrderForm orderForm) throws IOException {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.DELIVERY_ING.getCode()));
         orderForm.setCompanyId(getDeptId());
@@ -73,8 +64,6 @@ public class OrderController extends BaseController {
         EasyExcel.write(response.getOutputStream(), OrderVO.class).registerWriteHandler(new DropdownWriteHandler(16, expressCompany)).sheet("sheet1").doWrite(pageBO.getData());
     }
 
-
-
     @PostMapping("delivery/ing/list/import")
     public AjaxResult deliveryImport(@RequestParam("file") MultipartFile file) throws IOException {
 
@@ -85,10 +74,6 @@ public class OrderController extends BaseController {
         return AjaxResult.success();
     }
 
-
-
-
-
     @PostMapping("delivery/end/list")
     public TableDataInfo deliveryEnd(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.DELIVERY_END.getCode()));
@@ -97,10 +82,6 @@ public class OrderController extends BaseController {
         PageBO<OrderVO> pageBO = orderBizService.pageList(orderForm, startParamV2());
         return getDataTable(pageBO.getData(), pageBO.getTotal());
     }
-
-
-
-
 
     @PostMapping("delivery/end/list/export")
     public void deliveryEndExport(@RequestBody OrderForm orderForm) throws IOException {
@@ -115,10 +96,6 @@ public class OrderController extends BaseController {
 
     }
 
-
-
-
-
     @PostMapping("transit/list")
     public TableDataInfo transit(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.TRANSIT.getCode()));
@@ -127,10 +104,6 @@ public class OrderController extends BaseController {
         PageBO<OrderVO> pageBO = orderBizService.pageList(orderForm, startParamV2());
         return getDataTable(pageBO.getData(), pageBO.getTotal());
     }
-
-
-
-
 
     @PostMapping("chase/list")
     public TableDataInfo chase(@RequestBody OrderForm orderForm) {
@@ -141,10 +114,6 @@ public class OrderController extends BaseController {
         return getDataTable(pageBO.getData(), pageBO.getTotal());
     }
 
-
-
-
-
     @PostMapping("error/list")
     public TableDataInfo errorList(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.ERROR.getCode()));
@@ -153,10 +122,6 @@ public class OrderController extends BaseController {
         PageBO<OrderVO> pageBO = orderBizService.pageList(orderForm, startParamV2());
         return getDataTable(pageBO.getData(), pageBO.getTotal());
     }
-
-
-
-
 
     @PostMapping("receipt/list")
     public TableDataInfo ending(@RequestBody OrderForm orderForm) {
@@ -167,10 +132,6 @@ public class OrderController extends BaseController {
         return getDataTable(pageBO.getData(), pageBO.getTotal());
     }
 
-
-
-
-
     @PostMapping("afterSales/list")
     public TableDataInfo afterSales(@RequestBody OrderForm orderForm) {
         orderForm.setStatusList(List.of(OrderConsts.OrderStatus.AFTER_SALES.getCode()));
@@ -180,10 +141,6 @@ public class OrderController extends BaseController {
         return getDataTable(pageBO.getData(), pageBO.getTotal());
     }
 
-
-
-
-
     @GetMapping("province/{status}")
     public AjaxResult provinceCount(@PathVariable("status") Integer status, @RequestParam(value = "brand", required = false) String brand) {
 
@@ -191,9 +148,6 @@ public class OrderController extends BaseController {
 
         return AjaxResult.success(orderAreaCountVOS);
     }
-
-
-
 
 
     @GetMapping("brand/{status}")
@@ -207,8 +161,6 @@ public class OrderController extends BaseController {
 
 
     @GetMapping("list/{orderId}/imei")
-
-
     public AjaxResult imei(@PathVariable("orderId") String orderCode) {
 
         List<ImeiVO> list = imeiBizService.list(orderCode);
@@ -218,8 +170,6 @@ public class OrderController extends BaseController {
 
 
     @GetMapping("confirmRevoke/{orderCode}")
-
-
     public AjaxResult confirmRevoke(@PathVariable("orderCode") String orderCode) {
         orderBizService.confirmRevoke(orderCode);
         return AjaxResult.success();

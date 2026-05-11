@@ -4,6 +4,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
+import com.ruoyi.express.facade.IRouteSubscribeFacade;
+import com.ruoyi.express.model.bo.RouteSubscribeBO;
+import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.facade.ITradeOrderFacade;
@@ -44,13 +47,16 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
 
     ITradeOrderFacade tradeOrderFacade;
 
+    IRouteSubscribeFacade routeSubscribeFacade;
 
-    public ExcelPlateformReadListener(IImeiFacade imeiFacade, IOrderFacade orderFacade, WdtClient client, String warehouseNo, ITradeOrderFacade tradeOrderFacade) {
+
+    public ExcelPlateformReadListener(IImeiFacade imeiFacade, IOrderFacade orderFacade, WdtClient client, String warehouseNo, ITradeOrderFacade tradeOrderFacade, IRouteSubscribeFacade routeSubscribeFacade) {
         this.imeiFacade = imeiFacade;
         this.orderFacade = orderFacade;
         this.wdtClient = client;
         this.warehouseNo = warehouseNo;
         this.tradeOrderFacade = tradeOrderFacade;
+        this.routeSubscribeFacade = routeSubscribeFacade;
     }
 
     @Override
@@ -71,15 +77,23 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
         }
         OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
 
+        RouteSubscribeBO routeSubscribeBO = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setOrderCode(orderBO.getOrderCode()));
+
         // 修改订单状态
         if (Objects.equals(platformImei.getCode(), ImeiConsts.PlatformImei.NORMAL.getCode())) {
-            orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()),
-                    new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
-            //创建入库单
-            try {
-                wdtClient.stockInPush(builderStockIn(orderBO));
-            } catch (IOException e) {
-                log.error("订单号：{}，创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage());
+            if (Objects.nonNull(routeSubscribeBO)) {
+                orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()),
+                        new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
+                //创建入库单
+                try {
+                    wdtClient.stockInPush(builderStockIn(orderBO));
+                } catch (IOException e) {
+                    log.error("订单号：{}，创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage());
+                }
+            } else {
+                log.info("待填写物流单号：{}", orderBO.getOrderCode());
+                orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode()),
+                        new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
             }
         } else {
             orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES_ERROR.getCode()), new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));

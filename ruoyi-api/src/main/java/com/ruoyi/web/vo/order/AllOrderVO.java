@@ -73,6 +73,7 @@ public class AllOrderVO {
 
     private Integer status;
 
+    private Integer orderType;
 
     private String subStatus;
 }

@@ -11,6 +11,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.validator.ValidatorUtils;
+import com.ruoyi.express.facade.impl.RouteSubscribeFacade;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.facade.ITradeOrderFacade;
@@ -56,6 +57,9 @@ public class ErrorOrderController extends BaseController {
     @Autowired
     RuoYiConfig config;
 
+    @Autowired
+    RouteSubscribeFacade routeSubscribeFacade;
+
 
     /**
      * 订单转异常
@@ -74,7 +78,6 @@ public class ErrorOrderController extends BaseController {
     }
 
 
-
     @GetMapping("error2wait")
     public AjaxResult error2revoke(String orderCode) {
         Assert.notBlank(orderCode, "订单编号不能为空");
@@ -83,7 +86,6 @@ public class ErrorOrderController extends BaseController {
 
         return AjaxResult.success();
     }
-
 
 
     @GetMapping("error2ending")
@@ -98,8 +100,6 @@ public class ErrorOrderController extends BaseController {
     }
 
 
-
-
     @PostMapping("/export")
     public void export(@RequestBody ExcelForm excelForm, HttpServletResponse response) throws IOException {
 
@@ -108,7 +108,6 @@ public class ErrorOrderController extends BaseController {
         EasyExcel.write(response.getOutputStream(), ExcelPlatformVO.class).sheet("sheet1").doWrite(excelPlatformVOS);
 
     }
-
 
 
     @PostMapping("/import")
@@ -120,7 +119,7 @@ public class ErrorOrderController extends BaseController {
         if (!originalFilename.endsWith(".xlsx") && !originalFilename.endsWith(".xls")) {
             throw new ServerException("请上传excel文件");
         }
-        ExcelPlateformReadListener excelPlateformReadListener = new ExcelPlateformReadListener(imeiFacade, orderFacade, wdtClient, config.getWarehouseNo(), tradeOrderFacade);
+        ExcelPlateformReadListener excelPlateformReadListener = new ExcelPlateformReadListener(imeiFacade, orderFacade, wdtClient, config.getWarehouseNo(), tradeOrderFacade, routeSubscribeFacade);
         EasyExcel.read(file.getInputStream(), ExcelPlatformVO.class, excelPlateformReadListener).sheet().doRead();
 
         return AjaxResult.success();

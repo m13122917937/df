@@ -57,11 +57,11 @@ public interface OrderConsts {
     public enum OrderType {
 
         /**
-         * * 采购类型（1:一件代发,2:群接龙）
+         * * 采购类型（1:入仓,2:代发）
          */
         O2O(2, "一件代发"),
 
-        PROCUREMENT(1, "群接龙");
+        PROCUREMENT(1, "入仓");
 
         private Integer code;
         private String desc;
@@ -131,11 +131,13 @@ public interface OrderConsts {
 
         WAIT_IMEI(41, "待填写串码"),
 
-        WAIT_EXPRESS(42, "待填写物流信息"),
+        WAIT_SALES(42, "待填写物流信息和平台二销验证中"),
 
-        WAIT_SALES(43, "平台二销验证中"),
+        EXPRESS_WAIT_SALES(43, "物流已经填写，平台二销验证中"),
 
         WAIT_SALES_ERROR(44, "平台已销售"),
+
+        WAIT_EXPRESS(45, "平台未销售"),
 
         DELIVERY_ING_BACK(71, "发货中追单供应商未确定"),
 

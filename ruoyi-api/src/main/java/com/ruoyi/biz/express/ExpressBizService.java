@@ -131,8 +131,7 @@ public class ExpressBizService {
 
         OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(expressOrderForm.getOrderCode()));
         Assert.notNull(orderBO, "订单不存在");
-//        String phone = extractVirtualSuffix(orderBO.getPhone(), orderBO.getAddressee(), orderBO.getReceivingAddress());
-//        expressOrderForm.setCellphone(phone);
+
         log.info("保存快递信息，订单号:{}，手机号码：{}，物流单号：{}", expressOrderForm.getOrderCode(), expressOrderForm.getCellphone(), expressOrderForm.getTrackingNumber());
         boolean express = Objects.equals(orderBO.getStatus(), OrderConsts.OrderStatus.DELIVERY_ING.getCode()) || Objects.equals(orderBO.getStatus(), OrderConsts.OrderStatus.ERROR.getCode());
         Assert.isTrue(express, "订单异常，请刷新页面");
@@ -157,8 +156,15 @@ public class ExpressBizService {
         tradeOrderFacade.update(new TradeOrderParam().setTrackingCompany(expressOrderForm.getTrackingCompany()).setTrackingNumber(expressOrderForm.getTrackingNumber())
                 , new TradeOrderQuery().setOrderId(expressOrderForm.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
         // 修改订单数据
-        OrderParam orderParam = new OrderParam().setSendTime(DateUtil.date()).setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES.getCode());
+        OrderParam orderParam = new OrderParam().setSendTime(DateUtil.date());
+        // 不需要验证平台二销售的
         if (!WebConstants.PLATFORM_VER.contains(orderBO.getPlatform())) {
+            orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
+            //  创建入库单
+            wdtClient.stockInPush(builderStockIn(orderBO));
+        }
+        // 如果已经验证了 二销 ， 现在填写了物流单号
+        if ( Objects.equals(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode(), orderBO.getSubStatus())){
             orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
             //  创建入库单
             wdtClient.stockInPush(builderStockIn(orderBO));
