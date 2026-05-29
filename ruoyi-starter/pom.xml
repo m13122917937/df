@@ -17,6 +17,7 @@
         <module>spring-boot-starter-wangdian</module>
         <module>spring-boot-starter-oss</module>
         <module>spring-boot-starter-esign</module>
+        <module>spring-boot-starter-jky</module>
     </modules>
 
     <properties>

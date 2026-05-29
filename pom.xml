@@ -41,7 +41,6 @@
         <aliyun.oss.version>2.8.3</aliyun.oss.version>
         <pinyin4j.version>2.5.1</pinyin4j.version>
         <fadada.version>5.7.9.1226</fadada.version>
-        <pdd.pop.version>1.23.36</pdd.pop.version>
         <!-- override dependency version -->
         <tomcat.version>9.0.108</tomcat.version>
         <logback.version>1.2.13</logback.version>
@@ -212,12 +211,6 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.pinduoduo</groupId>
-                <artifactId>pop-sdk</artifactId>
-                <version>${pdd.pop.version}</version>
             </dependency>
 
             <!-- mapstruct bean 对象装换 -->
@@ -418,6 +411,12 @@
             <dependency>
                 <groupId>com.ruoyi</groupId>
                 <artifactId>spring-boot-starter-wangdian</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>spring-boot-starter-jky</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 

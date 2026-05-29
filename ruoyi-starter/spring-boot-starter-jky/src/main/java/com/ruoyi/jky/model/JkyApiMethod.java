@@ -1,0 +1,18 @@
+package com.ruoyi.jky.model;
+
+public final class JkyApiMethod {
+
+    public static final String VENDOR_CREATE = "erp.vend.create";
+
+    public static final String ORDER_QUERY = "oms.trade.fullinfoget";
+
+    public static final String REFUND_LIST = "omsapi-business.refund.listrefund";
+
+    public static final String LOGISTICS_UPDATE = "wms-wos.sendorderupdatelogisticinfo";
+
+    public static final String SN_REPORT = "wms.order.snreport";
+
+    private JkyApiMethod() {
+    }
+
+}

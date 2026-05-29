@@ -84,6 +84,14 @@
             <artifactId>spring-boot-starter-wangdian</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>spring-boot-starter-jky</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>spring-boot-starter-esign</artifactId>
+        </dependency>
+        <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-http</artifactId>
         </dependency>
@@ -124,11 +132,6 @@
         <dependency>
             <groupId>com.belerweb</groupId>
             <artifactId>pinyin4j</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.pinduoduo</groupId>
-            <artifactId>pop-sdk</artifactId>
         </dependency>
 
     </dependencies>
@@ -189,7 +192,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M9</version> <!-- 使用最新稳定版本 -->
                 <configuration>
-                    <skipTests>true</skipTests>
+                    <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
         </plugins>

@@ -69,14 +69,6 @@ wechat:
         secret: 8d0f2f5ce562a5e420f5ebec4b7a03ce
         token: oiXr3GV0RYUl2FYVsI4U8k2KhI
         aesKey: oiXr3GV0RYUl2FYVsI4U8k2KhISQWJK40a4YQ6huCc6
-#fy:
-#  wd:
-#    sid: apidevnew2
-#    appkey: lltxsb3-test
-#    appsecret: d92dbe54e
-#    baseUrl: https://sandbox.wangdian.cn/openapi2/
-#    connectTimeout: 3000
-#    readTimeout: 15000
 fy:
   wd:
     sid: lltxsb3
@@ -98,6 +90,18 @@ fy:
     key: FeZClOPI7130
     secret:
     customer: A41C8B61E65E57A166110EE53776EE46
+  jky:
+    appKey: 15021080
+    appSecret: b87426a6e0654a388ee654b3c9f002d8
+    baseUrl: https://open.jackyun.com/open/openapi/do
+    connectTimeout: 10000
   pdd:
     clientId: 3a86a9f9b2f644c6ac6306ee6475680e
     clientSecret: be1d12163b765a78535439f0c5621c4aca46061a
+
+esign:
+  host: https://smlopenapi.esign.cn
+  appId: 7439107862
+  appSecret: 2029fe9458ab9ce47b139127a6279849
+  redirectUri: https://www.wujievip.cn/
+  notify: https://api.wujievip.cn/company/auth/%s/%s
