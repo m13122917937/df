@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ruoyi.biz.order.OrderBizService;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.consts.AdminRedisKey;
 import com.ruoyi.jky.JkyTemplate;
@@ -38,6 +39,9 @@ public class JkyOrderSyncJob {
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private RuoYiConfig ruoYiConfig;
 
     /**
      * 同步吉客云最近修改的订单。
@@ -107,6 +111,7 @@ public class JkyOrderSyncJob {
         param.setFields(ORDER_FIELDS);
         param.setScrollId(scrollId);
         param.setPageSize(100);
+        param.setWarehouseIds(List.of(ruoYiConfig.getWarehouseNo()));
         param.setStartModified(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
         param.setEndModified(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
         return param;
