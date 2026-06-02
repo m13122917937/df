@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(sed -i '/<el-table-column prop=\"trackingNumber\" label=\"物流信息\"/,/<\\\\/el-table-column>/d' D:/work/jie/adm/ruoyi-ui/src/views/demandManage/putin/__TRACKED_VAR__)",
+      "Bash(sed -i '/getTrackingCompanyName\\(value\\) {/,/return map\\\\[value\\\\] || value/d' D:/work/jie/adm/ruoyi-ui/src/views/demandManage/putin/__TRACKED_VAR__)",
+      "Bash(sed -i '/^    },$/{ N; /\\\\n    \\\\/\\\\/ 发货时效/{ s/^    },\\\\n/    /; } }' D:/work/jie/adm/ruoyi-ui/src/views/demandManage/putin/__TRACKED_VAR__)",
+      "Bash(awk '/^\\\\s{4}\\\\w+\\\\\\(.*\\\\\\)\\\\s*\\\\{/ { start=NR; name=$0 } /^\\\\s{4}\\\\}/ && start { if \\(NR-start < 2\\) print \"POSSIBLE MISSING CLOSING at line \" start \": \" name; start=0 }' D:/work/jie/adm/ruoyi-ui/src/views/demandManage/putin/__TRACKED_VAR__)",
+      "Bash(node *)",
+      "Bash(npx vue-cli-service *)",
+      "Bash(git log *)",
+      "Bash(npm run *)"
     ]
   }
 }

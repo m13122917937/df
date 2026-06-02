@@ -21,7 +21,7 @@ public class CompanyController extends BaseController {
     public AjaxResult auth() {
 
         String authUrl = companyBizService.getOrgAuthUrl(getDeptId(), getUserId());
-        return AjaxResult.success().put( AjaxResult.DATA_TAG ,authUrl);
+        return AjaxResult.success().put(AjaxResult.DATA_TAG, authUrl);
     }
 
     @GetMapping("info")
@@ -32,10 +32,11 @@ public class CompanyController extends BaseController {
         return AjaxResult.success(companyVO);
     }
 
-    @PostMapping("/auth/{companyId}")
-    public AjaxResult callBack(@PathVariable("companyId") Long companyId, @RequestBody() String json) {
+    @PostMapping("/auth/{companyId}/{userId}")
+    public AjaxResult callBack(@PathVariable("companyId") Long companyId, @PathVariable("userId") Long userId, @RequestBody() String json) {
 
-        log.info("请求回调：{}， {} ", companyId, json);
+        log.info("请求回调：{}，{}，{}", companyId, userId, json);
+        companyBizService.authCallBack(companyId, userId);
         return AjaxResult.success();
     }
 

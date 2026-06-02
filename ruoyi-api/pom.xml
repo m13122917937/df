@@ -65,6 +65,11 @@
 
         <dependency>
             <groupId>com.ruoyi</groupId>
+            <artifactId>spring-boot-starter-jky</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ruoyi</groupId>
             <artifactId>spring-boot-starter-sn</artifactId>
         </dependency>
 

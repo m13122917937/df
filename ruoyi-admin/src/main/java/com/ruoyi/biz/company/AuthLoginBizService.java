@@ -52,7 +52,7 @@ public class AuthLoginBizService {
             throw new ServiceException("用户名或者密码不正确");
         }
         if (authInfoBO.getExpired().compareTo(new Date()) <= 0) {
-            return new AuthLoginInfoVO().setType(0);
+            return new AuthLoginInfoVO().setType(1).setUserName(authInfoBO.getUserName()).setMacId(authInfoBO.getMacId());
         }
 //        if (StrUtil.isNotEmpty(authInfoBO.getMacId()) && !authInfoBO.getMacId().equals(form.getMacId())) {
 //            throw new ServiceException("登录设备异常");

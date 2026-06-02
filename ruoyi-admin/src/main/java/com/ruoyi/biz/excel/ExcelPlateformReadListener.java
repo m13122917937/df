@@ -6,6 +6,8 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
+import com.ruoyi.jky.JkyTemplate;
+import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
@@ -43,6 +45,8 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
 
     WdtClient wdtClient;
 
+    JkyTemplate jkyTemplate;
+
     String warehouseNo;
 
     ITradeOrderFacade tradeOrderFacade;
@@ -50,10 +54,11 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
     IRouteSubscribeFacade routeSubscribeFacade;
 
 
-    public ExcelPlateformReadListener(IImeiFacade imeiFacade, IOrderFacade orderFacade, WdtClient client, String warehouseNo, ITradeOrderFacade tradeOrderFacade, IRouteSubscribeFacade routeSubscribeFacade) {
+    public ExcelPlateformReadListener(IImeiFacade imeiFacade, IOrderFacade orderFacade, WdtClient client, JkyTemplate jkyTemplate, String warehouseNo, ITradeOrderFacade tradeOrderFacade, IRouteSubscribeFacade routeSubscribeFacade) {
         this.imeiFacade = imeiFacade;
         this.orderFacade = orderFacade;
         this.wdtClient = client;
+        this.jkyTemplate = jkyTemplate;
         this.warehouseNo = warehouseNo;
         this.tradeOrderFacade = tradeOrderFacade;
         this.routeSubscribeFacade = routeSubscribeFacade;
@@ -87,6 +92,7 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
                 //创建入库单
                 try {
                     wdtClient.stockInPush(builderStockIn(orderBO));
+                    createJkyStockIn(orderBO, warehouseNo, orderBO.getQuantity());
                 } catch (IOException e) {
                     log.error("订单号：{}，创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage());
                 }
@@ -98,6 +104,18 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
         } else {
             orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES_ERROR.getCode()), new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
         }
+    }
+
+    private void createJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
+        try {
+            jkyTemplate.createAndStockIn(builderJkyStockIn(orderBO, warehouseNo, quantity));
+        } catch (Exception e) {
+            log.error("订单号：{}，创建吉客云入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
+        }
+    }
+
+    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
+        return new StockCreateAndStockInParam().setWarehouseCode(warehouseNo).setGoodsCode(orderBO.getSkuCode()).setQuantity(quantity).setBatchNo(orderBO.getOrderCode());
     }
 
     /**

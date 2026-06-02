@@ -95,12 +95,17 @@ fy:
     connectTimeout: 3000
     readTimeout: 15000
     warehouseNo: 005
+  jky:
+    appKey: 15021080
+    appSecret: b87426a6e0654a388ee654b3c9f002d8
+    baseUrl: https://open.jackyun.com/open/openapi/do
+    connectTimeout: 10000
 
 esign:
   host: https://smlopenapi.esign.cn
   appId: 7439107862
   appSecret: 2029fe9458ab9ce47b139127a6279849
   redirectUri: https://www.wujievip.cn/
-  notify: https://api.wujievip.cn/company/auth/%s
+  notify: https://api.wujievip.cn/company/auth/%s/%s
 
 

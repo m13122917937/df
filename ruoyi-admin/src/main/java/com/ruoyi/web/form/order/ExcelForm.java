@@ -11,7 +11,7 @@ public class ExcelForm {
 
     private List<String> brandSet;
 
-
-
     private List<String> categoryList;
+
+    private List<String> platformList;
 }

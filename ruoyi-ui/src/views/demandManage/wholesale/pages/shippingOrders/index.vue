@@ -57,6 +57,14 @@
                 >
                   导出订单
                 </el-button> -->
+                <el-button
+                  type="success"
+                  :loading="forwardDeliveryLoading"
+                  :disabled="multipleSelection.length === 0"
+                  @click="handleForwardDelivery"
+                >
+                  转发货
+                </el-button>
                 <el-button @click="openPDDDialog">
                   <svg-icon icon-class="icon-confirmReceipt-pdd"></svg-icon>
                   验证平台销售
@@ -92,11 +100,18 @@
             element-loading-text="数据加载中"
             :height="tableHeight"
             v-table-height="{ bottomOffset: 94 }"
+            @selection-change="handleSelectionChange"
           >
             <!-- 空数据状态 -->
             <template slot="empty">
               <EmptyState text="暂无发货中数据" />
             </template>
+            <el-table-column
+              type="selection"
+              width="45"
+              :selectable="isForwardDeliverySelectable"
+              fixed="left"
+            />
             <el-table-column
               v-for="(item, index) in columnData"
               :key="index"
@@ -347,7 +362,7 @@ import FilterPanel from "../../components/filterPanel.vue";
 import BrandFilter from "../../components/brandFilter.vue";
 import PddDialog from "../../components/PddDialog.vue";
 import EmptyState from "@/views/demandManage/wholesale/components/emptyState.vue";
-import { apiGetDelivery, exportError } from "@/api/creatingOrders";
+import { deliveryIngToTodayApi } from "@/api/creatingOrders";
 import { getOrderSendListApi, exportOrderListApi }  from "@/api/wholesale";
 import { column } from "./config";
 import { saveAs } from "file-saver";
@@ -386,6 +401,8 @@ export default {
       tableDataList: [],
       columnData: column,
       exportLoading: false,
+      forwardDeliveryLoading: false,
+      multipleSelection: [],
 
       searchParams: {
         //table列表query入参
@@ -492,6 +509,37 @@ export default {
       this.searchParams.province = locationId;
       this.getData();
     },
+    isForwardDeliverySelectable(row) {
+      return row.subStatus === 44;
+    },
+    handleSelectionChange(selection) {
+      this.multipleSelection = selection;
+    },
+    async handleForwardDelivery() {
+      if (!this.multipleSelection.length) {
+        this.$message.warning("请选择平台已销售的订单");
+        return;
+      }
+      try {
+        await this.$confirm(`确认将选中的 ${this.multipleSelection.length} 个订单转为当日发货吗？`, "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        });
+      } catch (error) {
+        return;
+      }
+      const orderCodeList = this.multipleSelection.map((item) => item.orderCode);
+      this.forwardDeliveryLoading = true;
+      try {
+        await deliveryIngToTodayApi(orderCodeList);
+        this.$message.success("转发货成功");
+        await this.getData();
+      } finally {
+        this.forwardDeliveryLoading = false;
+      }
+    },
+
     // 退货追单
     handleReturn(row) {
       this.currentOrder = [row];
@@ -584,6 +632,10 @@ export default {
          }
          this.tableDataList = rows || [];
          this.totalNum = total || 0;
+         this.multipleSelection = [];
+         this.$nextTick(() => {
+           this.$refs.table && this.$refs.table.clearSelection();
+         });
       } catch (error) {
         console.error('获取发货中列表失败', error);
         this.tableDataList = [];

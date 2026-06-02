@@ -84,6 +84,13 @@ public class EsignProperties {
     }
 
     /**
+     * 查询机构认证信息(v3)
+     */
+    public String getOrgIdentityInfoUrl() {
+        return host + "/v3/organizations/identity-info";
+    }
+
+    /**
      * 查询认证信息URL(v2)
      */
     public String getAuthInfoUrl() {

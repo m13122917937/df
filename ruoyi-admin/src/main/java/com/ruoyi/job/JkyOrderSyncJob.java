@@ -112,8 +112,9 @@ public class JkyOrderSyncJob {
         param.setScrollId(scrollId);
         param.setPageSize(100);
         param.setWarehouseIds(List.of(ruoYiConfig.getWarehouseNo()));
-        param.setStartModified(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
-        param.setEndModified(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
+        param.setStartAuditTime(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
+        param.setEndAuditTime(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
+        param.setIsDelete("0");
         return param;
     }
 

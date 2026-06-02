@@ -7,7 +7,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.http.HttpRequest;
 import com.ruoyi.biz.address.SmartParse;
 import com.ruoyi.biz.order.OrderAddressBizService;
-import com.ruoyi.biz.pdd.PddBizService;
 import com.ruoyi.capital.facade.ICompanyCapitalFacade;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.JacksonUtil;
@@ -109,65 +108,6 @@ public class ApplicationIntegrationTest {
         }
 
 
-    }
-
-
-    @Autowired
-    PddBizService pddBizService;
-
-    @Autowired
-    PddOrderIncrementJob pddOrderIncrementJob;
-
-    @Test
-    public void dg1dfg() throws Exception {
-
-
-    }
-
-
-    @Test
-    public void dgdfg() throws Exception {
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
-        pddOrderIncrementJob.execute();
     }
 
 

@@ -81,7 +81,7 @@
              <el-table-column
               label="采购人/成交时间"
               prop="createTime"
-              width="250"
+              width="180"
             >
               <template slot-scope="scope">
                 <div class="order-numbers">
@@ -150,12 +150,29 @@
                 {{ scope.row.remark || '-' }}
               </template>
             </el-table-column>
+            <el-table-column prop="trackingNumber" label="物流信息" width="250" align="center">
+              <template slot-scope="scope">
+                <div style="text-align: left; line-height: 1.8;">
+                  <template v-if="scope.row.trackingCompany || scope.row.trackingNumber">
+                    <div v-if="scope.row.trackingCompany" style="margin-bottom: 2px;">
+                      <span>物流公司：</span>
+                      <el-tag size="mini" type="success">{{ getTrackingCompanyName(scope.row.trackingCompany) }}</el-tag>
+                    </div>
+                    <div v-if="scope.row.trackingNumber">
+                      <span>物流单号：</span>
+                      <el-tag size="mini" type="success">{{ scope.row.trackingNumber }}</el-tag>
+                    </div>
+                  </template>
+                  <el-tag v-else size="mini" type="danger">待上传物流单号</el-tag>
+                </div>
+              </template>
+            </el-table-column>
             <!-- 操作 -->
-            <el-table-column label="操作" width="250" fixed="right" align="center">
+            <el-table-column label="操作" width="260" fixed="right" align="center">
               <template slot-scope="scope">
                 <div class="operation-buttons">
                   <el-button size="mini" type="info" @click="handleCopy(scope.row)">一键复制</el-button>
-                  <el-button size="mini" type="primary" @click="handleImeiInfo(scope.row)" v-if="scope.row.warehouseQuantity && scope.row.warehouseQuantity > 0">串码信息</el-button>
+                  <el-button size="mini" type="warning" @click="handleEditTracking(scope.row)">修改物流</el-button>
                   <el-button size="mini" type="danger" @click="handleRevoke(scope.row)">撤销</el-button>
                 </div>
               </template>
@@ -189,6 +206,24 @@
 
     <NewOrderDialog ref="newOrderDialog" @created="onNewOrderCreated" />
     <CopyDialog :visible.sync="copyDialogVisible" :data="copyDialogData" />
+
+    <!-- 修改物流弹窗 -->
+    <el-dialog title="修改物流信息" :visible.sync="trackingDialogVisible" width="480px" :close-on-click-modal="false">
+      <el-form :model="trackingForm" label-width="90px">
+        <el-form-item label="物流公司">
+          <el-select v-model="trackingForm.trackingCompany" placeholder="请选择物流公司" style="width: 100%;">
+            <el-option v-for="item in trackingCompanyOptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="物流单号" v-if="trackingForm.trackingCompany !== '送货入仓'">
+          <el-input v-model="trackingForm.trackingNumber" placeholder="请输入物流单号" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="trackingDialogVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="trackingLoading" @click="handleTrackingConfirm">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -199,7 +234,7 @@ import BrandFilter from './components/brandFilter'
 import SearchSection from '@/views/demandManage/wholesale/components/searchSection.vue'
 import NewOrderDialog from './components/NewOrderDialog'
 import CopyDialog from './components/CopyDialog'
-import { getPutinList, putinRevokeOrder, getProductBrandList, getProductNameList, getSkuList, saveOrder } from '@/api/putin'
+import { getPutinList, putinRevokeOrder, getProductBrandList, getProductNameList, getSkuList, saveOrder, updateTracking } from '@/api/putin'
 import { getBusinessCompanyListApi } from '@/api/business'
 import { getDeliveryTimeText } from '@/utils/deliveryTime'
 
@@ -236,6 +271,20 @@ export default {
       // 一键复制弹窗相关数据
       copyDialogVisible: false,
       copyDialogData: {},
+      // 修改物流弹窗相关数据
+      trackingDialogVisible: false,
+      trackingLoading: false,
+      trackingCompanyOptions: [
+        { value: '顺丰快递', label: '顺丰快递' },
+        { value: '京东', label: '京东' },
+        { value: '德邦', label: '德邦' },
+        { value: '送货入仓', label: '送货入仓' }
+      ],
+      trackingForm: {
+        orderCode: '',
+        trackingCompany: '',
+        trackingNumber: ''
+      },
     }
   },
   computed: {
@@ -244,6 +293,16 @@ export default {
     this.fetchOrderList()
   },
   methods: {
+    getTrackingCompanyName(value) {
+      if (!value) return value
+      const map = {
+        shunfeng: '顺丰快递',
+        jd: '京东',
+        debangwuliu: '德邦',
+        zs: '送货入仓'
+      }
+      return map[value] || value
+    },
     // 发货时效显示方法
     getDeliveryTimeText,
     handleRegionChange(region) {
@@ -400,6 +459,32 @@ export default {
       console.log('取消揽收状态筛选')
     },
     // 操作按钮相关方法
+    handleEditTracking(row) {
+      this.trackingForm = {
+        orderCode: row.orderCode,
+        trackingCompany: row.trackingCompany || '',
+        trackingNumber: row.trackingNumber || ''
+      }
+      this.trackingDialogVisible = true
+    },
+    async handleTrackingConfirm() {
+      this.trackingLoading = true
+      try {
+        const res = await updateTracking(this.trackingForm)
+        if (res && res.code === 200) {
+          this.$message.success('修改物流信息成功')
+          this.trackingDialogVisible = false
+          this.fetchOrderList()
+        } else {
+          this.$message.error(res?.msg || '修改物流信息失败')
+        }
+      } catch (error) {
+        console.error('修改物流信息失败', error)
+        this.$message.error('修改物流信息失败，请稍后重试')
+      } finally {
+        this.trackingLoading = false
+      }
+    },
     handleWarehouseDelivery(row) {
       console.log('仓配代发:', row)
       this.$message.success(`订单 ${row.orderNo} 已设置为仓配代发`)
@@ -677,8 +762,7 @@ export default {
     },
     handleSupplierClear() {
       this.newOrderForm.supplierId = ''
-    }
-    ,
+    },
     // called when NewOrderDialog emits created
     onNewOrderCreated(res) {
       // refresh list and brand filter
@@ -727,7 +811,6 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  align-items: center;
 }
 
 /* 操作按钮样式 */
@@ -735,7 +818,6 @@ export default {
   display: flex;
   gap: 8px;
   justify-content: center;
-  align-items: center;
   .el-button {
     border-radius: 6px;
     font-weight: 500;
@@ -756,7 +838,6 @@ export default {
 .order-productName-line {
   font-size: 12px;
   display: flex;
-  align-items: center;
   gap: 6px;
   line-height: 20px;
 }
@@ -1008,7 +1089,6 @@ export default {
 
 .status-text {
   display: flex;
-  align-items: center;
   cursor: pointer;
   color: #606266;
 

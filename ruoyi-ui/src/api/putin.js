@@ -94,3 +94,14 @@ export function putinRevokeOrder(orderCode) {
     method: "post"
   });
 }
+
+/**
+ * 修改物流信息
+ */
+export function updateTracking(data) {
+  return request({
+    url: `/warehousing/order/tracking`,
+    method: "post",
+    data,
+  });
+}

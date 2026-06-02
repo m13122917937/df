@@ -239,7 +239,7 @@ export default {
     this.fetchOrderList()
   },
   methods: {
-    // 发货时效显示方法
+        // 发货时效显示方法
     getDeliveryTimeText,
     handleRegionChange(region) {
       this.selectedRegion = region
@@ -360,7 +360,7 @@ export default {
     handleOrderNumberFilterConfirm(selectedObjects) {
       this.$message.success('订单编号搜索已应用')
     },
-    // 发货时效筛选相关方法
+        // 发货时效筛选相关方法
     handleShippingTimeFilterConfirm(selectedObjects) {
       this.$message.success('发货时效筛选已应用')
     },
@@ -493,7 +493,6 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  align-items: center;
 }
 
 /* 操作按钮样式 */
@@ -501,7 +500,6 @@ export default {
   display: flex;
   gap: 8px;
   justify-content: center;
-  align-items: center;
   .el-button {
     border-radius: 6px;
     font-weight: 500;
@@ -522,7 +520,6 @@ export default {
 .order-productName-line {
   font-size: 12px;
   display: flex;
-  align-items: center;
   gap: 6px;
   line-height: 20px;
 }
@@ -774,7 +771,6 @@ export default {
 
 .status-text {
   display: flex;
-  align-items: center;
   cursor: pointer;
   color: #606266;
 

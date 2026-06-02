@@ -14,11 +14,7 @@ import com.ruoyi.web.form.order.AllOrderForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 
@@ -47,7 +43,7 @@ public class SysExcelTaskController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('system:excel:generate')")
     @PostMapping("/generate")
-    public AjaxResult generateExcel(AllOrderForm query) {
+    public AjaxResult generateExcel(@RequestBody AllOrderForm query) {
         Long userId = getUserId();
         // 设置公司ID，数据权限过滤
         query.setCompanyId(getDeptId());

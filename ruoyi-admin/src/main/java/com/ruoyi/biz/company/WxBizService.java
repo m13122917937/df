@@ -51,7 +51,8 @@ public class WxBizService {
             } else {
                 // 添加企业用户信息
                 String name = map.get(UserApiConsts.QR_CODE_SCENE_USERNAME);
-                memberFacade.addMemberCompany(memberBO.getUserId(), Convert.toLong(map.get(UserApiConsts.QR_CODE_SCENE_DEPTID)), name);
+                memberFacade.addMemberCompany(memberBO.getUserId(), Convert.toLong(map.get(UserApiConsts.QR_CODE_SCENE_DEPTID)), name,
+                        Convert.toInt(map.get(UserApiConsts.QR_CODE_SCENE_OWNER)));
             }
         } else if (Objects.equals(Convert.toInt(type), UserApiConsts.LOGIN_QR_CODE_TYPE)) {
             String uuid = map.get(UserApiConsts.QR_CODE_SCENE_UUID);

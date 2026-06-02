@@ -1,6 +1,8 @@
 package com.ruoyi.esign.core;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.net.url.UrlQuery;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.Digester;
 import cn.hutool.crypto.digest.DigestAlgorithm;
@@ -10,6 +12,8 @@ import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.esign.api.EsignAuthApi;
 import com.ruoyi.esign.exception.EsignException;
 import com.ruoyi.esign.model.v3.OrgAuthUrlRequest;
+import com.ruoyi.esign.model.v3.OrgIdentityInfoRequest;
+import com.ruoyi.esign.model.v3.OrgIdentityInfoResponse;
 import com.ruoyi.esign.properties.EsignProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +27,7 @@ import java.util.TimeZone;
 
 /**
  * 默认e签宝认证客户端实现（V3版本）
- * 只实现：获取企业认证授权链接
+ * 实现：获取企业认证授权链接、查询机构认证信息
  *
  * @author ruoyi
  */
@@ -43,6 +47,12 @@ public class DefaultEsignAuthClient implements EsignAuthApi {
         return extractRedirectUrl(postWithSignature(url, request));
     }
 
+    @Override
+    public OrgIdentityInfoResponse getOrgIdentityInfo(OrgIdentityInfoRequest request) {
+        GetUrl getUrl = buildOrgIdentityInfoUrl(request);
+        return extractOrgIdentityInfo(getWithSignature(getUrl.requestUrl, getUrl.signatureUrl));
+    }
+
     /**
      * 使用请求签名鉴权发送POST请求并返回结果Map
      * 签名规则参考：https://open.esign.cn/doc/opendoc/dev-guide3/tggw2e
@@ -59,6 +69,7 @@ public class DefaultEsignAuthClient implements EsignAuthApi {
         String date = formatDate();
         // 提取路径部分用于签名计算（签名只需要路径，不需要host）
         String pathUrl = extractPath(fullUrl);
+        log.info("e签宝认证请求参数|url={}|path={}|body={}", fullUrl, pathUrl, body);
         String contentMd5 = generateContentMd5(body);
         String signature = generateSignature("POST", pathUrl, contentMd5, accept, contentType, date);
 
@@ -82,6 +93,46 @@ public class DefaultEsignAuthClient implements EsignAuthApi {
             }
 
             return JacksonUtil.parse(response.body(), Map.class);
+        } catch (EsignException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("e签宝API请求异常", e);
+            throw new EsignException("API请求异常", e);
+        }
+    }
+
+    /**
+     * 使用请求签名鉴权发送GET请求并返回结果Map
+     * 签名规则参考：https://open.esign.cn/doc/opendoc/dev-guide3/tggw2e
+     */
+    private Map<String, Object> getWithSignature(String requestUrl, String signatureUrl) {
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String accept = "application/json";
+        String contentType = "";
+        String date = formatDate();
+        String pathUrl = extractPath(signatureUrl);
+        log.info("e签宝查询机构认证信息请求参数|url={}|signaturePath={}", requestUrl, pathUrl);
+        String signature = generateSignature("GET", pathUrl, "", accept, contentType, date);
+
+        try {
+            HttpRequest httpRequest = HttpRequest.get(requestUrl)
+                    .header("Accept", accept)
+                    .header("Date", date)
+                    .header("X-Tsign-Open-App-Id", properties.getAppId().trim())
+                    .header("X-Tsign-Open-Ca-Timestamp", timestamp)
+                    .header("X-Tsign-Open-Ca-Signature", signature)
+                    .header("X-Tsign-Open-Auth-Mode", "Signature")
+                    .timeout(properties.getReadTimeout().intValue());
+
+            HttpResponse response = httpRequest.execute();
+            String responseBody = response.body();
+            log.info("e签宝查询机构认证信息响应结果|body={}", responseBody);
+
+            if (!response.isOk()) {
+                throw new EsignException("请求失败，请求响应：" + responseBody);
+            }
+
+            return JacksonUtil.parse(responseBody, Map.class);
         } catch (EsignException e) {
             throw e;
         } catch (Exception e) {
@@ -119,6 +170,38 @@ public class DefaultEsignAuthClient implements EsignAuthApi {
     }
 
     /**
+     * 构建查询机构认证信息URL
+     */
+    private GetUrl buildOrgIdentityInfoUrl(OrgIdentityInfoRequest request) {
+        UrlQuery requestQuery = new UrlQuery();
+        StringBuilder signatureQuery = new StringBuilder();
+        if (StrUtil.isNotBlank(request.getOrgId())) {
+            appendQueryParam(requestQuery, signatureQuery, "orgId", request.getOrgId());
+        } else if (StrUtil.isNotBlank(request.getOrgName())) {
+            appendQueryParam(requestQuery, signatureQuery, "orgName", request.getOrgName());
+        } else if (StrUtil.isNotBlank(request.getOrgIDCardNum())) {
+            appendQueryParam(requestQuery, signatureQuery, "orgIDCardNum", request.getOrgIDCardNum());
+            appendQueryParam(requestQuery, signatureQuery, "orgIDCardType", request.getOrgIDCardType());
+        }
+        String query = requestQuery.build(StandardCharsets.UTF_8);
+        if (StrUtil.isBlank(query)) {
+            return new GetUrl(properties.getOrgIdentityInfoUrl(), properties.getOrgIdentityInfoUrl());
+        }
+        return new GetUrl(properties.getOrgIdentityInfoUrl() + "?" + query, properties.getOrgIdentityInfoUrl() + "?" + signatureQuery);
+    }
+
+    /**
+     * 追加GET查询参数
+     */
+    private void appendQueryParam(UrlQuery requestQuery, StringBuilder signatureQuery, String key, String value) {
+        requestQuery.add(key, value);
+        if (signatureQuery.length() > 0) {
+            signatureQuery.append("&");
+        }
+        signatureQuery.append(key).append("=").append(value);
+    }
+
+    /**
      * 提取跳转链接
      */
     private String extractRedirectUrl(Map<String, Object> result) {
@@ -127,6 +210,20 @@ public class DefaultEsignAuthClient implements EsignAuthApi {
         Map<String, Object> data = (Map<String, Object>) result.get("data");
         log.info("e签宝返回data: {}", data);
         return (String) data.get("authUrl");
+    }
+
+    /**
+     * 提取机构认证信息
+     */
+    private OrgIdentityInfoResponse extractOrgIdentityInfo(Map<String, Object> result) {
+        checkApiResultCode(result);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> data = (Map<String, Object>) result.get("data");
+        log.info("e签宝机构认证信息返回data: {}", data);
+        if (data == null) {
+            return null;
+        }
+        return JacksonUtil.toPojo(data, OrgIdentityInfoResponse.class);
     }
 
     /**
@@ -171,7 +268,6 @@ public class DefaultEsignAuthClient implements EsignAuthApi {
           .append(url);
 
         String message = sb.toString();
-        log.debug("e签宝待签名字符串: {}", message);
         // appSecret去除前后空格
         String appSecret = properties.getAppSecret().trim();
         return doSignatureBase64(message, appSecret);
@@ -186,6 +282,15 @@ public class DefaultEsignAuthClient implements EsignAuthApi {
         return Base64.encode(hmac);
     }
 
+    private static class GetUrl {
 
+        private final String requestUrl;
 
+        private final String signatureUrl;
+
+        private GetUrl(String requestUrl, String signatureUrl) {
+            this.requestUrl = requestUrl;
+            this.signatureUrl = signatureUrl;
+        }
+    }
 }

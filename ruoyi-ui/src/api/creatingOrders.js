@@ -140,6 +140,14 @@ export function exportError(data) {
   });
 }
 
+export function deliveryIngToTodayApi(data) {
+  return request({
+    url: `/order/error/delivery/today`,
+    method: "post",
+    data,
+  });
+}
+
 export function apiGetImei(orderId) {
   return request({
     url: `/order/new/list/${orderId}/imei`,

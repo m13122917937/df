@@ -8,6 +8,7 @@ import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.validator.ValidatorUtils;
 import com.ruoyi.web.form.order.BrandForm;
 import com.ruoyi.web.form.order.PickingOrderForm;
+import com.ruoyi.web.form.order.TrackingForm;
 import com.ruoyi.web.form.order.WarehousingOrderParam;
 import com.ruoyi.web.form.order.WarehousingSaveParam;
 import com.ruoyi.web.vo.order.BrandCountVO;
@@ -91,6 +92,17 @@ public class WarehousingController extends BaseController {
     public AjaxResult picking(@Validated() @RequestBody PickingOrderForm pickingOrderForm) throws IOException {
 
         wOrderBizService.picking(pickingOrderForm, getLoginUser());
+
+        return AjaxResult.success();
+    }
+
+    /**
+     * 修改物流信息
+     */
+    @PostMapping("tracking")
+    public AjaxResult updateTracking(@Validated @RequestBody TrackingForm trackingForm) {
+
+        wOrderBizService.updateTracking(trackingForm);
 
         return AjaxResult.success();
     }

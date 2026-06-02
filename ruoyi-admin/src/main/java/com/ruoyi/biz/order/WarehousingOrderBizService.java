@@ -14,6 +14,9 @@ import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.JacksonUtil;
+import com.ruoyi.express.model.consts.LogisticsCode;
+import com.ruoyi.jky.JkyTemplate;
+import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.mapper.order.OrderConvert;
 import com.ruoyi.mapper.order.WarehousingConvert;
 import com.ruoyi.order.facade.IHangingOrderFacade;
@@ -46,6 +49,7 @@ import com.ruoyi.wangdian.param.stock.StockInInfoParam;
 import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.order.BrandForm;
 import com.ruoyi.web.form.order.PickingOrderForm;
+import com.ruoyi.web.form.order.TrackingForm;
 import com.ruoyi.web.form.order.WarehousingOrderParam;
 import com.ruoyi.web.form.order.WarehousingSaveParam;
 import com.ruoyi.web.vo.order.BrandCountVO;
@@ -93,6 +97,9 @@ public class WarehousingOrderBizService {
 
     @Autowired
     WdtClient wdtClient;
+
+    @Autowired
+    JkyTemplate jkyTemplate;
 
 
     /**
@@ -166,6 +173,7 @@ public class WarehousingOrderBizService {
         tradeOrderParam.setOrderId(orderBO.getOrderCode()).setTradePrice(warehousingSaveParam.getPrice()).setBrand(orderBO.getBrand()).setProductName(orderBO.getProductName());
         tradeOrderParam.setSkuName(orderBO.getSkuName()).setSkuCode(orderBO.getSkuCode()).setProvince(orderBO.getProvince()).setQuantity(0);
         tradeOrderParam.setOrderType(orderBO.getOrderType()).setTradeIndex(4).setHangOrderId(hangingOrderBO.getId()).setOrderId(orderBO.getOrderCode());
+        tradeOrderParam.setTrackingCompany(LogisticsCode.ZS.getMsg());
         tradeOrderFacade.save(tradeOrderParam);
         log.info("保存入仓订单成功,{}", orderBO.getOrderCode());
 
@@ -257,6 +265,7 @@ public class WarehousingOrderBizService {
             //  回传旺店通
             StockInInfoParam stockInInfoParam = builderStockIn(orderBO, pickingOrderForm.getSnList().size(), pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
             wdtClient.stockInPush(stockInInfoParam);
+            createJkyStockIn(orderBO, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList().size());
 
             tradeOrderFacade.update(new TradeOrderParam().setQuantity(quantity).setUpdateTime(DateUtil.date()),
                     new TradeOrderQuery().setOrderId(pickingOrderForm.getOrderCode()));
@@ -267,6 +276,7 @@ public class WarehousingOrderBizService {
             // 非 sn 管理
             StockInInfoParam stockInInfoParam = builderStockIn(orderBO, quantity, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
             wdtClient.stockInPush(stockInInfoParam);
+            createJkyStockIn(orderBO, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getQuantity());
             // 更新成交记录
             tradeOrderFacade.update(new TradeOrderParam().setQuantity(quantity).setUpdateTime(DateUtil.date()),
                     new TradeOrderQuery().setOrderId(pickingOrderForm.getOrderCode()));
@@ -283,6 +293,29 @@ public class WarehousingOrderBizService {
 
     }
 
+
+    /**
+     * 修改物流信息
+     *
+     * @param trackingForm
+     */
+    public void updateTracking(TrackingForm trackingForm) {
+        tradeOrderFacade.update(new TradeOrderParam().setTrackingCompany(trackingForm.getTrackingCompany())
+                .setTrackingNumber(trackingForm.getTrackingNumber()).setUpdateTime(DateUtil.date()),
+                new TradeOrderQuery().setOrderId(trackingForm.getOrderCode()));
+    }
+
+    private void createJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
+        try {
+            jkyTemplate.createAndStockIn(builderJkyStockIn(orderBO, warehouseNo, quantity));
+        } catch (Exception e) {
+            log.error("订单号：{}，创建吉客云入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
+        }
+    }
+
+    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
+        return new StockCreateAndStockInParam().setWarehouseCode(warehouseNo).setGoodsCode(orderBO.getSkuCode()).setQuantity(quantity).setBatchNo(orderBO.getOrderCode());
+    }
 
     private StockInInfoParam builderStockIn(OrderBO orderBO, Integer quantity, String warehouseNo, List<String> snList, String remark) {
         TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));

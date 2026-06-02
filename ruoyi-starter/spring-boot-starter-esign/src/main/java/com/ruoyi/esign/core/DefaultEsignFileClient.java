@@ -167,7 +167,6 @@ public class DefaultEsignFileClient implements EsignFileApi {
           .append(url);
 
         String message = sb.toString();
-        log.debug("e签宝待签名字符串: {}", message);
         String appSecret = properties.getAppSecret().trim();
         return doSignatureBase64(message, appSecret);
     }

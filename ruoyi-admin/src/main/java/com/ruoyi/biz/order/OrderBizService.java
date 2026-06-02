@@ -868,6 +868,28 @@ public class OrderBizService {
 
     }
 
+    /**
+     * 按照原始单号处理吉客云售后。
+     */
+    public int revokeJkyRefund(final String originalOrderId, final Integer revokeCode) {
+        if (StrUtil.isBlank(originalOrderId)) {
+            return 0;
+        }
+        List<OrderBO> list = orderFacade.list(new OrderQuery().setOriginalOrderId(originalOrderId));
+        if (CollectionUtil.isEmpty(list)) {
+            return 0;
+        }
+        int count = 0;
+        for (OrderBO orderBO : list) {
+            if (Objects.equals(orderBO.getStatus(), OrderConsts.OrderStatus.ENDING.getCode())) {
+                continue;
+            }
+            revoke(orderBO.getOrderCode(), revokeCode);
+            count++;
+        }
+        return count;
+    }
+
     public PageBO<AllOrderVO> allList(AllOrderForm allOrderForm, PageParamV2 pageParamV2) {
         OrderQuery orderQuery = OrderConvert.INSTANCE.allParamToQuery(allOrderForm);
         PageBO<OrderBO> pageBO = orderFacade.listPage(orderQuery, pageParamV2);

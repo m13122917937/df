@@ -6,11 +6,17 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.model.page.PageBO;
+import com.ruoyi.web.form.order.ExcelForm;
 import com.ruoyi.web.form.order.ImeiForm;
+import com.ruoyi.web.form.order.PlatformImeiForm;
+import com.ruoyi.web.vo.order.ImeiQueryVO;
 import com.ruoyi.web.vo.order.ImeiRelVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 
@@ -61,6 +67,24 @@ public class IMEIController extends BaseController {
 
         imeiBizService.del(id);
 
+        return AjaxResult.success();
+    }
+
+    /**
+     * 通过平台+品牌+品类查询待发货订单的sn、imei
+     */
+    @PostMapping("/imei/query")
+    public AjaxResult listImeiInfo(@RequestBody ExcelForm excelForm) {
+        List<ImeiQueryVO> list = imeiBizService.listImeiInfo(excelForm);
+        return AjaxResult.success(list);
+    }
+
+    /**
+     * 修改平台校验状态并更新订单状态
+     */
+    @PostMapping("/imei/platform")
+    public AjaxResult updatePlatformImei(@Validated @RequestBody PlatformImeiForm form) {
+        imeiBizService.updatePlatformImei(form);
         return AjaxResult.success();
     }
 

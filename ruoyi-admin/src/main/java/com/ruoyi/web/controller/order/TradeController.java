@@ -22,8 +22,6 @@ public class TradeController {
 
 
     @GetMapping("list/today")
-
-
     public AjaxResult today(TradePriceForm tradePriceForm) {
 
         List<TradePriceVO> today = tradeBizService.today(tradePriceForm);
@@ -33,8 +31,6 @@ public class TradeController {
 
 
     @GetMapping("list/yesterday")
-
-
     public AjaxResult yesterday(TradePriceForm tradePriceForm) {
         ValidatorUtils.validateEntity(tradePriceForm);
 

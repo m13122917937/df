@@ -13,7 +13,7 @@ public enum LogisticsCode {
     JD("jd", "京东", 17),
     ZHONGTONG("zhongtong", "中通", 3),
     DE_BANG("debangwuliu", "德邦", 16),
-    ZS("zs", "自送(仓内调拨)", (Integer) null);
+    ZS("zs", "送货入仓", (Integer) null);
 
     private final String code;
     private final String msg;

@@ -40,6 +40,11 @@ public class MemberCompany {
     private Integer owner;
 
     /**
+     * 合同签署权限状态（0:未授权 1:已授权）
+     */
+    private Integer contractSignAuthStatus;
+
+    /**
      * 创建时间
      */
     private Date createTime;

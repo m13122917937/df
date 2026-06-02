@@ -30,6 +30,8 @@ import com.ruoyi.kuaidi100.ExpressClient;
 import com.ruoyi.kuaidi100.model.*;
 import com.ruoyi.kuaidi100.model.consts.LogisticsStatus;
 import com.ruoyi.kuaidi100.model.reponse.Kd100SubscribeResp;
+import com.ruoyi.jky.JkyTemplate;
+import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.mapper.order.OrderConvert;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
@@ -74,6 +76,9 @@ public class ExpressBizService {
 
     @Autowired
     WdtClient wdtClient;
+
+    @Autowired
+    JkyTemplate jkyTemplate;
 
     @Autowired
     IOrderFacade orderFacade;
@@ -162,12 +167,14 @@ public class ExpressBizService {
             orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
             //  创建入库单
             wdtClient.stockInPush(builderStockIn(orderBO));
+            createJkyStockIn(orderBO, ruoYiConfig.getWarehouseNo(), orderBO.getQuantity());
         }
         // 如果已经验证了 二销 ， 现在填写了物流单号
         if ( Objects.equals(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode(), orderBO.getSubStatus())){
             orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
             //  创建入库单
             wdtClient.stockInPush(builderStockIn(orderBO));
+            createJkyStockIn(orderBO, ruoYiConfig.getWarehouseNo(), orderBO.getQuantity());
         }
         // 更新订单发货时间,和子状态
         orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));
@@ -181,6 +188,18 @@ public class ExpressBizService {
      * @param orderBO
      * @return
      */
+    private void createJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
+        try {
+            jkyTemplate.createAndStockIn(builderJkyStockIn(orderBO, warehouseNo, quantity));
+        } catch (Exception e) {
+            log.error("订单号：{}，创建吉客云入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
+        }
+    }
+
+    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
+        return new StockCreateAndStockInParam().setWarehouseCode(warehouseNo).setGoodsCode(orderBO.getSkuCode()).setQuantity(quantity).setBatchNo(orderBO.getOrderCode());
+    }
+
     private StockInInfoParam builderStockIn(OrderBO orderBO) {
         List<ImeiBO> list = iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
         List<String> imeiList = null;

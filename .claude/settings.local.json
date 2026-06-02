@@ -43,7 +43,13 @@
       "Bash(node scripts/cli.js generate --project D:/work/jie/adm --source-file D:/work/jie/adm/ruoyi-admin/src/main/java/com/ruoyi/web/controller/company/AuthLoginController.java --title \"AuthLoginController 接口文档\" --output D:/work/jie/adm/output)",
       "Read(//c/Users/m1312/.claude/skills/softcopyright/**)",
       "Bash(node scripts/cli.js generate --project D:/work/jie/adm --source-file D:/work/jie/adm/ruoyi-admin/src/main/java/com/ruoyi/web/controller/company/AuthLoginController.java --title \"AuthLoginController 授权登录接口文档\" --output D:/work/jie/adm/output)",
-      "Bash(node scripts/cli.js generate --project D:/work/jie/adm --output D:/work/jie/adm/softcopyright-output --auto-pdf)"
+      "Bash(node scripts/cli.js generate --project D:/work/jie/adm --output D:/work/jie/adm/softcopyright-output --auto-pdf)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm *)",
+      "Bash(python *)",
+      "Bash(git restore *)",
+      "Bash(git push *)",
+      "Bash(mysql *)"
     ]
   }
 }

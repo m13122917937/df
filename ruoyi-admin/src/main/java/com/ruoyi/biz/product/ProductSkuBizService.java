@@ -11,10 +11,6 @@ import com.ruoyi.product.facade.IProductSkuFacade;
 import com.ruoyi.product.model.bo.ProductSkuBO;
 import com.ruoyi.product.model.param.ProductSkuParam;
 import com.ruoyi.product.model.query.ProductSkuQuery;
-import com.ruoyi.wangdian.param.base.ProductParams;
-import com.ruoyi.wangdian.param.base.product.GoodsInfo;
-import com.ruoyi.wangdian.param.base.product.SpecInfo;
-import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.product.ProductSkuForm;
 import com.ruoyi.web.vo.product.ProductSkuVO;
 import com.ruoyi.web.vo.product.ProductVO;
@@ -23,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -42,9 +36,6 @@ public class ProductSkuBizService {
 
     @Autowired
     private IProductSkuFacade productSkuFacade;
-
-    @Autowired
-    private WdtClient wdtClient;
 
     /**
      * 分页查询商品SKU列表
@@ -70,7 +61,7 @@ public class ProductSkuBizService {
      * @return 新增的SKU信息
      */
     @Transactional(rollbackFor = Exception.class)
-    public ProductSkuVO add(ProductSkuForm form) throws IOException {
+    public ProductSkuVO add(ProductSkuForm form) {
         log.info("开始新增商品SKU 商品名称: {}",  form.getProductName());
 
         ProductSkuParam param = ProductConvert.INSTANCE.toParam(form);
@@ -80,12 +71,6 @@ public class ProductSkuBizService {
         param.setSortOrder(DateUtil.currentSeconds());
         this.genSkuCode(param);
         productSkuFacade.save(param);
-
-        // 旺店通创建商品
-        GoodsInfo goodsInfo = GoodsInfo.builder().goods_name(param.getProductName())
-                .brand_name(param.getBrand()).class_name(param.getCategory()).goods_no(param.getSkuCode()).build();
-        SpecInfo specInfo = SpecInfo.builder().spec_no(param.getSkuCode()).spec_name(param.getSpecName()).sn_type(form.getSnType()).build();
-        wdtClient.goods(goodsInfo, specInfo);
 
         log.info("商品SKU新增成功，SKU编码: {}", param.getSkuCode());
         return null;

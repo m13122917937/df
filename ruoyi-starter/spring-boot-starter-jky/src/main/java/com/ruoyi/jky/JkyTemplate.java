@@ -11,16 +11,20 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.jky.model.JkyApiMethod;
 import com.ruoyi.jky.model.JkyResponse;
+import com.ruoyi.jky.param.goods.GoodsListParam;
 import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
 import com.ruoyi.jky.param.order.OrderQueryParam;
 import com.ruoyi.jky.param.refund.RefundQueryParam;
 import com.ruoyi.jky.param.sn.SnReportParam;
+import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.jky.param.vendor.VendorCreateParam;
 import com.ruoyi.jky.properties.JkyProperties;
+import com.ruoyi.jky.rep.goods.GoodsListRep;
 import com.ruoyi.jky.rep.logistics.LogisticsUpdateRep;
 import com.ruoyi.jky.rep.order.OrderQueryRep;
 import com.ruoyi.jky.rep.refund.RefundQueryRep;
 import com.ruoyi.jky.rep.sn.SnReportRep;
+import com.ruoyi.jky.rep.stock.StockCreateAndStockInRep;
 import com.ruoyi.jky.rep.vendor.VendorCreateRep;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +53,14 @@ public class JkyTemplate {
      */
     public JkyResponse<VendorCreateRep> createVendor(final VendorCreateParam param) {
         return execute(JkyApiMethod.VENDOR_CREATE, BIZ_CONTENT, param, new TypeReference<JkyResponse<VendorCreateRep>>() {
+        });
+    }
+
+    /**
+     * 分页查询货品信息。
+     */
+    public JkyResponse<List<GoodsListRep>> goodsList(final GoodsListParam param) {
+        return execute(JkyApiMethod.GOODS_LIST, BIZ_CONTENT, param, new TypeReference<JkyResponse<List<GoodsListRep>>>() {
         });
     }
 
@@ -82,6 +94,15 @@ public class JkyTemplate {
     public JkyResponse<SnReportRep> reportSerialNumbers(final SnReportParam param) {
         return execute(JkyApiMethod.SN_REPORT, BIZ_DATA, param, new TypeReference<JkyResponse<SnReportRep>>() {
         });
+    }
+
+    /**
+     * 创建库存并入库。
+     */
+    public JkyResponse<StockCreateAndStockInRep> createAndStockIn(final StockCreateAndStockInParam param) {
+        return execute(JkyApiMethod.STOCK_CREATE_AND_STOCK_IN, BIZ_CONTENT, param,
+                new TypeReference<JkyResponse<StockCreateAndStockInRep>>() {
+                });
     }
 
     private <T> JkyResponse<T> execute(final String method, final String bizParamName, final Object param,

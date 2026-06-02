@@ -24,8 +24,6 @@ public class OrderFilterController {
     @Autowired
     OrderBizService orderBizService;
 
-
-
     @PostMapping("countHeader")
     public AjaxResult countHeader(){
         DateTime dateTime = DateUtil.offsetDay(DateUtil.date(), -15);
@@ -34,6 +32,5 @@ public class OrderFilterController {
 
         return AjaxResult.success(orderStatusVOS);
     }
-
 
 }

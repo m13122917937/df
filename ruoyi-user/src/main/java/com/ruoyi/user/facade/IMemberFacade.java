@@ -29,7 +29,7 @@ public interface IMemberFacade {
     PageBO<MemberBO> memberList(MemberQuery memberQuery, PageParamV2 pageParamV2);
 
 
-    void addMemberCompany(Long memberId, Long aLong, String name);
+    void addMemberCompany(Long memberId, Long companyId, String name, Integer owner);
 
 
     PageBO<MemberBO> pageCompanyMember(MemberQuery memberQuery, PageParamV2 pageParamV2);

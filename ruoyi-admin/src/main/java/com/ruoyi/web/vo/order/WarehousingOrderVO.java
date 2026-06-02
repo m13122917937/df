@@ -50,7 +50,9 @@ public class WarehousingOrderVO {
 
     private Integer deliveryCode;
 
+    private String trackingCompany;
 
+    private String trackingNumber;
 
     private String remark;
 

@@ -34,7 +34,7 @@ public class AuthLoginController extends BaseController {
      */
     @PostMapping("/login")
     public AjaxResult login(@RequestBody AuthLoginInfoForm form) {
-        log.info("请求参数：{}", JacksonUtil.toJson(form));
+        log.info("查码请求参数：{}", JacksonUtil.toJson(form));
         AuthLoginInfoVO vo = authLoginBizService.login(form);
         return AjaxResult.success(vo);
     }

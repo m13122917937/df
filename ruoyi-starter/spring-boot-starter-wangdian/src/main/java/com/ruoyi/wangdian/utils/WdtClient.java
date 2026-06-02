@@ -73,7 +73,10 @@ public class WdtClient {
         String response = execute("setting.PurchaseProvider.push", params, null);
         log.info("创建供应商，返回结果：{}", response);
         WDRep wdRep = JacksonUtil.parse(response, WDRep.class);
-        if (Objects.isNull(wdRep) || !wdRep.isSuccess()) {
+        if (Objects.isNull(wdRep)) {
+            throw new ServiceException("创建供应商响应解析失败");
+        }
+        if (!wdRep.isSuccess()) {
             throw new ServiceException(wdRep.getMessage());
         }
     }

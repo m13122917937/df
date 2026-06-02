@@ -76,12 +76,13 @@ public class MemberFacade implements IMemberFacade {
     }
 
     @Override
-    public void addMemberCompany(Long memberId, Long companyId, String name) {
+    public void addMemberCompany(Long memberId, Long companyId, String name, Integer owner) {
         long count = memberCompanyService.count(DynamicCondition.toWrapper(new MemberCompanyQuery().setUserId(memberId).setCompanyId(companyId)));
         if (count > 1) {
             return;
         }
-        MemberCompany memberCompany = new MemberCompany().setCompanyId(companyId).setUserId(memberId).setOwner(MemberEnum.UserOwner.PEOPLE.getValue()).setCreateTime(DateUtil.date());
+        Integer accountOwner = Objects.requireNonNullElse(owner, MemberEnum.UserOwner.PEOPLE.getValue());
+        MemberCompany memberCompany = new MemberCompany().setCompanyId(companyId).setUserId(memberId).setOwner(accountOwner).setCreateTime(DateUtil.date());
         memberCompanyService.save(memberCompany);
 
         memberService.update(new Member().setNickName(name), DynamicCondition.toWrapper(new MemberQuery().setUserId(memberId)));
