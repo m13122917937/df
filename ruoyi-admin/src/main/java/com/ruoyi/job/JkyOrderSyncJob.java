@@ -7,12 +7,12 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ruoyi.biz.order.OrderBizService;
-import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.consts.AdminRedisKey;
 import com.ruoyi.jky.JkyTemplate;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.order.OrderQueryParam;
+import com.ruoyi.jky.properties.JkyProperties;
 import com.ruoyi.jky.rep.order.OrderQueryRep;
 import com.ruoyi.web.form.order.OrderAddForm;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Component("jkyOrderSyncJob")
 public class JkyOrderSyncJob {
 
-    private static final String ORDER_FIELDS = "tradeNo,orderNo,sourceTradeNo,shopName,companyName,tradeTime,payTime,lastShipTime,sellerMemo,buyerMemo,flagNames,goodsDetail.goodsNo,goodsDetail.outerId,goodsDetail.sellCount,goodsDetail.needProcessCount,goodsDetail.isGift,scrollId";
+    private static final String ORDER_FIELDS = "tradeNo,platFlags,tradeFrom,tradeStatus,tradeTime,payTime,auditTime,reviewTime,notifyPickTime,consignTime,signingTime,orderNo,shopId,shopCode,shopName,companyId,companyName,warehouseId,warehouseName,logisticId,logisticName,logisticType,mainPostid,tradeType,sourceTradeType,totalFee,taxFee,receivedPostFee,discountFee,payment,couponFee,receivedTotal,postFee,confirmTime,otherFee,departId,departName,lastShipTime,completeTime,platCompleteTime,payStatus,sellerMemo,grossProfit,buyerMemo,estimateVolume,appendMemo,auditor,reviewer,estimateWeight,packageWeight,tradeCount,goodsTypeCount,freezeReason,abnormalDescription,goodslist,onlineTradeNo,gmtCreate,gmtModified,stockoutNo,sysFlagIds,flagIds,isDelete,flagNames,customerId,customerAccount,buyerOpenUid,customerName,customerCode,customerTypeName,customerGradeName,customerTags,customerDiscount,specialReminding,qq,email,blackList,countryCode,cityCode,receiverName,phone,mobile,country,state,city,district,town,zip,address,identityCardType,identityCardNo,identityCardName,payerBankName,invoiceType,payerName,payerRegno,payerBankAccount,payerPhone,payerAddress,invoiceNo,invoiceCode,invoiceStatus,invoiceEmail,supplierId,supplierName,agentShopName,chargeType,chargeCurrency,chargeAccount,accountName,payType,payAccount,payNo,chargeCurrencyCode,chargeExchangeRate,localCurrencyCode,localExchangeRate,customerTotalFee,customerDiscountFee,customerPostFee,customerPayment,isBillCheck,billDate,checkTotal,finDoc,sourceAfterNo,afterNo,pickUpCode,localPayment,pickUpTime";
 
     @Autowired
     private JkyTemplate jkyTemplate;
@@ -41,7 +42,7 @@ public class JkyOrderSyncJob {
     private RedisCache redisCache;
 
     @Autowired
-    private RuoYiConfig ruoYiConfig;
+    private JkyProperties jkyProperties;
 
     /**
      * 同步吉客云最近修改的订单。
@@ -96,7 +97,7 @@ public class JkyOrderSyncJob {
     private DateTime getStartTime(DateTime endTime) {
         String lastSyncTime = redisCache.getCacheObject(AdminRedisKey.Jky.ORDER_LAST_SYNC_TIME);
         if (StrUtil.isBlank(lastSyncTime)) {
-            return DateUtil.offsetMinute(endTime, -10);
+            return DateUtil.offsetHour(endTime, -5);
         }
         try {
             return DateUtil.parse(lastSyncTime, DatePattern.NORM_DATETIME_PATTERN);
@@ -111,7 +112,11 @@ public class JkyOrderSyncJob {
         param.setFields(ORDER_FIELDS);
         param.setScrollId(scrollId);
         param.setPageSize(100);
-        param.setWarehouseIds(List.of(ruoYiConfig.getWarehouseNo()));
+        param.setIsReturnPddData(1);
+        param.setIsPddQuery(0);
+        if (StrUtil.isNotBlank(jkyProperties.getWarehouseId())) {
+            param.setWarehouseIds(Collections.singletonList(jkyProperties.getWarehouseId()));
+        }
         param.setStartAuditTime(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
         param.setEndAuditTime(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
         param.setIsDelete("0");
@@ -149,7 +154,7 @@ public class JkyOrderSyncJob {
             return null;
         }
         String tradeNo = trade.getTradeNo();
-        String skuCode = StrUtil.blankToDefault(goods.getOuterId(), goods.getGoodsNo());
+        String skuCode = StrUtil.blankToDefault(goods.getGoodsNo(), goods.getOuterId());
         Long quantity = toQuantity(goods.getNeedProcessCount(), goods.getSellCount());
         Date erpTradeTime = parseDate(StrUtil.blankToDefault(trade.getTradeTime(), trade.getPayTime()));
         Date lastShippingTime = parseDate(trade.getLastShipTime());
@@ -169,8 +174,8 @@ public class JkyOrderSyncJob {
         form.setErpTradeTime(erpTradeTime);
         form.setLastShippingTime(lastShippingTime);
         form.setAddress(address);
+        form.setOrderStyle(trade.getPlatFlags());
         parseAddress(form);
-        form.setOrderStyle(trade.getFlagNames());
         return form;
     }
 

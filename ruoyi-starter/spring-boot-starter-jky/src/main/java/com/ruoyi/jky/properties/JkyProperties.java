@@ -19,6 +19,10 @@ public class JkyProperties {
 
     private String token;
 
+    private Boolean enabled = true;
+
+    private String warehouseId;
+
     private String version = "v1.0";
 
     private String contentType = "json";

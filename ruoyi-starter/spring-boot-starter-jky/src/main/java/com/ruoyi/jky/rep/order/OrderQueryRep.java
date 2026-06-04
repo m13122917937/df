@@ -73,7 +73,15 @@ public class OrderQueryRep {
 
         private String buyerMemo;
 
+        private String payerName;
+
+        private String payerPhone;
+
+        private String payerAddress;
+
         private String flagNames;
+
+        private String platFlags;
 
         private List<OrderGoodsDetailRep> goodsDetail;
 

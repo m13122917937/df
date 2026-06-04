@@ -6,6 +6,8 @@ public final class JkyApiMethod {
 
     public static final String GOODS_LIST = "erp.storage.goodslist";
 
+    public static final String WAREHOUSE_LIST = "erp.warehouse.get";
+
     public static final String ORDER_QUERY = "oms.trade.fullinfoget";
 
     public static final String REFUND_LIST = "omsapi-business.refund.listrefund";

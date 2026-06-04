@@ -3,16 +3,24 @@ package com.ruoyi;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.utils.JacksonUtil;
+import com.ruoyi.consts.AdminRedisKey;
 import com.ruoyi.jky.JkyTemplate;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.order.OrderQueryParam;
+import com.ruoyi.jky.param.warehouse.WarehouseListParam;
+import com.ruoyi.job.JkyOrderSyncJob;
 import com.ruoyi.jky.rep.order.OrderQueryRep;
+import com.ruoyi.jky.rep.warehouse.WarehouseListRep;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @ContextConfiguration
@@ -21,6 +29,75 @@ public class JkyOrderTest {
 
     @Autowired
     private JkyTemplate jkyTemplate;
+
+    @Autowired
+    private JkyOrderSyncJob jkyOrderSyncJob;
+
+
+    @Autowired
+    private RedisCache redisCache;
+
+
+    /**
+     * 执行吉客云订单同步定时任务。
+     */
+    @Test
+    public void executeJkyOrderSyncJob() {
+        redisCache.deleteObject(AdminRedisKey.Jky.ORDER_SYNC_LOCK);
+        redisCache.deleteObject(AdminRedisKey.Jky.ORDER_LAST_SYNC_TIME);
+        jkyOrderSyncJob.execute();
+    }
+
+    /**
+     * 拉取吉客云全部仓库。
+     */
+    @Test
+    public void pullJkyWarehouses() {
+        int pageIndex = 0;
+        int pageSize = 50;
+        List<WarehouseListRep.WarehouseInfoRep> warehouses = new ArrayList<>();
+        while (true) {
+            WarehouseListParam param = new WarehouseListParam()
+                    .setPageIndex(pageIndex)
+                    .setPageSize(pageSize)
+                    .setIncludeDeleteAndBlockup(1);
+            JkyResponse<WarehouseListRep> response = jkyTemplate.warehouseList(param);
+            log.info("吉客云仓库第{}页响应：{}", pageIndex, JacksonUtil.toJson(response));
+            WarehouseListRep data = response.getResult() == null ? null : response.getResult().getData();
+            List<WarehouseListRep.WarehouseInfoRep> warehouseInfo = data == null ? null : data.getWarehouseInfo();
+            if (warehouseInfo == null || warehouseInfo.isEmpty()) {
+                break;
+            }
+            warehouses.addAll(warehouseInfo);
+            if (warehouseInfo.size() < pageSize) {
+                break;
+            }
+            pageIndex++;
+        }
+        log.info("吉客云仓库总数：{}，仓库列表：{}", warehouses.size(), JacksonUtil.toJson(warehouses));
+    }
+
+    /**
+     * 按定时任务参数查询吉客云订单。
+     */
+    @Test
+    public void queryOrders() {
+        DateTime endTime = DateUtil.date();
+        DateTime startTime = DateUtil.offsetHour(endTime, -1);
+
+        OrderQueryParam param = new OrderQueryParam();
+        param.setFields("tradeNo,orderNo,sourceTradeNo,shopName,companyName,tradeTime,payTime,lastShipTime,payerName,payerPhone,payerAddress,sellerMemo,buyerMemo,flagNames,goodsDetail.goodsNo,goodsDetail.outerId,goodsDetail.sellCount,goodsDetail.needProcessCount,goodsDetail.isGift,scrollId");
+        param.setScrollId("");
+        param.setPageSize(10);
+        param.setIsReturnPddData(1);
+        param.setIsPddQuery(0);
+        param.setStartAuditTime(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
+        param.setEndAuditTime(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
+        param.setIsDelete("0");
+
+        JkyResponse<OrderQueryRep> response = jkyTemplate.queryOrders(param);
+        log.info("吉客云订单查询响应：{}", JacksonUtil.toJson(response));
+    }
 
     /**
      * 拉取吉客云最近一小时修改的订单。

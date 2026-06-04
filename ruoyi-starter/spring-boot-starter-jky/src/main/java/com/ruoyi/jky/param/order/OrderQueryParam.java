@@ -63,4 +63,8 @@ public class OrderQueryParam {
 
     private String isDelete;
 
+    private Integer isReturnPddData;
+
+    private Integer isPddQuery;
+
 }

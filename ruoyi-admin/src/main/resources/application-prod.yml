@@ -89,10 +89,12 @@ fy:
     secret:
     customer: A41C8B61E65E57A166110EE53776EE46
   jky:
+    enabled: true
     appKey: 15021080
     appSecret: b87426a6e0654a388ee654b3c9f002d8
     baseUrl: https://open.jackyun.com/open/openapi/do
     connectTimeout: 10000
+    warehouseId: 2484864208013886080
   pdd:
     clientId: 3a86a9f9b2f644c6ac6306ee6475680e
     clientSecret: be1d12163b765a78535439f0c5621c4aca46061a

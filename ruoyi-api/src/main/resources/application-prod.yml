@@ -93,10 +93,12 @@ fy:
     readTimeout: 15000
     warehouseNo: 005
   jky:
+    enabled: true
     appKey: 15021080
     appSecret: b87426a6e0654a388ee654b3c9f002d8
     baseUrl: https://open.jackyun.com/open/openapi/do
     connectTimeout: 10000
+    warehouseId:
 # e 签宝
 esign:
   host: https://smlopenapi.esign.cn

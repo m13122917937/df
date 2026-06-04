@@ -27,6 +27,10 @@ public interface OrderConsts {
 
         PDD_ACTIVATE(1, "顺丰包邮 微派服务"),
 
+        CHECK_SN_BEFORE_DELIVERY(0, "发货前校验sn码"),
+
+        SF_FREE_WP_CHECK_SN_BEFORE_DELIVERY(1, "顺丰包邮,微派服务,发货前校验sn码"),
+
         ;
 
         private Integer code;
