@@ -54,9 +54,17 @@ public class AuthLoginBizService {
         if (authInfoBO.getExpired().compareTo(new Date()) <= 0) {
             return new AuthLoginInfoVO().setType(1).setUserName(authInfoBO.getUserName()).setMacId(authInfoBO.getMacId());
         }
-//        if (StrUtil.isNotEmpty(authInfoBO.getMacId()) && !authInfoBO.getMacId().equals(form.getMacId())) {
-//            throw new ServiceException("登录设备异常");
-//        }
+        if (StrUtil.isEmpty(authInfoBO.getMacId())) {
+            if (StrUtil.isNotEmpty(form.getMacId())) {
+                AuthInfoParam updateParam = new AuthInfoParam();
+                updateParam.setId(authInfoBO.getId());
+                updateParam.setMacId(form.getMacId());
+                authInfoFacade.update(updateParam, new AuthInfoQuery().setId(authInfoBO.getId()));
+                authInfoBO.setMacId(form.getMacId());
+            }
+        } else if (!authInfoBO.getMacId().equals(form.getMacId())) {
+            throw new ServiceException("登录设备异常");
+        }
 
         return new AuthLoginInfoVO()
                 .setType(authInfoBO.getType())
