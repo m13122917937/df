@@ -22,6 +22,17 @@ public class PayerForm {
     private static final long serialVersionUID = 1L;
 
     /**
+     * 昵称
+     */
+    private String nickName;
+
+    /**
+     * 吉客云编号
+     */
+    @NotBlank(groups = {AddGroup.class}, message = "吉客云编号不能为空")
+    private String outCode;
+
+    /**
      * $column.columnComment
      */
     @NotNull(groups = {UpdateGroup.class}, message = "id不能为空")

@@ -79,6 +79,12 @@
           show-overflow-tooltip
         />
         <el-table-column
+          prop="outCode"
+          label="吉客云编号"
+          min-width="120"
+          show-overflow-tooltip
+        />
+        <el-table-column
           prop="bankName"
           label="开户行全称"
           min-width="200"
@@ -237,6 +243,7 @@ export default {
       form: {
         payName: '',
         nickName: '',
+        outCode: '',
         bankName: '',
         payNo: '',
         balance: 0,
@@ -285,6 +292,7 @@ export default {
       this.form = {
         payName: row.payName,
         nickName: row.nickName || '',
+        outCode: row.outCode || '',
         bankName: row.bankName,
         payNo: row.payNo,
         balance: row.balance || 0,
@@ -362,6 +370,7 @@ export default {
       this.form = {
         payName: '',
         nickName: '',
+        outCode: '',
         bankName: '',
         payNo: '',
         balance: 0,

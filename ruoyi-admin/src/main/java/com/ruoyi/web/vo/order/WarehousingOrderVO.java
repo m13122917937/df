@@ -45,6 +45,9 @@ public class WarehousingOrderVO {
     private BigDecimal tradePrice;
 
 
+    private String payerName;
+
+
     private String tradeCompanyName;
 
 

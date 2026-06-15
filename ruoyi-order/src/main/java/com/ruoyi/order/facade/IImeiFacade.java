@@ -18,6 +18,8 @@ public interface IImeiFacade {
 
     ImeiBO save(ImeiParam param);
 
+    boolean saveBatch(List<ImeiParam> params);
+
     ImeiBO getOne(ImeiQuery query);
 
     boolean update(ImeiParam param, ImeiQuery query);

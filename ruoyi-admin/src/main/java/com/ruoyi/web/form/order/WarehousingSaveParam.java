@@ -34,5 +34,8 @@ public class WarehousingSaveParam {
     @NotNull(message = "账期不能为空")
     private Integer accountingPeriod;
 
+    @NotNull(message = "付款主体不能为空")
+    private Long payerId;
+
 
 }

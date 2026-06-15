@@ -7,14 +7,12 @@ import com.ruoyi.bill.constant.BillConsts;
 import com.ruoyi.bill.constant.BillPayPlanConsts;
 import com.ruoyi.bill.facade.IBillFacade;
 import com.ruoyi.bill.facade.IBillPayPlanFacade;
-import com.ruoyi.bill.facade.IPayerConfigFacade;
 import com.ruoyi.bill.facade.IPayerFacade;
 import com.ruoyi.bill.model.bo.*;
 import com.ruoyi.bill.model.param.BillParam;
 import com.ruoyi.bill.model.param.BillPayPlanParam;
 import com.ruoyi.bill.model.query.BillPayPlanQuery;
 import com.ruoyi.bill.model.query.BillQuery;
-import com.ruoyi.bill.model.query.PayerConfigQuery;
 import com.ruoyi.bill.model.query.PayerQuery;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.exception.ServiceException;
@@ -70,9 +68,6 @@ public class BillBizService {
 
     @Autowired
     ICompanyBankFacade companyBankFacade;
-
-    @Autowired
-    IPayerConfigFacade payerConfigFacade;
 
     @Autowired
     ITradeOrderFacade tradeOrderFacade;
@@ -152,10 +147,6 @@ public class BillBizService {
             log.info("订单{}无成交订单", orderBO.getOrderCode());
             return;
         }
-        PayerConfigBO payerConfigBO = payerConfigFacade.getOne(new PayerConfigQuery().setKeyWord(orderBO.getShopName()));
-        if (Objects.isNull(payerConfigBO)) {
-            payerConfigBO = payerConfigFacade.listPage(new PayerConfigQuery(), new PageParamV2()).getData().get(0);
-        }
         CompanyBankBO companyBankBO = companyBankFacade.getOne(new CompanyBankQuery().setDefaulted(CompanyBankConsts.Defaulted.YES.getValue()).setCompanyId(tradeOrderBO.getTradeCompanyId()));
 
         // 计算结算时间
@@ -170,12 +161,10 @@ public class BillBizService {
 
 
         //  设置付款主体
-        if (Objects.nonNull(payerConfigBO)) {
-            billParam.setPayCompanyId(payerConfigBO.getPayerId());
-            PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(payerConfigBO.getPayerId()));
-            if (Objects.nonNull(payerBO)) {
-                billParam.setPayCompanyName(payerBO.getPayName());
-            }
+        billParam.setPayCompanyId(orderBO.getPayerId());
+        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(orderBO.getPayerId()));
+        if (Objects.nonNull(payerBO)) {
+            billParam.setPayCompanyName(payerBO.getPayName());
         }
         billFacade.save(billParam);
     }

@@ -39,6 +39,12 @@ public class OrderAddForm {
     private String shopName;
 
     /**
+     * 企业名称
+     */
+    @ExcelProperty(value = "企业名称")
+    private String companyName;
+
+    /**
      * sku编码
      */
     @NotBlank(message = "sku编码不能为空", groups = AddGroup.class)

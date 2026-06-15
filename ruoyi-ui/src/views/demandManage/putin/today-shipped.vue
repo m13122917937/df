@@ -73,6 +73,11 @@
                 </div>
               </template>
             </el-table-column>
+            <el-table-column prop="payerName" label="付款主体" width="160" align="center" :show-overflow-tooltip="true">
+              <template slot-scope="scope">
+                {{ scope.row.payerName || '-' }}
+              </template>
+            </el-table-column>
              <el-table-column prop="tradeCompanyName" label="供应商" width="400" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
                 {{ scope.row.tradeCompanyName || '-' }}

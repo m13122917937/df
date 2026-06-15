@@ -117,6 +117,7 @@ public class JkyGoodsSyncJob {
                 return;
             }
             param.setId(productSku.getId());
+
             productSkuFacade.update(param, new ProductSkuQuery().setSkuCode(param.getSkuCode()));
             count.updateCount++;
         } catch (Exception e) {

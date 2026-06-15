@@ -5,7 +5,7 @@
     :visible.sync="dialogVisible"
     :close-on-click-modal="false"
     :destroy-on-close="true"
-    width="550px"
+    width="600px"
     :append-to-body="true"
     :z-index="99999"
     @close="handleClose"
@@ -20,17 +20,35 @@
         <span class="label">商品编号：</span>
         <span class="value">{{ imeiInfo.sku || '-' }}</span>
       </div>
-      <div  class="imei-info-item" v-for="item in imeiInfo.codeList" :key="item.sn">
-        <span class="label">SN码：</span>
-        <span class="value">{{ item.sn || '-' }}</span>
-        <i v-if="item.sn" class="el-icon-copy-document copy-icon" title="复制" @click="handleCopyText(item.sn )" />
+
+      <!-- 串码明细列表（含状态 + 人工放行操作） -->
+      <div class="imei-row" v-for="(item, idx) in imeiInfo.codeList" :key="idx">
+        <div class="imei-row-codes">
+          <div class="imei-info-item">
+            <span class="label">SN码：</span>
+            <span class="value">{{ item.sn || '-' }}</span>
+            <i v-if="item.sn" class="el-icon-copy-document copy-icon" title="复制" @click="handleCopyText(item.sn)" />
+          </div>
+          <div class="imei-info-item">
+            <span class="label">86码：</span>
+            <span class="value">{{ item.imel || '-' }}</span>
+            <i v-if="item.imel" class="el-icon-copy-document copy-icon" @click="handleCopyText(item.imel)" title="复制"></i>
+          </div>
+          <div class="imei-info-item">
+            <span class="label">激活状态：</span>
+            <el-tag :type="activatedTagType(item.activated)" size="small">{{ activatedLabel(item.activated) }}</el-tag>
+          </div>
+        </div>
+        <div class="imei-row-action">
+          <el-button
+            v-if="item.activated === 5"
+            type="warning"
+            size="mini"
+            :loading="!!passing[idx]"
+            @click="handleManualPass(item, idx)"
+          >人工放行</el-button>
+        </div>
       </div>
-      <div class="imei-info-item" v-for="item in imeiInfo.codeList" :key="item.imel">
-        <span class="label">86码：</span>
-        <span class="value">{{ item.imel || '-' }}</span>
-        <i v-if="item.imel" class="el-icon-copy-document copy-icon" @click="handleCopyText(item.imel)" title="复制"></i>
-      </div>
-     
     </div>
 
     <!-- 按钮区域 -->
@@ -42,7 +60,29 @@
 
 <script>
 import { copyText } from '@/utils/wholesaleUtils';
-import { apiGetImei } from '@/api/creatingOrders';
+import { apiGetImei, manualPassActivatedApi } from '@/api/creatingOrders';
+
+const ACTIVATED_LABEL = {
+  0: '待查询',
+  1: '已激活',
+  2: '未激活',
+  3: '型号不一致',
+  4: '查询通过',
+  5: '验证失败',
+  6: '串码已存在',
+  7: '已撤销'
+};
+
+const ACTIVATED_TAG_TYPE = {
+  0: 'info',
+  1: 'success',
+  2: 'warning',
+  3: 'danger',
+  4: 'success',
+  5: 'danger',
+  6: 'danger',
+  7: 'info'
+};
 
 export default {
   name: 'ImeiDialog',
@@ -63,11 +103,12 @@ export default {
   data() {
     return {
       loading: false,
+      passing: {},
       imeiInfo: {
         productName: '',
         skuName: '',
         sku: '',
-        codeList: ''
+        codeList: []
       }
     }
   },
@@ -87,7 +128,6 @@ export default {
   watch: {
     visible(newVal) {
       if (newVal) {
-        console.log('Initializing ImeiDialog...');
         this.initImeiInfo();
         this.loadImeiData();
       }
@@ -97,28 +137,24 @@ export default {
     // 初始化串码信息
     initImeiInfo() {
       if (this.currentOrder) {
-        this.imeiInfo.productName=this.currentOrder.productName || '',
-        this.imeiInfo.skuName= this.currentOrder.skuName || '',
-        this.imeiInfo.sku= this.currentOrder.skuCode || ''
+        this.imeiInfo.productName = this.currentOrder.productName || '';
+        this.imeiInfo.skuName = this.currentOrder.skuName || '';
+        this.imeiInfo.sku = this.currentOrder.skuCode || '';
       }
-
+      this.imeiInfo.codeList = [];
+      this.passing = {};
     },
 
     // 加载串码数据
     async loadImeiData() {
-      
-      if (!this.currentOrder) {
+      if (!this.currentOrder || !this.currentOrder.orderCode) {
         return;
       }
-
       this.loading = true;
-      
       try {
         const res = await apiGetImei(this.currentOrder.orderCode);
-        
         if (res.code === 200 && res.data) {
-          // 如果接口返回了串码数据，更新串码信息
-          this.imeiInfo.codeList = res.data
+          this.imeiInfo.codeList = res.data;
         }
       } catch (error) {
         console.error('获取串码数据失败:', error);
@@ -126,6 +162,44 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+
+    activatedLabel(code) {
+      return ACTIVATED_LABEL[code] || '-';
+    },
+    activatedTagType(code) {
+      return ACTIVATED_TAG_TYPE[code] || 'info';
+    },
+
+    // 人工放行（仅 06api 验证失败 NOT_EXITS=5 的串码可见）
+    handleManualPass(item, idx) {
+      const codeDesc = item.sn ? `SN:${item.sn}` : `IMEI:${item.imel}`;
+      this.$confirm(
+        `确认放行该串码？操作将记录审计日志。<br/>${codeDesc}`,
+        '人工放行串码',
+        { type: 'warning', dangerouslyUseHTMLString: true }
+      )
+        .then(async () => {
+          this.$set(this.passing, idx, true);
+          try {
+            const res = await manualPassActivatedApi({
+              orderCode: this.currentOrder.orderCode,
+              sn: item.sn || null,
+              imei: item.imel || null
+            });
+            if (res.code === 200) {
+              this.$message.success('放行成功');
+              // 刷新串码列表 + 通知父页面刷新订单
+              await this.loadImeiData();
+              this.$emit('refresh');
+            }
+          } catch (e) {
+            console.error('人工放行失败:', e);
+          } finally {
+            this.$set(this.passing, idx, false);
+          }
+        })
+        .catch(() => {});
     },
 
     // 复制文本
@@ -158,6 +232,27 @@ export default {
   &:last-child {
     margin-bottom: 0;
   }
+}
+
+.imei-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px dashed #e4e7ed;
+
+  &:first-of-type {
+    border-top: none;
+  }
+}
+
+.imei-row-codes {
+  flex: 1;
+}
+
+.imei-row-action {
+  margin-left: 12px;
+  flex-shrink: 0;
 }
 
 .label {

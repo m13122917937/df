@@ -1,6 +1,5 @@
 package com.ruoyi.web.controller.company;
 
-import cn.hutool.core.lang.Assert;
 import com.ruoyi.biz.company.CompanyBizService;
 import com.ruoyi.biz.company.MemberBizService;
 import com.ruoyi.common.core.controller.BaseController;
@@ -66,17 +65,10 @@ public class CompanyController extends BaseController {
 
         ValidatorUtils.validateEntity(companyForm, AddGroup.class);
 
-        CompanyBO companyBO = companyService.queryOne(new CompanyQuery().setCompanyName(companyForm.getCompanyName()));
-        Assert.isNull(companyBO, "企业已经存在，请重新添加");
-
         LoginUser loginUser = getLoginUser();
         CompanyParam companyParam = CompanyConvert.INSTANCE.toCompanyAddParam(companyForm);
         companyParam.setCreator(loginUser.getUsername()).setCreatorId(loginUser.getUserId());
-        companyBO = companyService.add(companyParam);
-        companyBizService.checkContractAuthStatus(companyBO);
-        // erp创建对象
-        companyBizService.createProvider(companyBO);
-
+        CompanyBO companyBO = companyBizService.add(companyParam);
         return AjaxResult.success(CompanyConvert.INSTANCE.toVo(companyBO));
     }
 

@@ -26,6 +26,13 @@
           clearable
         />
       </el-form-item>
+      <el-form-item label="吉客云编号" prop="outCode">
+        <el-input
+          v-model.trim="form.outCode"
+          placeholder="请输入吉客云编号"
+          clearable
+        />
+      </el-form-item>
       <el-form-item label="开户行全称" prop="bankName">
         <el-input
           v-model.trim="form.bankName"
@@ -87,6 +94,7 @@ export default {
       default: () => ({
         payName: '',
         nickName: '',
+        outCode: '',
         bankName: '',
         payNo: '',
         balance: 0,
@@ -104,6 +112,7 @@ export default {
       form: {
         payName: '',
         nickName: '',
+        outCode: '',
         bankName: '',
         payNo: '',
         balance: 0,
@@ -115,6 +124,9 @@ export default {
         ],
         nickName: [
           { required: true, message: '请输入简称', trigger: 'blur' }
+        ],
+        outCode: [
+          { required: true, message: '请输入吉客云编号', trigger: 'blur' }
         ],
         bankName: [
           { required: true, message: '请输入开户行全称', trigger: 'blur' }
@@ -159,6 +171,7 @@ export default {
       this.form = {
         payName: '',
         nickName: '',
+        outCode: '',
         bankName: '',
         payNo: '',
         balance: 0,

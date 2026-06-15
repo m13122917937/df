@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="Payer" id="PayerResult">
         <result property="id"    column="id"    />
         <result property="payName"    column="pay_name"    />
+        <result property="outCode"    column="out_code"    />
         <result property="bankName"    column="bank_name"    />
         <result property="payNo"    column="pay_no"    />
         <result property="createTime"    column="create_time"    />

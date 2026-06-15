@@ -9,7 +9,8 @@
       "Bash(node *)",
       "Bash(npx vue-cli-service *)",
       "Bash(git log *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(mvn *)"
     ]
   }
 }

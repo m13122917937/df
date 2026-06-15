@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.alibaba.excel.EasyExcel;
 import com.ruoyi.biz.excel.ExcelPlateformReadListener;
+import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.biz.order.ErrorOrderBizService;
 import com.ruoyi.biz.order.ImeiBizService;
 import com.ruoyi.biz.order.OrderBizService;
@@ -13,7 +14,6 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.validator.ValidatorUtils;
 import com.ruoyi.express.facade.impl.RouteSubscribeFacade;
-import com.ruoyi.jky.JkyTemplate;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.facade.ITradeOrderFacade;
@@ -57,7 +57,7 @@ public class ErrorOrderController extends BaseController {
     WdtClient wdtClient;
 
     @Autowired
-    JkyTemplate jkyTemplate;
+    JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
 
     @Autowired
     RuoYiConfig config;
@@ -132,7 +132,7 @@ public class ErrorOrderController extends BaseController {
         if (!originalFilename.endsWith(".xlsx") && !originalFilename.endsWith(".xls")) {
             throw new ServerException("请上传excel文件");
         }
-        ExcelPlateformReadListener excelPlateformReadListener = new ExcelPlateformReadListener(imeiFacade, orderFacade, wdtClient, jkyTemplate, config.getWarehouseNo(), tradeOrderFacade, routeSubscribeFacade);
+        ExcelPlateformReadListener excelPlateformReadListener = new ExcelPlateformReadListener(imeiFacade, orderFacade, wdtClient, jkyStockInAndDeliveryBizService, config.getWarehouseNo(), tradeOrderFacade, routeSubscribeFacade);
         EasyExcel.read(file.getInputStream(), ExcelPlatformVO.class, excelPlateformReadListener).sheet().doRead();
 
         return AjaxResult.success();

@@ -4,13 +4,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
+import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
-import com.ruoyi.jky.JkyTemplate;
-import com.ruoyi.jky.param.JkyStockInAndDeliveryParam;
-import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
-import com.ruoyi.jky.param.sn.SnReportParam;
-import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
@@ -26,8 +22,6 @@ import com.ruoyi.order.model.param.OrderParam;
 import com.ruoyi.order.model.query.ImeiQuery;
 import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
-import com.ruoyi.common.utils.DictUtils;
-import com.ruoyi.system.model.consts.DictDataConsts;
 import com.ruoyi.wangdian.param.stock.StockInInfoGoodsList;
 import com.ruoyi.wangdian.param.stock.StockInInfoParam;
 import com.ruoyi.wangdian.utils.WdtClient;
@@ -50,7 +44,7 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
 
     WdtClient wdtClient;
 
-    JkyTemplate jkyTemplate;
+    JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
 
     String warehouseNo;
 
@@ -59,11 +53,13 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
     IRouteSubscribeFacade routeSubscribeFacade;
 
 
-    public ExcelPlateformReadListener(IImeiFacade imeiFacade, IOrderFacade orderFacade, WdtClient client, JkyTemplate jkyTemplate, String warehouseNo, ITradeOrderFacade tradeOrderFacade, IRouteSubscribeFacade routeSubscribeFacade) {
+    public ExcelPlateformReadListener(IImeiFacade imeiFacade, IOrderFacade orderFacade, WdtClient client,
+                                      JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService, String warehouseNo,
+                                      ITradeOrderFacade tradeOrderFacade, IRouteSubscribeFacade routeSubscribeFacade) {
         this.imeiFacade = imeiFacade;
         this.orderFacade = orderFacade;
         this.wdtClient = client;
-        this.jkyTemplate = jkyTemplate;
+        this.jkyStockInAndDeliveryBizService = jkyStockInAndDeliveryBizService;
         this.warehouseNo = warehouseNo;
         this.tradeOrderFacade = tradeOrderFacade;
         this.routeSubscribeFacade = routeSubscribeFacade;
@@ -95,12 +91,8 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
                 orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()),
                         new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
                 //创建入库单
-                try {
-                    wdtClient.stockInPush(builderStockIn(orderBO));
-                    createJkyStockIn(orderBO, routeSubscribeBO, warehouseNo, orderBO.getQuantity());
-                } catch (IOException e) {
-                    log.error("订单号：{}，创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage());
-                }
+                createWDTStockIn(orderBO);
+                jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
             } else {
                 log.info("待填写物流单号：{}", orderBO.getOrderCode());
                 orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode()),
@@ -111,73 +103,28 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
         }
     }
 
-    private void createJkyStockIn(OrderBO orderBO, RouteSubscribeBO routeSubscribeBO, String warehouseNo, Integer quantity) {
+    /**
+     * 创建旺店通入库单
+     *
+     * @param orderBO 订单
+     */
+    private void createWDTStockIn(OrderBO orderBO) {
         try {
-            jkyTemplate.stockInAndDelivery(builderJkyStockInAndDelivery(orderBO, routeSubscribeBO, warehouseNo, quantity));
-        } catch (Exception e) {
-            log.error("订单号：{}，吉客云入库发货失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
+            wdtClient.stockInPush(builderStockIn(orderBO));
+        } catch (IOException e) {
+            log.error("订单号：{}，旺店通创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
         }
     }
 
-    private JkyStockInAndDeliveryParam builderJkyStockInAndDelivery(OrderBO orderBO, RouteSubscribeBO routeSubscribeBO,
-                                                                    String warehouseNo, Integer quantity) {
-        return new JkyStockInAndDeliveryParam()
-                .setStockInParam(builderJkyStockIn(orderBO, warehouseNo, quantity))
-                .setSnReportParam(builderJkySnReport(orderBO, warehouseNo))
-                .setLogisticsUpdateParam(builderJkyLogisticsUpdate(orderBO, routeSubscribeBO));
-    }
-
-    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
-        return new StockCreateAndStockInParam().setWarehouseCode(warehouseNo).setGoodsCode(orderBO.getSkuCode()).setQuantity(quantity).setBatchNo(orderBO.getOrderCode());
-    }
-
-    private SnReportParam builderJkySnReport(OrderBO orderBO, String warehouseNo) {
-        SnReportParam param = new SnReportParam();
-        param.setDeliveryorderno(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
-        param.setDeliverytype("JH_01");
-        param.setOwnerorderno(StrUtil.blankToDefault(orderBO.getOriginalOrderId(), orderBO.getOrderCode()));
-        param.setWarehousecode(warehouseNo);
-        param.setOwnercode(warehouseNo);
-        param.setOutbizcode(orderBO.getOrderCode());
-        param.setOperatorcode("system");
-        param.setOperatorname("system");
-        param.setOperatetime(DateUtil.now());
-        param.setGoods(Collections.singletonList(builderJkySnGoods(orderBO)));
-        return param;
-    }
-
-    private SnReportParam.SnReportGoods builderJkySnGoods(OrderBO orderBO) {
-        List<ImeiBO> list = imeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
-        List<String> snList = list.stream().map(item -> Objects.equals("小米", orderBO.getBrand()) ? item.getImel() : item.getSn()).collect(Collectors.toList());
-        SnReportParam.SnReportGoods goods = new SnReportParam.SnReportGoods();
-        goods.setOutSkuCode(orderBO.getSkuCode());
-        goods.setName(StrUtil.blankToDefault(orderBO.getProductName(), orderBO.getSkuName()));
-        goods.setItemid(orderBO.getSkuCode());
-        goods.setUnit("台");
-        goods.setSnlist(snList);
-        return goods;
-    }
-
-    private LogisticsUpdateParam builderJkyLogisticsUpdate(OrderBO orderBO, RouteSubscribeBO routeSubscribeBO) {
-        LogisticsUpdateParam.LogisticsUpdateItem item = new LogisticsUpdateParam.LogisticsUpdateItem();
-        item.setOrderNo(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
-        item.setLogisticNo(routeSubscribeBO.getLogisticsNo());
-        item.setLogisticName(DictUtils.getDictLabel(DictDataConsts.P_EXPRESS_COMPANY, routeSubscribeBO.getLogisticsCode()));
-        item.setLogisticCode(routeSubscribeBO.getLogisticsCode());
-        LogisticsUpdateParam param = new LogisticsUpdateParam();
-        param.setBizdata(Collections.singletonList(item));
-        return param;
-    }
-
     /**
-     * 创建入库单
+     * 构建旺店通入库单参数
      *
-     * @param orderBO
-     * @return
+     * @param orderBO 订单
+     * @return 旺店通入库单参数
      */
     private StockInInfoParam builderStockIn(OrderBO orderBO) {
         List<ImeiBO> list = imeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
-        List<String> imeiList = null;
+        List<String> imeiList;
         if (Objects.equals("小米", orderBO.getBrand())) {
             imeiList = list.stream().map(ImeiBO::getImel).collect(Collectors.toList());
         } else {

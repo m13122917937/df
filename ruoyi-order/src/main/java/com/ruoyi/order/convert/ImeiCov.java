@@ -22,5 +22,7 @@ public interface ImeiCov {
     Imei queryToDomain(ImeiQuery query);
 
     Imei  paramToDomain(ImeiParam param);
+
+    List<Imei> paramToDomainList(List<ImeiParam> list);
 }
 

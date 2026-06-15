@@ -13,22 +13,26 @@ import com.ruoyi.jky.model.JkyApiMethod;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.JkyStockInAndDeliveryParam;
 import com.ruoyi.jky.param.goods.GoodsListParam;
+import com.ruoyi.jky.param.inspect.InspectParam;
 import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
 import com.ruoyi.jky.param.order.OrderQueryParam;
 import com.ruoyi.jky.param.refund.RefundQueryParam;
 import com.ruoyi.jky.param.sn.SnReportParam;
 import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.jky.param.vendor.VendorCreateParam;
+import com.ruoyi.jky.param.vendor.VendorListParam;
 import com.ruoyi.jky.param.warehouse.WarehouseListParam;
 import com.ruoyi.jky.properties.JkyProperties;
 import com.ruoyi.jky.rep.JkyStockInAndDeliveryRep;
 import com.ruoyi.jky.rep.goods.GoodsListRep;
+import com.ruoyi.jky.rep.inspect.InspectRep;
 import com.ruoyi.jky.rep.logistics.LogisticsUpdateRep;
 import com.ruoyi.jky.rep.order.OrderQueryRep;
 import com.ruoyi.jky.rep.refund.RefundQueryRep;
 import com.ruoyi.jky.rep.sn.SnReportRep;
 import com.ruoyi.jky.rep.stock.StockCreateAndStockInRep;
 import com.ruoyi.jky.rep.vendor.VendorCreateRep;
+import com.ruoyi.jky.rep.vendor.VendorListRep;
 import com.ruoyi.jky.rep.warehouse.WarehouseListRep;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,6 +46,8 @@ public class JkyTemplate {
     private static final String BIZ_CONTENT = "bizcontent";
 
     private static final String BIZ_DATA = "bizdata";
+
+    public static final String STOCK_IN_APPLY_DEPART_CODE = "0001";
 
     private final JkyProperties jkyProperties;
 
@@ -60,6 +66,17 @@ public class JkyTemplate {
             return new JkyResponse<>();
         }
         return execute(JkyApiMethod.VENDOR_CREATE, BIZ_CONTENT, param, new TypeReference<JkyResponse<VendorCreateRep>>() {
+        });
+    }
+
+    /**
+     * 分页查询供应商信息。
+     */
+    public JkyResponse<VendorListRep> listVendors(final VendorListParam param) {
+        if (isDisabled(JkyApiMethod.VENDOR_LIST)) {
+            return new JkyResponse<>();
+        }
+        return execute(JkyApiMethod.VENDOR_LIST, BIZ_CONTENT, param, new TypeReference<JkyResponse<VendorListRep>>() {
         });
     }
 
@@ -119,6 +136,13 @@ public class JkyTemplate {
     }
 
     /**
+     * 发货单完成并更新物流信息。
+     */
+    public JkyResponse<List<LogisticsUpdateRep>> sendOrderUpdateLogisticInfo(final LogisticsUpdateParam param) {
+        return updateLogisticsInfo(param);
+    }
+
+    /**
      * 发货单 SN 通知。
      */
     public JkyResponse<SnReportRep> reportSerialNumbers(final SnReportParam param) {
@@ -142,41 +166,53 @@ public class JkyTemplate {
     }
 
     /**
-     * 创建库存入库、上报 SN 并更新物流信息。
+     * 完成验货。
      */
-    public JkyStockInAndDeliveryRep stockInAndDelivery(
-            final JkyStockInAndDeliveryParam param) {
-        if (isDisabled("stockInAndDelivery")) {
+    public JkyResponse<InspectRep> inspect(final InspectParam param) {
+        if (isDisabled(JkyApiMethod.INSPECT)) {
+            return new JkyResponse<>();
+        }
+        return execute(JkyApiMethod.INSPECT, BIZ_CONTENT, param, new TypeReference<JkyResponse<InspectRep>>() {
+        });
+    }
+
+    /**
+     * 验货、创建库存入库并更新物流信息。
+     */
+    public JkyStockInAndDeliveryRep inspectStockInAndDelivery(final JkyStockInAndDeliveryParam param) {
+        if (isDisabled("inspectStockInAndDelivery")) {
             return new JkyStockInAndDeliveryRep();
         }
-        if (ObjectUtil.hasNull(param, param.getStockInParam(), param.getSnReportParam(), param.getLogisticsUpdateParam())) {
-            throw new ServiceException("吉客云入库发货参数不能为空");
+        if (ObjectUtil.hasNull(param, param.getInspectParam(), param.getStockInParam(), param.getLogisticsUpdateParam())) {
+            throw new ServiceException("吉客云验货入库发货参数不能为空");
         }
+        JkyResponse<InspectRep> inspectResponse = inspect(param.getInspectParam());
+        checkInspectResponse(inspectResponse);
         JkyResponse<StockCreateAndStockInRep> stockInResponse = createAndStockIn(param.getStockInParam());
         checkStockInResponse(stockInResponse);
-        JkyResponse<SnReportRep> snReportResponse = reportSerialNumbers(param.getSnReportParam());
-        checkSnReportResponse(snReportResponse);
-        JkyResponse<List<LogisticsUpdateRep>> logisticsUpdateResponse = updateLogisticsInfo(param.getLogisticsUpdateParam());
+        JkyResponse<List<LogisticsUpdateRep>> logisticsUpdateResponse = sendOrderUpdateLogisticInfo(param.getLogisticsUpdateParam());
         checkLogisticsUpdateResponse(logisticsUpdateResponse);
         return new JkyStockInAndDeliveryRep()
+                .setInspectResponse(inspectResponse)
                 .setStockInResponse(stockInResponse)
-                .setSnReportResponse(snReportResponse)
                 .setLogisticsUpdateResponse(logisticsUpdateResponse);
+    }
+
+    private <T> void checkResponse(final JkyResponse<T> response, final String message) {
+        if (ObjectUtil.isNull(response) || !Integer.valueOf(200).equals(response.getCode()) || ObjectUtil.isNull(response.getResult())) {
+            throw new ServiceException(StrUtil.blankToDefault(response == null ? null : response.getMsg(), message));
+        }
+    }
+
+    private void checkInspectResponse(final JkyResponse<InspectRep> response) {
+        checkResponse(response, "吉客云验货失败");
     }
 
     private void checkStockInResponse(final JkyResponse<StockCreateAndStockInRep> response) {
         checkResponse(response, "吉客云创建库存入库失败");
         StockCreateAndStockInRep data = response.getResult().getData();
-        if (ObjectUtil.isNull(data) || StrUtil.isBlank(data.getStockId())) {
+        if (ObjectUtil.isNull(data) || StrUtil.isBlank(data.getInNo())) {
             throw new ServiceException("吉客云创建库存入库返回结果为空");
-        }
-    }
-
-    private void checkSnReportResponse(final JkyResponse<SnReportRep> response) {
-        checkResponse(response, "吉客云发货单 SN 通知失败");
-        SnReportRep data = response.getResult().getData();
-        if (ObjectUtil.isNull(data) || !Boolean.TRUE.equals(data.getIsSuccess())) {
-            throw new ServiceException(StrUtil.blankToDefault(data == null ? null : data.getErrorMsg(), "吉客云发货单 SN 通知失败"));
         }
     }
 
@@ -190,12 +226,6 @@ public class JkyTemplate {
             if (ObjectUtil.isNull(item) || !Boolean.TRUE.equals(item.getIsSuccess())) {
                 throw new ServiceException(StrUtil.blankToDefault(item == null ? null : item.getError(), "吉客云发货单物流更新失败"));
             }
-        }
-    }
-
-    private <T> void checkResponse(final JkyResponse<T> response, final String message) {
-        if (ObjectUtil.isNull(response) || !Integer.valueOf(200).equals(response.getCode()) || ObjectUtil.isNull(response.getResult())) {
-            throw new ServiceException(StrUtil.blankToDefault(response == null ? null : response.getMsg(), message));
         }
     }
 

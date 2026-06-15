@@ -2,6 +2,20 @@
   <el-dialog :visible.sync="visible" width="720px" title="新建订单" @close="handleCancel">
     <div class="new-order-form">
       <el-form :model="form" label-width="110px" ref="formRef" :rules="rules">
+        <el-form-item label="付款主体" prop="payerId">
+          <el-select
+            v-model="form.payerId"
+            placeholder="请选择付款主体"
+            clearable
+            filterable
+            :loading="payerLoading"
+            @visible-change="handlePayerVisible"
+            @clear="handlePayerClear"
+            class="search-select"
+          >
+            <el-option v-for="p in payerOptions" :key="p.value" :label="p.label" :value="p.value" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="供应商" prop="supplierId">
           <el-select
             v-model="form.supplierId"
@@ -95,6 +109,7 @@
 <script>
 import { getProductBrandList, getProductNameList, getSkuList, saveOrder } from '@/api/putin'
 import { getBusinessCompanyListApi } from '@/api/business'
+import { getPayerAllListApi } from '@/api/monery'
 
 export default {
   name: 'NewOrderDialog',
@@ -110,6 +125,7 @@ export default {
         quantity: null,
         purchasePrice: '',
         accountingPeriod: 0,
+        payerId: '',
         remark: '',
         supplierId: ''
       },
@@ -118,6 +134,8 @@ export default {
       skuOptions: [],
       supplierOptions: [],
       supplierLoading: false,
+      payerOptions: [],
+      payerLoading: false,
       rules: {
         supplierId: [{ required: true, message: '请选择供应商', trigger: 'change' }],
         brandId: [{ required: true, message: '请选择品牌', trigger: 'change' }],
@@ -140,7 +158,8 @@ export default {
             }
           }, trigger: 'change'
         }],
-        accountingPeriod: [{ required: true, message: '请选择账期', trigger: 'change' }]
+        accountingPeriod: [{ required: true, message: '请选择账期', trigger: 'change' }],
+        payerId: [{ required: true, message: '请选择付款主体', trigger: 'change' }]
       }
     }
   },
@@ -160,6 +179,7 @@ export default {
         quantity: null,
         purchasePrice: '',
         accountingPeriod: 0,
+        payerId: '',
         remark: '',
         supplierId: ''
       }
@@ -168,6 +188,8 @@ export default {
       this.skuOptions = []
       this.supplierOptions = []
       this.supplierLoading = false
+      this.payerOptions = []
+      this.payerLoading = false
     },
     handleCancel() {
       this.visible = false
@@ -181,6 +203,7 @@ export default {
           accountingPeriod: Number(f.accountingPeriod || 0),
           price: Number(f.purchasePrice),
           quantity: Number(f.quantity),
+          payerId: f.payerId ? Number(f.payerId) : '',
           remark: f.remark || '',
           skuCode: f.productCode || f.noWarehouseSkuCode || ''
         }
@@ -293,6 +316,31 @@ export default {
     },
     handleSupplierClear() {
       this.form.supplierId = ''
+    },
+    async loadPayerOptions() {
+      this.payerLoading = true
+      try {
+        const res = await getPayerAllListApi({})
+        const list = res?.rows || res?.data || []
+        this.payerOptions = Array.isArray(list)
+          ? list.map(item => ({
+              label: item.bankName ? `${item.payName}(${item.bankName})` : item.payName,
+              value: item.id,
+              raw: item
+            }))
+          : []
+      } catch (error) {
+        console.error('获取付款主体列表失败', error)
+        this.payerOptions = []
+      } finally {
+        this.payerLoading = false
+      }
+    },
+    handlePayerVisible(visible) {
+      if (visible && !this.payerOptions.length) this.loadPayerOptions()
+    },
+    handlePayerClear() {
+      this.form.payerId = ''
     }
   }
 }

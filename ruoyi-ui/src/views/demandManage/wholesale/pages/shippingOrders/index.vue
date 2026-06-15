@@ -290,6 +290,12 @@
                   <el-button
                     type="primary"
                     size="mini"
+                    @click="openImeiDialog(row)"
+                    >查看串码</el-button
+                  >
+                  <el-button
+                    type="primary"
+                    size="mini"
                     @click="handleReturn(row)"
                     >退货追单</el-button
                   >
@@ -355,6 +361,14 @@
       </div>
     </el-dialog>
     <!-- 补单发货 -->
+
+    <!-- 串码弹窗（含 06api 失败串码人工放行） -->
+    <ImeiDialog
+      :visible.sync="imeiDialogVisible"
+      :current-order="currentImeiOrder"
+      title="串码信息"
+      @refresh="getData"
+    />
   </div>
 </template>
 <script>
@@ -378,6 +392,7 @@ import {
   createGetTimeStatusClassMethod,
 } from "@/utils/wholesaleUtils";
 import PriceChips from "@/views/demandManage/wholesale/components/priceChips.vue";
+import ImeiDialog from "@/views/demandManage/wholesale/components/imeiDialog.vue";
 
 export default {
   name: "Consignment",
@@ -390,7 +405,8 @@ export default {
     PddDialog,
     EmptyState,
     PriceChips,
-    OrderStyleBadge
+    OrderStyleBadge,
+    ImeiDialog
   },
   data() {
     return {
@@ -420,6 +436,8 @@ export default {
       },
       totalNum: 0,
       currentOrder: null,
+      currentImeiOrder: {},
+      imeiDialogVisible: false,
       returnReason: 5, // 退货追单原因
       batchOriginalDialogVisible: false,
       batchOriginalInput: "",
@@ -544,6 +562,12 @@ export default {
     handleReturn(row) {
       this.currentOrder = [row];
       this.returnOrderDialog = true;
+    },
+
+    // 打开串码弹窗
+    openImeiDialog(row) {
+      this.currentImeiOrder = row;
+      this.imeiDialogVisible = true;
     },
 
     initTable() {

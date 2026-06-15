@@ -1,5 +1,6 @@
 package com.ruoyi.biz.order;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -7,16 +8,23 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.ruoyi.bill.constant.PayerConsts;
+import com.ruoyi.bill.facade.IPayerFacade;
+import com.ruoyi.bill.model.bo.PayerBO;
+import com.ruoyi.bill.model.query.PayerQuery;
 import com.ruoyi.biz.bill.BillBizService;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.user.LoginUser;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.express.model.consts.LogisticsCode;
 import com.ruoyi.jky.JkyTemplate;
+import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
+import com.ruoyi.jky.rep.stock.StockCreateAndStockInRep;
 import com.ruoyi.mapper.order.OrderConvert;
 import com.ruoyi.mapper.order.WarehousingConvert;
 import com.ruoyi.order.facade.IHangingOrderFacade;
@@ -101,6 +109,8 @@ public class WarehousingOrderBizService {
     @Autowired
     JkyTemplate jkyTemplate;
 
+    @Autowired
+    IPayerFacade payerFacade;
 
     /**
      * 入仓订单列表
@@ -142,6 +152,8 @@ public class WarehousingOrderBizService {
 
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(warehousingSaveParam.getCompanyId()));
         Assert.notNull(companyBO, "企业不存在,请重新选择企业");
+        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(warehousingSaveParam.getPayerId()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
+        Assert.notNull(payerBO, "付款主体不存在或已弃用");
 
 
         String orderERPCode = IdUtil.objectId();
@@ -150,6 +162,7 @@ public class WarehousingOrderBizService {
         OrderParam orderParam = new OrderParam().setErpOrderId(orderERPCode).setOriginalOrderId(orderERPCode).setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode())
                 .setShopName(OrderConsts.SHOP_NAME).setPlatform(OrderConsts.PLATFORM).setBrand(productSkuBO.getBrand()).setCategory(productSkuBO.getCategory())
                 .setProductName(productSkuBO.getProductName()).setSkuName(productSkuBO.getSpecName()).setSkuCode(productSkuBO.getSkuCode()).setQuantity(warehousingSaveParam.getQuantity())
+                .setPayerId(payerBO.getId()).setPayerName(payerBO.getNickName())
                 .setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()).setSendTime(now).setCreateTime(now).setUpdateTime(now).setRemark(warehousingSaveParam.getRemark());
         OrderBO orderBO = orderFacade.save(orderParam);
         // 构建挂单
@@ -239,60 +252,110 @@ public class WarehousingOrderBizService {
      */
     @Transactional
     public void picking(PickingOrderForm pickingOrderForm, LoginUser loginUser) throws IOException {
-
-        OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(pickingOrderForm.getOrderCode()));
-        Assert.notNull(orderBO, "订单不存在");
-        HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(pickingOrderForm.getOrderCode()).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
-        Assert.notNull(hangingOrderBO, "订单挂单不存在");
-        TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(pickingOrderForm.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
-        Assert.notNull(tradeOrderBO, "订单成交记录不存在");
-
+        OrderBO orderBO = queryPickingOrder(pickingOrderForm.getOrderCode());
+        HangingOrderBO hangingOrderBO = queryPickingHangingOrder(pickingOrderForm.getOrderCode());
+        TradeOrderBO tradeOrderBO = queryPickingTradeOrder(pickingOrderForm.getOrderCode());
         log.info("开始拣货,{},操作用户：{}, 拣货信息：{}", pickingOrderForm.getOrderCode(), loginUser.getUsername(), JacksonUtil.toJson(pickingOrderForm));
 
-        Integer quantity = null;
-        if (Objects.isNull(pickingOrderForm.getQuantity())) {
-            quantity = pickingOrderForm.getSnList().size() + tradeOrderBO.getQuantity();
-            Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
-
-            // sn 入库, 保存sn ， 回传旺店通
-            ImeiParam imeiParam = new ImeiParam().setCreateTime(DateUtil.date()).setProductName(orderBO.getProductName()).setSkuName(orderBO.getSkuName())
-                    .setSkuCode(orderBO.getSkuCode()).setHangingOrderId(hangingOrderBO.getId()).setTradeNo(tradeOrderBO.getId());
-            for (String sn : pickingOrderForm.getSnList()) {
-                imeiParam.setImel(sn);
-                imeiFacade.save(imeiParam);
-            }
-
-            //  回传旺店通
-            StockInInfoParam stockInInfoParam = builderStockIn(orderBO, pickingOrderForm.getSnList().size(), pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
-            wdtClient.stockInPush(stockInInfoParam);
-            createJkyStockIn(orderBO, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList().size());
-
-            tradeOrderFacade.update(new TradeOrderParam().setQuantity(quantity).setUpdateTime(DateUtil.date()),
-                    new TradeOrderQuery().setOrderId(pickingOrderForm.getOrderCode()));
-        } else {
-            quantity = pickingOrderForm.getQuantity() + tradeOrderBO.getQuantity();
-            Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
-
-            // 非 sn 管理
-            StockInInfoParam stockInInfoParam = builderStockIn(orderBO, quantity, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
-            wdtClient.stockInPush(stockInInfoParam);
-            createJkyStockIn(orderBO, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getQuantity());
-            // 更新成交记录
-            tradeOrderFacade.update(new TradeOrderParam().setQuantity(quantity).setUpdateTime(DateUtil.date()),
-                    new TradeOrderQuery().setOrderId(pickingOrderForm.getOrderCode()));
-        }
-
-        // 订单数量全部拣货完成
-        if (Objects.equals(quantity, orderBO.getQuantity())) {
-            DateTime date = DateUtil.date();
-            orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.ENDING.getCode()).setUpdateTime(date).setSignedTime(date),
-                    new OrderQuery().setOrderCode(pickingOrderForm.getOrderCode()));
-            // 生成财务账单
-            billBizService.generateBill(orderBO);
-        }
-
+        Integer quantity = Objects.isNull(pickingOrderForm.getQuantity())
+                ? pickingWithSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO, loginUser)
+                : pickingWithoutSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO, loginUser);
+        finishPickingOrder(pickingOrderForm.getOrderCode(), orderBO, quantity);
     }
 
+
+    /**
+     * 查询拣货订单。
+     */
+    private OrderBO queryPickingOrder(String orderCode) {
+        OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(orderCode));
+        Assert.notNull(orderBO, "订单不存在");
+        return orderBO;
+    }
+
+    /**
+     * 查询拣货挂单。
+     */
+    private HangingOrderBO queryPickingHangingOrder(String orderCode) {
+        HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(orderCode).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
+        Assert.notNull(hangingOrderBO, "订单挂单不存在");
+        return hangingOrderBO;
+    }
+
+    /**
+     * 查询拣货成交记录。
+     */
+    private TradeOrderBO queryPickingTradeOrder(String orderCode) {
+        TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderCode).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
+        Assert.notNull(tradeOrderBO, "订单成交记录不存在");
+        return tradeOrderBO;
+    }
+
+    /**
+     * 处理 SN 管理商品拣货入仓。
+     */
+    private Integer pickingWithSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser) throws IOException {
+        Integer quantity = pickingOrderForm.getSnList().size() + tradeOrderBO.getQuantity();
+        Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
+        savePickingSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO);
+        createStockIn(orderBO, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList().size(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList().size(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        updatePickingQuantity(pickingOrderForm.getOrderCode(), quantity);
+        return quantity;
+    }
+
+    /**
+     * 处理非 SN 管理商品拣货入仓。
+     */
+    private Integer pickingWithoutSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser) throws IOException {
+        Integer quantity = pickingOrderForm.getQuantity() + tradeOrderBO.getQuantity();
+        Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
+        createStockIn(orderBO, pickingOrderForm.getWarehouseCode(), quantity, pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getQuantity(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        updatePickingQuantity(pickingOrderForm.getOrderCode(), quantity);
+        return quantity;
+    }
+
+    /**
+     * 保存拣货串码。
+     */
+    private void savePickingSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO) {
+        DateTime createTime = DateUtil.date();
+        List<ImeiParam> imeiParams = pickingOrderForm.getSnList().stream().map(sn -> new ImeiParam().setCreateTime(createTime).setProductName(orderBO.getProductName())
+                .setSkuName(orderBO.getSkuName()).setSkuCode(orderBO.getSkuCode()).setHangingOrderId(hangingOrderBO.getId()).setTradeNo(tradeOrderBO.getId()).setImel(sn)).collect(Collectors.toList());
+        imeiFacade.saveBatch(imeiParams);
+    }
+
+    /**
+     * 创建旺店通入库单。
+     */
+    private void createStockIn(OrderBO orderBO, String warehouseCode, Integer quantity, List<String> snList, String remark) {
+        try {
+            StockInInfoParam stockInInfoParam = builderStockIn(orderBO, quantity, warehouseCode, snList, remark);
+            wdtClient.stockInPush(stockInInfoParam);
+        } catch (Exception e) {
+            log.error("订单号：{}，创建旺店通入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 更新拣货入仓数量。
+     */
+    private void updatePickingQuantity(String orderCode, Integer quantity) {
+        tradeOrderFacade.update(new TradeOrderParam().setQuantity(quantity).setUpdateTime(DateUtil.date()), new TradeOrderQuery().setOrderId(orderCode));
+    }
+
+    /**
+     * 完成全部拣货并生成账单。
+     */
+    private void finishPickingOrder(String orderCode, OrderBO orderBO, Integer quantity) {
+        if (!Objects.equals(quantity, orderBO.getQuantity())) {
+            return;
+        }
+        DateTime date = DateUtil.date();
+        orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.ENDING.getCode()).setUpdateTime(date).setSignedTime(date), new OrderQuery().setOrderCode(orderCode));
+        billBizService.generateBill(orderBO);
+    }
 
     /**
      * 修改物流信息
@@ -305,16 +368,56 @@ public class WarehousingOrderBizService {
                 new TradeOrderQuery().setOrderId(trackingForm.getOrderCode()));
     }
 
-    private void createJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
+    private void createJkyStockIn(OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser, String warehouseNo, Integer quantity, List<String> snList, String remark) {
         try {
-            jkyTemplate.createAndStockIn(builderJkyStockIn(orderBO, warehouseNo, quantity));
+            StockCreateAndStockInParam param = builderJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, warehouseNo, quantity, snList, remark);
+            JkyResponse<StockCreateAndStockInRep> response = jkyTemplate.createAndStockIn(param);
+            if (response == null || !Objects.equals(response.getCode(), 200)) {
+                throw new ServiceException(StrUtil.blankToDefault(response == null ? null : response.getMsg(), "吉客云创建库存并入库失败"));
+            }
+            StockCreateAndStockInRep data = response.getResult() == null ? null : response.getResult().getData();
+            if (data == null || StrUtil.isBlank(data.getInNo())) {
+                throw new ServiceException("吉客云创建库存并入库返回结果为空");
+            }
         } catch (Exception e) {
             log.error("订单号：{}，创建吉客云入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
         }
     }
 
-    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
-        return new StockCreateAndStockInParam().setWarehouseCode(warehouseNo).setGoodsCode(orderBO.getSkuCode()).setQuantity(quantity).setBatchNo(orderBO.getOrderCode());
+    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser, String warehouseNo, Integer quantity, List<String> snList, String remark) {
+        ProductSkuBO productSkuBO = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(orderBO.getSkuCode()));
+        Assert.notNull(productSkuBO, "吉客云入库商品不存在");
+        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(orderBO.getPayerId()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
+        Assert.notNull(payerBO, "吉客云入库付款主体不存在或已弃用");
+        Assert.notBlank(payerBO.getOutCode(), "吉客云入库付款主体吉客云编号不能为空");
+        CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(tradeOrderBO.getTradeCompanyId()));
+        Assert.notNull(companyBO, "吉客云入库供应商不存在");
+        Assert.notBlank(companyBO.getOutNo(), "吉客云入库供应商编码不能为空");
+        Assert.notBlank(loginUser.getUsername(), "吉客云入库申请人不能为空");
+        Assert.notNull(hangingOrderBO.getCreateBy(), "吉客云入库制单人不能为空");
+        String operator = queryJkyStockInOperator(hangingOrderBO.getCreateBy());
+        Assert.notBlank(warehouseNo, "吉客云入库仓库编码不能为空");
+        Assert.notBlank(orderBO.getOrderCode(), "吉客云入库关联单据编号不能为空");
+        String logisticNo = StrUtil.blankToDefault(tradeOrderBO.getTrackingNumber(), "123");
+        Assert.notNull(quantity, "吉客云入库数量不能为空");
+        Assert.isTrue(quantity > 0, "吉客云入库数量必须大于0");
+
+        StockCreateAndStockInParam.StockInDetailView detail = new StockCreateAndStockInParam.StockInDetailView()
+                .setSkuBarcode(productSkuBO.getSkuCode()).setRelDetailId(tradeOrderBO.getId()).setSkuCount(new BigDecimal(quantity))
+                .setSkuPrice(tradeOrderBO.getTradePrice()).setIsCertified(1).setRowRemark(remark);
+        if (CollectionUtil.isNotEmpty(snList)) {
+            detail.setSerialList(snList.stream().map(sn -> new StockCreateAndStockInParam.Serial().setSerialNo(sn)).collect(Collectors.toList()));
+        }
+        return new StockCreateAndStockInParam().setVendCode(companyBO.getOutNo()).setApplyDepartCode(JkyTemplate.STOCK_IN_APPLY_DEPART_CODE).setApplyCompanyCode(payerBO.getOutCode())
+                .setInWarehouseCode(warehouseNo).setRelDataId(orderBO.getOrderCode()).setApplyUserName(loginUser.getUser().getNickName())
+                .setApplyDate(DateUtil.date()).setMemo(remark).setOperator(operator)
+                .setLogisticName(tradeOrderBO.getTrackingCompany()).setLogisticNo(logisticNo).setStockInDetailViews(Collections.singletonList(detail));
+    }
+
+    private String queryJkyStockInOperator(Long createBy) {
+        SysUser sysUser = sysUserFacade.selectUserById(createBy);
+        Assert.notNull(sysUser, "吉客云入库制单人不存在");
+        return StrUtil.blankToDefault(sysUser.getNickName(), sysUser.getUserName());
     }
 
     private StockInInfoParam builderStockIn(OrderBO orderBO, Integer quantity, String warehouseNo, List<String> snList, String remark) {

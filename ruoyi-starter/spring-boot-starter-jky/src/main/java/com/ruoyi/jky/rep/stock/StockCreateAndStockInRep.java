@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class StockCreateAndStockInRep {
 
-    private String stockId;
+    private String inNo;
 
 }

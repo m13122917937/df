@@ -551,17 +551,11 @@ public class OrderBizService {
             } else {
                 param.setAddressStatus(OrderConsts.AddressStatus.NOT_SUPPLEMENTED.getCode());
             }
-            PayerConfigBO payerConfigBO = payerConfigFacade.getOne(new PayerConfigQuery().setKeyWord(param.getShopName()));
-            if (Objects.isNull(payerConfigBO)) {
-                log.error("订单店铺不存在：{}", param.getShopName());
-                return;
-            }
-            PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(payerConfigBO.getPayerId()));
+            PayerBO payerBO = queryPayer(orderAddForm, param);
             if (Objects.isNull(payerBO)) {
-                log.info("订单付款人不存在：{}", payerConfigBO.getPayerId());
                 return;
             }
-            param.setPayerName(payerBO.getNickName());
+            param.setPayerId(payerBO.getId()).setPayerName(payerBO.getNickName());
             orderFacade.save(param);
             return;
         } else if (Objects.equals(orderBO.getStatus(), OrderConsts.OrderStatus.REVOKE.getCode())) {
@@ -580,6 +574,27 @@ public class OrderBizService {
             log.info("订单已经存在:{}", orderAddForm.getOriginalOrderId());
         }
 
+    }
+
+    private PayerBO queryPayer(OrderAddForm orderAddForm, OrderParam param) {
+        if (StrUtil.isNotBlank(orderAddForm.getCompanyName())) {
+            PageBO<PayerBO> payerBOPageBO = payerFacade.listPage(new PayerQuery().setPayName(orderAddForm.getCompanyName()), new PageParamV2());
+            if (CollectionUtil.isEmpty(payerBOPageBO.getData())) {
+                log.error("订单企业付款主体不存在：{}", orderAddForm.getCompanyName());
+                return null;
+            }
+            return payerBOPageBO.getData().get(0);
+        }
+        PayerConfigBO payerConfigBO = payerConfigFacade.getOne(new PayerConfigQuery().setKeyWord(param.getShopName()));
+        if (Objects.isNull(payerConfigBO)) {
+            log.error("订单店铺不存在：{}", param.getShopName());
+            return null;
+        }
+        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(payerConfigBO.getPayerId()));
+        if (Objects.isNull(payerBO)) {
+            log.info("订单付款人不存在：{}", payerConfigBO.getPayerId());
+        }
+        return payerBO;
     }
 
     private void caseOrderStyle(OrderAddForm orderAddForm) {

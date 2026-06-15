@@ -4,15 +4,15 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.DateTime;
+import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.common.config.RuoYiConfig;
+import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
-import com.ruoyi.jky.JkyTemplate;
-import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.mapper.order.ImeiConvert;
 import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IImeiFacade;
@@ -31,6 +31,7 @@ import com.ruoyi.order.model.query.*;
 import com.ruoyi.wangdian.param.stock.StockInInfoGoodsList;
 import com.ruoyi.wangdian.param.stock.StockInInfoParam;
 import com.ruoyi.wangdian.utils.WdtClient;
+import com.ruoyi.web.form.order.ActivatedImeiForm;
 import com.ruoyi.web.form.order.ImeiForm;
 import com.ruoyi.web.form.order.ExcelForm;
 import com.ruoyi.web.form.order.PlatformImeiForm;
@@ -76,7 +77,7 @@ public class ImeiBizService {
     WdtClient wdtClient;
 
     @Autowired
-    JkyTemplate jkyTemplate;
+    JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
 
     @Autowired
     RuoYiConfig ruoYiConfig;
@@ -189,12 +190,8 @@ public class ImeiBizService {
                 orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()).setUpdateTime(DateUtil.date()),
                         new OrderQuery().setOrderCode(form.getOrderCode()));
                 // 创建入库单
-                try {
-                    wdtClient.stockInPush(builderStockIn(orderBO));
-                    createJkyStockIn(orderBO, ruoYiConfig.getWarehouseNo(), orderBO.getQuantity());
-                } catch (IOException e) {
-                    log.error("订单号：{}，创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage());
-                }
+                createWDTStockIn(orderBO);
+                jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
             } else {
                 orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode()).setUpdateTime(DateUtil.date()),
                         new OrderQuery().setOrderCode(form.getOrderCode()));
@@ -205,16 +202,47 @@ public class ImeiBizService {
         }
     }
 
-    private void createJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
-        try {
-            jkyTemplate.createAndStockIn(builderJkyStockIn(orderBO, warehouseNo, quantity));
-        } catch (Exception e) {
-            log.error("订单号：{}，创建吉客云入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
-        }
+    /**
+     * 人工放行串码激活状态：将处于 NOT_EXITS（06api 查询失败）的串码改为 SUCCESS。
+     * 仅允许该状态转换；其它失败状态（如型号不一致）不允许通过本接口放行。
+     *
+     * @param form 表单（订单号 + sn/imei）
+     */
+    public void manualPassActivated(ActivatedImeiForm form) {
+        ImeiBO imeiBO = imeiFacade.getOne(new ImeiQuery()
+                .setOrderId(form.getOrderCode())
+                .setSn(form.getSn())
+                .setImel(form.getImei()));
+        Assert.notNull(imeiBO, "串码记录不存在");
+        Assert.isTrue(Objects.equals(imeiBO.getActivated(), ImeiConsts.Activated.NOT_EXITS.getCode()),
+                "只有验证失败（NOT_EXITS）的串码可人工放行");
+
+        boolean updated = imeiFacade.update(
+                new ImeiParam().setActivated(ImeiConsts.Activated.SUCCESS.getCode()),
+                new ImeiQuery()
+                        .setId(imeiBO.getId())
+                        .setActivated(ImeiConsts.Activated.NOT_EXITS.getCode()));
+        Assert.isTrue(updated, "串码状态已被他人变更，请刷新后重试");
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        log.warn("人工放行串码激活状态成功，operatorId={}, operatorName={}, orderCode={}, sn={}, imei={}, oldActivated={}, newActivated={}",
+                loginUser.getUserId(), loginUser.getUsername(),
+                form.getOrderCode(), form.getSn(), form.getImei(),
+                ImeiConsts.Activated.NOT_EXITS.getCode(),
+                ImeiConsts.Activated.SUCCESS.getCode());
     }
 
-    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
-        return new StockCreateAndStockInParam().setWarehouseCode(warehouseNo).setGoodsCode(orderBO.getSkuCode()).setQuantity(quantity).setBatchNo(orderBO.getOrderCode());
+    /**
+     * 创建旺店通入库单
+     *
+     * @param orderBO 订单
+     */
+    private void createWDTStockIn(OrderBO orderBO) {
+        try {
+            wdtClient.stockInPush(builderStockIn(orderBO));
+        } catch (IOException e) {
+            log.error("订单号：{}，旺店通创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
+        }
     }
 
     /**

@@ -31,6 +31,6 @@ public interface WebConstants {
     String EXPRESS_NOTIFY_URL = "%s/express/notify/info";
 
 
-    Set<String> PLATFORM_VER = Set.of("拼多多", "淘宝", "快手小店", "抖店(放心购)", "京东");
+//    Set<String> PLATFORM_VER = Set.of("拼多多", "淘宝", "快手小店", "抖店(放心购)", "京东");
 
 }

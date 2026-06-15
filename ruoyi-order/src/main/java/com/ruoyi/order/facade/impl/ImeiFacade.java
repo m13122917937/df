@@ -44,6 +44,11 @@ public class ImeiFacade implements IImeiFacade {
     }
 
     @Override
+    public boolean saveBatch(List<ImeiParam> params) {
+        return imeiService.saveBatch(ImeiCov.INSTANCE.paramToDomainList(params));
+    }
+
+    @Override
     public ImeiBO getOne(ImeiQuery query) {
         Imei domain = ImeiCov.INSTANCE.queryToDomain(query);
         return ImeiCov.INSTANCE.toBO(imeiService.getOne(DynamicCondition.toWrapper(query)));

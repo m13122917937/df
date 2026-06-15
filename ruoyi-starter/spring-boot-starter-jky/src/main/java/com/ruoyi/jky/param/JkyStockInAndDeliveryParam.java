@@ -1,5 +1,6 @@
 package com.ruoyi.jky.param;
 
+import com.ruoyi.jky.param.inspect.InspectParam;
 import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
 import com.ruoyi.jky.param.sn.SnReportParam;
 import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
@@ -9,6 +10,8 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class JkyStockInAndDeliveryParam {
+
+    private InspectParam inspectParam;
 
     private StockCreateAndStockInParam stockInParam;
 

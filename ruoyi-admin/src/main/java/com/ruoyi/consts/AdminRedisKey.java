@@ -21,6 +21,8 @@ public interface AdminRedisKey {
 
         String GOODS_SYNC_LOCK = ROOT_KEY + "goods:sync:lock";
 
+        String VENDOR_SYNC_LOCK = ROOT_KEY + "vendor:sync:lock";
+
     }
 
 }

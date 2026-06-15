@@ -30,11 +30,6 @@ import com.ruoyi.kuaidi100.ExpressClient;
 import com.ruoyi.kuaidi100.model.*;
 import com.ruoyi.kuaidi100.model.consts.LogisticsStatus;
 import com.ruoyi.kuaidi100.model.reponse.Kd100SubscribeResp;
-import com.ruoyi.jky.JkyTemplate;
-import com.ruoyi.jky.param.JkyStockInAndDeliveryParam;
-import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
-import com.ruoyi.jky.param.sn.SnReportParam;
-import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.mapper.order.OrderConvert;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
@@ -81,7 +76,7 @@ public class ExpressBizService {
     WdtClient wdtClient;
 
     @Autowired
-    JkyTemplate jkyTemplate;
+    JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
 
     @Autowired
     IOrderFacade orderFacade;
@@ -165,25 +160,23 @@ public class ExpressBizService {
                 , new TradeOrderQuery().setOrderId(expressOrderForm.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
         // 修改订单数据
         OrderParam orderParam = new OrderParam().setSendTime(DateUtil.date());
-        // 不需要验证平台二销售的
-        if (!WebConstants.PLATFORM_VER.contains(orderBO.getPlatform())) {
-            orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
-            //  创建入库单
-            wdtClient.stockInPush(builderStockIn(orderBO));
-            createJkyStockIn(orderBO, expressOrderForm, ruoYiConfig.getWarehouseNo(), orderBO.getQuantity());
-        }
+//        FIX 注释 全部都需要验证平台二销 // 不需要验证平台二销售的
+//        if (!WebConstants.PLATFORM_VER.contains(orderBO.getPlatform())) {
+//            orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
+//            //  创建入库单
+//            wdtClient.stockInPush(builderStockIn(orderBO));
+//            createJkyStockIn(orderBO, expressOrderForm, orderBO.getQuantity());
+//        }
         // 如果已经验证了 二销 ， 现在填写了物流单号
-        if ( Objects.equals(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode(), orderBO.getSubStatus())){
+        if (Objects.equals(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode(), orderBO.getSubStatus())) {
             orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
-            //  创建入库单
-            wdtClient.stockInPush(builderStockIn(orderBO));
-            createJkyStockIn(orderBO, expressOrderForm, ruoYiConfig.getWarehouseNo(), orderBO.getQuantity());
+            createWDTStockIn(orderBO);
+            jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, expressOrderForm);
         }
         // 更新订单发货时间,和子状态
         orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));
 
     }
-
 
     /**
      * 创建入库单
@@ -191,63 +184,15 @@ public class ExpressBizService {
      * @param orderBO
      * @return
      */
-    private void createJkyStockIn(OrderBO orderBO, ExpressOrderForm expressOrderForm, String warehouseNo, Integer quantity) {
+    private void createWDTStockIn(OrderBO orderBO) {
+        //  创建入库单
         try {
-            jkyTemplate.stockInAndDelivery(builderJkyStockInAndDelivery(orderBO, expressOrderForm, warehouseNo, quantity));
-        } catch (Exception e) {
-            log.error("订单号：{}，吉客云入库发货失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
+            wdtClient.stockInPush(builderStockIn(orderBO));
+        } catch (IOException e) {
+            log.info("旺店通创建入库单失败：{}", e);
         }
     }
 
-    private JkyStockInAndDeliveryParam builderJkyStockInAndDelivery(OrderBO orderBO, ExpressOrderForm expressOrderForm,
-                                                                    String warehouseNo, Integer quantity) {
-        return new JkyStockInAndDeliveryParam()
-                .setStockInParam(builderJkyStockIn(orderBO, warehouseNo, quantity))
-                .setSnReportParam(builderJkySnReport(orderBO, warehouseNo))
-                .setLogisticsUpdateParam(builderJkyLogisticsUpdate(orderBO, expressOrderForm));
-    }
-
-    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
-        return new StockCreateAndStockInParam().setWarehouseCode(warehouseNo).setGoodsCode(orderBO.getSkuCode()).setQuantity(quantity).setBatchNo(orderBO.getOrderCode());
-    }
-
-    private SnReportParam builderJkySnReport(OrderBO orderBO, String warehouseNo) {
-        SnReportParam param = new SnReportParam();
-        param.setDeliveryorderno(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
-        param.setDeliverytype("JH_01");
-        param.setOwnerorderno(StrUtil.blankToDefault(orderBO.getOriginalOrderId(), orderBO.getOrderCode()));
-        param.setWarehousecode(warehouseNo);
-        param.setOwnercode(warehouseNo);
-        param.setOutbizcode(orderBO.getOrderCode());
-        param.setOperatorcode("system");
-        param.setOperatorname("system");
-        param.setOperatetime(DateUtil.now());
-        param.setGoods(Collections.singletonList(builderJkySnGoods(orderBO)));
-        return param;
-    }
-
-    private SnReportParam.SnReportGoods builderJkySnGoods(OrderBO orderBO) {
-        List<ImeiBO> list = iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
-        List<String> snList = list.stream().map(item -> Objects.equals("小米", orderBO.getBrand()) ? item.getImel() : item.getSn()).collect(Collectors.toList());
-        SnReportParam.SnReportGoods goods = new SnReportParam.SnReportGoods();
-        goods.setOutSkuCode(orderBO.getSkuCode());
-        goods.setName(StrUtil.blankToDefault(orderBO.getProductName(), orderBO.getSkuName()));
-        goods.setItemid(orderBO.getSkuCode());
-        goods.setUnit("台");
-        goods.setSnlist(snList);
-        return goods;
-    }
-
-    private LogisticsUpdateParam builderJkyLogisticsUpdate(OrderBO orderBO, ExpressOrderForm expressOrderForm) {
-        LogisticsUpdateParam.LogisticsUpdateItem item = new LogisticsUpdateParam.LogisticsUpdateItem();
-        item.setOrderNo(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
-        item.setLogisticNo(expressOrderForm.getTrackingNumber());
-        item.setLogisticName(expressOrderForm.getTrackingCompany());
-        item.setLogisticCode(expressOrderForm.getTrackingCompanyCode());
-        LogisticsUpdateParam param = new LogisticsUpdateParam();
-        param.setBizdata(Collections.singletonList(item));
-        return param;
-    }
 
     private StockInInfoParam builderStockIn(OrderBO orderBO) {
         List<ImeiBO> list = iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
@@ -400,7 +345,7 @@ public class ExpressBizService {
         LogisticsContext context = new LogisticsContext(parse.getStatus(), parse.getLastResult(), Boolean.TRUE);
         context.doAction(orderBO.getOrderCode());
         //返还保证金
-        if(Objects.isNull(orderBO.getShipmentsTime())){
+        if (Objects.isNull(orderBO.getShipmentsTime())) {
             returnBond(orderBO.getOrderCode(), parse.getLastResult().getState());
         }
     }

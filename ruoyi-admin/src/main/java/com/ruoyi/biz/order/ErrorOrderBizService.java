@@ -4,13 +4,12 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
+import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.biz.sys.IDictDistrictBizService;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
-import com.ruoyi.jky.JkyTemplate;
-import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.kuaidi100.properties.ExpressProperties;
 import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IImeiFacade;
@@ -77,7 +76,7 @@ public class ErrorOrderBizService {
     WdtClient wdtClient;
 
     @Autowired
-    JkyTemplate jkyTemplate;
+    JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
 
     @Autowired
     RuoYiConfig ruoYiConfig;
@@ -139,24 +138,26 @@ public class ErrorOrderBizService {
                 new ImeiQuery().setOrderId(orderCode));
         orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()).setUpdateTime(DateUtil.date()),
                 new OrderQuery().setOrderCode(orderCode));
+        createWDTStockIn(orderBO);
+        RouteSubscribeBO routeSubscribeBO = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setOrderCode(orderCode));
+        if (Objects.nonNull(routeSubscribeBO)) {
+            jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
+        } else {
+            log.info("订单号：{}，未查询到物流订阅信息，跳过吉客云入库发货", orderCode);
+        }
+    }
+
+    /**
+     * 创建旺店通入库单
+     *
+     * @param orderBO 订单
+     */
+    private void createWDTStockIn(OrderBO orderBO) {
         try {
             wdtClient.stockInPush(builderStockIn(orderBO));
-            createJkyStockIn(orderBO, ruoYiConfig.getWarehouseNo(), orderBO.getQuantity());
         } catch (IOException e) {
-            log.error("订单号：{}，创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage());
+            log.error("订单号：{}，旺店通创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
         }
-    }
-
-    private void createJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
-        try {
-            jkyTemplate.createAndStockIn(builderJkyStockIn(orderBO, warehouseNo, quantity));
-        } catch (Exception e) {
-            log.error("订单号：{}，创建吉客云入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
-        }
-    }
-
-    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, String warehouseNo, Integer quantity) {
-        return new StockCreateAndStockInParam().setWarehouseCode(warehouseNo).setGoodsCode(orderBO.getSkuCode()).setQuantity(quantity).setBatchNo(orderBO.getOrderCode());
     }
 
     private StockInInfoParam builderStockIn(OrderBO orderBO) {

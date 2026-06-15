@@ -6,6 +6,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.model.page.PageBO;
+import com.ruoyi.web.form.order.ActivatedImeiForm;
 import com.ruoyi.web.form.order.ExcelForm;
 import com.ruoyi.web.form.order.ImeiForm;
 import com.ruoyi.web.form.order.PlatformImeiForm;
@@ -85,6 +86,15 @@ public class IMEIController extends BaseController {
     @PostMapping("/imei/platform")
     public AjaxResult updatePlatformImei(@Validated @RequestBody PlatformImeiForm form) {
         imeiBizService.updatePlatformImei(form);
+        return AjaxResult.success();
+    }
+
+    /**
+     * 人工放行串码激活状态（仅 NOT_EXITS → SUCCESS）
+     */
+    @PostMapping("/imei/activated/manual-pass")
+    public AjaxResult manualPassActivated(@Validated @RequestBody ActivatedImeiForm form) {
+        imeiBizService.manualPassActivated(form);
         return AjaxResult.success();
     }
 

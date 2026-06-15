@@ -22,6 +22,8 @@
         <result property="skuName" column="sku_name"/>
         <result property="skuCode" column="sku_code"/>
         <result property="quantity" column="quantity"/>
+        <result property="payerId" column="payer_id"/>
+        <result property="payerName" column="payer_name"/>
         <result property="platform" column="platform"/>
         <result property="status" column="status"/>
         <result property="subStatus" column="sub_status"/>
@@ -145,7 +147,7 @@
             o.order_type,
             oto.delivery_code,
             o.remark,
-           oto.update_by createBy,
+            oto.update_by createBy,
             o.payer_name payerName
         FROM
             o_order o

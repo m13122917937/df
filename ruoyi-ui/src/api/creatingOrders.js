@@ -155,6 +155,15 @@ export function apiGetImei(orderId) {
   });
 }
 
+// 人工放行串码激活状态（仅 NOT_EXITS=5 → SUCCESS=4）
+export function manualPassActivatedApi(data) {
+  return request({
+    url: `/apply/imei/activated/manual-pass`,
+    method: "post",
+    data,
+  });
+}
+
 export function apiGetApply(orderCode) {
   return request({
     url: `/order/apply/${orderCode}`,

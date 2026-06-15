@@ -20,6 +20,12 @@ public class PayerVO {
      */
 
     private String nickName;
+
+    /**
+     * 编码
+     */
+    private String outCode;
+
     /**
      * 付款户名
      */

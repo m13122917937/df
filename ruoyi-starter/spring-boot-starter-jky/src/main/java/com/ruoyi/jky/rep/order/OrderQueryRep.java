@@ -39,6 +39,8 @@ public class OrderQueryRep {
 
         private String shopName;
 
+        private String shopTypeCode;
+
         private String companyName;
 
         private Long warehouseId;

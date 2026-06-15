@@ -29,6 +29,10 @@ public class PayerQuery {
      */
     private String nickName;
     /**
+     * 编码
+     */
+    private String outCode;
+    /**
      * 付款户名
      */
     @QueryField(operator = DynamicCondition.Operator.IN, field = "pay_name")

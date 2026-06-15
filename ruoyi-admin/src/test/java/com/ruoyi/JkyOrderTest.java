@@ -11,6 +11,7 @@ import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.order.OrderQueryParam;
 import com.ruoyi.jky.param.warehouse.WarehouseListParam;
 import com.ruoyi.job.JkyOrderSyncJob;
+import com.ruoyi.job.JkyVendorSyncJob;
 import com.ruoyi.jky.rep.order.OrderQueryRep;
 import com.ruoyi.jky.rep.warehouse.WarehouseListRep;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,8 @@ public class JkyOrderTest {
     @Autowired
     private JkyOrderSyncJob jkyOrderSyncJob;
 
+    @Autowired
+    private JkyVendorSyncJob jkyVendorSyncJob;
 
     @Autowired
     private RedisCache redisCache;
@@ -46,6 +49,15 @@ public class JkyOrderTest {
         redisCache.deleteObject(AdminRedisKey.Jky.ORDER_SYNC_LOCK);
         redisCache.deleteObject(AdminRedisKey.Jky.ORDER_LAST_SYNC_TIME);
         jkyOrderSyncJob.execute();
+    }
+
+    /**
+     * 执行吉客云供应商编码同步定时任务。
+     */
+    @Test
+    public void executeJkyVendorSyncJob() {
+        redisCache.deleteObject(AdminRedisKey.Jky.VENDOR_SYNC_LOCK);
+        jkyVendorSyncJob.execute();
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.ruoyi.biz.company;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
@@ -50,6 +51,18 @@ public class CompanyBizService {
     private static final String JKY_VENDOR_CLASS_NAME = "BMG国内";
 
     /**
+     * 新增企业。
+     */
+    public CompanyBO add(CompanyParam companyParam) {
+        CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setCompanyName(companyParam.getCompanyName()));
+        Assert.isNull(companyBO, "企业已经存在，请重新添加");
+        companyBO = companyFacade.add(companyParam);
+        checkContractAuthStatus(companyBO);
+        createProvider(companyBO);
+        return companyBO;
+    }
+
+    /**
      * 检查企业合同认证状态
      *
      * @param companyBO 企业信息
@@ -96,6 +109,8 @@ public class CompanyBizService {
             return;
         }
         String providerNo = genOutNo(companyBO);
+        companyFacade.update(new CompanyParam().setOutNo(providerNo), new CompanyQuery().setId(companyBO.getId()));
+        companyBO.setOutNo(providerNo);
         String providerName = companyBO.getCompanyName() + COMPANY_NAME_AFTER;
         ProviderParams params = ProviderParams.builder().provider_no(providerNo).provider_name(providerName).build();
         try {

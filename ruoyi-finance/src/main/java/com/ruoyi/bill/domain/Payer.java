@@ -30,6 +30,10 @@ public class Payer {
      */
     private String nickName;
     /**
+     * 编码
+     */
+    private String outCode;
+    /**
      * 付款户名
      */
     private String payName;

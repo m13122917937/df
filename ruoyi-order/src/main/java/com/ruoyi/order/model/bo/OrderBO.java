@@ -94,6 +94,11 @@ public class OrderBO {
      */
     private Integer quantity;
     /**
+     * 付款主体id
+     */
+    private Long payerId;
+
+    /**
      * 付款主体简称
      */
     private String payerName;

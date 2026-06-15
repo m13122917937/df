@@ -79,7 +79,7 @@
               <template slot-scope="scope">
                 <div class="order-numbers">
                   <div class="order-number-item">
-                    {{ scope.row.tradeUserName || "-" }}
+                    {{ scope.row.createBy || "-" }}
                   </div>
                   <div class="order-number-item">
                     {{ scope.row.createTime || "-" }}
