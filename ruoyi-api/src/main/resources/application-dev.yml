@@ -102,7 +102,6 @@ fy:
     baseUrl: https://open.jackyun.com/open/openapi/do
     connectTimeout: 10000
     warehouseId:
-
 esign:
   host: https://smlopenapi.esign.cn
   appId: 7439107862

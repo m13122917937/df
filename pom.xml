@@ -48,6 +48,7 @@
         <spring-framework.version>5.3.39</spring-framework.version>
         <weixin-java.version>4.6.0</weixin-java.version>
         <weixin-java-cp.version>4.6.0</weixin-java-cp.version>
+        <taobao-sdk-java-auto.version>1763085639121-20251207</taobao-sdk-java-auto.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 
     </properties>
@@ -436,6 +437,19 @@
                 <groupId>com.ruoyi</groupId>
                 <artifactId>spring-boot-starter-esign</artifactId>
                 <version>${ruoyi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>spring-boot-starter-taobao</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+            <!-- 淘宝（本地 jar，位于项目根目录 /lib 下） -->
+            <dependency>
+                <groupId>com.taobao</groupId>
+                <artifactId>taobao-sdk-java-auto</artifactId>
+                <version>${taobao-sdk-java-auto.version}</version>
+                <scope>system</scope>
+                <systemPath>${maven.multiModuleProjectDirectory}/lib/taobao-sdk-java-auto-1763085639121-20251207.jar</systemPath>
             </dependency>
 
         </dependencies>

@@ -1,23 +1,25 @@
 package com.ruoyi.esign.core;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.codec.Base64;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.digest.Digester;
+import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.esign.api.EsignSignApi;
 import com.ruoyi.esign.exception.EsignException;
-import com.ruoyi.esign.model.*;
+import com.ruoyi.esign.model.sign.CreateByFileRequest;
+import com.ruoyi.esign.model.sign.CreateByFileResponse;
 import com.ruoyi.esign.properties.EsignProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * 默认e签宝合同签署客户端实现
@@ -29,173 +31,93 @@ public class DefaultEsignSignClient implements EsignSignApi {
     private static final Logger log = LoggerFactory.getLogger(DefaultEsignSignClient.class);
 
     private final EsignProperties properties;
-    private final ObjectMapper objectMapper;
 
     public DefaultEsignSignClient(EsignProperties properties) {
         this.properties = properties;
-        this.objectMapper = new ObjectMapper();
     }
 
     @Override
-    public CreateFlowResponse createFlow(CreateFlowRequest request) {
-        String url = properties.getCreateFlowUrl();
-        return executePost(url, request, CreateFlowResponse.class);
+    public CreateByFileResponse createByFile(CreateByFileRequest request) {
+        return executePost(properties.getCreateByFileUrl(), request, CreateByFileResponse.class);
     }
 
-    @Override
-    public AddFileResponse addFile(AddFileRequest request) {
-        String url = properties.getAddFileUrl();
-        return executePost(url, request, AddFileResponse.class);
-    }
-
-    @Override
-    public AddSignerResponse addSigner(AddSignerRequest request) {
-        String url = properties.getAddSignerUrl();
-        return executePost(url, request, AddSignerResponse.class);
-    }
-
-    @Override
-    public StartFlowResponse startFlow(String flowId) {
-        if (StrUtil.isBlank(flowId)) {
-            throw new IllegalArgumentException("flowId不能为空");
+    private <T> T executePost(String fullUrl, Object request, Class<T> responseClass) {
+        String body = JacksonUtil.toJson(request);
+        if (body == null) {
+            throw new EsignException("序列化请求失败");
         }
-        String url = properties.getStartFlowUrl();
-        StartFlowRequest request = new StartFlowRequest();
-        request.setFlowId(flowId);
-        return executePost(url, request, StartFlowResponse.class);
-    }
-
-    @Override
-    public QueryFlowResponse getFlowDetail(String flowId) {
-        if (StrUtil.isBlank(flowId)) {
-            throw new IllegalArgumentException("flowId不能为空");
-        }
-        String url = properties.getQueryFlowUrl();
-        Map<String, Object> params = new HashMap<>();
-        params.put("flowId", flowId);
-        return executePost(url, params, QueryFlowResponse.class);
-    }
-
-    @Override
-    public GetSignUrlResponse getSignUrl(GetSignUrlRequest request) {
-        String url = properties.getSignUrl();
-        return executePost(url, request, GetSignUrlResponse.class);
-    }
-
-    /**
-     * 执行POST请求，使用请求签名鉴权方式
-     */
-    @SuppressWarnings("unchecked")
-    private <T> T executePost(String url, Object request, Class<T> responseClass) {
-        String body;
-        try {
-            body = objectMapper.writeValueAsString(request);
-        } catch (JsonProcessingException e) {
-            log.error("序列化请求失败", e);
-            throw new EsignException("序列化请求失败", e);
-        }
-
-        long timestamp = System.currentTimeMillis();
+        String accept = "application/json";
+        String contentType = "application/json; charset=UTF-8";
+        String date = formatDate();
+        String pathUrl = extractPath(fullUrl);
         String contentMd5 = generateContentMd5(body);
-        String signature = generateSignature(body, timestamp);
+        String signature = generateSignature("POST", pathUrl, contentMd5, accept, contentType, date);
 
         try {
-            HttpRequest httpRequest = HttpRequest.post(url)
+            HttpResponse response = HttpRequest.post(fullUrl)
                     .body(body)
-                    .header("Accept", "application/json")
-                    .contentType("application/json; charset=UTF-8")
+                    .header("Accept", accept)
+                    .header("Date", date)
+                    .contentType(contentType)
                     .header("Content-MD5", contentMd5)
-                    .header("X-Tsign-Open-App-Id", properties.getAppId())
-                    .header("X-Tsign-Open-Ca-Timestamp", String.valueOf(timestamp))
+                    .header("X-Tsign-Open-App-Id", properties.getAppId().trim())
+                    .header("X-Tsign-Open-Ca-Timestamp", String.valueOf(System.currentTimeMillis()))
                     .header("X-Tsign-Open-Ca-Signature", signature)
-                    .timeout(properties.getReadTimeout().intValue());
-
-            HttpResponse response = httpRequest.execute();
-
+                    .header("X-Tsign-Open-Auth-Mode", "Signature")
+                    .timeout(properties.getReadTimeout().intValue())
+                    .execute();
             if (!response.isOk()) {
-                throw new EsignException("请求失败，HTTP状态码：" + response.getStatus());
+                throw new EsignException("请求失败，请求响应：" + response.body());
             }
-
-            String responseBody = response.body();
-            T result = objectMapper.readValue(responseBody, responseClass);
-
+            T result = JacksonUtil.parse(response.body(), responseClass);
             logResponseError(result);
             return result;
         } catch (EsignException e) {
             throw e;
-        } catch (IOException e) {
-            log.error("反序列化响应失败", e);
-            throw new EsignException("反序列化响应失败", e);
         } catch (Exception e) {
-            log.error("e签宝API调用异常", e);
-            throw new EsignException("API调用异常", e);
+            log.error("e签宝合同签署API请求异常", e);
+            throw new EsignException("API请求异常", e);
         }
     }
 
-    /**
-     * 生成Content-MD5
-     */
+    private String formatDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return sdf.format(new Date());
+    }
+
+    private String extractPath(String fullUrl) {
+        int pathStart = fullUrl.indexOf("//");
+        if (pathStart >= 0) {
+            pathStart += 2;
+            int pathEnd = fullUrl.indexOf('/', pathStart);
+            if (pathEnd >= 0) {
+                return fullUrl.substring(pathEnd);
+            }
+        }
+        return fullUrl;
+    }
+
     private String generateContentMd5(String body) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] hash = md.digest(body.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hash) {
-                sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            log.error("生成Content-MD5失败", e);
-            throw new EsignException("生成Content-MD5失败", e);
-        }
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        Digester digester = new Digester(DigestAlgorithm.MD5);
+        byte[] md5Bytes = digester.digest(bytes);
+        return Base64.encode(md5Bytes);
     }
 
-    /**
-     * 生成请求签名
-     * <p>
-     * 签名规则：
-     * 1. 将body参数按字典升序排序拼接（对于JSON body直接使用原文字符串）
-     * 2. 拼接格式：body + timestamp + appSecret
-     * 3. 使用SHA256加密得到签名
-     */
-    private String generateSignature(String body, long timestamp) {
-        String signStr = body + timestamp + properties.getAppSecret();
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(signStr.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hash) {
-                sb.append(Integer.toHexString((b & 0xFF) | 0x100).substring(1, 3));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            log.error("生成签名失败", e);
-            throw new EsignException("生成签名失败", e);
-        }
+    private String generateSignature(String httpMethod, String url, String contentMd5,
+                                     String accept, String contentType, String date) {
+        String message = httpMethod + "\n" + accept + "\n" + contentMd5 + "\n" + contentType + "\n" + date + "\n" + url;
+        return Base64.encode(SecureUtil.hmacSha256(properties.getAppSecret().trim().getBytes(StandardCharsets.UTF_8))
+                .digest(message.getBytes(StandardCharsets.UTF_8)));
     }
 
-    /**
-     * 记录响应错误日志
-     */
     private void logResponseError(Object result) {
-        if (result instanceof CreateFlowResponse && !Boolean.TRUE.equals(((CreateFlowResponse) result).getSuccess())) {
-            log.error("创建e签宝签署流程失败，code:{}, message:{}",
-                    ((CreateFlowResponse) result).getCode(), ((CreateFlowResponse) result).getMessage());
-        } else if (result instanceof AddFileResponse && !Boolean.TRUE.equals(((AddFileResponse) result).getSuccess())) {
-            log.error("添加e签宝签署文件失败，code:{}, message:{}",
-                    ((AddFileResponse) result).getCode(), ((AddFileResponse) result).getMessage());
-        } else if (result instanceof AddSignerResponse && !Boolean.TRUE.equals(((AddSignerResponse) result).getSuccess())) {
-            log.error("添加e签宝签署人失败，code:{}, message:{}",
-                    ((AddSignerResponse) result).getCode(), ((AddSignerResponse) result).getMessage());
-        } else if (result instanceof StartFlowResponse && !Boolean.TRUE.equals(((StartFlowResponse) result).getSuccess())) {
-            log.error("发起e签宝签署流程失败，code:{}, message:{}",
-                    ((StartFlowResponse) result).getCode(), ((StartFlowResponse) result).getMessage());
-        } else if (result instanceof QueryFlowResponse && !Boolean.TRUE.equals(((QueryFlowResponse) result).getSuccess())) {
-            log.error("查询e签宝签署流程详情失败，code:{}, message:{}",
-                    ((QueryFlowResponse) result).getCode(), ((QueryFlowResponse) result).getMessage());
-        } else if (result instanceof GetSignUrlResponse && !Boolean.TRUE.equals(((GetSignUrlResponse) result).getSuccess())) {
-            log.error("获取e签宝签署页面URL失败，code:{}, message:{}",
-                    ((GetSignUrlResponse) result).getCode(), ((GetSignUrlResponse) result).getMessage());
+        if (result instanceof CreateByFileResponse
+                && !Integer.valueOf(0).equals(((CreateByFileResponse) result).getCode())) {
+            log.error("e签宝基于文件发起签署失败，code:{}, message:{}",
+                    ((CreateByFileResponse) result).getCode(),
+                    ((CreateByFileResponse) result).getMessage());
         }
     }
 }

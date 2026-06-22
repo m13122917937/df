@@ -1,44 +1,40 @@
 package com.ruoyi.esign.api;
 
-import com.ruoyi.esign.model.file.GetFileDownloadUrlRequest;
-import com.ruoyi.esign.model.file.GetFileDownloadUrlResponse;
-import com.ruoyi.esign.model.file.GetFileInfoRequest;
-import com.ruoyi.esign.model.file.GetFileInfoResponse;
-import com.ruoyi.esign.model.file.UploadFileRequest;
-import com.ruoyi.esign.model.file.UploadFileResponse;
+import com.ruoyi.esign.model.file.CreateByDocTemplateRequest;
+import com.ruoyi.esign.model.file.CreateByDocTemplateResponse;
+import com.ruoyi.esign.model.file.PreviewFileDownloadUrlRequest;
+import com.ruoyi.esign.model.file.PreviewFileDownloadUrlResponse;
+import com.ruoyi.esign.model.file.SignFlowFileDownloadUrlRequest;
+import com.ruoyi.esign.model.file.SignFlowFileDownloadUrlResponse;
 
 /**
  * e签宝文件服务API接口
- * 包含文件上传、查询文件信息、获取文件下载链接
  *
  * @author ruoyi
  */
 public interface EsignFileApi {
 
     /**
-     * 上传文件
-     * 将PDF/Word文件上传到e签宝服务器，获取fileId用于后续签署流程
+     * 下载已签署文件及附属材料。
      *
-     * @param request 上传文件请求参数
-     * @return 上传文件响应结果
+     * @param request 请求参数
+     * @return 下载链接响应结果
      */
-    UploadFileResponse uploadFile(UploadFileRequest request);
+    SignFlowFileDownloadUrlResponse fileDownloadUrl(SignFlowFileDownloadUrlRequest request);
 
     /**
-     * 查询文件信息
-     * 根据文件ID查询已上传文件的详细信息
+     * 下载签署中文件。
      *
-     * @param request 查询文件信息请求参数
-     * @return 查询文件信息响应结果
+     * @param request 请求参数
+     * @return 预览下载链接响应结果
      */
-    GetFileInfoResponse getFileInfo(GetFileInfoRequest request);
+    PreviewFileDownloadUrlResponse previewFileDownloadUrl(PreviewFileDownloadUrlRequest request);
 
     /**
-     * 获取文件下载链接
-     * 根据文件ID获取文件的下载链接，链接可设置有效期
+     * 填写模板生成文件。
      *
-     * @param request 获取文件下载链接请求参数
-     * @return 获取文件下载链接响应结果
+     * @param request 请求参数
+     * @return 生成文件响应结果
      */
-    GetFileDownloadUrlResponse getFileDownloadUrl(GetFileDownloadUrlRequest request);
+    CreateByDocTemplateResponse createByDocTemplate(CreateByDocTemplateRequest request);
 }

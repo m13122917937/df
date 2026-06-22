@@ -55,7 +55,7 @@ spring:
       # 端口，默认为6379
       port: 6379
       # 数据库索引
-      database: 1
+      database: 0
       # 密码
       password: rN8_iR44
 mybatis-plus:
@@ -100,6 +100,14 @@ fy:
   pdd:
     clientId: 3a86a9f9b2f644c6ac6306ee6475680e
     clientSecret: be1d12163b765a78535439f0c5621c4aca46061a
+  # 淘宝开放平台
+  taobao:
+    enabled: true
+    serverUrl: https://eco.taobao.com/router/rest
+    appKey: 26133373
+    appSecret: m018of43ealk0g758h4cbfimei3hnh0e
+    connectTimeout: 10000
+    readTimeout: 15000
 
 esign:
   host: https://smlopenapi.esign.cn
@@ -107,3 +115,4 @@ esign:
   appSecret: 2029fe9458ab9ce47b139127a6279849
   redirectUri: https://www.wujievip.cn/
   notify: https://api.wujievip.cn/company/auth/%s/%s
+

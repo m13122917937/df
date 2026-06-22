@@ -147,26 +147,44 @@ public class EsignProperties {
     }
 
     /**
-     * 上传文件URL
-     * 文档：https://open.esign.cn/doc/opendoc/file-and-template/qxq4td
+     * 下载已签署文件及附属材料URL
      */
-    public String getFileUploadUrl() {
-        return host + "/v1/files/upload";
+    public String getSignFlowFileDownloadUrl(String signFlowId) {
+        return host + "/v3/sign-flow/" + signFlowId + "/file-download-url";
     }
 
     /**
-     * 查询文件信息URL
-     * 文档：https://open.esign.cn/doc/opendoc/file-and-template/bl03hx
+     * 下载签署中文件URL
      */
-    public String getFileGetInfoUrl() {
-        return host + "/v1/files/get-info";
+    public String getPreviewFileDownloadUrl(String signFlowId) {
+        return host + "/v3/sign-flow/" + signFlowId + "/preview-file-download-url";
     }
 
     /**
-     * 获取文件下载链接URL
-     * 文档：https://open.esign.cn/doc/opendoc/file-and-template/fmpsge
+     * 填写模板生成文件URL
      */
-    public String getFileGetDownloadUrl() {
-        return host + "/v1/files/get-download-url";
+    public String getCreateByDocTemplateUrl() {
+        return host + "/v3/files/create-by-doc-template";
+    }
+
+    /**
+     * 基于文件发起签署URL
+     */
+    public String getCreateByFileUrl() {
+        return host + "/v3/sign-flow/create-by-file";
+    }
+
+    /**
+     * 查询合同模板列表URL
+     */
+    public String getDocTemplatesUrl() {
+        return host + "/v3/doc-templates";
+    }
+
+    /**
+     * 查询合同模板中控件详情URL
+     */
+    public String getDocTemplateInfoUrl(String docTemplateId) {
+        return host + "/v3/doc-templates/" + docTemplateId;
     }
 }

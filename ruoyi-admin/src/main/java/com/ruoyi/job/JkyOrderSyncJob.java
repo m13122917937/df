@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Component("jkyOrderSyncJob")
 public class JkyOrderSyncJob {
 
-    private static final String ORDER_FIELDS = "tradeNo,platFlags,tradeFrom,tradeStatus,tradeTime,payTime,auditTime,reviewTime,notifyPickTime,consignTime,signingTime,orderNo,shopId,shopCode,shopName,shopTypeCode,companyId,companyName,warehouseId,warehouseName,logisticId,logisticName,logisticType,mainPostid,tradeType,sourceTradeType,totalFee,taxFee,receivedPostFee,discountFee,payment,couponFee,receivedTotal,postFee,confirmTime,otherFee,departId,departName,lastShipTime,completeTime,platCompleteTime,payStatus,sellerMemo,grossProfit,buyerMemo,estimateVolume,appendMemo,auditor,reviewer,estimateWeight,packageWeight,tradeCount,goodsTypeCount,freezeReason,abnormalDescription,goodslist,onlineTradeNo,gmtCreate,gmtModified,stockoutNo,sysFlagIds,flagIds,isDelete,flagNames,customerId,customerAccount,buyerOpenUid,customerName,customerCode,customerTypeName,customerGradeName,customerTags,customerDiscount,specialReminding,qq,email,blackList,countryCode,cityCode,receiverName,phone,mobile,country,state,city,district,town,zip,address,identityCardType,identityCardNo,identityCardName,payerBankName,invoiceType,payerName,payerRegno,payerBankAccount,payerPhone,payerAddress,invoiceNo,invoiceCode,invoiceStatus,invoiceEmail,supplierId,supplierName,agentShopName,chargeType,chargeCurrency,chargeAccount,accountName,payType,payAccount,payNo,chargeCurrencyCode,chargeExchangeRate,localCurrencyCode,localExchangeRate,customerTotalFee,customerDiscountFee,customerPostFee,customerPayment,isBillCheck,billDate,checkTotal,finDoc,sourceAfterNo,afterNo,pickUpCode,localPayment,pickUpTime";
+    private static final String ORDER_FIELDS = "tradeNo,orderNo,shopName,companyName,warehouseName,logisticName,mainPostid,goodsDetail.goodsNo,flagNames,columnExt,sourceAfterNo,goodsDetail.outerId,pickUpCode,expense.expenseFee,expense.expenseItemName,billDate,goodsPlatDiscountFee,goodsDetail.shareOrderDiscountFee,goodsDetail.shareOrderPlatDiscountFee,customizeGoodsColumn9,goodsDetail.goodsId,goodsDetail.sellCount,goodsDetail.needProcessCount,goodsDetail.baseUnitSellCount,goodsDetail.assessmentCost,goodsDetail.compassSourceContentTypem,sourceTradeNo,shopId,warehouseId,scrollId,goodsDetail.auxiliaryInventoryCount,goodsDetail.auxiliaryInventoryUnit";
 
     @Autowired
     private JkyTemplate jkyTemplate;
@@ -97,7 +97,7 @@ public class JkyOrderSyncJob {
     private DateTime getStartTime(DateTime endTime) {
         String lastSyncTime = redisCache.getCacheObject(AdminRedisKey.Jky.ORDER_LAST_SYNC_TIME);
         if (StrUtil.isBlank(lastSyncTime)) {
-            return DateUtil.offsetDay(endTime, -5);
+            return DateUtil.offsetHour(endTime, -5);
         }
         try {
             return DateUtil.parse(lastSyncTime, DatePattern.NORM_DATETIME_PATTERN);

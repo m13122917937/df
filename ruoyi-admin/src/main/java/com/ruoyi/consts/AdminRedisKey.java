@@ -25,4 +25,20 @@ public interface AdminRedisKey {
 
     }
 
+    interface Contract {
+
+        String ROOT_KEY = ADMIN_BASE + "contract:";
+
+        /**
+         * 合同编号每日流水 key，使用前需拼接 yyyyMMdd
+         */
+        String NO_DAILY_SEQ = ROOT_KEY + "no:seq:";
+
+        /**
+         * 状态拉取兜底任务锁
+         */
+        String STATUS_SYNC_LOCK = ROOT_KEY + "status:sync:lock";
+
+    }
+
 }

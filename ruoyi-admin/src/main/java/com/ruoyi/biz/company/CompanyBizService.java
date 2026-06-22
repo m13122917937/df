@@ -3,6 +3,7 @@ package com.ruoyi.biz.company;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.ruoyi.biz.contract.ContractBizService;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.esign.api.EsignAuthApi;
@@ -43,6 +44,9 @@ public class CompanyBizService {
     @Autowired
     private ICompanyFacade companyFacade;
 
+    @Autowired
+    private ContractBizService contractBizService;
+
 
     private static final String OUT_NO_PREFIX = "FY";
 
@@ -59,7 +63,22 @@ public class CompanyBizService {
         companyBO = companyFacade.add(companyParam);
         checkContractAuthStatus(companyBO);
         createProvider(companyBO);
+        initFrameworkContract(companyBO, companyParam.getCreatorId());
         return companyBO;
+    }
+
+    /**
+     * 初始化框架协议草稿：我方主体固定为集团公司
+     *
+     * @param companyBO 新建的供应商
+     * @param createBy  创建人id
+     */
+    private void initFrameworkContract(CompanyBO companyBO, Long createBy) {
+        try {
+            contractBizService.initFrameworkContract(companyBO.getId(), companyBO.getCompanyName(), createBy);
+        } catch (Exception e) {
+            log.error("初始化框架协议失败，companyId:{}，message:{}", companyBO.getId(), e.getMessage(), e);
+        }
     }
 
     /**

@@ -18,6 +18,7 @@
         <module>spring-boot-starter-oss</module>
         <module>spring-boot-starter-esign</module>
         <module>spring-boot-starter-jky</module>
+        <module>spring-boot-starter-taobao</module>
     </modules>
 
     <properties>
