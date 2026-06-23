@@ -22,6 +22,8 @@ public final class JkyApiMethod {
 
     public static final String INSPECT = "wms-wos.order.inspect";
 
+    public static final String DELIVERY_ORDER_GET = "wms.extpick.getdeliveryorder";
+
     private JkyApiMethod() {
     }
 

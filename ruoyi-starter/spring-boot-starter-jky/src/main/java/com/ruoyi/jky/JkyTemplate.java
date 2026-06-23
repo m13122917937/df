@@ -12,6 +12,7 @@ import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.jky.model.JkyApiMethod;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.JkyStockInAndDeliveryParam;
+import com.ruoyi.jky.param.delivery.DeliveryOrderParam;
 import com.ruoyi.jky.param.goods.GoodsListParam;
 import com.ruoyi.jky.param.inspect.InspectParam;
 import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
@@ -24,6 +25,7 @@ import com.ruoyi.jky.param.vendor.VendorListParam;
 import com.ruoyi.jky.param.warehouse.WarehouseListParam;
 import com.ruoyi.jky.properties.JkyProperties;
 import com.ruoyi.jky.rep.JkyStockInAndDeliveryRep;
+import com.ruoyi.jky.rep.delivery.DeliveryOrderRep;
 import com.ruoyi.jky.rep.goods.GoodsListRep;
 import com.ruoyi.jky.rep.inspect.InspectRep;
 import com.ruoyi.jky.rep.logistics.LogisticsUpdateRep;
@@ -174,6 +176,18 @@ public class JkyTemplate {
         }
         return execute(JkyApiMethod.INSPECT, BIZ_CONTENT, param, new TypeReference<JkyResponse<InspectRep>>() {
         });
+    }
+
+    /**
+     * 获取发货单。
+     */
+    public JkyResponse<DeliveryOrderRep> getDeliveryOrder(final DeliveryOrderParam param) {
+        if (isDisabled(JkyApiMethod.DELIVERY_ORDER_GET)) {
+            return new JkyResponse<>();
+        }
+        return execute(JkyApiMethod.DELIVERY_ORDER_GET, BIZ_CONTENT, param,
+                new TypeReference<JkyResponse<DeliveryOrderRep>>() {
+                });
     }
 
     /**
