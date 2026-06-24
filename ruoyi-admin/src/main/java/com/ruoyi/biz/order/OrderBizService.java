@@ -28,8 +28,11 @@ import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.DictUtils;
+import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.common.utils.weebhook.QWRobotUtil;
 import com.ruoyi.consts.AdminConsts;
+import com.ruoyi.jky.JkyTemplate;
+import com.ruoyi.jky.param.reject.RejectParam;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.consts.LogisticsCode;
@@ -132,6 +135,9 @@ public class OrderBizService {
 
     @Autowired
     IPayerConfigFacade payerConfigFacade;
+
+    @Autowired
+    private JkyTemplate jkyTemplate;
 
 
     public String sortField(Integer status) {
@@ -313,11 +319,13 @@ public class OrderBizService {
     @Transactional
     public void revoke(final String orderCode, final Integer revokeCode) {
         log.info("撤销/追单订单：{}, 撤销原因:{}", orderCode, revokeCode);
+        OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(orderCode));
         HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(orderCode).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
         if (Objects.isNull(hangingOrderBO)) {
             // 还没挂单，直接撤销，
             orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(OrderConsts.OrderSubStatus.REVOKE_NEW.getCode())
                     .setRevokeType(revokeCode).setUpdateTime(DateUtil.date()), new OrderQuery().setOrderCode(orderCode));
+            rejectJkyIfNeeded(orderBO, revokeCode);
             return;
         }
 
@@ -329,9 +337,9 @@ public class OrderBizService {
             // 设置订单失效
             orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(OrderConsts.OrderSubStatus.REVOKE_TRADING.getCode())
                     .setUpdateTime(DateUtil.date()).setRevokeType(revokeCode), new OrderQuery().setOrderCode(orderCode));
+            rejectJkyIfNeeded(orderBO, revokeCode);
             return;
         }
-        OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(orderCode));
         // 追单2 ， 已经抢单，还没成交
         Set<Integer> tradeStatusSet = tradeOrderBOList.stream().map(TradeOrderBO::getStatus).collect(Collectors.toSet());
         if (!tradeStatusSet.contains(TradeOrderConsts.TradeStatus.SUCCESS.getCode())) {
@@ -350,6 +358,7 @@ public class OrderBizService {
                         .setOrderNo(hangingOrderBO.getOrderId()).setType(CompanyCapitalConsts.LogTypes.ORDER.getCode()).setTradeId(tradeOrderBO.getId()));
             }
 
+            rejectJkyIfNeeded(orderBO, revokeCode);
             return;
         }
         // 追单3 ， 已经成交
@@ -401,6 +410,22 @@ public class OrderBizService {
                     ">原始单号：<font color='info'>" + orderBo.getOriginalOrderId() + "</font>\r\n" +
                     ">供应商：<font color='info'>" + tradeOrderBO.getTradeNickName() + "</font>\r\n";
             QWRobotUtil.sendMarkdownMsg(uncollectedKey, sb);
+        }
+    }
+
+    /**
+     * 代发订单吉客云驳回
+     */
+    private void rejectJkyIfNeeded(OrderBO orderBO, Integer revokeCode) {
+        if (Objects.nonNull(orderBO)
+                && Objects.equals(orderBO.getOrderType(), OrderConsts.OrderType.O2O.getCode())
+                && StrUtil.isNotBlank(orderBO.getErpOrderId())) {
+            OrderConsts.RevokeType revokeType = OrderConsts.RevokeType.getByCode(revokeCode);
+            RejectParam rejectParam = new RejectParam();
+            rejectParam.setTradeNos(JacksonUtil.toJson(Collections.singleton(orderBO.getErpOrderId())));
+            rejectParam.setReason(Objects.nonNull(revokeType) ? revokeType.getDesc() : "订单撤销");
+            rejectParam.setIsFreezeOrder("0");
+            jkyTemplate.reject(rejectParam);
         }
     }
 
