@@ -36,7 +36,16 @@ public interface OrderConsts {
         private Integer code;
         private String desc;
 
-        public static OrderStyle getByCode(Integer code) {
+        public static OrderStyle getByCode(String keyword) {
+            for (OrderStyle value : values()) {
+                if (value.desc.contains(keyword)) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        public static OrderStyle getByCodeValue(Integer code) {
             for (OrderStyle value : values()) {
                 if (value.code.equals(code)) {
                     return value;
@@ -47,7 +56,7 @@ public interface OrderConsts {
 
         public static OrderStyle getByName(String desc) {
             for (OrderStyle value : values()) {
-                if (Objects.equals(value.desc, desc)) {
+                if (desc.contains(value.desc)) {
                     return value;
                 }
             }

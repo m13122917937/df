@@ -81,10 +81,6 @@
         </dependency>
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>spring-boot-starter-wangdian</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.ruoyi</groupId>
             <artifactId>spring-boot-starter-jky</artifactId>
         </dependency>
         <dependency>

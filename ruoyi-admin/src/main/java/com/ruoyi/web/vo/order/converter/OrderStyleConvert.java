@@ -24,7 +24,7 @@ public class OrderStyleConvert implements Converter<Integer> {
             Integer value,
             ExcelContentProperty contentProperty,
             GlobalConfiguration globalConfiguration) {
-        String desc = OrderConsts.OrderStyle.getByCode(value).getDesc();
+        String desc = OrderConsts.OrderStyle.getByCodeValue(value).getDesc();
         return new WriteCellData<>(desc);
     }
 

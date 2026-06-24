@@ -7,16 +7,20 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpRequest;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.jky.model.JkyApiMethod;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.JkyStockInAndDeliveryParam;
 import com.ruoyi.jky.param.delivery.DeliveryOrderParam;
+import com.ruoyi.jky.param.delivery.SendDirectParam;
 import com.ruoyi.jky.param.goods.GoodsListParam;
 import com.ruoyi.jky.param.inspect.InspectParam;
 import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
 import com.ruoyi.jky.param.order.OrderQueryParam;
+import com.ruoyi.jky.param.reject.RejectParam;
 import com.ruoyi.jky.param.refund.RefundQueryParam;
 import com.ruoyi.jky.param.sn.SnReportParam;
 import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
@@ -45,7 +49,7 @@ import java.util.Map;
 @Slf4j
 public class JkyTemplate {
 
-    private static final String BIZ_CONTENT = "bizcontent";
+    protected static final String BIZ_CONTENT = "bizcontent";
 
     private static final String BIZ_DATA = "bizdata";
 
@@ -111,7 +115,7 @@ public class JkyTemplate {
         if (isDisabled(JkyApiMethod.ORDER_QUERY)) {
             return new JkyResponse<>();
         }
-        return execute(JkyApiMethod.ORDER_QUERY, BIZ_CONTENT, param, new TypeReference<JkyResponse<OrderQueryRep>>() {
+        return execute(JkyApiMethod.QM_ORDER_QUERY, BIZ_CONTENT, param, new TypeReference<JkyResponse<OrderQueryRep>>() {
         });
     }
 
@@ -133,16 +137,11 @@ public class JkyTemplate {
         if (isDisabled(JkyApiMethod.LOGISTICS_UPDATE)) {
             return new JkyResponse<>();
         }
-        return execute(JkyApiMethod.LOGISTICS_UPDATE, BIZ_CONTENT, param, new TypeReference<JkyResponse<List<LogisticsUpdateRep>>>() {
+        List<LogisticsUpdateParam.LogisticsUpdateItem> bizdata = param.getBizdata();
+        return execute(JkyApiMethod.LOGISTICS_UPDATE, BIZ_CONTENT, bizdata, new TypeReference<JkyResponse<List<LogisticsUpdateRep>>>() {
         });
     }
 
-    /**
-     * 发货单完成并更新物流信息。
-     */
-    public JkyResponse<List<LogisticsUpdateRep>> sendOrderUpdateLogisticInfo(final LogisticsUpdateParam param) {
-        return updateLogisticsInfo(param);
-    }
 
     /**
      * 发货单 SN 通知。
@@ -191,59 +190,51 @@ public class JkyTemplate {
     }
 
     /**
-     * 验货、创建库存入库并更新物流信息。
+     * 销售单驳回审核。
+     */
+    public JkyResponse<Object> reject(final RejectParam param) {
+        if (isDisabled(JkyApiMethod.REJECT)) {
+            return new JkyResponse<>();
+        }
+        return execute(JkyApiMethod.REJECT, BIZ_CONTENT, param, new TypeReference<JkyResponse<Object>>() {
+        });
+    }
+
+    /**
+     * 直接发货。
+     */
+    public JkyResponse<Object> sendDirect(final SendDirectParam param) {
+        if (isDisabled(JkyApiMethod.SEND_DIRECT)) {
+            return new JkyResponse<>();
+        }
+        return execute(JkyApiMethod.SEND_DIRECT, BIZ_CONTENT, param, new TypeReference<JkyResponse<Object>>() {
+        });
+    }
+
+    /**
+     * 组合操作：验货、入库、更新物流、上报序列号。
      */
     public JkyStockInAndDeliveryRep inspectStockInAndDelivery(final JkyStockInAndDeliveryParam param) {
+        JkyStockInAndDeliveryRep rep = new JkyStockInAndDeliveryRep();
         if (isDisabled("inspectStockInAndDelivery")) {
-            return new JkyStockInAndDeliveryRep();
+            return rep;
         }
-        if (ObjectUtil.hasNull(param, param.getInspectParam(), param.getStockInParam(), param.getLogisticsUpdateParam())) {
-            throw new ServiceException("吉客云验货入库发货参数不能为空");
-        }
-        JkyResponse<InspectRep> inspectResponse = inspect(param.getInspectParam());
-        checkInspectResponse(inspectResponse);
-        JkyResponse<StockCreateAndStockInRep> stockInResponse = createAndStockIn(param.getStockInParam());
-        checkStockInResponse(stockInResponse);
-        JkyResponse<List<LogisticsUpdateRep>> logisticsUpdateResponse = sendOrderUpdateLogisticInfo(param.getLogisticsUpdateParam());
-        checkLogisticsUpdateResponse(logisticsUpdateResponse);
-        return new JkyStockInAndDeliveryRep()
-                .setInspectResponse(inspectResponse)
-                .setStockInResponse(stockInResponse)
-                .setLogisticsUpdateResponse(logisticsUpdateResponse);
-    }
-
-    private <T> void checkResponse(final JkyResponse<T> response, final String message) {
-        if (ObjectUtil.isNull(response) || !Integer.valueOf(200).equals(response.getCode()) || ObjectUtil.isNull(response.getResult())) {
-            throw new ServiceException(StrUtil.blankToDefault(response == null ? null : response.getMsg(), message));
-        }
-    }
-
-    private void checkInspectResponse(final JkyResponse<InspectRep> response) {
-        checkResponse(response, "吉客云验货失败");
-    }
-
-    private void checkStockInResponse(final JkyResponse<StockCreateAndStockInRep> response) {
-        checkResponse(response, "吉客云创建库存入库失败");
-        StockCreateAndStockInRep data = response.getResult().getData();
-        if (ObjectUtil.isNull(data) || StrUtil.isBlank(data.getInNo())) {
-            throw new ServiceException("吉客云创建库存入库返回结果为空");
-        }
-    }
-
-    private void checkLogisticsUpdateResponse(final JkyResponse<List<LogisticsUpdateRep>> response) {
-        checkResponse(response, "吉客云发货单物流更新失败");
-        List<LogisticsUpdateRep> data = response.getResult().getData();
-        if (ObjectUtil.isEmpty(data)) {
-            throw new ServiceException("吉客云发货单物流更新返回结果为空");
-        }
-        for (LogisticsUpdateRep item : data) {
-            if (ObjectUtil.isNull(item) || !Boolean.TRUE.equals(item.getIsSuccess())) {
-                throw new ServiceException(StrUtil.blankToDefault(item == null ? null : item.getError(), "吉客云发货单物流更新失败"));
+        try {
+            if (param.getStockInParam() != null) {
+                rep.setStockInResponse(createAndStockIn(param.getStockInParam()));
             }
+            if (param.getInspectParam() != null) {
+                rep.setInspectResponse(inspect(param.getInspectParam()));
+            }
+        } catch (Exception e) {
+            log.error("吉客云验货入库发货失败：{}", e.getMessage(), e);
+            throw new ServiceException("验货入库发货失败");
         }
+        return rep;
     }
 
-    private boolean isDisabled(final String method) {
+
+    protected boolean isDisabled(final String method) {
         if (Boolean.TRUE.equals(jkyProperties.getEnabled())) {
             return false;
         }
@@ -251,8 +242,8 @@ public class JkyTemplate {
         return true;
     }
 
-    private <T> JkyResponse<T> execute(final String method, final String bizParamName, final Object param,
-                                       final TypeReference<JkyResponse<T>> typeReference) {
+    protected <T> JkyResponse<T> execute(final String method, final String bizParamName, final Object param,
+                                         final TypeReference<JkyResponse<T>> typeReference) {
         checkProperties();
         String bizJson = JacksonUtil.toJson(param);
         Map<String, Object> requestParams = buildRequestParams(method, bizParamName, bizJson);
@@ -267,6 +258,8 @@ public class JkyTemplate {
         if (StrUtil.isBlank(body)) {
             throw new ServiceException("吉客云接口返回为空");
         }
+        // 兼容吉客云接口返回 data 字段为 JSON 字符串的情况
+        body = resolveStringifiedData(body);
         JkyResponse<T> response = JacksonUtil.parse(body, typeReference);
         if (ObjectUtil.isNull(response)) {
             throw new ServiceException("吉客云接口响应解析失败");
@@ -298,6 +291,37 @@ public class JkyTemplate {
                 .forEach(entry -> builder.append(entry.getKey()).append(entry.getValue()));
         builder.append(jkyProperties.getAppSecret());
         return SecureUtil.md5(builder.toString().toLowerCase());
+    }
+
+    /**
+     * 当接口返回的 data 字段为 JSON 字符串时，自动解析为 JSON 对象。
+     */
+    private static String resolveStringifiedData(final String body) {
+        try {
+            JsonNode root = JacksonUtil.readTree(body);
+            JsonNode resultNode = root.get("result");
+            if (resultNode instanceof ObjectNode) {
+                JsonNode dataNode = resultNode.get("data");
+                if (dataNode != null && dataNode.isTextual()) {
+                    String dataText = dataNode.asText();
+                    if (StrUtil.isNotBlank(dataText)) {
+                        try {
+                            JsonNode parsedData = JacksonUtil.readTree(dataText);
+                            ((ObjectNode) resultNode).set("data", parsedData);
+                            String modifiedBody = JacksonUtil.toJson(root);
+                            if (modifiedBody != null) {
+                                return modifiedBody;
+                            }
+                        } catch (Exception e) {
+                            log.warn("data 字段不是有效 JSON 字符串，保持原样: {}", dataText);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("响应 body 解析失败，保持原样: {}", body);
+        }
+        return body;
     }
 
     private void checkProperties() {

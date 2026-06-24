@@ -5,7 +5,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.DateTime;
 import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
-import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
@@ -18,19 +17,14 @@ import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IImeiSkuRelFacade;
 import com.ruoyi.order.facade.IOrderFacade;
-import com.ruoyi.order.facade.ITradeOrderFacade;
 import com.ruoyi.order.model.bo.*;
 import com.ruoyi.order.model.consts.HandingOrderConsts;
 import com.ruoyi.order.model.consts.ImeiConsts;
 import com.ruoyi.order.model.consts.OrderConsts;
-import com.ruoyi.order.model.consts.TradeOrderConsts;
 import com.ruoyi.order.model.param.ImeiParam;
 import com.ruoyi.order.model.param.ImeiSkuRelParam;
 import com.ruoyi.order.model.param.OrderParam;
 import com.ruoyi.order.model.query.*;
-import com.ruoyi.wangdian.param.stock.StockInInfoGoodsList;
-import com.ruoyi.wangdian.param.stock.StockInInfoParam;
-import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.order.ActivatedImeiForm;
 import com.ruoyi.web.form.order.ImeiForm;
 import com.ruoyi.web.form.order.ExcelForm;
@@ -68,19 +62,10 @@ public class ImeiBizService {
     IOrderFacade orderFacade;
 
     @Autowired
-    ITradeOrderFacade tradeOrderFacade;
-
-    @Autowired
     IRouteSubscribeFacade routeSubscribeFacade;
 
     @Autowired
-    WdtClient wdtClient;
-
-    @Autowired
     JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
-
-    @Autowired
-    RuoYiConfig ruoYiConfig;
 
 
     public List<ImeiVO> list(final String orderCode) {
@@ -189,8 +174,7 @@ public class ImeiBizService {
             if (Objects.nonNull(routeSubscribeBO)) {
                 orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()).setUpdateTime(DateUtil.date()),
                         new OrderQuery().setOrderCode(form.getOrderCode()));
-                // 创建入库单
-                createWDTStockIn(orderBO);
+
                 jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
             } else {
                 orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode()).setUpdateTime(DateUtil.date()),
@@ -232,37 +216,4 @@ public class ImeiBizService {
                 ImeiConsts.Activated.SUCCESS.getCode());
     }
 
-    /**
-     * 创建旺店通入库单
-     *
-     * @param orderBO 订单
-     */
-    private void createWDTStockIn(OrderBO orderBO) {
-        try {
-            wdtClient.stockInPush(builderStockIn(orderBO));
-        } catch (IOException e) {
-            log.error("订单号：{}，旺店通创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
-        }
-    }
-
-    /**
-     * 构建入库单
-     */
-    private StockInInfoParam builderStockIn(OrderBO orderBO) {
-        List<ImeiBO> list = imeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
-        List<String> imeiList;
-        if (Objects.equals("小米", orderBO.getBrand())) {
-            imeiList = list.stream().map(ImeiBO::getImel).collect(Collectors.toList());
-        } else {
-            imeiList = list.stream().map(ImeiBO::getSn).collect(Collectors.toList());
-        }
-
-        TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
-        String companyName = tradeOrderBO.getTradeNickName();
-
-        StockInInfoGoodsList stockInInfoGoodsList = StockInInfoGoodsList.builder().spec_no(orderBO.getSkuCode()).num(new BigDecimal(orderBO.getQuantity()))
-                .remark(String.format("代发订单号:%s,供应商名称:%s", orderBO.getOrderCode(), companyName)).stockin_price(tradeOrderBO.getTradePrice()).sn_list(imeiList).build();
-        return StockInInfoParam.builder().outer_no(orderBO.getOrderCode()).warehouse_no(ruoYiConfig.getWarehouseNo())
-                .is_check(1).goods_list(Collections.singletonList(stockInInfoGoodsList)).build();
-    }
 }

@@ -10,30 +10,17 @@ import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
-import com.ruoyi.order.facade.ITradeOrderFacade;
-import com.ruoyi.order.model.bo.ImeiBO;
 import com.ruoyi.order.model.bo.OrderBO;
-import com.ruoyi.order.model.bo.TradeOrderBO;
 import com.ruoyi.order.model.consts.ImeiConsts;
 import com.ruoyi.order.model.consts.OrderConsts;
-import com.ruoyi.order.model.consts.TradeOrderConsts;
 import com.ruoyi.order.model.param.ImeiParam;
 import com.ruoyi.order.model.param.OrderParam;
 import com.ruoyi.order.model.query.ImeiQuery;
 import com.ruoyi.order.model.query.OrderQuery;
-import com.ruoyi.order.model.query.TradeOrderQuery;
-import com.ruoyi.wangdian.param.stock.StockInInfoGoodsList;
-import com.ruoyi.wangdian.param.stock.StockInInfoParam;
-import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.vo.order.ExcelPlatformVO;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO> {
@@ -42,26 +29,17 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
 
     IOrderFacade orderFacade;
 
-    WdtClient wdtClient;
-
     JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
-
-    String warehouseNo;
-
-    ITradeOrderFacade tradeOrderFacade;
 
     IRouteSubscribeFacade routeSubscribeFacade;
 
 
-    public ExcelPlateformReadListener(IImeiFacade imeiFacade, IOrderFacade orderFacade, WdtClient client,
-                                      JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService, String warehouseNo,
-                                      ITradeOrderFacade tradeOrderFacade, IRouteSubscribeFacade routeSubscribeFacade) {
+    public ExcelPlateformReadListener(IImeiFacade imeiFacade, IOrderFacade orderFacade,
+                                      JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService,
+                                      IRouteSubscribeFacade routeSubscribeFacade) {
         this.imeiFacade = imeiFacade;
         this.orderFacade = orderFacade;
-        this.wdtClient = client;
         this.jkyStockInAndDeliveryBizService = jkyStockInAndDeliveryBizService;
-        this.warehouseNo = warehouseNo;
-        this.tradeOrderFacade = tradeOrderFacade;
         this.routeSubscribeFacade = routeSubscribeFacade;
     }
 
@@ -90,8 +68,7 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
             if (Objects.nonNull(routeSubscribeBO)) {
                 orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()),
                         new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
-                //创建入库单
-                createWDTStockIn(orderBO);
+
                 jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
             } else {
                 log.info("待填写物流单号：{}", orderBO.getOrderCode());
@@ -101,44 +78,6 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
         } else {
             orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES_ERROR.getCode()), new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
         }
-    }
-
-    /**
-     * 创建旺店通入库单
-     *
-     * @param orderBO 订单
-     */
-    private void createWDTStockIn(OrderBO orderBO) {
-        try {
-            wdtClient.stockInPush(builderStockIn(orderBO));
-        } catch (IOException e) {
-            log.error("订单号：{}，旺店通创建入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
-        }
-    }
-
-    /**
-     * 构建旺店通入库单参数
-     *
-     * @param orderBO 订单
-     * @return 旺店通入库单参数
-     */
-    private StockInInfoParam builderStockIn(OrderBO orderBO) {
-        List<ImeiBO> list = imeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
-        List<String> imeiList;
-        if (Objects.equals("小米", orderBO.getBrand())) {
-            imeiList = list.stream().map(ImeiBO::getImel).collect(Collectors.toList());
-        } else {
-            imeiList = list.stream().map(ImeiBO::getSn).collect(Collectors.toList());
-        }
-
-
-        TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
-        String companyName = tradeOrderBO.getTradeNickName();
-
-        StockInInfoGoodsList stockInInfoGoodsList = StockInInfoGoodsList.builder().spec_no(orderBO.getSkuCode()).num(new BigDecimal(orderBO.getQuantity()))
-                .remark(String.format("代发订单号:%s,供应商名称:%s", orderBO.getOrderCode(), companyName)).stockin_price(tradeOrderBO.getTradePrice()).sn_list(imeiList).build();
-        return StockInInfoParam.builder().outer_no(orderBO.getOrderCode()).warehouse_no(warehouseNo)
-                .is_check(1).goods_list(Collections.singletonList(stockInInfoGoodsList)).build();
     }
 
     @Override

@@ -8,7 +8,6 @@ import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.biz.order.ErrorOrderBizService;
 import com.ruoyi.biz.order.ImeiBizService;
 import com.ruoyi.biz.order.OrderBizService;
-import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.ServletUtils;
@@ -16,8 +15,6 @@ import com.ruoyi.common.validator.ValidatorUtils;
 import com.ruoyi.express.facade.impl.RouteSubscribeFacade;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
-import com.ruoyi.order.facade.ITradeOrderFacade;
-import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.order.ErrorOrder;
 import com.ruoyi.web.form.order.ExcelForm;
 import com.ruoyi.web.vo.order.ExcelPlatformVO;
@@ -42,25 +39,13 @@ public class ErrorOrderController extends BaseController {
     private ErrorOrderBizService errorOrderBizService;
 
     @Autowired
-    private ImeiBizService imeiBizService;
-
-    @Autowired
     IImeiFacade imeiFacade;
 
     @Autowired
     IOrderFacade orderFacade;
 
     @Autowired
-    ITradeOrderFacade tradeOrderFacade;
-
-    @Autowired
-    WdtClient wdtClient;
-
-    @Autowired
     JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
-
-    @Autowired
-    RuoYiConfig config;
 
     @Autowired
     RouteSubscribeFacade routeSubscribeFacade;
@@ -132,7 +117,7 @@ public class ErrorOrderController extends BaseController {
         if (!originalFilename.endsWith(".xlsx") && !originalFilename.endsWith(".xls")) {
             throw new ServerException("请上传excel文件");
         }
-        ExcelPlateformReadListener excelPlateformReadListener = new ExcelPlateformReadListener(imeiFacade, orderFacade, wdtClient, jkyStockInAndDeliveryBizService, config.getWarehouseNo(), tradeOrderFacade, routeSubscribeFacade);
+        ExcelPlateformReadListener excelPlateformReadListener = new ExcelPlateformReadListener(imeiFacade, orderFacade, jkyStockInAndDeliveryBizService, routeSubscribeFacade);
         EasyExcel.read(file.getInputStream(), ExcelPlatformVO.class, excelPlateformReadListener).sheet().doRead();
 
         return AjaxResult.success();

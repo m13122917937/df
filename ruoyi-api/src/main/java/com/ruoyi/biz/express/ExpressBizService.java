@@ -45,9 +45,6 @@ import com.ruoyi.order.model.query.ImeiQuery;
 import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
 import com.ruoyi.system.model.consts.DictDataConsts;
-import com.ruoyi.wangdian.param.stock.StockInInfoGoodsList;
-import com.ruoyi.wangdian.param.stock.StockInInfoParam;
-import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.ExpressOrderForm;
 import com.ruoyi.web.vo.order.OrderExpressVO;
 import lombok.extern.slf4j.Slf4j;
@@ -71,9 +68,6 @@ public class ExpressBizService {
 
     @Autowired
     ExpressClient expressClient;
-
-    @Autowired
-    WdtClient wdtClient;
 
     @Autowired
     JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
@@ -160,57 +154,14 @@ public class ExpressBizService {
                 , new TradeOrderQuery().setOrderId(expressOrderForm.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
         // 修改订单数据
         OrderParam orderParam = new OrderParam().setSendTime(DateUtil.date());
-//        FIX 注释 全部都需要验证平台二销 // 不需要验证平台二销售的
-//        if (!WebConstants.PLATFORM_VER.contains(orderBO.getPlatform())) {
-//            orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
-//            //  创建入库单
-//            wdtClient.stockInPush(builderStockIn(orderBO));
-//            createJkyStockIn(orderBO, expressOrderForm, orderBO.getQuantity());
-//        }
         // 如果已经验证了 二销 ， 现在填写了物流单号
         if (Objects.equals(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode(), orderBO.getSubStatus())) {
             orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
-            createWDTStockIn(orderBO);
             jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, expressOrderForm);
         }
         // 更新订单发货时间,和子状态
         orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));
 
-    }
-
-    /**
-     * 创建入库单
-     *
-     * @param orderBO
-     * @return
-     */
-    private void createWDTStockIn(OrderBO orderBO) {
-        //  创建入库单
-        try {
-            wdtClient.stockInPush(builderStockIn(orderBO));
-        } catch (IOException e) {
-            log.info("旺店通创建入库单失败：{}", e);
-        }
-    }
-
-
-    private StockInInfoParam builderStockIn(OrderBO orderBO) {
-        List<ImeiBO> list = iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
-        List<String> imeiList = null;
-        if (Objects.equals("小米", orderBO.getBrand())) {
-            imeiList = list.stream().map(ImeiBO::getImel).collect(Collectors.toList());
-        } else {
-            imeiList = list.stream().map(ImeiBO::getSn).collect(Collectors.toList());
-        }
-
-        TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
-        String companyName = tradeOrderBO.getTradeNickName();
-
-        StockInInfoGoodsList stockInInfoGoodsList = StockInInfoGoodsList.builder().spec_no(orderBO.getSkuCode()).num(new BigDecimal(orderBO.getQuantity()))
-                .remark(String.format("代发订单号:%s,供应商名称:%s", orderBO.getOrderCode(), companyName)).stockin_price(tradeOrderBO.getTradePrice()).sn_list(imeiList).build();
-
-        return StockInInfoParam.builder().outer_no(orderBO.getOrderCode()).warehouse_no(ruoYiConfig.getWarehouseNo())
-                .is_check(1).goods_list(Collections.singletonList(stockInInfoGoodsList)).build();
     }
 
     /**

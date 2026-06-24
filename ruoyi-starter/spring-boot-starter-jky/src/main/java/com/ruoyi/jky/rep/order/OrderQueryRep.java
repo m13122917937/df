@@ -25,6 +25,8 @@ public class OrderQueryRep {
 
         private String tradeTime;
 
+        private String customerTradeNo;
+
         private String payTime;
 
         private String consignTime;
@@ -54,6 +56,8 @@ public class OrderQueryRep {
         private String mainPostid;
 
         private String sourceTradeNo;
+
+        private String onlineTradeNo;
 
         private String pickUpCode;
 

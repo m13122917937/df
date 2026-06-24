@@ -11,11 +11,16 @@ import com.ruoyi.bill.model.query.PayerQuery;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.JacksonUtil;
+import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
+import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.jky.JkyTemplate;
 import com.ruoyi.jky.param.JkyStockInAndDeliveryParam;
-import com.ruoyi.jky.param.inspect.InspectParam;
+import com.ruoyi.jky.param.delivery.SendDirectParam;
 import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
+import com.ruoyi.web.form.jky.JkyCallbackForm;
+import com.ruoyi.jky.param.inspect.InspectParam;
+import com.ruoyi.jky.param.sn.SnReportParam;
 import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.ITradeOrderFacade;
@@ -39,6 +44,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -67,18 +73,78 @@ public class JkyStockInAndDeliveryBizService {
     @Autowired
     private IPayerFacade payerFacade;
 
+    @Autowired
+    private IRouteSubscribeFacade routeSubscribeFacade;
+
     /**
-     * 通过 RouteSubscribeBO 创建吉客云验货、入库并回传物流信息。
+     * 创建吉客云验货、入库、更新物流、上报序列号并直接发货。
      *
      * @param orderBO          订单
-     * @param routeSubscribeBO 物流订阅信息
+     * @param routeSubscribeBO 物流订阅信息（为 null 时跳过物流更新）
      */
     public void createJkyStockIn(OrderBO orderBO, RouteSubscribeBO routeSubscribeBO) {
+        List<String> snList = queryJkySnList(orderBO);
+        TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery()
+                .setOrderId(orderBO.getOrderCode())
+                .setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
+        Assert.notNull(tradeOrderBO, "吉客云入库成交订单不存在");
+
+
+        // 1. 创建库存并入库
+        StockCreateAndStockInParam stockInParam = builderJkyStockIn(orderBO, tradeOrderBO, orderBO.getQuantity(), snList);
+        jkyTemplate.createAndStockIn(stockInParam);
+        // 2. 验货
+        InspectParam inspectParam = builderJkyInspect(orderBO, snList);
+        jkyTemplate.inspect(inspectParam);
+
+        // 3. 更新物流信息
+        if (Objects.nonNull(routeSubscribeBO)) {
+            LogisticsUpdateParam logisticsUpdateParam = builderJkyLogisticsUpdate(orderBO, routeSubscribeBO);
+            jkyTemplate.updateLogisticsInfo(logisticsUpdateParam);
+        } else {
+            log.info("订单号：{}，未查询到物流订阅信息，跳过吉客云更新物流", orderBO.getOrderCode());
+        }
+    }
+
+    /**
+     * 三方物流回调处理：解析 bizdata JSON，更新吉客云物流信息。
+     */
+    public void handleDeliveryCallback(final String bizdata) {
+        if (StrUtil.isBlank(bizdata)) {
+            log.warn("三方物流回调 bizdata 为空");
+            return;
+        }
+        JkyCallbackForm form = parseBizdata(bizdata);
+        if (form == null) {
+            return;
+        }
+        LogisticsUpdateParam.LogisticsUpdateItem item = new LogisticsUpdateParam.LogisticsUpdateItem();
+        item.setOrderNo(StrUtil.blankToDefault(form.getDeliveryOrderNo(), form.getOwnerOrderNo()));
+        item.setLogisticNo(form.getLogisticNo());
+        item.setLogisticName(resolveJkyLogisticsName(form.getLogisticName()));
+        item.setLogisticCode(resolveJkyLogisticsCode(form.getLogisticCode()));
+
+        LogisticsUpdateParam param = new LogisticsUpdateParam();
+        param.setBizdata(Collections.singletonList(item));
+
+        jkyTemplate.updateLogisticsInfo(param);
+    }
+
+    private static JkyCallbackForm parseBizdata(final String bizdata) {
         try {
-            JkyStockInAndDeliveryParam param = builderJkyStockInAndDelivery(orderBO, builderJkyLogisticsUpdate(orderBO, routeSubscribeBO));
-            jkyTemplate.inspectStockInAndDelivery(param);
+            Map<String, Object> map = JacksonUtil.parse(bizdata, Map.class);
+            JkyCallbackForm form = new JkyCallbackForm();
+            form.setDeliveryOrderNo(StrUtil.toStringOrNull(map.get("deliveryorderno")));
+            form.setOwnerOrderNo(StrUtil.toStringOrNull(map.get("ownerorderno")));
+            form.setWarehouseCode(StrUtil.toStringOrNull(map.get("warehousecode")));
+            form.setOwnerCode(StrUtil.toStringOrNull(map.get("ownercode")));
+            form.setLogisticNo(StrUtil.toStringOrNull(map.get("logisticNo")));
+            form.setLogisticName(StrUtil.toStringOrNull(map.get("logisticName")));
+            form.setLogisticCode(StrUtil.toStringOrNull(map.get("logisticCode")));
+            return form;
         } catch (Exception e) {
-            log.error("订单号：{}，吉客云入库发货失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
+            log.error("bizdata 解析失败：{}", bizdata, e);
+            return null;
         }
     }
 
@@ -94,12 +160,10 @@ public class JkyStockInAndDeliveryBizService {
 
     private InspectParam builderJkyInspect(OrderBO orderBO, List<String> snList) {
         InspectParam.InspectDetail detail = new InspectParam.InspectDetail();
-        detail.setGoodsNo(orderBO.getSkuCode());
-        detail.setSkuName(StrUtil.blankToDefault(orderBO.getProductName(), orderBO.getSkuName()));
-        detail.setSnList(JacksonUtil.toJson(snList));
+        detail.setSkuBarcode(orderBO.getSkuCode());
+        detail.setSnList(snList.get(0));
         InspectParam param = new InspectParam();
         param.setNumber(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
-        param.setChecker("system");
         param.setInspectDetailList(Collections.singletonList(detail));
         param.setIsCheckOrder(0);
         param.setIsRefundDetect(0);
@@ -131,6 +195,32 @@ public class JkyStockInAndDeliveryBizService {
                 .setLogisticName(tradeOrderBO.getTrackingCompany()).setLogisticNo(tradeOrderBO.getTrackingNumber()).setStockInDetailViews(Collections.singletonList(detail));
     }
 
+    private SnReportParam builderSnReport(OrderBO orderBO, List<String> snList) {
+        ProductSkuBO productSkuBO = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(orderBO.getSkuCode()));
+        Assert.notNull(productSkuBO, "吉客云序列号上报商品不存在");
+        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(orderBO.getPayerId()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
+        Assert.notNull(payerBO, "吉客云序列号上报付款主体不存在");
+        Assert.notBlank(payerBO.getOutCode(), "吉客云序列号上报付款主体吉客云编号不能为空");
+
+        SnReportParam.SnReportGoods goods = new SnReportParam.SnReportGoods();
+        goods.setOutSkuCode(productSkuBO.getSkuCode());
+        goods.setName(StrUtil.blankToDefault(orderBO.getProductName(), orderBO.getSkuName()));
+        goods.setBarcode(productSkuBO.getSkuCode());
+        goods.setSnlist(snList);
+
+        SnReportParam param = new SnReportParam();
+        param.setDeliveryorderno(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
+        param.setOwnerorderno(orderBO.getOrderCode());
+        param.setWarehousecode(ruoYiConfig.getWarehouseNo());
+        param.setOwnercode(payerBO.getOutCode());
+        param.setOutbizcode(orderBO.getOrderCode());
+        param.setOperatorcode("system");
+        param.setOperatorname("system");
+        param.setOperatetime(DateUtil.now());
+        param.setGoods(Collections.singletonList(goods));
+        return param;
+    }
+
     private List<String> queryJkySnList(OrderBO orderBO) {
         List<ImeiBO> list = iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
         return list.stream().map(item -> Objects.equals("小米", orderBO.getBrand()) ? item.getImel() : item.getSn()).collect(Collectors.toList());
@@ -140,10 +230,34 @@ public class JkyStockInAndDeliveryBizService {
         LogisticsUpdateParam.LogisticsUpdateItem item = new LogisticsUpdateParam.LogisticsUpdateItem();
         item.setOrderNo(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
         item.setLogisticNo(routeSubscribeBO.getLogisticsNo());
-        item.setLogisticName(DictUtils.getDictLabel(DictDataConsts.P_EXPRESS_COMPANY, routeSubscribeBO.getLogisticsCode()));
-        item.setLogisticCode(routeSubscribeBO.getLogisticsCode());
+        item.setLogisticName(resolveJkyLogisticsName(DictUtils.getDictLabel(DictDataConsts.P_EXPRESS_COMPANY, routeSubscribeBO.getLogisticsCode())));
+        item.setLogisticCode(resolveJkyLogisticsCode(routeSubscribeBO.getLogisticsCode()));
         LogisticsUpdateParam param = new LogisticsUpdateParam();
         param.setBizdata(Collections.singletonList(item));
         return param;
+    }
+
+    private static String resolveJkyLogisticsCode(final String logisticsCode) {
+        if (StrUtil.isBlank(logisticsCode)) {
+            return null;
+        }
+        switch (logisticsCode) {
+            case "shunfeng":
+                return "0001";
+            default:
+                return logisticsCode;
+        }
+    }
+
+    private static String resolveJkyLogisticsName(final String logisticsName) {
+        if (StrUtil.isBlank(logisticsName)) {
+            return null;
+        }
+        switch (logisticsName) {
+            case "顺丰快递":
+                return "顺丰速运";
+            default:
+                return logisticsName;
+        }
     }
 }

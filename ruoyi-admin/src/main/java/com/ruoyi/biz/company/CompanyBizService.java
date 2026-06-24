@@ -19,8 +19,6 @@ import com.ruoyi.user.model.bo.CompanyBO;
 import com.ruoyi.user.model.consts.CompanyEnum;
 import com.ruoyi.user.model.param.CompanyParam;
 import com.ruoyi.user.model.query.CompanyQuery;
-import com.ruoyi.wangdian.param.base.ProviderParams;
-import com.ruoyi.wangdian.utils.WdtClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,9 +29,6 @@ import java.util.Objects;
 @Slf4j
 public class CompanyBizService {
 
-
-    @Autowired
-    private WdtClient wdtClient;
 
     @Autowired
     private JkyTemplate jkyTemplate;
@@ -119,7 +114,7 @@ public class CompanyBizService {
     }
 
     /**
-     * 创建旺店通供应商
+     * 创建供应商。
      *
      * @param companyBO 企业信息
      */
@@ -131,12 +126,6 @@ public class CompanyBizService {
         companyFacade.update(new CompanyParam().setOutNo(providerNo), new CompanyQuery().setId(companyBO.getId()));
         companyBO.setOutNo(providerNo);
         String providerName = companyBO.getCompanyName() + COMPANY_NAME_AFTER;
-        ProviderParams params = ProviderParams.builder().provider_no(providerNo).provider_name(providerName).build();
-        try {
-            wdtClient.createProvider(params);
-        } catch (Exception e) {
-            log.warn("创建旺店通供应商失败，companyId:{}，providerNo:{}，providerName:{}，message:{}", companyBO.getId(), params.getProvider_no(), providerName, e.getMessage());
-        }
         createJkyVendor(companyBO, providerNo, providerName);
     }
 

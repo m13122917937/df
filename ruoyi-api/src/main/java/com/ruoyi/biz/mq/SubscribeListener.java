@@ -31,7 +31,6 @@ import com.ruoyi.order.model.param.TradeOrderParam;
 import com.ruoyi.order.model.query.HangingOrderQuery;
 import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
-import com.ruoyi.wangdian.utils.WdtClient;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

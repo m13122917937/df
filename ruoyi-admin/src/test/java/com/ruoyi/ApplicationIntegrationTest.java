@@ -14,13 +14,6 @@ import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.job.*;
-import com.ruoyi.product.facade.IProductSkuFacade;
-import com.ruoyi.wangdian.param.Pager;
-import com.ruoyi.wangdian.param.base.ProviderParams;
-import com.ruoyi.wangdian.param.order.TradeQueryParams;
-import com.ruoyi.wangdian.param.purchase.create.PurchaseDetailParam;
-import com.ruoyi.wangdian.param.purchase.create.PurchaseOrderParam;
-import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.order.AddressCompletedParams;
 import com.ruoyi.web.form.order.OrderAddForm;
 import org.junit.jupiter.api.Test;
@@ -66,9 +59,6 @@ public class ApplicationIntegrationTest {
     BillToDayJob billToDayJob;
 
     @Autowired
-    WdtClient wdtClient;
-
-    @Autowired
     ExpressErrorJob expressErrorJob;
 
     @Autowired
@@ -77,62 +67,6 @@ public class ApplicationIntegrationTest {
 
     @Autowired
     SmartParse smartParse;
-
-    @Autowired
-    SyncGoodsJob syncGoodsJob;
-
-    @Test
-    public void x1111xxxxx() throws IOException {
-        syncGoodsJob.execute();
-
-    }
-
-    @Test
-    public void x1111xx() {
-
-        for (int i = 0; i < 1000; i++) {
-            TradeQueryParams tradeQueryParams = new TradeQueryParams();
-            DateTime endTime = DateUtil.offsetHour(DateUtil.date(), -i);
-            ;
-            DateTime startTime = DateUtil.offsetHour(endTime, -1);
-            tradeQueryParams.setStatus("110");
-            tradeQueryParams.setStartTime(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
-            tradeQueryParams.setEndTime(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
-            Pager pager = new Pager();
-            pager.setPageNo(0);
-            pager.setPageSize(200);
-            pager.setCalcTotal(0);
-
-            wdtClient.orderList(tradeQueryParams, pager);
-
-        }
-
-
-    }
-
-
-    @Test
-    public void testExpress() throws IOException, InterruptedException {
-//        expressErrorJob.execute();
-        // orderDownJob.execute();
-        // 创建采购单
-        PurchaseOrderParam build = PurchaseOrderParam.builder().purchase_no("1").expect_warehouse_no("dfc").purchaserer_name("李权").receive_warehouse_nos("dfc").provider_no("FY1")
-                .purchase_details(List.of(PurchaseDetailParam.builder().spec_no("X35V03-375QSD-160512").num(1).build())).build();
-//        wdtClient.purchaseOrderCreate(build);
-        // 创建入库单
-//        StockinOrderHeader.builder().logistics_code()
-//        PurchaseOrderInParam orderInParam = PurchaseOrderInParam.builder().stockin_order().build();
-//        wdtClient.purchaseOrderIn(orderInParam);
-    }
-
-    @Test
-    public void testOrder() throws IOException {
-        String uncollectedKey = DictUtils.getDictValue(WEB_HOOK_FOLLOW_ORDER.getValue(), WEB_HOOK_FOLLOW_ORDER.getLabel());
-        System.out.println(uncollectedKey);
-        ProviderParams params = ProviderParams.builder().provider_name("test001").provider_no("测试").build();
-        wdtClient.createProvider(params);
-
-    }
 
     @Test
     public void xxx() {

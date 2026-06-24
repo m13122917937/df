@@ -87,14 +87,6 @@ wechat:
     privateKeyPath: "classpath:cert/apiclient_key.pem"
     privateCertPath: "classpath:cert/apiclient_cert.pem"
 fy:
-  wd:
-    sid: apidevnew2
-    appkey: lltxsb3-test
-    appsecret: d92dbe54e
-    baseUrl: https://sandbox.wangdian.cn/openapi2/
-    connectTimeout: 3000
-    readTimeout: 15000
-    warehouseNo: 005
   jky:
     enabled: true
     appKey: 15021080

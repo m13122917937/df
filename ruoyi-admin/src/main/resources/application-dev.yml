@@ -58,9 +58,9 @@ spring:
       database: 0
       # 密码
       password: rN8_iR44
-mybatis-plus:
-    configuration:
-        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#mybatis-plus:
+#    configuration:
+#        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 wechat:
   mp:
     useRedis: true
@@ -70,14 +70,6 @@ wechat:
         token: oiXr3GV0RYUl2FYVsI4U8k2KhI
         aesKey: oiXr3GV0RYUl2FYVsI4U8k2KhISQWJK40a4YQ6huCc6
 fy:
-  wd:
-    sid: lltxsb3
-    appkey: lltxsb3-yy
-    appsecret: 9290c78ee0b9a66e2f70bad499868281:1294184460056224683b0f894ceea66f
-    salt: 1294184460056224683b0f894ceea66f
-    baseUrl: http://wdt.wangdian.cn/openapi
-    connectTimeout: 3000
-    readTimeout: 15000
   oss:
     aliyunDomain: https://static.wujievip.cn
     aliyunPrefix: dev

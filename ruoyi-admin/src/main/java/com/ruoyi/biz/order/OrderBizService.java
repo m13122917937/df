@@ -325,7 +325,7 @@ public class OrderBizService {
             // 还没挂单，直接撤销，
             orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(OrderConsts.OrderSubStatus.REVOKE_NEW.getCode())
                     .setRevokeType(revokeCode).setUpdateTime(DateUtil.date()), new OrderQuery().setOrderCode(orderCode));
-            rejectJkyIfNeeded(orderBO, revokeCode);
+            rejectJkyIfNeeded(orderBO);
             return;
         }
 
@@ -337,7 +337,7 @@ public class OrderBizService {
             // 设置订单失效
             orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(OrderConsts.OrderSubStatus.REVOKE_TRADING.getCode())
                     .setUpdateTime(DateUtil.date()).setRevokeType(revokeCode), new OrderQuery().setOrderCode(orderCode));
-            rejectJkyIfNeeded(orderBO, revokeCode);
+            rejectJkyIfNeeded(orderBO);
             return;
         }
         // 追单2 ， 已经抢单，还没成交
@@ -358,7 +358,7 @@ public class OrderBizService {
                         .setOrderNo(hangingOrderBO.getOrderId()).setType(CompanyCapitalConsts.LogTypes.ORDER.getCode()).setTradeId(tradeOrderBO.getId()));
             }
 
-            rejectJkyIfNeeded(orderBO, revokeCode);
+            rejectJkyIfNeeded(orderBO);
             return;
         }
         // 追单3 ， 已经成交
@@ -416,15 +416,12 @@ public class OrderBizService {
     /**
      * 代发订单吉客云驳回
      */
-    private void rejectJkyIfNeeded(OrderBO orderBO, Integer revokeCode) {
+    private void rejectJkyIfNeeded(OrderBO orderBO ) {
         if (Objects.nonNull(orderBO)
                 && Objects.equals(orderBO.getOrderType(), OrderConsts.OrderType.O2O.getCode())
                 && StrUtil.isNotBlank(orderBO.getErpOrderId())) {
-            OrderConsts.RevokeType revokeType = OrderConsts.RevokeType.getByCode(revokeCode);
             RejectParam rejectParam = new RejectParam();
             rejectParam.setTradeNos(JacksonUtil.toJson(Collections.singleton(orderBO.getErpOrderId())));
-            rejectParam.setReason(Objects.nonNull(revokeType) ? revokeType.getDesc() : "订单撤销");
-            rejectParam.setIsFreezeOrder("0");
             jkyTemplate.reject(rejectParam);
         }
     }

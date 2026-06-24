@@ -1,6 +1,6 @@
 package com.ruoyi.jky;
 
-import com.ruoyi.jky.properties.QmJkyProperties;
+import com.ruoyi.jky.properties.JkyProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -10,15 +10,14 @@ import org.springframework.context.annotation.Configuration;
 public class JkyConfig {
 
     @Autowired
-    QmJkyProperties qmProperties;
+    JkyProperties jkyProperties;
 
     /**
      * 创建 QM JKY 模板实例。
      */
     @Bean
-    @ConditionalOnMissingBean
-    public QmJKYTemplate qmJKYTemplate() {
-        return new QmJKYTemplate(qmProperties);
+    public JkyTemplate qmJKYTemplate() {
+        return new JkyTemplate(jkyProperties);
     }
 
 }

@@ -52,9 +52,6 @@ import com.ruoyi.user.model.bo.CompanyBO;
 import com.ruoyi.user.model.bo.MemberBO;
 import com.ruoyi.user.model.query.CompanyQuery;
 import com.ruoyi.user.model.query.MemberQuery;
-import com.ruoyi.wangdian.param.stock.StockInInfoGoodsList;
-import com.ruoyi.wangdian.param.stock.StockInInfoParam;
-import com.ruoyi.wangdian.utils.WdtClient;
 import com.ruoyi.web.form.order.BrandForm;
 import com.ruoyi.web.form.order.PickingOrderForm;
 import com.ruoyi.web.form.order.TrackingForm;
@@ -102,9 +99,6 @@ public class WarehousingOrderBizService {
 
     @Autowired
     IImeiFacade imeiFacade;
-
-    @Autowired
-    WdtClient wdtClient;
 
     @Autowired
     JkyTemplate jkyTemplate;
@@ -298,7 +292,6 @@ public class WarehousingOrderBizService {
         Integer quantity = pickingOrderForm.getSnList().size() + tradeOrderBO.getQuantity();
         Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
         savePickingSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO);
-        createStockIn(orderBO, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList().size(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
         createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList().size(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
         updatePickingQuantity(pickingOrderForm.getOrderCode(), quantity);
         return quantity;
@@ -310,7 +303,7 @@ public class WarehousingOrderBizService {
     private Integer pickingWithoutSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser) throws IOException {
         Integer quantity = pickingOrderForm.getQuantity() + tradeOrderBO.getQuantity();
         Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
-        createStockIn(orderBO, pickingOrderForm.getWarehouseCode(), quantity, pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        // TODO: 旺店通已移除，原 createStockIn 调用已删除
         createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getQuantity(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
         updatePickingQuantity(pickingOrderForm.getOrderCode(), quantity);
         return quantity;
@@ -324,18 +317,6 @@ public class WarehousingOrderBizService {
         List<ImeiParam> imeiParams = pickingOrderForm.getSnList().stream().map(sn -> new ImeiParam().setCreateTime(createTime).setProductName(orderBO.getProductName())
                 .setSkuName(orderBO.getSkuName()).setSkuCode(orderBO.getSkuCode()).setHangingOrderId(hangingOrderBO.getId()).setTradeNo(tradeOrderBO.getId()).setImel(sn)).collect(Collectors.toList());
         imeiFacade.saveBatch(imeiParams);
-    }
-
-    /**
-     * 创建旺店通入库单。
-     */
-    private void createStockIn(OrderBO orderBO, String warehouseCode, Integer quantity, List<String> snList, String remark) {
-        try {
-            StockInInfoParam stockInInfoParam = builderStockIn(orderBO, quantity, warehouseCode, snList, remark);
-            wdtClient.stockInPush(stockInInfoParam);
-        } catch (Exception e) {
-            log.error("订单号：{}，创建旺店通入库单失败：{}", orderBO.getOrderCode(), e.getMessage(), e);
-        }
     }
 
     /**
@@ -420,16 +401,7 @@ public class WarehousingOrderBizService {
         return StrUtil.blankToDefault(sysUser.getNickName(), sysUser.getUserName());
     }
 
-    private StockInInfoParam builderStockIn(OrderBO orderBO, Integer quantity, String warehouseNo, List<String> snList, String remark) {
-        TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
-        String companyName = tradeOrderBO.getTradeNickName();
-
-        StockInInfoGoodsList stockInInfoGoodsList = StockInInfoGoodsList.builder().spec_no(orderBO.getSkuCode()).num(new BigDecimal(quantity))
-                .remark(StrUtil.isEmpty(remark) ? "" : remark + "," + String.format("入仓订单号:%s,供应商名称:%s", orderBO.getOrderCode(), companyName)).stockin_price(tradeOrderBO.getTradePrice()).sn_list(snList).build();
-        return StockInInfoParam.builder().outer_no(orderBO.getOrderCode()).warehouse_no(warehouseNo)
-                .is_check(1).goods_list(Collections.singletonList(stockInInfoGoodsList)).build();
-    }
-
+    // TODO: 旺店通已移除，原 createStockIn / builderStockIn 方法已删除
 }
 
 

@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @Component("jkyOrderSyncJob")
 public class JkyOrderSyncJob {
 
-    private static final String ORDER_FIELDS = "tradeNo,orderNo,shopName,companyName,warehouseName,logisticName,mainPostid,goodsDetail.goodsNo,flagNames,columnExt,sourceAfterNo,goodsDetail.outerId,pickUpCode,expense.expenseFee,expense.expenseItemName,billDate,goodsPlatDiscountFee,goodsDetail.shareOrderDiscountFee,goodsDetail.shareOrderPlatDiscountFee,customizeGoodsColumn9,goodsDetail.goodsId,goodsDetail.sellCount,goodsDetail.needProcessCount,goodsDetail.baseUnitSellCount,goodsDetail.assessmentCost,goodsDetail.compassSourceContentTypem,sourceTradeNo,shopId,warehouseId,scrollId,goodsDetail.auxiliaryInventoryCount,goodsDetail.auxiliaryInventoryUnit";
+    private static final String ORDER_FIELDS = "tradeNo,orderNo,onlineTradeNo,sourceTradeNo,lastShipTime,platFlags,tradeTime,sellerMemo,shopName,companyName,warehouseName,logisticName,mainPostid,goodsDetail.goodsNo,flagNames,columnExt,sourceAfterNo,goodsDetail.outerId,pickUpCode,expense.expenseFee,expense.expenseItemName,billDate,goodsPlatDiscountFee,goodsDetail.shareOrderDiscountFee,goodsDetail.shareOrderPlatDiscountFee,customizeGoodsColumn9,goodsDetail.goodsId,goodsDetail.sellCount,goodsDetail.needProcessCount,goodsDetail.baseUnitSellCount,goodsDetail.assessmentCost,goodsDetail.compassSourceContentTypem,sourceTradeNo,shopId,warehouseId,scrollId,goodsDetail.auxiliaryInventoryCount,goodsDetail.auxiliaryInventoryUnit";
 
     @Autowired
     private JkyTemplate jkyTemplate;
@@ -165,8 +165,8 @@ public class JkyOrderSyncJob {
             return null;
         }
         OrderAddForm form = new OrderAddForm();
-        form.setErpOrderId(tradeNo);
-        form.setOriginalOrderId(firstNotBlank(trade.getSourceTradeNo(), trade.getOrderNo(), tradeNo));
+        form.setErpOrderId(trade.getOrderNo());
+        form.setOriginalOrderId(firstNotBlank(trade.getOnlineTradeNo(), trade.getOrderNo(), tradeNo));
         form.setShopName(trade.getShopName());
         form.setSkuCode(skuCode);
         form.setQuantity(quantity);
