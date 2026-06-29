@@ -471,7 +471,7 @@ public class WarehousingOrderBizService {
         }
         if (StrUtil.isBlank(row.getPayerName())) {
             errors.add("付款主体名称不能为空");
-        } else if (payerFacade.getOne(new PayerQuery().setPayName(row.getPayerName()).setActived(PayerConsts.Activated.ACTIVATED.getCode())) == null) {
+        } else if (CollectionUtil.isEmpty(payerFacade.list(new PayerQuery().setPayName(row.getPayerName()).setActived(PayerConsts.Activated.ACTIVATED.getCode()), null))) {
             errors.add("付款主体名称不存在或已弃用");
         }
         if (row.getQuantity() == null || row.getQuantity() <= 0) {
@@ -522,7 +522,8 @@ public class WarehousingOrderBizService {
      */
     private WarehousingSaveParam convertToSaveParam(WarehousingImportVO row) {
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setCompanyName(row.getCompanyName()));
-        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setPayName(row.getPayerName()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
+        List<PayerBO> payerList = payerFacade.list(new PayerQuery().setPayName(row.getPayerName()).setActived(PayerConsts.Activated.ACTIVATED.getCode()), null);
+        PayerBO payerBO = payerList.get(0);
         WarehousingSaveParam param = new WarehousingSaveParam();
         param.setSkuCode(row.getSkuCode());
         param.setQuantity(row.getQuantity());
