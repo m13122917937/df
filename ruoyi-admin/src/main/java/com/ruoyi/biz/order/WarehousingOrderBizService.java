@@ -461,8 +461,13 @@ public class WarehousingOrderBizService {
 
         if (StrUtil.isBlank(row.getSkuCode())) {
             errors.add("SKU编码不能为空");
-        } else if (productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(row.getSkuCode())) == null) {
-            errors.add("SKU编码不存在");
+        } else {
+            ProductSkuBO sku = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(row.getSkuCode()));
+            if (sku == null) {
+                errors.add("SKU编码不存在");
+            } else {
+                r.setProductName(sku.getProductName()).setSpecName(sku.getSpecName());
+            }
         }
         if (StrUtil.isBlank(row.getCompanyName())) {
             errors.add("供应商名称不能为空");
