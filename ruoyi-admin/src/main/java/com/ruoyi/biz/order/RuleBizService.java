@@ -7,6 +7,7 @@ import com.ruoyi.biz.sys.IDictDistrictBizService;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
+import com.ruoyi.consts.AdminRedisKey;
 import com.ruoyi.mapper.order.HangingOrderConvert;
 import com.ruoyi.mapper.rule.RuleConvert;
 import com.ruoyi.order.facade.IHangingOrderFacade;
@@ -31,6 +32,8 @@ import com.ruoyi.system.model.bo.DictDistrictBO;
 import com.ruoyi.web.form.rule.RuleQueryForm;
 import com.ruoyi.web.vo.order.RuleVO;
 import lombok.extern.slf4j.Slf4j;
+import com.ruoyi.common.core.redis.RedisCache;
+import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -40,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -60,6 +64,9 @@ public class RuleBizService {
 
     @Autowired
     private IDictDistrictBizService dictDistrictBizService;
+
+    @Autowired
+    private RedisCache redisCache;
 
 
     public PageBO<RuleVO> listPage(RuleQueryForm ruleQueryForm, PageParamV2 pageParamV2) {
@@ -109,28 +116,48 @@ public class RuleBizService {
             return;
         }
         for (OrderBO orderBO : list) {
-            long count = hangingOrderFacade.count(new HangingOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
-            if (count > 0) {
+            String lockKey = AdminRedisKey.Order.LOCK_PREFIX + orderBO.getOrderCode();
+            RLock lock = redisCache.getLock(lockKey);
+            boolean locked;
+            try {
+                locked = lock.tryLock(0, 30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                log.error("订单 {} 获取锁被中断", orderBO.getOrderCode(), e);
+                Thread.currentThread().interrupt();
                 continue;
             }
-            log.info("执行规则：{}", ruleBO);
-            //保存挂单
-            HangingOrderParam hangingOrderParam = HangingOrderConvert.INSTANCE.ruleToHangingParam(ruleBO).setId(null).setPriceHignStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode())
-                    .setPriceHighestStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode()).setPriceLowestStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode()).setRuleId(ruleBO.getId())
-                    .setPriceLowStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode()).setStatus(HandingOrderConsts.Status.NORMAL.getCode()).setOrderId(orderBO.getOrderCode())
-                    .setAccountingPeriod(ruleBO.getAccountingPeriod()).setDeliveryTime(ruleBO.getDeliveryTime())
-                    .setDeliveryDeadline(DateUtil.offsetDay(DateUtil.endOfDay(DateTime.now()), ruleBO.getDeliveryTime()));
-            log.info("保存挂单：{}", hangingOrderParam);
-            hangingOrderFacade.save(hangingOrderParam);
-
-            // 修改订单状态
-            OrderParam orderParam = new OrderParam();
-            if (Objects.equals(orderBO.getAddressStatus(), OrderConsts.AddressStatus.NOT_SUPPLEMENTED.getCode())) {
-                orderParam.setStatus(OrderConsts.OrderStatus.WAIT.getCode());
-            } else {
-                orderParam.setStatus(OrderConsts.OrderStatus.TRADING.getCode());
+            if (!locked) {
+                log.info("订单 {} 正在被其他线程报价，跳过", orderBO.getOrderCode());
+                continue;
             }
-            orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));
+            try {
+                long count = hangingOrderFacade.count(new HangingOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
+                if (count > 0) {
+                    continue;
+                }
+                log.info("执行规则：{}", ruleBO);
+                //保存挂单
+                HangingOrderParam hangingOrderParam = HangingOrderConvert.INSTANCE.ruleToHangingParam(ruleBO).setId(null).setPriceHignStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode())
+                        .setPriceHighestStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode()).setPriceLowestStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode()).setRuleId(ruleBO.getId())
+                        .setPriceLowStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode()).setStatus(HandingOrderConsts.Status.NORMAL.getCode()).setOrderId(orderBO.getOrderCode())
+                        .setAccountingPeriod(ruleBO.getAccountingPeriod()).setDeliveryTime(ruleBO.getDeliveryTime())
+                        .setDeliveryDeadline(DateUtil.offsetDay(DateUtil.endOfDay(DateTime.now()), ruleBO.getDeliveryTime()));
+                log.info("保存挂单：{}", hangingOrderParam);
+                hangingOrderFacade.save(hangingOrderParam);
+
+                // 修改订单状态
+                OrderParam orderParam = new OrderParam();
+                if (Objects.equals(orderBO.getAddressStatus(), OrderConsts.AddressStatus.NOT_SUPPLEMENTED.getCode())) {
+                    orderParam.setStatus(OrderConsts.OrderStatus.WAIT.getCode());
+                } else {
+                    orderParam.setStatus(OrderConsts.OrderStatus.TRADING.getCode());
+                }
+                orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));
+            } finally {
+                if (lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                }
+            }
         }
     }
 

@@ -1,7 +1,6 @@
 package com.ruoyi.job;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.consts.AdminRedisKey;
@@ -9,6 +8,7 @@ import com.ruoyi.jky.JkyTemplate;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.vendor.VendorListParam;
 import com.ruoyi.jky.rep.vendor.VendorListRep;
+import com.ruoyi.jky.util.JkyResponseUtil;
 import com.ruoyi.user.domain.Company;
 import com.ruoyi.user.service.CompanyService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,29 +38,24 @@ public class JkyVendorSyncJob {
      * 同步吉客云供应商编码到企业外部编码。
      */
     public void execute() {
-        Boolean locked = redisCache.setIfAbsent(AdminRedisKey.Jky.VENDOR_SYNC_LOCK, DateUtil.now(), 30L, TimeUnit.MINUTES);
-        if (!Boolean.TRUE.equals(locked)) {
-            log.info("吉客云供应商同步任务正在执行，本次跳过");
-            return;
-        }
+        redisCache.tryLockRun(AdminRedisKey.Jky.VENDOR_SYNC_LOCK, 30L, TimeUnit.MINUTES, "吉客云供应商同步", this::doSync);
+    }
+
+    private void doSync() {
         SyncCount count = new SyncCount();
         boolean success = true;
-        try {
-            success = syncVendors(count);
-        } finally {
-            redisCache.deleteObject(AdminRedisKey.Jky.VENDOR_SYNC_LOCK);
-        }
+        success = syncVendors(count);
         log.info("结束同步吉客云供应商定时任务，供应商{}条，更新{}条，跳过{}条，成功状态{}", count.vendorCount, count.updateCount, count.skipCount, success);
     }
 
     private boolean syncVendors(SyncCount count) {
         for (int pageIndex = 0; ; pageIndex++) {
             JkyResponse<VendorListRep> response = jkyTemplate.listVendors(buildQueryParam(pageIndex));
-            if (response == null || !Objects.equals(response.getCode(), 200)) {
+            if (!JkyResponseUtil.isSuccess(response)) {
                 log.warn("吉客云供应商同步响应异常，code={}，msg={}", response == null ? null : response.getCode(), response == null ? null : response.getMsg());
                 return false;
             }
-            VendorListRep data = response.getResult() == null ? null : response.getResult().getData();
+            VendorListRep data = JkyResponseUtil.getData(response);
             List<VendorListRep.VendorInfoRep> vendors = data == null ? null : data.getVendInfo();
             if (CollectionUtil.isEmpty(vendors)) {
                 return true;

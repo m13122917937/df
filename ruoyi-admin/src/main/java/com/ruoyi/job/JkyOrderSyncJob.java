@@ -14,6 +14,8 @@ import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.order.OrderQueryParam;
 import com.ruoyi.jky.properties.JkyProperties;
 import com.ruoyi.jky.rep.order.OrderQueryRep;
+import com.ruoyi.jky.util.JkyResponseUtil;
+import com.ruoyi.job.util.SyncTimeUtil;
 import com.ruoyi.web.form.order.OrderAddForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,72 +41,57 @@ public class JkyOrderSyncJob {
     private OrderBizService orderBizService;
 
     @Autowired
+    private JkyProperties jkyProperties;
+
+    @Autowired
     private RedisCache redisCache;
 
     @Autowired
-    private JkyProperties jkyProperties;
+    private SyncTimeUtil syncTimeUtil;
 
     /**
      * 同步吉客云最近修改的订单。
      */
     public void execute() {
-        Boolean locked = redisCache.setIfAbsent(AdminRedisKey.Jky.ORDER_SYNC_LOCK, DateUtil.now(), 30L, TimeUnit.MINUTES);
-        if (!Boolean.TRUE.equals(locked)) {
-            log.info("吉客云订单同步任务正在执行，本次跳过");
-            return;
-        }
+        redisCache.tryLockRun(AdminRedisKey.Jky.ORDER_SYNC_LOCK, 30L, TimeUnit.MINUTES, "吉客云订单同步", this::doSync);
+    }
+
+    private void doSync() {
         DateTime endTime = DateUtil.date();
-        DateTime startTime = getStartTime(endTime);
+        DateTime startTime = syncTimeUtil.getStartTime(AdminRedisKey.Jky.ORDER_LAST_SYNC_TIME, 5, TimeUnit.HOURS, "吉客云订单");
         log.info("开始同步吉客云订单定时任务，时间范围：{} - {}", DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN), DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
         String scrollId = "";
         int tradeCount = 0;
         int orderCount = 0;
         int skipCount = 0;
         boolean success = true;
-        try {
-            for (; ; ) {
-                OrderQueryParam param = buildQueryParam(startTime, endTime, scrollId);
-                JkyResponse<OrderQueryRep> response = jkyTemplate.queryOrders(param);
-                if (response == null || !Objects.equals(response.getCode(), 200)) {
-                    success = false;
-                    log.warn("吉客云订单同步响应异常，code={}，msg={}", response == null ? null : response.getCode(), response == null ? null : response.getMsg());
-                    break;
-                }
-                OrderQueryRep data = response.getResult() == null ? null : response.getResult().getData();
-                if (data == null || CollectionUtil.isEmpty(data.getTrades())) {
-                    break;
-                }
-                for (OrderQueryRep.OrderTradeRep trade : data.getTrades()) {
-                    tradeCount++;
-                    SyncCount count = syncTrade(trade);
-                    orderCount += count.orderCount;
-                    skipCount += count.skipCount;
-                }
-                if (StrUtil.isBlank(data.getScrollId()) || Objects.equals(scrollId, data.getScrollId())) {
-                    break;
-                }
-                scrollId = data.getScrollId();
+        for (; ; ) {
+            OrderQueryParam param = buildQueryParam(startTime, endTime, scrollId);
+            JkyResponse<OrderQueryRep> response = jkyTemplate.queryOrders(param);
+            if (!JkyResponseUtil.isSuccess(response)) {
+                success = false;
+                log.warn("吉客云订单同步响应异常，code={}，msg={}", response == null ? null : response.getCode(), response == null ? null : response.getMsg());
+                break;
             }
-            if (success) {
-                redisCache.setCacheObject(AdminRedisKey.Jky.ORDER_LAST_SYNC_TIME, DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
+            OrderQueryRep data = JkyResponseUtil.getData(response);
+            if (data == null || CollectionUtil.isEmpty(data.getTrades())) {
+                break;
             }
-        } finally {
-            redisCache.deleteObject(AdminRedisKey.Jky.ORDER_SYNC_LOCK);
+            for (OrderQueryRep.OrderTradeRep trade : data.getTrades()) {
+                tradeCount++;
+                SyncCount count = syncTrade(trade);
+                orderCount += count.orderCount;
+                skipCount += count.skipCount;
+            }
+            if (StrUtil.isBlank(data.getScrollId()) || Objects.equals(scrollId, data.getScrollId())) {
+                break;
+            }
+            scrollId = data.getScrollId();
+        }
+        if (success) {
+            syncTimeUtil.saveSyncTime(AdminRedisKey.Jky.ORDER_LAST_SYNC_TIME, endTime);
         }
         log.info("结束同步吉客云订单定时任务，销售单{}条，入库明细{}条，跳过{}条，成功状态{}", tradeCount, orderCount, skipCount, success);
-    }
-
-    private DateTime getStartTime(DateTime endTime) {
-        String lastSyncTime = redisCache.getCacheObject(AdminRedisKey.Jky.ORDER_LAST_SYNC_TIME);
-        if (StrUtil.isBlank(lastSyncTime)) {
-            return DateUtil.offsetHour(endTime, -5);
-        }
-        try {
-            return DateUtil.parse(lastSyncTime, DatePattern.NORM_DATETIME_PATTERN);
-        } catch (Exception e) {
-            log.warn("吉客云订单上次同步时间解析失败：{}", lastSyncTime);
-            return DateUtil.offsetMinute(endTime, -10);
-        }
     }
 
     private OrderQueryParam buildQueryParam(DateTime startTime, DateTime endTime, String scrollId) {
@@ -166,6 +153,8 @@ public class JkyOrderSyncJob {
         }
         OrderAddForm form = new OrderAddForm();
         form.setErpOrderId(trade.getOrderNo());
+        form.setJkyTradeNo(tradeNo);
+
         form.setOriginalOrderId(firstNotBlank(trade.getOnlineTradeNo(), trade.getOrderNo(), tradeNo));
         form.setShopName(trade.getShopName());
         form.setSkuCode(skuCode);

@@ -11,6 +11,8 @@ import com.ruoyi.jky.JkyTemplate;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.goods.GoodsListParam;
 import com.ruoyi.jky.rep.goods.GoodsListRep;
+import com.ruoyi.jky.util.JkyResponseUtil;
+import com.ruoyi.job.util.SyncTimeUtil;
 import com.ruoyi.product.facade.IProductSkuFacade;
 import com.ruoyi.product.model.bo.ProductSkuBO;
 import com.ruoyi.product.model.param.ProductSkuParam;
@@ -20,14 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component("jkyGoodsSyncJob")
 public class JkyGoodsSyncJob {
 
-    private static final int PAGE_SIZE = 200;
+    private static final int PAGE_SIZE = 10;
 
     @Autowired
     private JkyTemplate jkyTemplate;
@@ -38,27 +39,25 @@ public class JkyGoodsSyncJob {
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private SyncTimeUtil syncTimeUtil;
+
     /**
      * 同步吉客云最近更新的商品 SKU 信息到 p_product_sku。
      */
     public void execute() {
-        Boolean locked = redisCache.setIfAbsent(AdminRedisKey.Jky.GOODS_SYNC_LOCK, DateUtil.now(), 30L, TimeUnit.MINUTES);
-        if (!Boolean.TRUE.equals(locked)) {
-            log.info("吉客云商品同步任务正在执行，本次跳过");
-            return;
-        }
+        redisCache.tryLockRun(AdminRedisKey.Jky.GOODS_SYNC_LOCK, 30L, TimeUnit.MINUTES, "吉客云商品同步", this::doSync);
+    }
+
+    private void doSync() {
         DateTime endTime = DateUtil.date();
-        DateTime startTime = getStartTime(endTime);
+        DateTime startTime = syncTimeUtil.getStartTime(AdminRedisKey.Jky.GOODS_LAST_SYNC_TIME, 1, TimeUnit.DAYS, "吉客云商品");
         log.info("开始同步吉客云商品定时任务，时间范围：{} - {}", DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN), DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
         SyncCount count = new SyncCount();
         boolean success = true;
-        try {
-            success = syncGoods(startTime, endTime, count);
-            if (success) {
-                redisCache.setCacheObject(AdminRedisKey.Jky.GOODS_LAST_SYNC_TIME, DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
-            }
-        } finally {
-            redisCache.deleteObject(AdminRedisKey.Jky.GOODS_SYNC_LOCK);
+        success = syncGoods(startTime, endTime, count);
+        if (success) {
+            syncTimeUtil.saveSyncTime(AdminRedisKey.Jky.GOODS_LAST_SYNC_TIME, endTime);
         }
         log.info("结束同步吉客云商品定时任务，商品SKU{}条，新增{}条，更新{}条，跳过{}条，成功状态{}", count.goodsCount, count.insertCount, count.updateCount, count.skipCount, success);
     }
@@ -67,22 +66,23 @@ public class JkyGoodsSyncJob {
         long maxSkuId = 0L;
         for (; ; ) {
             GoodsListParam param = buildQueryParam(startTime, endTime, maxSkuId);
-            JkyResponse<List<GoodsListRep>> response = jkyTemplate.goodsList(param);
-            if (response == null || !Objects.equals(response.getCode(), 200)) {
+            JkyResponse<GoodsListRep.GoodsListWrapper> response = jkyTemplate.goodsList(param);
+            if (!JkyResponseUtil.isSuccess(response)) {
                 log.warn("吉客云商品同步响应异常，code={}，msg={}", response == null ? null : response.getCode(), response == null ? null : response.getMsg());
                 return false;
             }
-            List<GoodsListRep> data = response.getResult() == null ? null : response.getResult().getData();
-            if (CollectionUtil.isEmpty(data)) {
+            GoodsListRep.GoodsListWrapper wrapper = JkyResponseUtil.getData(response);
+            List<GoodsListRep> goodsList = wrapper == null ? null : wrapper.getGoods();
+            if (CollectionUtil.isEmpty(goodsList)) {
                 return true;
             }
-            for (GoodsListRep goods : data) {
+            for (GoodsListRep goods : goodsList) {
                 syncGoods(goods, count);
             }
-            if (data.size() < PAGE_SIZE) {
+            if (goodsList.size() < PAGE_SIZE) {
                 return true;
             }
-            Long nextMaxSkuId = data.get(data.size() - 1).getSkuId();
+            Long nextMaxSkuId = goodsList.get(goodsList.size() - 1).getSkuId();
             if (nextMaxSkuId == null || nextMaxSkuId <= maxSkuId) {
                 return true;
             }
@@ -147,19 +147,6 @@ public class JkyGoodsSyncJob {
             param.setSnType(goods.getIsSerialManagement().longValue());
         }
         return param;
-    }
-
-    private DateTime getStartTime(DateTime endTime) {
-        String lastSyncTime = redisCache.getCacheObject(AdminRedisKey.Jky.GOODS_LAST_SYNC_TIME);
-        if (StrUtil.isBlank(lastSyncTime)) {
-            return DateUtil.offsetMinute(endTime, -5);
-        }
-        try {
-            return DateUtil.parse(lastSyncTime, DatePattern.NORM_DATETIME_PATTERN);
-        } catch (Exception e) {
-            log.warn("吉客云商品上次同步时间解析失败：{}", lastSyncTime);
-            return DateUtil.offsetMinute(endTime, -5);
-        }
     }
 
     private String removeSpecName(String goodsName, String skuName) {

@@ -12,12 +12,13 @@ import com.ruoyi.jky.JkyTemplate;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.refund.RefundQueryParam;
 import com.ruoyi.jky.rep.refund.RefundQueryRep;
+import com.ruoyi.jky.util.JkyResponseUtil;
+import com.ruoyi.job.util.SyncTimeUtil;
 import com.ruoyi.order.model.consts.OrderConsts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -35,27 +36,25 @@ public class JkyRefundSyncJob {
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private SyncTimeUtil syncTimeUtil;
+
     /**
      * 同步吉客云售后订单。
      */
     public void execute() {
-        Boolean locked = redisCache.setIfAbsent(AdminRedisKey.Jky.REFUND_SYNC_LOCK, DateUtil.now(), 10L, TimeUnit.MINUTES);
-        if (!Boolean.TRUE.equals(locked)) {
-            log.info("吉客云售后订单同步任务正在执行，本次跳过");
-            return;
-        }
+        redisCache.tryLockRun(AdminRedisKey.Jky.REFUND_SYNC_LOCK, 10L, TimeUnit.MINUTES, "吉客云售后订单同步", this::doSync);
+    }
+
+    private void doSync() {
         DateTime endTime = DateUtil.date();
-        DateTime startTime = getStartTime(endTime);
+        DateTime startTime = syncTimeUtil.getStartTime(AdminRedisKey.Jky.REFUND_LAST_SYNC_TIME, 1, TimeUnit.DAYS, "吉客云售后订单");
         log.info("开始同步吉客云售后订单定时任务，时间范围：{} - {}", DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN), DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
         SyncCount count = new SyncCount();
         boolean success = true;
-        try {
-            success = syncRefunds(startTime, endTime, count);
-            if (success) {
-                redisCache.setCacheObject(AdminRedisKey.Jky.REFUND_LAST_SYNC_TIME, DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
-            }
-        } finally {
-            redisCache.deleteObject(AdminRedisKey.Jky.REFUND_SYNC_LOCK);
+        success = syncRefunds(startTime, endTime, count);
+        if (success) {
+            syncTimeUtil.saveSyncTime(AdminRedisKey.Jky.REFUND_LAST_SYNC_TIME, endTime);
         }
         log.info("结束同步吉客云售后订单定时任务，售后单{}条，处理订单{}条，跳过{}条，成功状态{}", count.refundCount, count.orderCount, count.skipCount, success);
     }
@@ -64,16 +63,16 @@ public class JkyRefundSyncJob {
         for (int pageIndex = 1; ; pageIndex++) {
             RefundQueryParam param = buildQueryParam(startTime, endTime, pageIndex);
             JkyResponse<RefundQueryRep> response = jkyTemplate.listRefunds(param);
-            if (response == null || !Objects.equals(response.getCode(), 200)) {
+            if (!JkyResponseUtil.isSuccess(response)) {
                 log.warn("吉客云售后订单同步响应异常，code={}，msg={}", response == null ? null : response.getCode(), response == null ? null : response.getMsg());
                 return false;
             }
-            RefundQueryRep data = response.getResult() == null ? null : response.getResult().getData();
+            RefundQueryRep data = JkyResponseUtil.getData(response);
             if (data == null || CollectionUtil.isEmpty(data.getTradeAfterOnlineDtoArr())) {
                 return true;
             }
-            for (RefundQueryRep.RefundTradeRep refund : data.getTradeAfterOnlineDtoArr()) {
-                syncRefund(refund, count);
+            for (RefundQueryRep.TradeAfterOnlineWrapper wrapper : data.getTradeAfterOnlineDtoArr()) {
+                syncRefund(wrapper, count);
             }
             if (data.getTradeAfterOnlineDtoArr().size() < PAGE_SIZE) {
                 return true;
@@ -83,7 +82,8 @@ public class JkyRefundSyncJob {
 
     private RefundQueryParam buildQueryParam(DateTime startTime, DateTime endTime, int pageIndex) {
         RefundQueryParam.PageInfo pageInfo = new RefundQueryParam.PageInfo();
-        pageInfo.setPageIndex(pageIndex);
+        int page = pageIndex - 1;
+        pageInfo.setPageIndex(page);
         pageInfo.setPageSize(PAGE_SIZE);
         RefundQueryParam param = new RefundQueryParam();
         param.setPageInfo(pageInfo);
@@ -94,8 +94,9 @@ public class JkyRefundSyncJob {
         return param;
     }
 
-    private void syncRefund(RefundQueryRep.RefundTradeRep refund, SyncCount count) {
+    private void syncRefund(RefundQueryRep.TradeAfterOnlineWrapper wrapper, SyncCount count) {
         count.refundCount++;
+        RefundQueryRep.RefundTradeRep refund = wrapper != null ? wrapper.getTradeAfterOnlineDTO() : null;
         if (refund == null || StrUtil.isBlank(refund.getPlatOrderNo())) {
             count.skipCount++;
             return;
@@ -110,19 +111,6 @@ public class JkyRefundSyncJob {
         } catch (Exception e) {
             count.skipCount++;
             log.error("吉客云售后订单处理异常，refundNo={}，platOrderNo={}", refund.getRefundNo(), refund.getPlatOrderNo(), e);
-        }
-    }
-
-    private DateTime getStartTime(DateTime endTime) {
-        String lastSyncTime = redisCache.getCacheObject(AdminRedisKey.Jky.REFUND_LAST_SYNC_TIME);
-        if (StrUtil.isBlank(lastSyncTime)) {
-            return DateUtil.offsetMinute(endTime, -5);
-        }
-        try {
-            return DateUtil.parse(lastSyncTime, DatePattern.NORM_DATETIME_PATTERN);
-        } catch (Exception e) {
-            log.warn("吉客云售后订单上次同步时间解析失败：{}", lastSyncTime);
-            return DateUtil.offsetMinute(endTime, -5);
         }
     }
 

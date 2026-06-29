@@ -1,24 +1,37 @@
 package com.ruoyi.common.core.redis;
 
 import lombok.AllArgsConstructor;
-import org.springframework.data.redis.core.BoundSetOperations;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.redisson.api.RBucket;
+import org.redisson.api.RList;
+import org.redisson.api.RMap;
+import org.redisson.api.RSet;
+import org.redisson.api.RedissonClient;
 
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
- * spring redis 工具类
+ * spring redis 工具类（基于 Redisson 实现）
  *
  * @author ruoyi
- **/
+ */
+@Slf4j
 @AllArgsConstructor
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 public class RedisCache {
 
-    public RedisTemplate redisTemplate;
+    public RedissonClient redissonClient;
 
     /**
      * 缓存基本的对象，Integer、String、实体类等
@@ -27,7 +40,8 @@ public class RedisCache {
      * @param value 缓存的值
      */
     public <T> void setCacheObject(final String key, final T value) {
-        redisTemplate.opsForValue().set(key, value);
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        bucket.set(value);
     }
 
     /**
@@ -39,7 +53,8 @@ public class RedisCache {
      * @param timeUnit 时间颗粒度
      */
     public <T> void setCacheObject(final String key, final T value, final Integer timeout, final TimeUnit timeUnit) {
-        redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        bucket.set(value, timeout, timeUnit);
     }
 
     /**
@@ -62,17 +77,17 @@ public class RedisCache {
      * @return true=设置成功；false=设置失败
      */
     public boolean expire(final String key, final long timeout, final TimeUnit unit) {
-        return redisTemplate.expire(key, timeout, unit);
+        return redissonClient.getKeys().expire(key, timeout, unit);
     }
 
     /**
      * 获取有效时间
      *
      * @param key Redis键
-     * @return 有效时间
+     * @return 有效时间（秒）
      */
     public long getExpire(final String key) {
-        return redisTemplate.getExpire(key);
+        return redissonClient.getKeys().remainTimeToLive(key) / 1000;
     }
 
     /**
@@ -82,7 +97,7 @@ public class RedisCache {
      * @return true 存在 false不存在
      */
     public Boolean hasKey(String key) {
-        return redisTemplate.hasKey(key);
+        return redissonClient.getBucket(key).isExists();
     }
 
     /**
@@ -92,25 +107,24 @@ public class RedisCache {
      * @return 缓存键值对应的数据
      */
     public <T> T getCacheObject(final String key) {
-        ValueOperations<String, T> operation = redisTemplate.opsForValue();
-        return operation.get(key);
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        return bucket.get();
     }
 
     /**
      * SETNX 原子操作 - 只有当 key 不存在时才设置值，key 存在则不操作
-     * 利用 Redis 原生原子性保证操作安全
      *
      * @param key   Redis键
      * @param value 要设置的值
      * @return true 设置成功 (key不存在), false 设置失败 (key已存在)
      */
     public <T> Boolean setIfAbsent(final String key, final T value) {
-        return redisTemplate.opsForValue().setIfAbsent(key, value);
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        return bucket.trySet(value);
     }
 
     /**
      * SETNX 原子操作 - 只有当 key 不存在时才设置值并设置过期时间，key 存在则不操作
-     * 利用 Redis 原生原子性保证操作安全
      *
      * @param key      Redis键
      * @param value    要设置的值
@@ -119,45 +133,53 @@ public class RedisCache {
      * @return true 设置成功 (key不存在), false 设置失败 (key已存在)
      */
     public <T> Boolean setIfAbsent(final String key, final T value, final Long timeout, final TimeUnit timeUnit) {
-        return redisTemplate.opsForValue().setIfAbsent(key, value, timeout, timeUnit);
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        return bucket.trySet(value, timeout, timeUnit);
     }
 
     /**
      * 查询 key 是否存在，不存在则设置值，存在则返回当前值
-     * 原子操作，并发安全
      *
      * @param key   Redis键
      * @param value 要设置的值 (当key不存在时)
      * @return key存在返回当前值，key不存在返回新设置的值
      */
-    @SuppressWarnings("unchecked")
     public <T> T getAndSetIfAbsent(final String key, final T value) {
-        // 先尝试SETNX，如果成功说明key不存在，直接返回新值
-        Boolean success = redisTemplate.opsForValue().setIfAbsent(key, value);
-        if (Boolean.TRUE.equals(success)) {
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        boolean success = bucket.trySet(value);
+        if (success) {
             return value;
         }
-        // key已存在，返回当前值
-        return (T) redisTemplate.opsForValue().get(key);
+        return bucket.get();
     }
 
     /**
      * 删除单个对象
      *
-     * @param key
+     * @param key 缓存键值
+     * @return 是否删除成功
      */
     public boolean deleteObject(final String key) {
-        return redisTemplate.delete(key);
+        return redissonClient.getKeys().delete(key) > 0;
     }
 
     /**
      * 删除集合对象
      *
      * @param collection 多个对象
-     * @return
+     * @return 删除数量
      */
-    public boolean deleteObject(final Collection collection) {
-        return redisTemplate.delete(collection) > 0;
+    public long deleteObject(final Collection collection) {
+        if (collection == null || collection.isEmpty()) {
+            return 0;
+        }
+        long count = 0;
+        for (Object key : collection) {
+            if (redissonClient.getBucket(key.toString()).delete()) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -165,11 +187,12 @@ public class RedisCache {
      *
      * @param key      缓存的键值
      * @param dataList 待缓存的List数据
-     * @return 缓存的对象
+     * @return 缓存后的列表长度
      */
     public <T> long setCacheList(final String key, final List<T> dataList) {
-        Long count = redisTemplate.opsForList().rightPushAll(key, dataList);
-        return count == null ? 0 : count;
+        RList<T> list = redissonClient.getList(key);
+        list.addAll(dataList);
+        return list.size();
     }
 
     /**
@@ -179,7 +202,7 @@ public class RedisCache {
      * @return 缓存键值对应的数据
      */
     public <T> List<T> getCacheList(final String key) {
-        return redisTemplate.opsForList().range(key, 0, -1);
+        return redissonClient.<T>getList(key).readAll();
     }
 
     /**
@@ -187,15 +210,12 @@ public class RedisCache {
      *
      * @param key     缓存键值
      * @param dataSet 缓存的数据
-     * @return 缓存数据的对象
+     * @return 是否成功
      */
-    public <T> BoundSetOperations<String, T> setCacheSet(final String key, final Set<T> dataSet) {
-        BoundSetOperations<String, T> setOperation = redisTemplate.boundSetOps(key);
-        Iterator<T> it = dataSet.iterator();
-        while (it.hasNext()) {
-            setOperation.add(it.next());
-        }
-        return setOperation;
+    public <T> boolean setCacheSet(final String key, final Set<T> dataSet) {
+        RSet<T> set = redissonClient.getSet(key);
+        set.addAll(dataSet);
+        return true;
     }
 
     /**
@@ -205,29 +225,28 @@ public class RedisCache {
      * @return 缓存的set集合
      */
     public <T> Set<T> getCacheSet(final String key) {
-        return redisTemplate.opsForSet().members(key);
+        return redissonClient.<T>getSet(key).readAll();
     }
 
     /**
      * 缓存Map
      *
-     * @param key
-     * @param dataMap
+     * @param key     缓存键值
+     * @param dataMap 缓存的数据
      */
     public <T> void setCacheMap(final String key, final Map<String, T> dataMap) {
-        if (dataMap != null) {
-            redisTemplate.opsForHash().putAll(key, dataMap);
-        }
+        RMap<String, T> map = redissonClient.getMap(key);
+        map.putAll(dataMap);
     }
 
     /**
      * 获得缓存的Map
      *
-     * @param key
-     * @return
+     * @param key 缓存键值
+     * @return 缓存的Map
      */
     public <T> Map<String, T> getCacheMap(final String key) {
-        return redisTemplate.opsForHash().entries(key);
+        return redissonClient.<String, T>getMap(key).readAllMap();
     }
 
     /**
@@ -238,7 +257,8 @@ public class RedisCache {
      * @param value 值
      */
     public <T> void setCacheMapValue(final String key, final String hKey, final T value) {
-        redisTemplate.opsForHash().put(key, hKey, value);
+        RMap<String, T> map = redissonClient.getMap(key);
+        map.put(hKey, value);
     }
 
     /**
@@ -249,8 +269,8 @@ public class RedisCache {
      * @return Hash中的对象
      */
     public <T> T getCacheMapValue(final String key, final String hKey) {
-        HashOperations<String, String, T> opsForHash = redisTemplate.opsForHash();
-        return opsForHash.get(key, hKey);
+        RMap<String, T> map = redissonClient.getMap(key);
+        return map.get(hKey);
     }
 
     /**
@@ -258,10 +278,12 @@ public class RedisCache {
      *
      * @param key   Redis键
      * @param hKeys Hash键集合
-     * @return Hash对象集合
+     * @return Hash对象列表
      */
     public <T> List<T> getMultiCacheMapValue(final String key, final Collection<Object> hKeys) {
-        return redisTemplate.opsForHash().multiGet(key, hKeys);
+        RMap<String, T> map = redissonClient.getMap(key);
+        Set<String> stringKeys = hKeys.stream().map(Object::toString).collect(Collectors.toSet());
+        return new ArrayList<>(map.getAll(stringKeys).values());
     }
 
     /**
@@ -272,16 +294,59 @@ public class RedisCache {
      * @return 是否成功
      */
     public boolean deleteCacheMapValue(final String key, final String hKey) {
-        return redisTemplate.opsForHash().delete(key, hKey) > 0;
+        RMap<String, Object> map = redissonClient.getMap(key);
+        return map.remove(hKey) != null;
     }
 
     /**
      * 获得缓存的基本对象列表
      *
      * @param pattern 字符串前缀
-     * @return 对象列表
+     * @return 键列表
      */
     public Collection<String> keys(final String pattern) {
-        return redisTemplate.keys(pattern);
+        Iterable<String> keys = redissonClient.getKeys().getKeysByPattern(pattern);
+        return StreamSupport.stream(keys.spliterator(), false).collect(Collectors.toList());
+    }
+
+    /**
+     * 尝试获取分布式锁，获取成功则执行 task，失败则跳过。
+     *
+     * @param lockKey   锁的 Redis key
+     * @param leaseTime 锁持有时间（到期自动释放，防止死锁）
+     * @param unit      时间单位
+     * @param jobName   任务名称（日志用）
+     * @param task      获取锁后执行的任务
+     * @return true 任务执行成功；false 获取锁失败或被中断
+     */
+    public boolean tryLockRun(String lockKey, long leaseTime, TimeUnit unit, String jobName, Runnable task) {
+        RLock lock = redissonClient.getLock(lockKey);
+        boolean locked;
+        try {
+            locked = lock.tryLock(0, leaseTime, unit);
+        } catch (InterruptedException e) {
+            log.error("{} 获取锁被中断", jobName, e);
+            Thread.currentThread().interrupt();
+            return false;
+        }
+        if (!locked) {
+            log.info("{} 任务正在执行，本次跳过", jobName);
+            return false;
+        }
+        try {
+            task.run();
+            return true;
+        } finally {
+            if (locked) {
+                lock.unlock();
+            }
+        }
+    }
+
+    /**
+     * 获取 Redisson RLock 实例，适用于需要在循环中逐条加锁等灵活场景。
+     */
+    public RLock getLock(String lockKey) {
+        return redissonClient.getLock(lockKey);
     }
 }
