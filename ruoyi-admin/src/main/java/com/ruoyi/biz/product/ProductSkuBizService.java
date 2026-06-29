@@ -53,55 +53,6 @@ public class ProductSkuBizService {
         return new PageBO(voList, productSkuBOList.getTotal());
     }
 
-
-    /**
-     * 新增商品SKU
-     *
-     * @param form SKU表单
-     * @return 新增的SKU信息
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ProductSkuVO add(ProductSkuForm form) {
-        log.info("开始新增商品SKU 商品名称: {}",  form.getProductName());
-
-        ProductSkuParam param = ProductConvert.INSTANCE.toParam(form);
-
-        validateExits(param);
-
-        param.setSortOrder(DateUtil.currentSeconds());
-        this.genSkuCode(param);
-        productSkuFacade.save(param);
-
-        log.info("商品SKU新增成功，SKU编码: {}", param.getSkuCode());
-        return null;
-    }
-
-    private void validateExits(ProductSkuParam param) {
-
-
-        long count = productSkuFacade.count(new ProductSkuQuery().setProductName(param.getProductName())
-                .setSpecName(param.getSpecName()));
-        if(count>0){
-            throw new ServiceException("商品SKU已存在");
-        }
-    }
-
-    private String genSkuCode(ProductSkuParam param) {
-        String brandCode = CategoryBrandUtils.getBrandCode(param.getBrand());
-        String categoryCode = CategoryBrandUtils.getCategoryCode(param.getCategory());
-        String productCode = ChineseToFirstLetterWithOthers.convert(param.getProductName());
-        String specCode = ChineseToFirstLetterWithOthers.convert(param.getSpecName());
-        String skuCode = brandCode + "-" + categoryCode + "-" + productCode + "-" + specCode;
-        param.setSkuCode(skuCode);
-        param.setSpuCode(productCode);
-        ProductSkuBO one = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(skuCode));
-        if (Objects.nonNull(one)) {
-            throw new ServiceException("商品SKU编码已存在");
-        }
-        return skuCode;
-    }
-
-
     /**
      *
      * @param brand
@@ -114,5 +65,14 @@ public class ProductSkuBizService {
             return Collections.EMPTY_LIST;
         }
         return list.stream().map(ProductSkuBO::getProductName).collect(Collectors.toList());
+    }
+
+
+    public List<String> listBrand() {
+        List<ProductSkuBO> list = productSkuFacade.list(new ProductSkuQuery().setLimit(50).setGroup("brand"), null);
+        if (CollectionUtil.isEmpty(list)) {
+            return Collections.EMPTY_LIST;
+        }
+        return list.stream().map(ProductSkuBO::getBrand).collect(Collectors.toList());
     }
 }
