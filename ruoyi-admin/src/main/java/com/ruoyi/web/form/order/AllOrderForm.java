@@ -59,4 +59,46 @@ public class AllOrderForm {
 
 
     private Integer orderType;
+
+
+    /**
+     * 品牌
+     */
+    private String brand;
+
+
+    /**
+     * 产品型号
+     */
+    private String productName;
+
+
+    /**
+     * 规格
+     */
+    private String skuName;
+
+
+    /**
+     * 店铺名
+     */
+    private String shopName;
+
+
+    /**
+     * 付款主体ID
+     */
+    private Long payerId;
+
+
+    /**
+     * 供应商名称
+     */
+    private String supplierName;
+
+
+    /**
+     * 串码（SN）
+     */
+    private String sn;
 }

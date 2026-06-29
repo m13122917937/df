@@ -2,88 +2,149 @@
   <div class="all-orders-page">
     <!-- 搜索面板 -->
     <div class="search-card">
-      <el-form ref="searchFormRef" :model="searchForm" size="small">
-        <div class="search-content">
-          <div class="search-container">
-            <!-- 第一行 -->
-            <div class="search-row">
-              <div class="search-item">
-                <label class="search-label">订单状态</label>
-                <el-select v-model="searchForm.status" placeholder="全部状态" clearable filterable class="search-input">
-                  <el-option v-for="option in statusOptions" :key="option.value" :label="option.label"
-                    :value="option.value"/>
-                </el-select>
-              </div>
-              <div class="search-item">
-                <label class="search-label">采购类型</label>
-                <el-select v-model="searchForm.orderType" placeholder="全部类型" clearable class="search-input">
-                  <el-option v-for="item in orderTypeOptions" :key="item.value" :label="item.label"
-                    :value="item.value" />
-                </el-select>
-              </div>
+      <el-form ref="searchFormRef" :model="searchForm" size="small" @submit.native.prevent="handleSearch">
+        <button type="submit" style="display:none"></button>
+        <!-- 订单信息 -->
+        <div class="search-group">
+          <div class="search-group-title">订单信息</div>
+          <div class="search-grid">
+            <div class="search-item">
+              <label class="search-label">订单状态</label>
+              <el-select v-model="searchForm.status" placeholder="全部状态" clearable filterable class="search-input">
+                <el-option v-for="option in statusOptions" :key="option.value" :label="option.label"
+                  :value="option.value"/>
+              </el-select>
             </div>
-            <!-- 第二行 -->
-            <div class="search-row">
-              <div class="search-item">
-                <label class="search-label">创建时间</label>
-                <el-date-picker
-                  v-model="searchForm.createTimeRange"
-                  type="daterange"
-                  start-placeholder="开始时间"
-                  end-placeholder="结束时间"
-                  range-separator="至"
-                  value-format="yyyy-MM-dd"
-                  unlink-panels
-                  :picker-options="createTimePickerOptions"
-                  @change="handleCreateTimeRangeChange"
-                  class="search-input"
-                />
-              </div>
-              <div class="search-item">
-                <label class="search-label">发货时间</label>
-                <el-date-picker
-                  v-model="searchForm.sendTimeRange"
-                  type="daterange"
-                  start-placeholder="开始时间"
-                  end-placeholder="结束时间"
-                  range-separator="至"
-                  value-format="yyyy-MM-dd"
-                  unlink-panels
-                  :picker-options="sendTimePickerOptions"
-                  @change="handleSendTimeRangeChange"
-                  class="search-input"
-                />
-              </div>
-            </div>                            
-          </div>
-
-          <div class="search-actions">
-            <div class="primary-actions">
-              <el-button type="primary" icon="el-icon-search" @click="handleSearch" class="search-action-btn">
-                搜索
-              </el-button>
-              <el-button icon="el-icon-refresh-left" @click="handleReset" class="reset-btn">
-                重置
-              </el-button>
-              <el-button type="warning" icon="el-icon-document" @click="handleGenerateExcel" :loading="generating" class="generate-btn">
-                生成Excel
-              </el-button>
-              <el-button type="success" icon="el-icon-download" @click="handleOpenExcelDialog" class="download-btn">
-                导出记录
-              </el-button>
+            <div class="search-item">
+              <label class="search-label">采购类型</label>
+              <el-select v-model="searchForm.orderType" placeholder="全部类型" clearable class="search-input">
+                <el-option v-for="item in orderTypeOptions" :key="item.value" :label="item.label"
+                  :value="item.value" />
+              </el-select>
+            </div>
+            <div class="search-item">
+              <label class="search-label">供应商</label>
+              <el-select v-model="searchForm.supplierName" placeholder="全部供应商" clearable filterable remote
+                :remote-method="searchCompany" :loading="companyLoading" class="search-input">
+                <el-option v-for="item in companyOptions" :key="item.id" :label="item.nickName || item.companyName" :value="item.nickName || item.companyName" />
+              </el-select>
             </div>
           </div>
         </div>
-        <div>
-          <div class="secondary-actions">
-            <el-button type="success" icon="el-icon-document-copy" @click="openBatchDialog" class="batch-btn">
-              批量内部单号查询
+
+        <!-- 更多查询条件（折叠） -->
+        <div v-show="showMore">
+          <!-- 店铺 + 串码 -->
+          <div class="search-group">
+            <div class="search-grid">
+              <div class="search-item">
+                <label class="search-label">店铺</label>
+                <el-select v-model="searchForm.shopName" placeholder="全部店铺" clearable filterable class="search-input">
+                  <el-option v-for="item in shopOptions" :key="item" :label="item" :value="item" />
+                </el-select>
+              </div>
+              <div class="search-item">
+                <label class="search-label">串码</label>
+                <el-input v-model="searchForm.sn" placeholder="序列号/SN" clearable class="search-input" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 商品信息 -->
+          <div class="search-group">
+            <div class="search-group-title">商品信息</div>
+            <div class="search-grid">
+              <div class="search-item">
+                <label class="search-label">品牌</label>
+                <el-select v-model="searchForm.brand" placeholder="全部品牌" clearable filterable class="search-input">
+                  <el-option v-for="item in brandOptions" :key="item" :label="item" :value="item" />
+                </el-select>
+              </div>
+              <div class="search-item">
+                <label class="search-label">型号</label>
+                <el-input v-model="searchForm.productName" placeholder="产品型号" clearable class="search-input" />
+              </div>
+              <div class="search-item">
+                <label class="search-label">规格</label>
+                <el-input v-model="searchForm.skuName" placeholder="规格" clearable class="search-input" />
+              </div>
+              <div class="search-item">
+                <label class="search-label">付款主体</label>
+                <el-select v-model="searchForm.payerId" placeholder="全部主体" clearable filterable class="search-input" value-key="id">
+                  <el-option v-for="item in payerOptions" :key="item.id" :label="item.nickName" :value="item.id" />
+                </el-select>
+              </div>
+            </div>
+          </div>
+
+        <!-- 时间范围 -->
+        <div class="search-group">
+          <div class="search-group-title">时间范围</div>
+          <div class="search-grid">
+            <div class="search-item search-item-daterange">
+              <label class="search-label">创建时间</label>
+              <el-date-picker
+                v-model="searchForm.createTimeRange"
+                type="daterange"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                range-separator="至"
+                value-format="yyyy-MM-dd"
+                unlink-panels
+                :picker-options="createTimePickerOptions"
+                @change="handleCreateTimeRangeChange"
+                class="search-input"
+              />
+            </div>
+            <div class="search-item search-item-daterange">
+              <label class="search-label">发货时间</label>
+              <el-date-picker
+                v-model="searchForm.sendTimeRange"
+                type="daterange"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                range-separator="至"
+                value-format="yyyy-MM-dd"
+                unlink-panels
+                :picker-options="sendTimePickerOptions"
+                @change="handleSendTimeRangeChange"
+                class="search-input"
+              />
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="search-actions-bar">
+          <div class="primary-actions">
+            <el-button type="primary" icon="el-icon-search" @click="handleSearch" class="search-action-btn">
+              搜索
             </el-button>
-            <el-button type="warning" icon="el-icon-document" @click="openBatchMerchantDialog" class="batch-btn">
-              批量商家单号查询
+            <el-button icon="el-icon-refresh-left" @click="handleReset" class="reset-btn">
+              重置
             </el-button>
-            <el-button type="info" icon="el-icon-document" @click="openBatchErpOrderDialog" class="batch-btn">
-              批量旺店通单号查询
+            <el-button type="warning" icon="el-icon-document" @click="handleGenerateExcel" :loading="generating" class="generate-btn">
+              生成Excel
+            </el-button>
+            <el-button type="success" icon="el-icon-download" @click="handleOpenExcelDialog" class="download-btn">
+              导出记录
+            </el-button>
+          </div>
+          <div class="toggle-more">
+            <el-button type="text" :icon="showMore ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" @click="showMore = !showMore">
+              {{ showMore ? '收起' : '展开更多查询' }}
+            </el-button>
+          </div>
+          <div class="batch-actions">
+            <el-button type="primary" plain icon="el-icon-document-copy" size="mini" @click="openBatchDialog" class="batch-btn">
+              批量内部单号
+            </el-button>
+            <el-button type="warning" plain icon="el-icon-document" size="mini" @click="openBatchMerchantDialog" class="batch-btn">
+              批量商家单号
+            </el-button>
+            <el-button type="info" plain icon="el-icon-document" size="mini" @click="openBatchErpOrderDialog" class="batch-btn">
+              批量吉客云单号
             </el-button>
           </div>
         </div>
@@ -107,7 +168,7 @@
                   @click="copyText(scope.row.orderCode)" />
               </div>
               <div class="order-number-item">
-                旺店通:
+                吉客云:
                 <span>{{ scope.row.erpOrderId || '-' }}</span>
                 <i v-if="scope.row.erpOrderId" class="el-icon-copy-document copy-icon"
                   @click="copyText(scope.row.erpOrderId)" />
@@ -241,12 +302,12 @@
       @confirm="applyBatchMerchantSearch"
       @cancel="closeBatchMerchantDialog"
     />
-    <!-- 批量旺店通单号查询 -->
+    <!-- 批量吉客云单号查询 -->
     <BatchQueryDialog
       :visible.sync="batchErpOrderDialogVisible"
       :input-value.sync="batchErpOrderCodeInput"
-      title="批量旺店通单号查询"
-      placeholder="每行输入一个旺店通单号，最多可输入200条"
+      title="批量吉客云单号查询"
+      placeholder="每行输入一个吉客云单号，最多可输入200条"
       @confirm="applyBatchErpOrderSearch"
       @cancel="closeBatchErpOrderDialog"
     />
@@ -313,8 +374,11 @@ import {
   generateOrderExcelApi,
   downloadOrderExcelApi,
   getExcelTaskStatusApi,
-  getRecentExcelTasksApi
+  getRecentExcelTasksApi,
+  getBrandListApi,
+  getShopNameListApi
 } from '@/api/wholesale'
+import { listPayerApi, listCompanyApi } from '@/api/contract'
 import {
   createCopyTextMethod,
   createFormatDateTimeMethod,
@@ -322,17 +386,15 @@ import {
 } from '@/utils/wholesaleUtils'
 import { saveAs } from 'file-saver'
 import { blobValidate } from '@/utils/ruoyi'
+import { ORDER_TYPE_OPTIONS, getOrderTypeLabel } from '@/enum/orderType'
 
 const getDefaultSearchForm = () => {
-  // 结束时间默认为当前日期
   const endDate = new Date()
   endDate.setHours(0, 0, 0, 0)
 
-  // 开始时间是结束时间往前推30天
   const startDate = new Date(endDate)
-  startDate.setDate(startDate.getDate() - 30)
+  startDate.setDate(startDate.getDate() - 15)
 
-  // 格式化为 yyyy-MM-dd
   const formatDate = (date) => {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -343,9 +405,14 @@ const getDefaultSearchForm = () => {
   return {
     status: '',
     orderType: '',
-    // 创建时间：默认近一个月
+    brand: '',
+    productName: '',
+    skuName: '',
+    payerId: null,
+    supplierName: '',
+    shopName: '',
+    imei: '',
     createTimeRange: [formatDate(startDate), formatDate(endDate)],
-    // 发货时间：默认为空
     sendTimeRange: []
   }
 }
@@ -426,11 +493,13 @@ export default {
         { label: '撤销', value: 11 },
         { label: '售后', value: 12 }
       ],
-      orderTypeOptions: [
-        { label: '全部类型', value: '' },
-        { label: '入仓', value: 1 },
-        { label: '代发', value: 2 }
-      ],
+      orderTypeOptions: ORDER_TYPE_OPTIONS,
+      brandOptions: [],
+      payerOptions: [],
+      companyOptions: [],
+      companyLoading: false,
+      shopOptions: [],
+      showMore: false,
       provinceOptions: [],
       cityOptions: [],
       batchDialogVisible: false,
@@ -453,6 +522,9 @@ export default {
   },
   created() {
     this.fetchProvinceOptions()
+    this.loadBrandOptions()
+    this.loadPayerOptions()
+    this.loadShopOptions()
   },
   mounted() {
     this.fetchOrderList()
@@ -495,6 +567,45 @@ export default {
     // 省市筛选已取消，这里保留空实现以防后续扩展
     async fetchProvinceOptions() { },
     async handleProvinceChange() { },
+    async loadBrandOptions() {
+      try {
+        const res = await getBrandListApi()
+        this.brandOptions = res.data || []
+      } catch (e) {
+        this.brandOptions = []
+      }
+    },
+    async loadPayerOptions() {
+      try {
+        const res = await listPayerApi()
+        this.payerOptions = res.data || res || []
+      } catch (e) {
+        this.payerOptions = []
+      }
+    },
+    async searchCompany(keyword) {
+      if (!keyword) {
+        this.companyOptions = []
+        return
+      }
+      this.companyLoading = true
+      try {
+        const res = await listCompanyApi({ companyNameLike: keyword, nickNameLike: keyword })
+        this.companyOptions = res.rows || res.data || []
+      } catch (e) {
+        this.companyOptions = []
+      } finally {
+        this.companyLoading = false
+      }
+    },
+    async loadShopOptions() {
+      try {
+        const res = await getShopNameListApi()
+        this.shopOptions = res.data || []
+      } catch (e) {
+        this.shopOptions = []
+      }
+    },
     handleSearch() {
       this.pagination.currentPage = 1
       this.fetchOrderList()
@@ -607,7 +718,7 @@ export default {
         this.batchErpOrderCodeInput = val
       }
       if (!this.batchErpOrderCodeInput.trim()) {
-        this.$message.warning('请输入至少一个旺店通单号')
+        this.$message.warning('请输入至少一个吉客云单号')
         return
       }
       const codes = this.batchErpOrderCodeInput
@@ -615,7 +726,7 @@ export default {
         .map(code => code.trim())
         .filter(code => !!code)
       if (!codes.length) {
-        this.$message.warning('请输入有效的旺店通单号')
+        this.$message.warning('请输入有效的吉客云单号')
         return
       }
       this.batchErpOrderCodeList = Array.from(new Set(codes))
@@ -693,7 +804,7 @@ export default {
       }
 
       /**
-       * 旺店通单号查询
+       * 吉客云单号查询
        */
       const erpOrderCodeList = this.batchErpOrderCodeList.length
         ? this.batchErpOrderCodeList
@@ -724,6 +835,35 @@ export default {
         params.sendStartTime = `${this.searchForm.sendTimeRange[0]} 00:00:00`
         // 结束时间设置为当天的 23:59:59
         params.sendNedTime = `${this.searchForm.sendTimeRange[1]} 23:59:59`
+      }
+
+      // 品牌
+      if (this.searchForm.brand) {
+        params.brand = this.searchForm.brand
+      }
+      // 产品型号
+      if (this.searchForm.productName) {
+        params.productName = this.searchForm.productName
+      }
+      // 规格
+      if (this.searchForm.skuName) {
+        params.skuName = this.searchForm.skuName
+      }
+      // 付款主体
+      if (this.searchForm.payerId) {
+        params.payerId = this.searchForm.payerId
+      }
+      // 供应商
+      if (this.searchForm.supplierName) {
+        params.supplierName = this.searchForm.supplierName
+      }
+      // 店铺
+      if (this.searchForm.shopName) {
+        params.shopName = this.searchForm.shopName
+      }
+      // 串码
+      if (this.searchForm.sn) {
+        params.sn = this.searchForm.sn
       }
 
       return params
@@ -781,11 +921,7 @@ export default {
       return map[status] || 'info'
     },
     getOrderType(orderType){
-      const map = {
-        1: '入仓',
-        2: '代发'
-      }
-      return map[orderType] || '代发'
+      return getOrderTypeLabel(orderType)
     },
     getStatusText(status) {
       const map = {
@@ -973,32 +1109,42 @@ export default {
   }
 }
 
-.search-content {
-  display: flex;
-  align-items: flex-end;
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px 16px;
 }
 
-.search-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  flex: 1;
-  gap: 12px;
+.search-group {
+  margin-bottom: 16px;
 }
 
-.search-row {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-  gap: 8px;
+.search-group + .search-group {
+  padding-top: 16px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.search-group-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #909399;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
 }
 
 .search-item {
-  flex: 0 0 30%;
-  max-width: 30%;
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+
+.search-item-daterange {
+  grid-column: span 2;
+}
+
+.search-item-daterange .search-input :deep(.el-date-editor) {
+  width: 100%;
 }
 
 .search-label {
@@ -1045,13 +1191,14 @@ export default {
   background: #fafbfc;
 }
 
-.search-actions {
+.search-actions-bar {
   display: flex;
-  flex-direction: column;
-  width: 220px;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #ebeef5;
 }
 
 .primary-actions {
@@ -1059,13 +1206,9 @@ export default {
   gap: 8px;
 }
 
-.secondary-actions {
+.batch-actions {
   display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  padding-top: 8px;
-  margin-top: 4px;
-  border-top: 1px solid #ebeef5;
+  gap: 8px;
 }
 
 .search-action-btn {

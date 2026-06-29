@@ -30,7 +30,6 @@ import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.common.utils.weebhook.QWRobotUtil;
-import com.ruoyi.consts.AdminConsts;
 import com.ruoyi.jky.JkyTemplate;
 import com.ruoyi.jky.param.reject.RejectParam;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
@@ -305,7 +304,6 @@ public class OrderBizService {
      */
     @Transactional
     public void revokeList(final RevokeParam revokeParam) {
-
         for (String orderCode : revokeParam.getOrderCodeList()) {
             revoke(orderCode, revokeParam.getRevokeCode());
         }
@@ -314,80 +312,114 @@ public class OrderBizService {
 
     /**
      * 撤销订单
-     *
      */
     @Transactional
     public void revoke(final String orderCode, final Integer revokeCode) {
         log.info("撤销/追单订单：{}, 撤销原因:{}", orderCode, revokeCode);
         OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(orderCode));
         HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(orderCode).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
+
         if (Objects.isNull(hangingOrderBO)) {
-            // 还没挂单，直接撤销，
-            orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(OrderConsts.OrderSubStatus.REVOKE_NEW.getCode())
-                    .setRevokeType(revokeCode).setUpdateTime(DateUtil.date()), new OrderQuery().setOrderCode(orderCode));
-            rejectJkyIfNeeded(orderBO);
+            revokeWithoutHanging(orderBO, revokeCode);
             return;
         }
 
-        // 追单1 ， 还未成交，还没人抢单
         List<TradeOrderBO> tradeOrderBOList = tradeOrderFacade.list(new TradeOrderQuery().setOrderId(orderCode).setHangOrderId(hangingOrderBO.getId()));
-        if (CollectionUtil.isEmpty(tradeOrderBOList)) {
-            // 设置挂单记录失效
-            hangingOrderFacade.update(new HangingOrderParam().setStatus(HandingOrderConsts.Status.FAILURE.getCode()), new HangingOrderQuery().setId(hangingOrderBO.getId()));
-            // 设置订单失效
-            orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(OrderConsts.OrderSubStatus.REVOKE_TRADING.getCode())
-                    .setUpdateTime(DateUtil.date()).setRevokeType(revokeCode), new OrderQuery().setOrderCode(orderCode));
-            rejectJkyIfNeeded(orderBO);
-            return;
-        }
-        // 追单2 ， 已经抢单，还没成交
-        Set<Integer> tradeStatusSet = tradeOrderBOList.stream().map(TradeOrderBO::getStatus).collect(Collectors.toSet());
-        if (!tradeStatusSet.contains(TradeOrderConsts.TradeStatus.SUCCESS.getCode())) {
-            // 设置抢单记录失效
-            tradeOrderFacade.update(new TradeOrderParam().setStatus(TradeOrderConsts.TradeStatus.EXPIRED.getCode()), new TradeOrderQuery().setOrderId(hangingOrderBO.getOrderId()).setHangOrderId(hangingOrderBO.getId()));
-            // 设置挂单记录失效
-            hangingOrderFacade.update(new HangingOrderParam().setStatus(HandingOrderConsts.Status.FAILURE.getCode()), new HangingOrderQuery().setId(hangingOrderBO.getId()));
-            // 设置订单失效
-            orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(OrderConsts.OrderSubStatus.REVOKE_TRADING.getCode())
-                    .setUpdateTime(DateUtil.date()).setRevokeType(revokeCode), new OrderQuery().setOrderCode(orderCode));
-            //  退还保证金
-            for (TradeOrderBO tradeOrderBO : tradeOrderBOList) {
-                tradeOrderFacade.update(new TradeOrderParam().setStatus(TradeOrderConsts.TradeStatus.TAKEN.getCode()), new TradeOrderQuery().setId(tradeOrderBO.getId()));
-                //  退保证金
-                companyCapitalFacade.unFreeze(new CompanyCapitalLogParam().setCompanyId(tradeOrderBO.getTradeCompanyId()).setUpdateTime(tradeOrderBO.getUpdateTime()).setAddAmount(companyCapitalBizService.calAmount(orderBO.getQuantity()))
-                        .setOrderNo(hangingOrderBO.getOrderId()).setType(CompanyCapitalConsts.LogTypes.ORDER.getCode()).setTradeId(tradeOrderBO.getId()));
-            }
 
-            rejectJkyIfNeeded(orderBO);
+        if (CollectionUtil.isEmpty(tradeOrderBOList)) {
+            revokeBeforeTrade(orderBO, hangingOrderBO, revokeCode);
             return;
         }
-        // 追单3 ， 已经成交
-        List<Integer> ordreCodeList = List.of(OrderConsts.OrderStatus.DELIVERY_ING.getCode(), OrderConsts.OrderStatus.ERROR.getCode(), OrderConsts.OrderStatus.DELIVERY_END.getCode(), OrderConsts.OrderStatus.TRANSIT.getCode());
-        Optional<TradeOrderBO> tradeOrderBOOptional = tradeOrderBOList.stream().filter(e -> Objects.equals(TradeOrderConsts.TradeStatus.SUCCESS.getCode(), e.getStatus())).findFirst();
-        if (ordreCodeList.contains(orderBO.getStatus())) {
-            //
-            OrderParam orderParam = new OrderParam().setStatus(OrderConsts.OrderStatus.CHASE_ORDER.getCode())
-                    .setSubStatus(OrderConsts.OrderSubStatus.DELIVERY_ING_BACK.getCode())
-                    .setUpdateTime(DateUtil.date()).setRevokeType(revokeCode);
-            if (Objects.nonNull(orderBO.getSendTime())) {
-                orderParam.setSubStatus(OrderConsts.OrderSubStatus.DELIVERY_END_BACK.getCode());
-            }
-            orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderCode));
-            // 退还保证金
-            companyCapitalFacade.unFreeze(new CompanyCapitalLogParam().setCompanyId(hangingOrderBO.getLastCompeteCompany()).setUpdateTime(DateUtil.date()).setAddAmount(companyCapitalBizService.calAmount(orderBO.getQuantity()))
-                    .setOrderNo(orderBO.getOrderCode()).setType(CompanyCapitalConsts.LogTypes.ORDER.getCode()).setTradeId(tradeOrderBOOptional.get().getId()));
-            // 提供追单资金
-            BigDecimal amount = Objects.nonNull(orderBO.getShipmentsTime()) ? AdminConsts.REVOKE_AMOUNT_SHIPMENTS : AdminConsts.REVOKE_AMOUNT;
-            CompanyCapitalLogParam capitalDetailParam = new CompanyCapitalLogParam().setOutAmount(BigDecimal.ZERO)
-                    .setOrderNo(orderBO.getOrderCode()).setCompanyId(hangingOrderBO.getLastCompeteCompany()).setAddAmount(amount)
-                    .setType(CompanyCapitalConsts.LogTypes.CHASE.getCode());
-            companyCapitalFacade.changeAvailable(capitalDetailParam);
-            // imei 撤销
-            imeiFacade.update(new ImeiParam().setActivated(ImeiConsts.Activated.CANCEL.getCode()), new ImeiQuery().setOrderId(orderCode));
-            // 发送追单消息
-            RouteSubscribeBO routeSubscribeBO = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setOrderCode(orderCode));
-            sendMessage(revokeCode, Objects.nonNull(routeSubscribeBO) ? routeSubscribeBO.getLogisticsNo() : "", orderBO, tradeOrderBOOptional.get());
+
+        if (!isTradeConfirmed(tradeOrderBOList)) {
+            revokeBeforeConfirm(orderBO, hangingOrderBO, tradeOrderBOList, revokeCode);
             return;
+        }
+
+        revokeAfterConfirm(orderBO, hangingOrderBO, tradeOrderBOList, revokeCode);
+    }
+
+    /**
+     * 还没挂单，直接撤销
+     */
+    private void revokeWithoutHanging(OrderBO orderBO, Integer revokeCode) {
+        orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(OrderConsts.OrderSubStatus.REVOKE_NEW.getCode())
+                .setRevokeType(revokeCode).setUpdateTime(DateUtil.date()), new OrderQuery().setOrderCode(orderBO.getOrderCode()));
+        rejectJkyIfNeeded(orderBO);
+    }
+
+    /**
+     * 追单1：已挂单，还没人抢单
+     */
+    private void revokeBeforeTrade(OrderBO orderBO, HangingOrderBO hangingOrderBO, Integer revokeCode) {
+        expireHangingOrder(hangingOrderBO);
+        expireOrder(orderBO.getOrderCode(), OrderConsts.OrderSubStatus.REVOKE_TRADING.getCode(), revokeCode);
+        rejectJkyIfNeeded(orderBO);
+    }
+
+    /**
+     * 追单2：已抢单，还没成交
+     */
+    private void revokeBeforeConfirm(OrderBO orderBO, HangingOrderBO hangingOrderBO, List<TradeOrderBO> tradeOrderBOList, Integer revokeCode) {
+        expireTradeOrders(hangingOrderBO);
+        expireHangingOrder(hangingOrderBO);
+        expireOrder(orderBO.getOrderCode(), OrderConsts.OrderSubStatus.REVOKE_TRADING.getCode(), revokeCode);
+        refundDeposits(tradeOrderBOList, orderBO, hangingOrderBO);
+        rejectJkyIfNeeded(orderBO);
+    }
+
+    /**
+     * 追单3：已成交
+     */
+    private void revokeAfterConfirm(OrderBO orderBO, HangingOrderBO hangingOrderBO, List<TradeOrderBO> tradeOrderBOList, Integer revokeCode) {
+        List<Integer> ordreCodeList = List.of(OrderConsts.OrderStatus.DELIVERY_ING.getCode(), OrderConsts.OrderStatus.ERROR.getCode(), OrderConsts.OrderStatus.DELIVERY_END.getCode(), OrderConsts.OrderStatus.TRANSIT.getCode());
+        if (!ordreCodeList.contains(orderBO.getStatus())) {
+            return;
+        }
+        TradeOrderBO confirmedTrade = tradeOrderBOList.stream().filter(e -> Objects.equals(TradeOrderConsts.TradeStatus.SUCCESS.getCode(), e.getStatus())).findFirst().orElse(null);
+        if (Objects.isNull(confirmedTrade)) {
+            return;
+        }
+        OrderParam orderParam = new OrderParam().setStatus(OrderConsts.OrderStatus.CHASE_ORDER.getCode())
+                .setSubStatus(OrderConsts.OrderSubStatus.DELIVERY_ING_BACK.getCode())
+                .setUpdateTime(DateUtil.date()).setRevokeType(revokeCode);
+        if (Objects.nonNull(orderBO.getSendTime())) {
+            orderParam.setSubStatus(OrderConsts.OrderSubStatus.DELIVERY_END_BACK.getCode());
+        }
+        orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));
+
+        companyCapitalFacade.unFreeze(new CompanyCapitalLogParam().setCompanyId(hangingOrderBO.getLastCompeteCompany()).setUpdateTime(DateUtil.date()).setAddAmount(companyCapitalBizService.calAmount(orderBO.getQuantity()))
+                .setOrderNo(orderBO.getOrderCode()).setType(CompanyCapitalConsts.LogTypes.ORDER.getCode()).setTradeId(confirmedTrade.getId()));
+
+        imeiFacade.update(new ImeiParam().setActivated(ImeiConsts.Activated.CANCEL.getCode()), new ImeiQuery().setOrderId(orderBO.getOrderCode()));
+
+        RouteSubscribeBO routeSubscribeBO = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setOrderCode(orderBO.getOrderCode()));
+        sendMessage(revokeCode, Objects.nonNull(routeSubscribeBO) ? routeSubscribeBO.getLogisticsNo() : "", orderBO, confirmedTrade);
+    }
+
+    private boolean isTradeConfirmed(List<TradeOrderBO> tradeOrderBOList) {
+        return tradeOrderBOList.stream().anyMatch(e -> Objects.equals(TradeOrderConsts.TradeStatus.SUCCESS.getCode(), e.getStatus()));
+    }
+
+    private void expireHangingOrder(HangingOrderBO hangingOrderBO) {
+        hangingOrderFacade.update(new HangingOrderParam().setStatus(HandingOrderConsts.Status.FAILURE.getCode()), new HangingOrderQuery().setId(hangingOrderBO.getId()));
+    }
+
+    private void expireTradeOrders(HangingOrderBO hangingOrderBO) {
+        tradeOrderFacade.update(new TradeOrderParam().setStatus(TradeOrderConsts.TradeStatus.EXPIRED.getCode()),
+                new TradeOrderQuery().setOrderId(hangingOrderBO.getOrderId()).setHangOrderId(hangingOrderBO.getId()));
+    }
+
+    private void expireOrder(String orderCode, Integer subStatus, Integer revokeCode) {
+        orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.REVOKE.getCode()).setSubStatus(subStatus)
+                .setUpdateTime(DateUtil.date()).setRevokeType(revokeCode), new OrderQuery().setOrderCode(orderCode));
+    }
+
+    private void refundDeposits(List<TradeOrderBO> tradeOrderBOList, OrderBO orderBO, HangingOrderBO hangingOrderBO) {
+        for (TradeOrderBO tradeOrderBO : tradeOrderBOList) {
+            tradeOrderFacade.update(new TradeOrderParam().setStatus(TradeOrderConsts.TradeStatus.TAKEN.getCode()), new TradeOrderQuery().setId(tradeOrderBO.getId()));
+            companyCapitalFacade.unFreeze(new CompanyCapitalLogParam().setCompanyId(tradeOrderBO.getTradeCompanyId()).setUpdateTime(tradeOrderBO.getUpdateTime()).setAddAmount(companyCapitalBizService.calAmount(orderBO.getQuantity()))
+                    .setOrderNo(hangingOrderBO.getOrderId()).setType(CompanyCapitalConsts.LogTypes.ORDER.getCode()).setTradeId(tradeOrderBO.getId()));
         }
     }
 
@@ -406,7 +438,7 @@ public class OrderBizService {
                     ">内部单号：<font color='info'>" + orderBo.getOrderCode() + "</font>\r\n" +
                     ">物流单号：<font color='info'>" + logisticsNo + "</font>\r\n" +
                     ">地址信息：<font color='info'>" + orderBo.getAddressee() + " " + orderBo.getPhone() + " " + orderBo.getReceivingAddress() + "</font>\r\n" +
-                    ">旺店通单号：<font color='info'>" + orderBo.getErpOrderId() + "</font>\r\n" +
+                    ">吉客云单号：<font color='info'>" + orderBo.getErpOrderId() + "</font>\r\n" +
                     ">原始单号：<font color='info'>" + orderBo.getOriginalOrderId() + "</font>\r\n" +
                     ">供应商：<font color='info'>" + tradeOrderBO.getTradeNickName() + "</font>\r\n";
             QWRobotUtil.sendMarkdownMsg(uncollectedKey, sb);
@@ -416,68 +448,46 @@ public class OrderBizService {
     /**
      * 代发订单吉客云驳回
      */
-    private void rejectJkyIfNeeded(OrderBO orderBO ) {
+    private void rejectJkyIfNeeded(OrderBO orderBO) {
         if (Objects.nonNull(orderBO)
-                && Objects.equals(orderBO.getOrderType(), OrderConsts.OrderType.O2O.getCode())
-                && StrUtil.isNotBlank(orderBO.getErpOrderId())) {
+                && Objects.equals(orderBO.getOrderType(), OrderConsts.OrderType.O2O.getCode())) {
+            String tradeNo = StrUtil.blankToDefault(orderBO.getJkyTradeNo(), orderBO.getErpOrderId());
+            if (StrUtil.isBlank(tradeNo)) {
+                return;
+            }
             RejectParam rejectParam = new RejectParam();
-            rejectParam.setTradeNos(JacksonUtil.toJson(Collections.singleton(orderBO.getErpOrderId())));
+            rejectParam.setTradeNos(Collections.singletonList(orderBO.getJkyTradeNo()));
             jkyTemplate.reject(rejectParam);
         }
     }
 
     /**
      * 订单报价
-     *
-     * @param ruleForm
      */
     @Transactional
     public void quotation(final RuleForm ruleForm, Long userId) {
-
 
         OrderBO orderBo = orderFacade.getOne(new OrderQuery().setOrderCode(ruleForm.getOrderCode()));
         if (Objects.isNull(orderBo)) {
             throw new ServiceException("订单异常");
         }
 
-        RuleParam ruleParam = RuleConvert.INSTANCE.toParam(ruleForm).setSkuCode(orderBo.getSkuCode()).setSkuName(orderBo.getSkuName()).setCreateBy(userId)
-                .setBrand(orderBo.getBrand()).setProductName(orderBo.getProductName()).setCategory(orderBo.getCategory()).setStatus(RuleConsts.Status.NORMAL.getCode());
+        // 检查是否已有有效报价，防止重复
+        HangingOrderBO existingHanging = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(ruleForm.getOrderCode()).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
+        if (Objects.nonNull(existingHanging)) {
+            throw new ServiceException("该订单已报价，请勿重复操作");
+        }
+
+        RuleParam ruleParam = RuleConvert.INSTANCE.toParam(ruleForm)
+                .setSkuCode(orderBo.getSkuCode())
+                .setCreateBy(userId)
+                .setStatus(RuleConsts.Status.NORMAL.getCode());
         if (ruleParam.getRuleRange() == RuleConsts.Range.PROVINCE.getCode()) {
             ruleParam.setProvince(orderBo.getProvince());
         }
-        //保存规则
-        RuleBO ruleBO = ruleBizService.saveOrUpdate(ruleParam);
-        // 更新报价
-        this.changeHanging(orderBo.getOrderCode());
-        //执行规则
-        ruleBizService.execute(ruleBO);
-    }
 
-    /**
-     * 修改订单报价状态
-     *
-     * @param orderCode
-     */
-    @Transactional
-    private void changeHanging(String orderCode) {
-        if (StrUtil.isEmpty(orderCode)) {
-            return;
-        }
-        HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(orderCode).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
-        if (Objects.isNull(hangingOrderBO)) {
-            return;
-        }
-        // 判断是否被其他人接单
-        long count = tradeOrderFacade.count(new TradeOrderQuery().setOrderId(orderCode).setHangOrderId(hangingOrderBO.getId()));
-        if (count > 0) {
-            return;
-        }
-        // 修改挂单
-        hangingOrderFacade.update(new HangingOrderParam().setStatus(HandingOrderConsts.Status.FAILURE.getCode()),
-                new HangingOrderQuery().setOrderId(orderCode).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
-        // 修改订单状态
-        orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.WAIT.getCode()),
-                new OrderQuery().setOrderCode(orderCode));
+        RuleBO ruleBO = ruleBizService.saveOrUpdate(ruleParam);
+        ruleBizService.execute(ruleBO);
     }
 
 
@@ -885,27 +895,6 @@ public class OrderBizService {
     }
 
     /**
-     * 按照原始单号撤销
-     *
-     * @param revokeOriParam
-     */
-    public void revokeOriginalList(RevokeOriParam revokeOriParam) {
-        for (String originalOrderId : revokeOriParam.getOriginalOrderIdList()) {
-            if (StrUtil.isBlank(originalOrderId)) {
-                continue;
-            }
-            List<OrderBO> list = orderFacade.list(new OrderQuery().setOriginalOrderId(originalOrderId));
-            if (CollectionUtil.isEmpty(list)) {
-                continue;
-            }
-            for (OrderBO orderBO : list) {
-                revoke(orderBO.getOrderCode(), revokeOriParam.getRevokeCode());
-            }
-        }
-
-    }
-
-    /**
      * 按照原始单号处理吉客云售后。
      */
     public int revokeJkyRefund(final String originalOrderId, final Integer revokeCode) {
@@ -929,6 +918,39 @@ public class OrderBizService {
 
     public PageBO<AllOrderVO> allList(AllOrderForm allOrderForm, PageParamV2 pageParamV2) {
         OrderQuery orderQuery = OrderConvert.INSTANCE.allParamToQuery(allOrderForm);
+
+        // 供应商名称过滤：先查成交订单获取匹配的orderCode
+        if (StrUtil.isNotBlank(allOrderForm.getSupplierName())) {
+            List<TradeOrderBO> tradeOrders = tradeOrderFacade.list(
+                    new TradeOrderQuery().setTradeNickName(allOrderForm.getSupplierName()));
+            if (CollectionUtil.isEmpty(tradeOrders)) {
+                return new PageBO<>(new ArrayList<>(), 0L);
+            }
+            List<String> supplierOrderCodes = tradeOrders.stream()
+                    .map(TradeOrderBO::getOrderId).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(orderQuery.getOrderCodeList())) {
+                supplierOrderCodes.retainAll(orderQuery.getOrderCodeList());
+            }
+            orderQuery.setOrderCodeList(supplierOrderCodes);
+        }
+
+        // 串码过滤：先查串码表获取匹配的orderCode
+        if (StrUtil.isNotBlank(allOrderForm.getSn())) {
+            List<ImeiBO> imeiList = imeiFacade.list(new ImeiQuery().setSn(allOrderForm.getSn()));
+            if (CollectionUtil.isEmpty(imeiList)) {
+                return new PageBO<>(new ArrayList<>(), 0L);
+            }
+            List<String> imeiOrderCodes = imeiList.stream()
+                    .map(ImeiBO::getOrderId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+            if (CollectionUtil.isEmpty(imeiOrderCodes)) {
+                return new PageBO<>(new ArrayList<>(), 0L);
+            }
+            if (CollectionUtil.isNotEmpty(orderQuery.getOrderCodeList())) {
+                imeiOrderCodes.retainAll(orderQuery.getOrderCodeList());
+            }
+            orderQuery.setOrderCodeList(imeiOrderCodes);
+        }
+
         PageBO<OrderBO> pageBO = orderFacade.listPage(orderQuery, pageParamV2);
 
         List<AllOrderVO> allOrderVOList = OrderConvert.INSTANCE.toAllOrderVOList(pageBO.getData());
@@ -955,7 +977,41 @@ public class OrderBizService {
 
 
     public List<AllOrderVO> allListExport(AllOrderForm allOrderForm) {
-        List<OrderBO> orderBOList = orderFacade.list(OrderConvert.INSTANCE.allParamToQuery(allOrderForm));
+        OrderQuery orderQuery = OrderConvert.INSTANCE.allParamToQuery(allOrderForm);
+
+        // 供应商名称过滤
+        if (StrUtil.isNotBlank(allOrderForm.getSupplierName())) {
+            List<TradeOrderBO> tradeOrders = tradeOrderFacade.list(
+                    new TradeOrderQuery().setTradeNickName(allOrderForm.getSupplierName()));
+            if (CollectionUtil.isEmpty(tradeOrders)) {
+                return new ArrayList<>();
+            }
+            List<String> supplierOrderCodes = tradeOrders.stream()
+                    .map(TradeOrderBO::getOrderId).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(orderQuery.getOrderCodeList())) {
+                supplierOrderCodes.retainAll(orderQuery.getOrderCodeList());
+            }
+            orderQuery.setOrderCodeList(supplierOrderCodes);
+        }
+
+        // 串码过滤：先查串码表获取匹配的orderCode
+        if (StrUtil.isNotBlank(allOrderForm.getSn())) {
+            List<ImeiBO> imeiList = imeiFacade.list(new ImeiQuery().setSn(allOrderForm.getSn()));
+            if (CollectionUtil.isEmpty(imeiList)) {
+                return new ArrayList<>();
+            }
+            List<String> imeiOrderCodes = imeiList.stream()
+                    .map(ImeiBO::getOrderId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+            if (CollectionUtil.isEmpty(imeiOrderCodes)) {
+                return new ArrayList<>();
+            }
+            if (CollectionUtil.isNotEmpty(orderQuery.getOrderCodeList())) {
+                imeiOrderCodes.retainAll(orderQuery.getOrderCodeList());
+            }
+            orderQuery.setOrderCodeList(imeiOrderCodes);
+        }
+
+        List<OrderBO> orderBOList = orderFacade.list(orderQuery);
 
         List<AllOrderVO> allOrderVOList = OrderConvert.INSTANCE.toAllOrderVOList(orderBOList);
         // 完善省市

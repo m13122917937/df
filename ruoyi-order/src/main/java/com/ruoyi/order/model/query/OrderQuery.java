@@ -41,6 +41,11 @@ public class OrderQuery {
     @QueryField(operator = DynamicCondition.Operator.IN, field = "erp_order_id")
     private List<String> erpOrderIdList;
 
+    /**
+     * 吉客云唯一单号（jy开头）
+     */
+    private String jkyTradeNo;
+
     @QueryField(operator = DynamicCondition.Operator.IN, field = "original_order_id")
     private List<String> originalOrderIdList;
 
@@ -52,13 +57,18 @@ public class OrderQuery {
      * 采购类型（1:批量采购，2:一件代发,3:接龙抢单,4:群接龙,5:采购入仓,6:预付采购）
      */
     private Integer orderType;
+
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "order_type")
+    private List<Integer> orderTypeList;
     /**
      * 店铺名
      */
+    @QueryField(operator = DynamicCondition.Operator.LIKE, field = "shop_name")
     private String shopName;
     /**
      * 付款主体id
      */
+    @QueryField(operator = DynamicCondition.Operator.EQ, field = "payer_id")
     private Long payerId;
 
     /**
@@ -104,6 +114,7 @@ public class OrderQuery {
     /**
      * 品牌
      */
+    @QueryField(operator = DynamicCondition.Operator.LIKE, field = "brand")
     private String brand;
 
     /**
@@ -115,10 +126,12 @@ public class OrderQuery {
     /**
      * 产品型号
      */
+    @QueryField(operator = DynamicCondition.Operator.LIKE, field = "product_name")
     private String productName;
     /**
      * 产品型号
      */
+    @QueryField(operator = DynamicCondition.Operator.LIKE, field = "sku_name")
     private String skuName;
 
     /**
