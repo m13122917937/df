@@ -24,4 +24,10 @@ public class WarehousingOrderParam {
 
     private Long deliveryCode;
 
+
+    private String payerName;
+
+
+    private Long createBy;
+
 }

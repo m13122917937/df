@@ -13,6 +13,7 @@ import com.ruoyi.bill.facade.IPayerFacade;
 import com.ruoyi.bill.model.bo.PayerBO;
 import com.ruoyi.bill.model.query.PayerQuery;
 import com.ruoyi.biz.bill.BillBizService;
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.exception.ServiceException;
@@ -22,6 +23,7 @@ import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.express.model.consts.LogisticsCode;
 import com.ruoyi.jky.JkyTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.jky.rep.stock.StockCreateAndStockInRep;
@@ -64,8 +66,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.excel.EasyExcel;
+import com.ruoyi.web.form.order.WarehousingImportResult;
+import com.ruoyi.web.form.order.WarehousingImportRowResult;
+import com.ruoyi.web.form.order.WarehousingImportVO;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -115,9 +124,10 @@ public class WarehousingOrderBizService {
      */
     public PageBO<WarehousingOrderVO> orderList(WarehousingOrderParam warehousingOrderParam, PageParamV2 pageParamV2) {
         DateTime dateTime = DateUtil.offsetDay(DateUtil.date(), -15);
-        OrderQuery orderQuery = new OrderQuery().setProductNameLike(warehousingOrderParam.getProductName()).setStatusList(warehousingOrderParam.getStatusList())
+        OrderQuery orderQuery = new OrderQuery().setProductName(warehousingOrderParam.getProductName()).setStatusList(warehousingOrderParam.getStatusList())
                 .setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode()).setDeliveryCode(warehousingOrderParam.getDeliveryCode())
-                .setCompanyId(warehousingOrderParam.getCompanyId()).setBrand(warehousingOrderParam.getBrand()).setCreateTime(dateTime).setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode());
+                .setCompanyId(warehousingOrderParam.getCompanyId()).setBrand(warehousingOrderParam.getBrand()).setCreateTime(dateTime).setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode())
+                .setPayerName(warehousingOrderParam.getPayerName()).setCreateBy(warehousingOrderParam.getCreateBy());
         PageBO<CompanyOrderBO> companyOrderBOPageBO = orderFacade.companyListPage(orderQuery, pageParamV2);
         List<WarehousingOrderVO> vo = WarehousingConvert.INSTANCE.toVO(companyOrderBOPageBO.getData());
         Set<Long> userIds = vo.stream().map(e -> Convert.toLong(e.getCreateBy())).collect(Collectors.toSet());
@@ -303,7 +313,7 @@ public class WarehousingOrderBizService {
     private Integer pickingWithoutSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser) throws IOException {
         Integer quantity = pickingOrderForm.getQuantity() + tradeOrderBO.getQuantity();
         Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
-        // TODO: 旺店通已移除，原 createStockIn 调用已删除
+        // 已切换至吉客云，原 createStockIn 调用已删除
         createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getQuantity(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
         updatePickingQuantity(pickingOrderForm.getOrderCode(), quantity);
         return quantity;
@@ -401,7 +411,128 @@ public class WarehousingOrderBizService {
         return StrUtil.blankToDefault(sysUser.getNickName(), sysUser.getUserName());
     }
 
-    // TODO: 旺店通已移除，原 createStockIn / builderStockIn 方法已删除
+    // 已切换至吉客云，原 createStockIn / builderStockIn 方法已删除
+
+    /**
+     * 下载导入模板
+     */
+    public void downloadTemplate(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("入仓订单导入模板", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), WarehousingImportVO.class).sheet("模板").doWrite(new ArrayList<>());
+    }
+
+    /**
+     * 校验导入文件，逐行检查数据合法性
+     */
+    @SuppressWarnings("unchecked")
+    public WarehousingImportResult importValidate(MultipartFile file) {
+        List<WarehousingImportVO> list;
+        try {
+            list = (List<WarehousingImportVO>) (List<?>) EasyExcel.read(file.getInputStream())
+                    .head(WarehousingImportVO.class).sheet().doReadSync();
+        } catch (IOException e) {
+            log.error("读取导入文件失败", e);
+            throw new ServiceException("读取文件失败");
+        }
+        List<WarehousingImportRowResult> rowResults = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            rowResults.add(validateRow(list.get(i), i));
+        }
+        WarehousingImportResult result = new WarehousingImportResult();
+        result.setTotalCount(list.size());
+        result.setSuccessCount((int) rowResults.stream().filter(WarehousingImportRowResult::getSuccess).count());
+        result.setErrorCount((int) rowResults.stream().filter(r -> !r.getSuccess()).count());
+        result.setRows(rowResults);
+        return result;
+    }
+
+    /**
+     * 逐行校验并转换
+     */
+    private WarehousingImportRowResult validateRow(WarehousingImportVO row, int index) {
+        WarehousingImportRowResult r = new WarehousingImportRowResult()
+                .setRowIndex(index + 1).setSkuCode(row.getSkuCode()).setCompanyName(row.getCompanyName())
+                .setQuantity(row.getQuantity()).setPrice(row.getPrice())
+                .setAccountingPeriod(row.getAccountingPeriod()).setPayerName(row.getPayerName()).setRemark(row.getRemark());
+        List<String> errors = new ArrayList<>();
+
+        if (StrUtil.isBlank(row.getSkuCode())) {
+            errors.add("SKU编码不能为空");
+        } else if (productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(row.getSkuCode())) == null) {
+            errors.add("SKU编码不存在");
+        }
+        if (StrUtil.isBlank(row.getCompanyName())) {
+            errors.add("供应商名称不能为空");
+        } else if (companyFacade.queryOne(new CompanyQuery().setCompanyName(row.getCompanyName())) == null) {
+            errors.add("供应商名称不存在");
+        }
+        if (StrUtil.isBlank(row.getPayerName())) {
+            errors.add("付款主体名称不能为空");
+        } else if (payerFacade.getOne(new PayerQuery().setPayName(row.getPayerName()).setActived(PayerConsts.Activated.ACTIVATED.getCode())) == null) {
+            errors.add("付款主体名称不存在或已弃用");
+        }
+        if (row.getQuantity() == null || row.getQuantity() <= 0) {
+            errors.add("数量必须大于0");
+        }
+        if (row.getPrice() == null || row.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            errors.add("单价不能为空且不能小于0");
+        }
+        if (row.getAccountingPeriod() == null || row.getAccountingPeriod() < 0) {
+            errors.add("账期不能为空且不能小于0");
+        }
+
+        if (errors.isEmpty()) {
+            r.setSuccess(true);
+        } else {
+            r.setSuccess(false);
+            r.setErrorMessage(String.join("; ", errors));
+        }
+        return r;
+    }
+
+    /**
+     * 导入并创建入仓订单（先校验后导入，校验通过的行整体导入）
+     */
+    @SuppressWarnings("unchecked")
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResult importFromExcel(MultipartFile file, LoginUser loginUser) {
+        List<WarehousingImportVO> list;
+        try {
+            list = (List<WarehousingImportVO>) (List<?>) EasyExcel.read(file.getInputStream())
+                    .head(WarehousingImportVO.class).sheet().doReadSync();
+        } catch (IOException e) {
+            log.error("读取导入文件失败", e);
+            return AjaxResult.error("读取文件失败");
+        }
+        int successCount = 0;
+        for (int i = 0; i < list.size(); i++) {
+            WarehousingImportVO row = list.get(i);
+            WarehousingSaveParam param = convertToSaveParam(row);
+            save(param, loginUser);
+            successCount++;
+        }
+        return AjaxResult.success("导入成功" + successCount + "条");
+    }
+
+    /**
+     * 将导入行转换为保存参数
+     */
+    private WarehousingSaveParam convertToSaveParam(WarehousingImportVO row) {
+        CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setCompanyName(row.getCompanyName()));
+        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setPayName(row.getPayerName()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
+        WarehousingSaveParam param = new WarehousingSaveParam();
+        param.setSkuCode(row.getSkuCode());
+        param.setQuantity(row.getQuantity());
+        param.setPrice(row.getPrice());
+        param.setCompanyId(companyBO.getId());
+        param.setAccountingPeriod(row.getAccountingPeriod());
+        param.setPayerId(payerBO.getId());
+        param.setRemark(row.getRemark());
+        return param;
+    }
 }
 
 

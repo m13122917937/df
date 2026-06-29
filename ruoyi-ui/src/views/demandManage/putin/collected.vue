@@ -21,6 +21,8 @@
         :show-product-name-like="true"
         :show-sku-name-like="false"
         :show-company="true"
+        :show-payer-name="true"
+        :show-create-by="true"
         :product-name-like-row2="true"
         @search="handleSearch"
         @reset="handleReset"
@@ -223,7 +225,9 @@ export default {
       // 搜索表单
       searchParams: {
         productNameLike: '',
-        companyId: ''
+        companyId: '',
+        payerName: '',
+        createBy: ''
       },
       pagination: {
         current: 1,
@@ -277,6 +281,8 @@ export default {
         brand: this.selectedBrand,
         companyId: this.searchParams.companyId,
         productName: this.searchParams.productNameLike,
+        payerName: this.searchParams.payerName,
+        createBy: this.searchParams.createBy,
         statusList: [this.currentStatus]
       }, {
         pageNum: this.pagination.current,

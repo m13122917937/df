@@ -7,6 +7,7 @@
     <resultMap type="Order" id="OrderResult">
         <result property="orderCode" column="order_code"/>
         <result property="erpOrderId" column="erp_order_id"/>
+        <result property="jkyTradeNo" column="jky_trade_no"/>
         <result property="originalOrderId" column="original_order_id"/>
         <result property="orderType" column="order_type"/>
         <result property="shopName" column="shop_name"/>
@@ -192,6 +193,12 @@
             </if>
             <if test="skuName != null and skuName!=''">
                 and o.sku_name like concat('%',#{skuName},'%')
+            </if>
+            <if test="payerName != null and payerName!=''">
+                and o.payer_name like concat('%',#{payerName},'%')
+            </if>
+            <if test="createBy != null">
+                and oto.update_by = #{createBy}
             </if>
             <if test="sendStartTime!=null">
                 and o.shipments_time>= #{sendStartTime}

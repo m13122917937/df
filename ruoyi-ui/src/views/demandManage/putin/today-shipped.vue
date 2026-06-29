@@ -21,12 +21,15 @@
         :show-product-name-like="true"
         :show-sku-name-like="false"
         :show-company="true"
+        :show-payer-name="true"
+        :show-create-by="true"
         :product-name-like-row2="true"
         @search="handleSearch"
         @reset="handleReset"
       >
         <template #toolbar>
           <el-button type="primary" @click="$refs.newOrderDialog.open()">新建订单</el-button>
+          <el-button type="success" @click="$refs.importOrderDialog.open()">导入Excel</el-button>
         </template>
       </SearchSection>
         <!-- 订单表格 -->
@@ -210,6 +213,7 @@
     />
 
     <NewOrderDialog ref="newOrderDialog" @created="onNewOrderCreated" />
+    <ImportOrderDialog ref="importOrderDialog" @imported="onImportCompleted" />
     <CopyDialog :visible.sync="copyDialogVisible" :data="copyDialogData" />
 
     <!-- 修改物流弹窗 -->
@@ -238,6 +242,7 @@ import ImeiDialog from './components/ImeiDialog'
 import BrandFilter from './components/brandFilter'
 import SearchSection from '@/views/demandManage/wholesale/components/searchSection.vue'
 import NewOrderDialog from './components/NewOrderDialog'
+import ImportOrderDialog from './components/ImportOrderDialog'
 import CopyDialog from './components/CopyDialog'
 import { getPutinList, putinRevokeOrder, getProductBrandList, getProductNameList, getSkuList, saveOrder, updateTracking } from '@/api/putin'
 import { getBusinessCompanyListApi } from '@/api/business'
@@ -251,6 +256,7 @@ export default {
     BrandFilter,
     SearchSection,
     NewOrderDialog,
+    ImportOrderDialog,
     CopyDialog
   },
   data() {
@@ -263,7 +269,9 @@ export default {
       // 搜索表单
       searchParams: {
         productNameLike: '',
-        companyId: ''
+        companyId: '',
+        payerName: '',
+        createBy: ''
       },
       pagination: {
         current: 1,
@@ -341,6 +349,8 @@ export default {
         brand: this.selectedBrand,
         companyId: this.searchParams.companyId,
         productName: this.searchParams.productNameLike,
+        payerName: this.searchParams.payerName,
+        createBy: this.searchParams.createBy,
         statusList: [this.currentStatus]
       }, {
         pageNum: this.pagination.current,
@@ -771,6 +781,17 @@ export default {
     // called when NewOrderDialog emits created
     onNewOrderCreated(res) {
       // refresh list and brand filter
+      this.fetchOrderList()
+      if (this.$refs.brandFilter && typeof this.$refs.brandFilter.getBrandData === 'function') {
+        try {
+          this.$refs.brandFilter.getBrandData()
+        } catch (err) {
+          console.warn('刷新 BrandFilter 失败', err)
+        }
+      }
+    },
+    // called when ImportOrderDialog emits imported
+    onImportCompleted() {
       this.fetchOrderList()
       if (this.$refs.brandFilter && typeof this.$refs.brandFilter.getBrandData === 'function') {
         try {

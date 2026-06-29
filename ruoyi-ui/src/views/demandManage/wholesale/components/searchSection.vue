@@ -154,6 +154,41 @@
             </div>
           </div>
 
+          <div v-if="showPayerName" class="search-item">
+            <label class="search-label">付款主体</label>
+            <div class="search-input-wrapper">
+              <el-input
+                v-model="payerNameValue"
+                placeholder="请输入付款主体"
+                @keyup.enter.native="handleSearch"
+                clearable
+                class="search-input"
+                prefix-icon="el-icon-search"
+              />
+            </div>
+          </div>
+
+          <div v-if="showCreateBy" class="search-item">
+            <label class="search-label">采购人</label>
+            <div class="search-input-wrapper">
+              <el-select
+                v-model="createByValue"
+                placeholder="请选择采购人"
+                clearable
+                filterable
+                remote
+                reserve-keyword
+                :remote-method="onUserRemote"
+                :loading="userLoading"
+                @visible-change="onUserVisible"
+                @change="onUserChange"
+                class="search-select"
+              >
+                <el-option v-for="u in userOptions" :key="u.value" :label="u.label" :value="u.value" />
+              </el-select>
+            </div>
+          </div>
+
           <div class="search-item" v-if="showEmpty">
             <label class="search-label placeholder-label"></label>
             <div class="search-input-wrapper"></div>
@@ -192,6 +227,7 @@
 
 <script>
 import { getBusinessCompanyListApi } from "@/api/business";
+import { listUser } from "@/api/system/user";
 export default {
   name: "SearchSection",
   props: {
@@ -274,6 +310,16 @@ export default {
       type: [String, Number],
       default: undefined,
     },
+    // 付款主体搜索
+    showPayerName: {
+      type: Boolean,
+      default: false,
+    },
+    // 采购人搜索
+    showCreateBy: {
+      type: Boolean,
+      default: false,
+    },
     // 商品名称是否显示在第二行（与供应商同行）
     productNameLikeRow2: {
       type: Boolean,
@@ -303,6 +349,10 @@ export default {
       companyOptions: [],
       companyLoading: false,
       companyValue: this.companyId,
+      payerNameValue: '',
+      createByValue: '',
+      userOptions: [],
+      userLoading: false,
     };
   },
   computed: {
@@ -391,6 +441,12 @@ export default {
       if (this.showCompany) {
         searchData.companyId = this.companyValue;
       }
+      if (this.showPayerName) {
+        searchData.payerName = this.payerNameValue;
+      }
+      if (this.showCreateBy) {
+        searchData.createBy = this.createByValue;
+      }
       if (
         this.showTime &&
         this.searchForm &&
@@ -413,6 +469,10 @@ export default {
       this.productNameLikeValue = "";
       this.skuNameLikeValue = "";
       this.companyValue = "";
+      this.payerNameValue = "";
+      this.createByValue = "";
+      this.userOptions = [];
+      this.userLoading = false;
       if (this.showTime && this.searchForm) {
         this.searchForm.dateRange = [];
       }
@@ -442,6 +502,12 @@ export default {
       }
       if (this.showCompany) {
         resetData.companyId = "";
+      }
+      if (this.showPayerName) {
+        resetData.payerName = "";
+      }
+      if (this.showCreateBy) {
+        resetData.createBy = "";
       }
 
       // clear local company input and options to avoid stale dropdown results after reset
@@ -484,6 +550,36 @@ export default {
     onCompanyChange(val) {
       this.companyValue = val;
       this.$emit('company-change', val);
+    },
+    // 采购人远程搜索
+    async onUserRemote(keyword) {
+      const trimmed = (keyword || "").trim();
+      this.userLoading = true;
+      try {
+        const params = { pageNum: 1, pageSize: 30 };
+        if (trimmed) params.nickName = trimmed;
+        const res = await listUser(params);
+        const list = res?.rows || res?.data || [];
+        this.userOptions = Array.isArray(list) ? list.map(item => ({
+          label: item.nickName,
+          value: item.userId,
+          raw: item
+        })) : [];
+      } catch (error) {
+        console.error('获取用户列表失败', error);
+        this.userOptions = [];
+      } finally {
+        this.userLoading = false;
+      }
+    },
+    onUserVisible(visible) {
+      if (visible && !this.userOptions.length) {
+        this.onUserRemote();
+      }
+    },
+    onUserChange(val) {
+      this.createByValue = val;
+      this.$emit('create-by-change', val);
     }
   },
 };
