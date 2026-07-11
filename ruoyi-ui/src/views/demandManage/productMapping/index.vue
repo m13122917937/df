@@ -19,29 +19,33 @@
 
     <!-- Main Content -->
     <div class="main-content">
-      <!-- Search (参照 wholesale searchSection 风格) -->
+      <!-- Search -->
       <div class="search-section">
-        <div class="search-toolbar">
-          <div class="toolbar-search">
-            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
+        <div class="search-content">
+          <div class="search-item">
+            <label class="search-label">商品名称</label>
             <el-input
               v-model.trim="query.productNameLike"
-              placeholder="搜索商品名称"
+              placeholder="请输入商品名称"
               clearable
-              size="small"
               class="search-input"
+              prefix-icon="el-icon-search"
               @keyup.enter.native="handleSearch"
             />
           </div>
-          <div class="toolbar-actions">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleSearch">
-              搜索
-            </el-button>
-            <el-button icon="el-icon-refresh-left" size="small" @click="handleReset">
+          <div class="search-actions">
+            <el-button
+              icon="el-icon-refresh"
+              @click="handleReset"
+            >
               重置
+            </el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-search"
+              @click="handleSearch"
+            >
+              搜索
             </el-button>
           </div>
         </div>
@@ -315,74 +319,45 @@ export default {
   gap: 12px;
 }
 
-/* ==================== Search Section (wholesale 风格) ==================== */
+/* ==================== Search Section ==================== */
 
 .search-section {
-  background: var(--bg-card);
-  border-radius: 16px;
-  box-shadow: var(--shadow-card);
   padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-tags);
+  box-shadow: var(--shadow-card);
   flex-shrink: 0;
 }
 
-.search-toolbar {
+.search-content {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
 }
 
-.toolbar-search {
+.search-item {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1.5px solid var(--adm-border);
-  background: var(--bg-hover);
-  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  width: 360px;
-  flex-shrink: 0;
-
-  &:focus-within {
-    border-color: #5B7CFA;
-    background: var(--bg-card);
-    box-shadow: 0 0 0 3px rgba(91,124,250,0.08);
-  }
 }
 
-.search-icon {
+.search-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #606266;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
 .search-input {
-  border: none;
-  background: transparent;
-  outline: none;
-  height: 36px;
-  font-size: 13px;
-  color: var(--adm-text-primary);
-  width: 100%;
-
-  &::placeholder {
-    color: var(--adm-text-tertiary);
-  }
+  width: 360px;
 }
 
-/* 覆盖 el-input 在自定义搜索框内的边框/背景 */
-.toolbar-search :deep(.el-input__inner) {
-  border: none !important;
-  background: transparent !important;
-  padding: 0;
-  height: 36px;
-  line-height: 36px;
-  box-shadow: none !important;
-}
-
-.toolbar-actions {
+.search-actions {
   display: flex;
-  align-items: center;
   gap: 8px;
-  margin-left: auto;
   flex-shrink: 0;
 }
 
