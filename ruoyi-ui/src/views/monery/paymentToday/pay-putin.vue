@@ -1347,14 +1347,14 @@ export default {
 
 <style scoped lang="scss">
 .payment-today {
-  padding: 20px;
+  padding: 0;
   display: flex;
   flex-direction: column;
   height: calc(100vh - 140px);
 }
 
 .search-section {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   padding: 12px 16px;
   background: var(--bg-card);
   border-radius: var(--radius);
@@ -1572,7 +1572,7 @@ export default {
 
 .table-section {
   background: #fff;
-  padding: 24px;
+  padding: 16px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #f0f0f0;
