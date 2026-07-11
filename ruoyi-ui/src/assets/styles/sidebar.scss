@@ -3,255 +3,47 @@
   .main-container {
     height: 100%;
     transition: margin-left .28s;
-    margin-left: $base-sidebar-width;
+    margin-left: var(--sidebar-expanded-width, 300px);
     position: relative;
   }
 
   .sidebarHide {
-    margin-left: 0!important;
+    margin-left: 0 !important;
   }
 
   .sidebar-container {
-    -webkit-transition: width .28s;
-    transition: width 0.28s;
-    width: $base-sidebar-width !important;
-    background-color: var(--bg-sidebar);
-    height: 100%;
+    width: var(--sidebar-expanded-width, 300px) !important;
+    background: var(--bg-sidebar);
     position: fixed;
-    font-size: 0px;
     top: 0;
     bottom: 0;
     left: 0;
     z-index: 1001;
     overflow: hidden;
     border-right: 1px solid var(--border-sidebar);
-    box-shadow: none;
+    transition: width 0.28s;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'HarmonyOS Sans', 'PingFang SC', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
 
-    .horizontal-collapse-transition {
-      transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out;
-    }
-
-    .scrollbar-wrapper {
-      overflow-x: hidden !important;
-    }
-
-    .el-scrollbar__bar.is-vertical {
-      right: 0px;
-    }
-
-    .el-scrollbar {
-      height: calc(100% - 44px);
-    }
-
-    &.has-logo {
-      .el-scrollbar {
-        height: calc(100% - 94px);
-      }
-    }
-
-    .is-horizontal {
-      display: none;
-    }
-
-    a {
-      display: inline-block;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .el-menu {
-      border: none;
-      height: 100%;
-      width: 100% !important;
-      background-color: transparent !important;
-    }
-
-    // ====== Menu Group Section Title ======
-    .menu-group-title {
-      padding: 20px 16px 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--adm-text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      user-select: none;
-    }
-
-    // ====== Menu Items ======
-    .el-menu-item, .el-submenu__title {
-      overflow: hidden !important;
-      white-space: nowrap !important;
-      font-size: 13px;
-      height: 44px;
-      line-height: 44px;
-      color: var(--menu-text);
-      padding: 0 16px !important;
-      margin: 0 8px;
-      border-radius: 12px;
-      width: auto !important;
-
-      &:hover {
-        background-color: var(--menu-hover-bg) !important;
-        color: var(--menu-hover-text);
-      }
-
-      .svg-icon {
-        margin-right: 10px;
-        font-size: 18px;
-      }
-
-      // Hide submenu arrow
-      .el-icon-arrow-down {
-        display: none;
-      }
-    }
-
-    .el-menu-item {
-      margin-bottom: 2px;
-
-      &.is-active {
-        color: var(--menu-active-text) !important;
-        background: var(--menu-active-bg) !important;
-        font-weight: 500;
-        position: relative;
-
-        &::before {
-          content: '';
-          position: absolute;
-          left: -8px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 4px;
-          height: 20px;
-          background: var(--menu-active-text);
-          border-radius: 0 4px 4px 0;
-        }
-      }
-    }
-
-    // submenu items
-    .el-submenu {
-      .el-menu-item {
-        padding-left: 42px !important;
-      }
-    }
-
-    // sidebar collapse toggle
-    .sidebar-collapse-toggle {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 44px;
+    .sidebar-panels {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 18px;
-      cursor: pointer;
-      color: var(--menu-text);
-      font-size: 13px;
-      border-top: 1px solid var(--border-sidebar);
-      transition: all 180ms;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'HarmonyOS Sans', 'PingFang SC', system-ui, sans-serif;
+      height: 100%;
+    }
 
-      &:hover {
-        background-color: var(--menu-hover-bg);
-        color: #5B7CFA;
-      }
-
-      .collapse-text {
-        white-space: nowrap;
-        overflow: hidden;
-      }
+    &.has-logo .sidebar-panels {
+      height: calc(100% - 56px);
     }
   }
 
   // ====== Collapsed Sidebar ======
   .hideSidebar {
     .sidebar-container {
-      width: 50px !important;
-
-      .menu-group-title {
-        display: none;
-      }
-
-      // When collapsed, el-menu gets el-menu--collapse class
-      .el-menu--collapse {
-        width: 50px;
-
-        // Submenu <li> needs same margin as .el-menu-item
-        .el-submenu {
-          margin: 0 4px;
-          width: auto !important;
-
-          > .el-submenu__title {
-            margin: 0;
-            padding: 0 !important;
-            border-radius: 10px;
-
-            // Make title-wrap fill the full collapsed item area
-            // so the native title tooltip has a complete hit target
-            .submenu-title-wrap {
-              width: 100%;
-              height: 44px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-          }
-        }
-
-        .el-menu-item,
-        .el-submenu__title {
-          margin: 0;
-          padding: 0 !important;
-          border-radius: 10px;
-          height: 44px;
-          line-height: 44px;
-          text-align: center;
-
-          &.is-active::before {
-            display: none;
-          }
-
-          .svg-icon {
-            margin: 0 !important;
-            font-size: 18px !important;
-            vertical-align: middle !important;
-            width: 18px !important;
-            height: 18px !important;
-          }
-
-          // Explicitly hide text in collapsed mode — matching Element UI's approach
-          // (visibility:hidden keeps text in DOM so tooltips can read it)
-          span {
-            visibility: hidden !important;
-            width: 0 !important;
-            height: 0 !important;
-            overflow: hidden !important;
-            display: inline-block !important;
-          }
-        }
-      }
+      width: var(--module-nav-width, 80px) !important;
     }
 
     .main-container {
-      margin-left: 50px;
+      margin-left: var(--module-nav-width, 80px);
     }
-
-    .sidebar-collapse-toggle {
-      justify-content: center;
-      padding: 0;
-    }
-  }
-
-  .el-menu--collapse .el-menu .el-submenu {
-    min-width: $base-sidebar-width !important;
   }
 
   // mobile responsive
@@ -262,14 +54,14 @@
 
     .sidebar-container {
       transition: transform .28s;
-      width: $base-sidebar-width !important;
+      width: var(--sidebar-expanded-width, 300px) !important;
     }
 
     &.hideSidebar {
       .sidebar-container {
         pointer-events: none;
         transition-duration: 0.3s;
-        transform: translate3d(-$base-sidebar-width, 0, 0);
+        transform: translate3d(calc(-1 * var(--sidebar-expanded-width, 300px)), 0, 0);
       }
     }
   }
@@ -282,9 +74,7 @@
   }
 }
 
-// when menu collapsed — popup menu on hover
-// .el-menu--vertical from top-level collapsed submenu
-// .el-menu--popup  from popper-append-to-body submenu
+// Popup menu styling (collapsed hover menus)
 .el-menu--vertical,
 .el-menu--popup {
   z-index: 9999 !important;
@@ -356,11 +146,6 @@
   }
 }
 
-// .sidebar-item-root is used inside el-menu to render sidebar items.
-// display:contents removes it from the box tree so <li> elements are
-// direct children of <ul>, fixing Element UI's > CSS selectors.
-// Must be global (not scoped inside #app) because popup menus are
-// appended to <body> by popper-append-to-body.
 .sidebar-item-root {
   display: contents;
 }

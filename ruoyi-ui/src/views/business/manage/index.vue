@@ -41,8 +41,7 @@
         <el-table-column
           prop="companyName"
           label="企业名称"
-          min-width="200"
-          fixed="left"
+          min-width="180"
         />
         <el-table-column
           prop="nickName"

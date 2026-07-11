@@ -157,7 +157,7 @@ export default {
     },
     // 返回按钮
     handleClose() {
-      const obj = { path: "/system/role" }
+      const obj = { path: "/sys-user/role" }
       this.$tab.closeOpenPage(obj)
     },
     /** 搜索按钮操作 */

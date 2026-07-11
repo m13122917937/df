@@ -1,6 +1,12 @@
 <template>
   <div class="navbar">
     <div class="navbar-left">
+      <div class="breadcrumb-bar">
+        <template v-for="(crumb, idx) in breadcrumbs">
+          <span v-if="idx > 0" class="breadcrumb-sep">/</span>
+          <span class="breadcrumb-item" :class="{ current: idx === breadcrumbs.length - 1 }">{{ crumb }}</span>
+        </template>
+      </div>
       <top-nav v-if="topNav" id="topmenu-container" class="topmenu-container" />
     </div>
 
@@ -83,7 +89,8 @@ export default {
     ...mapGetters([
       'avatar',
       'device',
-      'nickName'
+      'nickName',
+      'sidebarRouters'
     ]),
     topNav: {
       get() {
@@ -92,9 +99,46 @@ export default {
     },
     isDark() {
       return this.$store.state.settings.themeMode === 'dark'
+    },
+    breadcrumbs() {
+      const crumbs = [];
+      const path = this.$route.path;
+      const routers = this.sidebarRouters || [];
+      // Find module
+      for (const module of routers) {
+        if (module.hidden) continue;
+        const group = this.findInModule(module, path);
+        if (group) {
+          crumbs.push(module.meta && module.meta.title || module.name);
+          if (group !== module) {
+            crumbs.push(group.meta && group.meta.title || group.name);
+          }
+          // Find the leaf page title
+          const pageTitle = this.$route.meta && this.$route.meta.title;
+          if (pageTitle) {
+            crumbs.push(pageTitle);
+          }
+          break;
+        }
+      }
+      return crumbs;
     }
   },
   methods: {
+    findInModule(module, targetPath) {
+      if (!module.children) return null;
+      for (const child of module.children) {
+        if (child.path === targetPath) return module;
+        if (child.path && targetPath.startsWith(child.path + '/')) return module;
+        if (child.children) {
+          for (const grandchild of child.children) {
+            if (grandchild.path === targetPath) return child;
+            if (grandchild.path && targetPath.startsWith(grandchild.path + '/')) return child;
+          }
+        }
+      }
+      return null;
+    },
     setLayout(event) {
       this.$emit('setLayout')
     },
@@ -135,6 +179,32 @@ export default {
 .navbar-left {
   display: inline-flex;
   align-items: center;
+  gap: 16px;
+}
+
+.breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--adm-text-secondary);
+  white-space: nowrap;
+}
+
+.breadcrumb-item {
+  color: var(--adm-text-tertiary);
+  font-weight: 400;
+
+  &.current {
+    color: var(--adm-text-primary);
+    font-weight: 600;
+  }
+}
+
+.breadcrumb-sep {
+  color: var(--adm-text-disabled);
+  font-size: 11px;
+  margin: 0 2px;
 }
 
 .navbar-right {

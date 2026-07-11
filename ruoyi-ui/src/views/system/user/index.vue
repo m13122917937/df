@@ -636,6 +636,9 @@ export default {
   }
 
   .mb8 {
+    flex-direction: row;
+    flex-wrap: wrap;
+
     .el-col {
       height: auto;
       display: inline;

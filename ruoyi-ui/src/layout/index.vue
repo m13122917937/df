@@ -97,12 +97,12 @@ export default {
     top: 0;
     right: 0;
     z-index: 9;
-    width: calc(100% - #{$base-sidebar-width});
+    width: calc(100% - var(--sidebar-expanded-width, 300px));
     transition: width 0.28s;
   }
 
   .hideSidebar .fixed-header {
-    width: calc(100% - 50px);
+    width: calc(100% - var(--module-nav-width, 80px));
   }
 
   .sidebarHide .fixed-header {

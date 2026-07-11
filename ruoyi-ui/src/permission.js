@@ -15,9 +15,7 @@ const whiteList = ['/login', '/register']
 function findFirstPath(routes) {
   for (const route of routes) {
     if (route.path === '*' || route.path === '/404') continue
-    if (!route.children || route.children.length === 0) {
-      return route.path
-    }
+    if (!route.children || route.children.length === 0) continue
     const childPath = findFirstPath(route.children)
     if (childPath) {
       return route.path + '/' + childPath
