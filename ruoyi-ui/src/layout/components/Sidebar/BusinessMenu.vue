@@ -15,6 +15,19 @@
         </div>
       </template>
       <template v-else>
+        <!-- Standalone items (C-type leaf menus directly under module) -->
+        <div
+          v-for="item in standaloneItems"
+          :key="item._key"
+          class="biz-menu-item standalone-item"
+          :class="{ active: isItemActive(item) }"
+          @click="navigate(item)"
+        >
+          <svg-icon v-if="item.meta && item.meta.icon" :icon-class="item.meta.icon" class="biz-item-icon" />
+          <span class="biz-item-indicator" v-else></span>
+          <span class="biz-item-title">{{ item.meta ? item.meta.title : '' }}</span>
+        </div>
+        <!-- Group items (M-type directories with children) -->
         <div
           v-for="group in groups"
           :key="group._key"
@@ -73,23 +86,36 @@ export default {
         .filter(child => !child.hidden && child.meta && child.meta.title)
         .map(child => ({ ...child, fullPath: this.resolveFullPath(modPath, child) }));
     },
+    standaloneItems() {
+      if (!this.module || !this.module.children) return [];
+      const modPath = this.module.path || '';
+      return this.module.children
+        .filter(child => !child.hidden && child.meta && child.meta.title && !child.children)
+        .map(child => ({
+          _key: 'sa-' + (child.meta?.title || child.path),
+          ...child,
+          fullPath: this.resolveFullPath(modPath, child)
+        }));
+    },
     groups() {
       if (!this.module || !this.module.children) return [];
       const modPath = this.module.path || '';
       const result = [];
       for (const child of this.module.children) {
         if (child.hidden) continue;
-        const catFullPath = this.resolveFullPath(modPath, child);
-        const pages = (child.children || [])
-          .filter(p => !p.hidden && p.meta && p.meta.title)
-          .map(p => ({ ...p, fullPath: this.resolveFullPath(catFullPath, p) }));
-        if (pages.length > 0) {
-          result.push({
-            _key: child.meta?.title || child.path,
-            name: child.meta?.title || '',
-            icon: child.meta?.icon,
-            children: pages
-          });
+        if (child.children && child.children.length > 0) {
+          const catFullPath = this.resolveFullPath(modPath, child);
+          const pages = (child.children || [])
+            .filter(p => !p.hidden && p.meta && p.meta.title)
+            .map(p => ({ ...p, fullPath: this.resolveFullPath(catFullPath, p) }));
+          if (pages.length > 0) {
+            result.push({
+              _key: child.meta?.title || child.path,
+              name: child.meta?.title || '',
+              icon: child.meta?.icon,
+              children: pages
+            });
+          }
         }
       }
       return result;

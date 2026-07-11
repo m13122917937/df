@@ -191,26 +191,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// 订单搜索样式（参考 wholesale/searchSection 视觉风格）
+// 订单搜索样式
 .order-search {
   margin-bottom: 10px;
-  padding: 10px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #409eff, #67c23a, #e6a23c);
-  }
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-tags);
+  box-shadow: var(--shadow-card);
 
   .search-form {
     display: flex;

@@ -6,16 +6,22 @@ import 'nprogress/nprogress.css'
 import { getToken } from '@/utils/auth'
 import { isPathMatch } from '@/utils/validate'
 import { isRelogin } from '@/utils/request'
+import Layout from '@/layout/index'
 
 NProgress.configure({ showSpinner: false })
 
 const whiteList = ['/login', '/register']
 
-// 递归查找第一个叶子路由的完整路径（跳过 redirect: noRedirect 的父级）
+// 递归查找第一个叶子路由的完整路径
 function findFirstPath(routes) {
   for (const route of routes) {
     if (route.path === '*' || route.path === '/404') continue
-    if (!route.children || route.children.length === 0) continue
+    if (!route.children || route.children.length === 0) {
+      // 跳过只有 Layout 组件的占位模块（如经营分析、工具箱），
+      // 返回有实际页面组件的叶子路由路径
+      if (route.component === Layout) continue
+      return route.path
+    }
     const childPath = findFirstPath(route.children)
     if (childPath) {
       return route.path + '/' + childPath
@@ -30,6 +36,18 @@ const isWhiteList = (path) => {
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
+
+  // 登录后如果跳转到 404（比如上次会话的页面已不存在），
+  // 重定向到第一个有权限的菜单
+  if (to.path === '/404' && getToken() && store.state.permission.addRoutes.length > 0) {
+    const firstPath = findFirstPath(store.state.permission.addRoutes)
+    if (firstPath) {
+      next({ path: firstPath, replace: true })
+      NProgress.done()
+      return
+    }
+  }
+
   if (getToken()) {
     to.meta.title && store.dispatch('settings/setTitle', to.meta.title)
     /* has token*/
