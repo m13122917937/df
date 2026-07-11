@@ -10,7 +10,12 @@
       "Bash(npx vue-cli-service *)",
       "Bash(git log *)",
       "Bash(npm run *)",
-      "Bash(mvn *)"
+      "Bash(mvn *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:7772/getRouters)",
+      "Bash(curl -s http://localhost:7772/getRouters)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:7772/getInfo)",
+      "Bash(curl -s http://localhost:7772/getInfo)",
+      "Bash(curl -s http://localhost:7772/login -X POST -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"admin123\"}')"
     ]
   }
 }

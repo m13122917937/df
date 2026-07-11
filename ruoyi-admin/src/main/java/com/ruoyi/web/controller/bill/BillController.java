@@ -32,10 +32,7 @@ public class BillController extends BaseController {
     @Autowired
     BillBizService billBizService;
 
-
-
     @ResponseBody
-
     @GetMapping("today/sum")
     public AjaxResult sum(@RequestParam(value = "payCompanyId", required = false) Long payCompanyId,
                           @RequestParam(value = "supplierId", required = false) Long supplierId,
@@ -45,9 +42,6 @@ public class BillController extends BaseController {
 
         return AjaxResult.success(sumBillVO);
     }
-
-
-
 
     @GetMapping("today")
     @ResponseBody
@@ -61,11 +55,7 @@ public class BillController extends BaseController {
     }
 
 
-
-
-
     @ResponseBody
-
     @GetMapping("detail")
     public TableDataInfo queryBill(@RequestParam(value = "payCompanyId", required = false) Long payCompanyId,
                                    @RequestParam(value = "supplierId", required = true) Long supplierId,
@@ -75,9 +65,6 @@ public class BillController extends BaseController {
 
         return getDataTable(billVOPageBO.getData(), billVOPageBO.getTotal());
     }
-
-
-
 
     @GetMapping("detail/export")
     public void queryBillExport(@RequestParam(value = "payCompanyId", required = false) Long payCompanyId,
@@ -91,10 +78,7 @@ public class BillController extends BaseController {
     }
 
 
-
-
     @ResponseBody
-
     @PostMapping("split")
     public AjaxResult split(@RequestBody SplitForm splitForm) {
 
@@ -103,10 +87,7 @@ public class BillController extends BaseController {
         return AjaxResult.success(split);
     }
 
-
-
     @ResponseBody
-
     @PostMapping("plan")
     public AjaxResult plan(@Validated @RequestBody ConfirmSplitForm confirmSplitForm) {
 
@@ -115,10 +96,7 @@ public class BillController extends BaseController {
         return AjaxResult.success();
     }
 
-
-
     @ResponseBody
-
     @PostMapping("revoke/{planId}")
     public AjaxResult revoke(@PathVariable("planId") Long planId) {
 

@@ -2,7 +2,7 @@
 .order-detail {
   padding: 10px;
   padding-bottom: 0;
-  background: #f5f7fa;
+  background: var(--bg-page);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -97,9 +97,9 @@
       display: flex;
       flex-direction: column;
       flex: 1;
-      background: #fff;
+      background: var(--bg-card);
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(8, 6, 6, 0.08);
+      box-shadow: var(--shadow-card);
       overflow: auto;
       position: relative;
       -webkit-overflow-scrolling: touch;
@@ -107,20 +107,20 @@
       // 表格样式
       .order-table {
         flex: 1;
-        background: #fff;
+        background: var(--bg-card);
         border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-card);
         overflow: auto;
         min-width: 100%;
         // Element UI表格样式覆盖
         ::v-deep .el-table__header {
-          background: #fafbfc;
+          background: var(--bg-table-header);
 
           th {
-            background: #fafbfc !important;
-            color: #2c3e50;
+            background: var(--bg-table-header) !important;
+            color: var(--adm-text-primary);
             font-weight: 600;
-            border-bottom: 2px solid #e4e7ed;
+            border-bottom: 2px solid var(--border-tags);
           }
         }
 
@@ -129,17 +129,17 @@
             transition: all 0.3s ease;
 
             &:hover {
-              background: #f0f9ff !important;
+              background: var(--bg-hover) !important;
             }
           }
 
           td {
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-tags);
           }
         }
 
         ::v-deep .el-table--striped .el-table__body tr.el-table__row--striped td {
-          background: #fafbfc;
+          background: var(--bg-table-header);
         }
       }
 
@@ -147,8 +147,8 @@
       .pagination-wrapper {
         padding: 10px 24px;
         text-align: right;
-        background: #fafbfc;
-        border-top: 1px solid #e4e7ed;
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-tags);
 
         .custom-pagination {
           ::v-deep .el-pagination {

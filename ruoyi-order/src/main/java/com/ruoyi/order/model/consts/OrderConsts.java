@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Objects;
+import cn.hutool.core.util.StrUtil;
 
 public interface OrderConsts {
 
@@ -36,15 +37,6 @@ public interface OrderConsts {
         private Integer code;
         private String desc;
 
-        public static OrderStyle getByCode(String keyword) {
-            for (OrderStyle value : values()) {
-                if (value.desc.contains(keyword)) {
-                    return value;
-                }
-            }
-            return null;
-        }
-
         public static OrderStyle getByCodeValue(Integer code) {
             for (OrderStyle value : values()) {
                 if (value.code.equals(code)) {
@@ -55,6 +47,9 @@ public interface OrderConsts {
         }
 
         public static OrderStyle getByName(String desc) {
+            if (StrUtil.isBlank(desc)) {
+                return BILLION;
+            }
             for (OrderStyle value : values()) {
                 if (desc.contains(value.desc)) {
                     return value;
@@ -74,7 +69,9 @@ public interface OrderConsts {
          */
         O2O(2, "一件代发"),
 
-        PROCUREMENT(1, "入仓");
+        PROCUREMENT(1, "入仓"),
+
+        SALES(3, "销售订单");
 
         private Integer code;
         private String desc;

@@ -34,7 +34,7 @@ public class AllOrderVO {
      * 原始订单号
      */
 
-    @ExcelProperty(value = "旺店通订单号")
+    @ExcelProperty(value = "吉客云单号")
     private String erpOrderId;
 
     /**
@@ -152,10 +152,10 @@ public class AllOrderVO {
     private Integer orderType;
 
     /**
-     * 数量
+     * 价格
      */
 
-    @ExcelProperty(value = "数量")
+    @ExcelProperty(value = "价格")
     private BigDecimal tradePrice;
 
 
@@ -201,5 +201,17 @@ public class AllOrderVO {
      */
     @ExcelProperty(value = "串码")
     private String imei;
+
+    /**
+     * sn码
+     */
+    @ExcelProperty(value = "sn码")
+    private String sn;
+
+    /**
+     * 物流单号
+     */
+    @ExcelProperty(value = "物流单号")
+    private String trackingNumber;
 
 }

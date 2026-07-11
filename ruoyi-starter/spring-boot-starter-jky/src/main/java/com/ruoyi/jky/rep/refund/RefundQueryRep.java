@@ -10,7 +10,16 @@ public class RefundQueryRep {
 
     private Integer count;
 
-    private List<RefundTradeRep> tradeAfterOnlineDtoArr;
+    private List<TradeAfterOnlineWrapper> tradeAfterOnlineDtoArr;
+
+    @Data
+    public static class TradeAfterOnlineWrapper {
+
+        private RefundTradeRep tradeAfterOnlineDTO;
+
+        private List<RefundGoodsRep> tradeAfterOnlineGoodsDTOList;
+
+    }
 
     @Data
     public static class RefundTradeRep {
@@ -100,8 +109,6 @@ public class RefundQueryRep {
         private String gmtModified;
 
         private String platOrderCreateTime;
-
-        private List<RefundGoodsRep> tradeAfterOnlineGoodsDTOList;
 
     }
 

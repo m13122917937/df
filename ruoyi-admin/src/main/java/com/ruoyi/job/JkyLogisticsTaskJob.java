@@ -13,12 +13,19 @@ import com.ruoyi.order.facade.IJkyLogisticsTaskFacade;
 import com.ruoyi.order.model.bo.JkyLogisticsTaskBO;
 import com.ruoyi.order.model.param.JkyLogisticsTaskParam;
 import com.ruoyi.order.model.query.JkyLogisticsTaskQuery;
+import com.ruoyi.biz.bill.BillBizService;
+import com.ruoyi.mapper.jky.JkyLogisticsConvert;
+import com.ruoyi.order.facade.IOrderFacade;
+import com.ruoyi.order.model.bo.OrderBO;
+import com.ruoyi.order.model.consts.OrderConsts;
+import com.ruoyi.order.model.query.OrderQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -36,6 +43,12 @@ public class JkyLogisticsTaskJob {
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private IOrderFacade orderFacade;
+
+    @Autowired
+    private BillBizService billBizService;
 
     /**
      * 每分钟执行一次，轮询待处理的物流更新任务并执行。
@@ -63,13 +76,9 @@ public class JkyLogisticsTaskJob {
 
     private void processTask(JkyLogisticsTaskBO task) {
         try {
-            LogisticsUpdateParam.LogisticsUpdateItem item = new LogisticsUpdateParam.LogisticsUpdateItem();
-            item.setOrderNo(task.getErpOrderId() != null ? task.getErpOrderId() : task.getOrderCode());
-            item.setLogisticNo(task.getLogisticsNo());
-            item.setLogisticName(task.getLogisticsName());
-            item.setLogisticCode(task.getLogisticsCode());
             LogisticsUpdateParam param = new LogisticsUpdateParam();
-            param.setBizdata(Collections.singletonList(item));
+            param.setBizdata(Collections.singletonList(JkyLogisticsConvert.INSTANCE.toItem(task)));
+
             JkyResponse<List<LogisticsUpdateRep>> response = jkyTemplate.updateLogisticsInfo(param);
 
             List<LogisticsUpdateRep> dataList = JkyResponseUtil.getData(response);
@@ -79,11 +88,7 @@ public class JkyLogisticsTaskJob {
                 String errorMsg = first != null ? first.getError() : "响应数据为空";
                 log.error("订单号：{}，吉客云物流更新失败：{}", task.getOrderCode(), errorMsg);
                 jkyLogisticsTaskFacade.update(
-                        new JkyLogisticsTaskParam()
-                                .setStatus(2)
-                                .setErrorMsg(errorMsg)
-                                .setRetryCount(task.getRetryCount() != null ? task.getRetryCount() + 1 : 1)
-                                .setUpdateTime(DateUtil.date()),
+                        new JkyLogisticsTaskParam().setStatus(2).setErrorMsg(errorMsg).setUpdateTime(DateUtil.date()).setRetryCount(task.getRetryCount() != null ? task.getRetryCount() + 1 : 1),
                         new JkyLogisticsTaskQuery().setId(task.getId()));
                 return;
             }
@@ -92,15 +97,29 @@ public class JkyLogisticsTaskJob {
                     new JkyLogisticsTaskParam().setStatus(1).setUpdateTime(DateUtil.date()),
                     new JkyLogisticsTaskQuery().setId(task.getId()));
             log.info("订单号：{}，吉客云物流更新成功", task.getOrderCode());
+
+            tryGenerateBill(task);
         } catch (Exception e) {
             log.error("订单号：{}，吉客云物流更新失败：{}", task.getOrderCode(), e.getMessage(), e);
             jkyLogisticsTaskFacade.update(
-                    new JkyLogisticsTaskParam()
-                            .setStatus(2)
-                            .setErrorMsg(e.getMessage())
-                            .setRetryCount(task.getRetryCount() != null ? task.getRetryCount() + 1 : 1)
-                            .setUpdateTime(DateUtil.date()),
+                    new JkyLogisticsTaskParam().setStatus(2).setErrorMsg(e.getMessage()).setRetryCount(task.getRetryCount() != null ? task.getRetryCount() + 1 : 1).setUpdateTime(DateUtil.date()),
                     new JkyLogisticsTaskQuery().setId(task.getId()));
+        }
+    }
+
+    /**
+     * 代发订单物流同步成功后，按供应商账期出账。
+     */
+    private void tryGenerateBill(JkyLogisticsTaskBO task) {
+        try {
+            OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(task.getOrderCode()));
+            if (Objects.nonNull(orderBO)
+                    && Objects.equals(OrderConsts.OrderType.O2O.getCode(), orderBO.getOrderType())
+                    && Objects.equals(OrderConsts.OrderStatus.DELIVERY_END.getCode(), orderBO.getStatus())) {
+                billBizService.generateBill(orderBO);
+            }
+        } catch (Exception e) {
+            log.error("订单号：{}，出账失败：{}", task.getOrderCode(), e.getMessage(), e);
         }
     }
 }

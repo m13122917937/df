@@ -50,7 +50,15 @@
       "Bash(git restore *)",
       "Bash(git push *)",
       "Bash(mysql *)",
-      "WebFetch(domain:open.jackyun.com)"
+      "WebFetch(domain:open.jackyun.com)",
+      "Bash(jar xf *)",
+      "Bash(javap -p me/chanjar/weixin/common/redis/RedissonWxRedisOps.class)",
+      "WebFetch(domain:www.artd.pro)",
+      "Bash(sed -i '/<style/,/<\\\\/style>/s/background: #fff;/background: var\\(--bg-card\\);/g' index.vue)",
+      "Bash(sed -i '/<style/,/<\\\\/style>/s/background: #fafbfc;/background: var\\(--bg-hover\\);/g' index.vue)",
+      "Bash(sed -i '/<style/,/<\\\\/style>/s/background: #f4f6fb;/background: var\\(--bg-hover\\);/g' index.vue)",
+      "Bash(sed -i '/<style/,/<\\\\/style>/s/color: #606266;/color: var\\(--adm-text-secondary\\);/g' index.vue)",
+      "Bash(sed -i '/<style/,/<\\\\/style>/s/color: #333;/color: var\\(--adm-text-primary\\);/g' index.vue)"
     ]
   }
 }

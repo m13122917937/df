@@ -167,8 +167,14 @@ export default {
 </script>
 
 <style lang="scss">
+.topmenu-container.el-menu--horizontal {
+  display: inline-flex;
+  width: auto;
+  border-bottom: none !important;
+}
+
 .topmenu-container.el-menu--horizontal > .el-menu-item {
-  float: left;
+  float: none;
   height: 50px !important;
   line-height: 50px !important;
   color: #999093 !important;
@@ -183,7 +189,7 @@ export default {
 
 /* submenu item */
 .topmenu-container.el-menu--horizontal > .el-submenu .el-submenu__title {
-  float: left;
+  float: none;
   height: 50px !important;
   line-height: 50px !important;
   color: #999093 !important;

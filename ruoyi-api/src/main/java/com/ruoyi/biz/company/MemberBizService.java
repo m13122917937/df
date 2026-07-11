@@ -131,7 +131,7 @@ public class MemberBizService {
      */
     public LoginCompanyVO loginStatus(String uuid) {
         LoginCompanyVO loginCompanyVO = new LoginCompanyVO().setUuid(uuid);
-        UserLoginBO userLoginBO = redisCache.getCacheObject(UserRedisKey.USER_KEY.USER_LOGIN_KEY.getKey() + uuid);
+        UserLoginBO userLoginBO = redisCache.getCacheObject(UserRedisKey.USER_LOGIN_QR_CODE + uuid);
         if (Objects.isNull(userLoginBO)) {
             loginCompanyVO.setIsLogin(Boolean.FALSE);
             return loginCompanyVO;
@@ -155,7 +155,7 @@ public class MemberBizService {
      * @param companyId
      */
     public String login(String uuid, Long companyId) {
-        UserLoginBO userLoginBO = redisCache.getCacheObject(UserRedisKey.USER_KEY.USER_LOGIN_KEY.getKey() + uuid);
+        UserLoginBO userLoginBO = redisCache.getCacheObject(UserRedisKey.USER_LOGIN_QR_CODE + uuid);
         Assert.notNull(userLoginBO, "请重新登录");
 
         MemberBO userBO = memberFacade.queryOne(new MemberQuery().setUserId(userLoginBO.getUserId()));

@@ -30,11 +30,7 @@
             style="width: 100%"
             :fit="true"
             height="100%"
-            :header-cell-style="{
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
+            header-cell-class-name="table-header-cell"
             :cell-style="{ padding: '8px 0' }"
           >
             <!-- 空数据状态 -->
@@ -712,6 +708,13 @@ export default {
 <style lang="scss" scoped>
 @import "./style/table-common.scss";
 
+// 覆盖 table-common.scss 中的固定高度，适应 flex 布局
+.order-table-container-wrapper {
+  height: auto !important;
+  flex: 1;
+  min-height: 0;
+}
+
 // 筛选面板布局
 .filter-panels {
   display: flex;
@@ -781,7 +784,7 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
 }
 
 /* 复制图标样式 */
@@ -813,13 +816,13 @@ export default {
 
   &.main {
     font-size: 14px;
-    color: #303133;
+    color: var(--adm-text-primary);
     font-weight: 500;
   }
 
   &.sub {
     font-size: 13px;
-    color: #606266;
+    color: var(--adm-text-secondary);
   }
 }
 .pending-order {
@@ -833,9 +836,9 @@ export default {
 
   .order-table-container {
     flex: 1;
-    background: white;
+    background: var(--bg-card);
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
   }
 
@@ -870,10 +873,10 @@ export default {
       margin-top: 20px;
       text-align: right;
       padding: 20px;
-      background: #fff;
+      background: var(--bg-card);
       border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      border: 1px solid #f0f0f0;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-tags);
 
       .custom-pagination {
         .el-pagination__sizes,
@@ -946,9 +949,9 @@ export default {
 
   .el-dialog__footer {
     padding: 20px 24px;
-    background: #fafbfc;
+    background: var(--bg-card);
     border-radius: 0 0 12px 12px;
-    border-top: 1px solid #e4e7ed;
+    border-top: 1px solid var(--border-tags);
 
     .el-button {
       padding: 10px 20px;
@@ -1024,7 +1027,7 @@ export default {
   display: flex;
   align-items: center;
   cursor: pointer;
-  color: #606266;
+  color: var(--adm-text-secondary);
 
   .status-icon {
     font-size: 12px;
@@ -1067,11 +1070,11 @@ export default {
   height: 550px;
   overflow: auto;
   .pick-info-card {
-    background: #fff;
-    border: 1px solid #eef2f6;
+    background: var(--bg-card);
+    border: 1px solid var(--border-tags);
     padding: 12px 14px;
     border-radius: 8px;
-    color: #606266;
+    color: var(--adm-text-secondary);
     font-size: 14px;
     margin-bottom: 12px;
   }
@@ -1084,13 +1087,13 @@ export default {
   }
 
   .pi-label {
-    color: #909399;
+    color: var(--adm-text-tertiary);
     min-width: 100px;
     font-weight: 600;
   }
 
   .pi-value {
-    color: #303133;
+    color: var(--adm-text-primary);
     word-break: break-word;
     flex: 1;
   }
@@ -1106,7 +1109,7 @@ export default {
 
   .vertical-pick-form .el-form-item__label {
     display: block;
-    color: #606266;
+    color: var(--adm-text-secondary);
     font-weight: 600;
     margin-bottom: 8px;
   }

@@ -325,10 +325,10 @@ export default {
   .search-section {
     margin-bottom: 20px;
     padding: 10px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: var(--bg-card);
     border-radius: 12px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-tags);
+    box-shadow: var(--shadow-card);
     position: relative;
     overflow: hidden;
   }
@@ -401,14 +401,14 @@ export default {
     padding: 12px 16px 12px 40px;
     transition: all 0.3s ease;
     border: 2px solid #e4e7ed;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-card);
   }
 
   .search-input :deep(.el-input__inner):focus {
     border-color: #409eff;
     box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
-    background: #fafbfc;
+    background: var(--bg-hover);
   }
 
   .search-input :deep(.el-input__prefix) {
@@ -466,10 +466,10 @@ export default {
   }
 
   .table-section {
-    background: #fff;
+    background: var(--bg-card);
     padding: 24px;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
     border: 1px solid #f0f0f0;
     flex: 1;
     overflow: auto;
@@ -479,7 +479,7 @@ export default {
       overflow: hidden;
 
       th {
-        background-color: #fafafa;
+        background-color: var(--bg-table-header);
         color: #303133;
         font-weight: 600;
         border-bottom: 1px solid #ebeef5;
@@ -490,7 +490,7 @@ export default {
       }
 
       .el-table__row:hover {
-        background-color: #f5f7fa;
+        background-color: var(--bg-page);
       }
     }
   }
@@ -499,9 +499,9 @@ export default {
     margin-top: 20px;
     text-align: right;
     padding: 20px;
-    background: #fff;
+    background: var(--bg-card);
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
     border: 1px solid #f0f0f0;
   }
 }

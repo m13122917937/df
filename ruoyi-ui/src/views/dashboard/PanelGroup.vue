@@ -84,10 +84,10 @@ export default {
     font-size: 12px;
     position: relative;
     overflow: hidden;
-    color: #666;
-    background: #fff;
-    box-shadow: 4px 4px 40px rgba(0, 0, 0, .05);
-    border-color: rgba(0, 0, 0, .05);
+    color: var(--adm-text-secondary);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-card);
+    border-color: var(--adm-border);
 
     &:hover {
       .card-panel-icon-wrapper {
@@ -148,7 +148,7 @@ export default {
 
       .card-panel-text {
         line-height: 18px;
-        color: rgba(0, 0, 0, 0.45);
+        color: var(--adm-text-tertiary);
         font-size: 16px;
         margin-bottom: 12px;
       }

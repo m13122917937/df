@@ -4,10 +4,12 @@ import request from "@/utils/request";
  * @description: 合同分页列表
  */
 export function pageContractApi(data) {
+  const { pageNum, pageSize, ...filters } = data || {};
   return request({
     url: "/contract/page/list",
     method: "POST",
-    data,
+    params: { pageNum, pageSize },
+    data: filters,
   });
 }
 

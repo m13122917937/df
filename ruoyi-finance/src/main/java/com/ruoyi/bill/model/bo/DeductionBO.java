@@ -37,7 +37,7 @@ public class DeductionBO {
      */
     private String orderCode;
     /**
-     * 旺店通id
+     * 吉客云id
      */
     private String erpId;
     /**

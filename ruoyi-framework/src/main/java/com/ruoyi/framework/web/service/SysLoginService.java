@@ -2,7 +2,6 @@ package com.ruoyi.framework.web.service;
 
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.user.LoginUser;
-import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.exception.user.UserNotExistsException;
 import com.ruoyi.common.exception.user.UserPasswordNotMatchException;
@@ -33,9 +32,6 @@ public class SysLoginService {
 
     @Resource
     private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private RedisCache redisCache;
 
     @Autowired
     private ISysUserFacade userService;

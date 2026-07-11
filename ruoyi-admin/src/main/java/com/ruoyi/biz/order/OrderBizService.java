@@ -14,7 +14,7 @@ import com.ruoyi.bill.model.query.PayerConfigQuery;
 import com.ruoyi.bill.model.query.PayerQuery;
 import com.ruoyi.biz.address.SmartParse;
 import com.ruoyi.biz.address.domain.AddressInfo;
-import com.ruoyi.biz.bill.BillBizService;
+
 import com.ruoyi.biz.company.CompanyCapitalBizService;
 import com.ruoyi.biz.sys.IDictDistrictBizService;
 import com.ruoyi.capital.facade.ICompanyCapitalFacade;
@@ -28,14 +28,13 @@ import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.DictUtils;
-import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.common.utils.weebhook.QWRobotUtil;
-import com.ruoyi.jky.JkyTemplate;
-import com.ruoyi.jky.param.reject.RejectParam;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.consts.LogisticsCode;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
+import com.ruoyi.jky.JkyTemplate;
+import com.ruoyi.jky.param.reject.RejectParam;
 import com.ruoyi.mapper.order.OrderConvert;
 import com.ruoyi.mapper.rule.RuleConvert;
 import com.ruoyi.order.domain.dto.OrderStatusDTO;
@@ -48,7 +47,10 @@ import com.ruoyi.order.model.consts.HandingOrderConsts;
 import com.ruoyi.order.model.consts.ImeiConsts;
 import com.ruoyi.order.model.consts.OrderConsts;
 import com.ruoyi.order.model.consts.TradeOrderConsts;
-import com.ruoyi.order.model.param.*;
+import com.ruoyi.order.model.param.HangingOrderParam;
+import com.ruoyi.order.model.param.ImeiParam;
+import com.ruoyi.order.model.param.OrderParam;
+import com.ruoyi.order.model.param.TradeOrderParam;
 import com.ruoyi.order.model.query.HangingOrderQuery;
 import com.ruoyi.order.model.query.ImeiQuery;
 import com.ruoyi.order.model.query.OrderQuery;
@@ -64,10 +66,8 @@ import com.ruoyi.user.facade.ICompanyFacade;
 import com.ruoyi.user.facade.IMemberFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
 import com.ruoyi.user.model.bo.MemberBO;
-import com.ruoyi.user.model.bo.UserBO;
 import com.ruoyi.user.model.query.CompanyQuery;
 import com.ruoyi.user.model.query.MemberQuery;
-import com.ruoyi.user.model.query.UserQuery;
 import com.ruoyi.web.form.order.*;
 import com.ruoyi.web.form.rule.RuleForm;
 import com.ruoyi.web.vo.order.*;
@@ -122,9 +122,6 @@ public class OrderBizService {
 
     @Autowired
     ICompanyFacade companyFacade;
-
-    @Autowired
-    BillBizService billBizService;
 
     @Autowired
     IPayerFacade payerFacade;
@@ -553,13 +550,15 @@ public class OrderBizService {
         caseOrderStyle(orderAddForm);
         if (StrUtil.isBlank(orderAddForm.getAddressee()) && StrUtil.isBlank(orderAddForm.getPhone())) {
             ParseUserInfoUtil.ParsedAddress parse = ParseUserInfoUtil.parse(orderAddForm.getAddress());
-            orderAddForm.setAddressee(parse.getName());
-            orderAddForm.setPhone(parse.getPhone());
-            orderAddForm.setAddress(parse.getAddress());
+            if (Objects.nonNull(parse)) {
+                orderAddForm.setAddressee(parse.getName());
+                orderAddForm.setPhone(parse.getPhone());
+                orderAddForm.setAddress(parse.getAddress());
+            }
         }
         orderAddForm.setAddress(orderAddForm.getAddress().replaceAll("\\s+", ""));
         AddressInfo addressInfo = smartParse.parseAddressInfo(orderAddForm.getAddress());
-        OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOriginalOrderId(orderAddForm.getOriginalOrderId()).setErpOrderId(orderAddForm.getErpOrderId()));
+        OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOriginalOrderId(orderAddForm.getOriginalOrderId()).setJkyTradeNo(orderAddForm.getJkyTradeNo()));
         if (Objects.isNull(orderBO)) {
             ProductSkuBO productSkuBO = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(orderAddForm.getSkuCode()));
             if (Objects.isNull(productSkuBO)) {
@@ -673,7 +672,7 @@ public class OrderBizService {
                 .setUpdateTime(DateUtil.date()), new OrderQuery().setOrderCode(orderCode));
         OrderBO orderBo = orderFacade.getOne(new OrderQuery().setOrderCode(orderCode));
         if (update) {
-            billBizService.generateBill(orderBo);
+            log.info("订单{}已完成", orderCode);
         }
     }
 
@@ -962,15 +961,25 @@ public class OrderBizService {
             allOrderVO.setCityName(cityMap.get(allOrderVO.getCity()));
         }
         List<TradeOrderBO> list = tradeOrderFacade.list(new TradeOrderQuery().setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()).setOrderIdList(pageBO.getData().stream().map(OrderBO::getOrderCode).collect(Collectors.toList())));
-        Map<String, TradeOrderBO> tradeMap = list.stream().collect(Collectors.toMap(TradeOrderBO::getOrderId, t -> t));
+        Map<String, TradeOrderBO> tradeMap = list.stream().filter(t -> t.getOrderId() != null).collect(Collectors.toMap(TradeOrderBO::getOrderId, t -> t, (a, b) -> a));
+
+        List<ImeiBO> imeiBOList = imeiFacade.list(new ImeiQuery().setOrderIdList(allOrderVOList.stream().map(AllOrderVO::getOrderCode).collect(Collectors.toList())));
+        Map<String, String> imeiMap = imeiBOList.stream().filter(i -> i.getOrderId() != null).collect(Collectors.groupingBy(ImeiBO::getOrderId, Collectors.mapping(ImeiBO::getImel, Collectors.joining(","))));
+        Map<String, String> snMap = imeiBOList.stream().filter(i -> i.getOrderId() != null).collect(Collectors.groupingBy(ImeiBO::getOrderId, Collectors.mapping(ImeiBO::getSn, Collectors.joining(","))));
 
         for (AllOrderVO orderListVO : allOrderVOList) {
             TradeOrderBO tradeOrderBO = tradeMap.get(orderListVO.getOrderCode());
-            if (Objects.isNull(tradeOrderBO)) {
-                continue;
+            if (Objects.nonNull(tradeOrderBO)) {
+                orderListVO.setTradePrice(tradeOrderBO.getTradePrice());
+                orderListVO.setCompanyName(tradeOrderBO.getTradeNickName());
+                if (!Objects.equals(orderListVO.getStatus(), OrderConsts.OrderStatus.REVOKE.getCode())) {
+                    orderListVO.setTrackingNumber(tradeOrderBO.getTrackingNumber());
+                }
             }
-            orderListVO.setTradePrice(tradeOrderBO.getTradePrice());
-            orderListVO.setCompanyName(tradeOrderBO.getTradeNickName());
+            if (!Objects.equals(orderListVO.getStatus(), OrderConsts.OrderStatus.REVOKE.getCode())) {
+                orderListVO.setImei(imeiMap.get(orderListVO.getOrderCode()));
+                orderListVO.setSn(snMap.get(orderListVO.getOrderCode()));
+            }
         }
         return new PageBO<>(allOrderVOList, pageBO.getTotal());
     }
@@ -1016,18 +1025,24 @@ public class OrderBizService {
         List<AllOrderVO> allOrderVOList = OrderConvert.INSTANCE.toAllOrderVOList(orderBOList);
         // 完善省市
         List<TradeOrderBO> list = tradeOrderFacade.list(new TradeOrderQuery().setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()).setOrderIdList(allOrderVOList.stream().map(AllOrderVO::getOrderCode).collect(Collectors.toList())));
-        Map<String, TradeOrderBO> tradeMap = list.stream().collect(Collectors.toMap(TradeOrderBO::getOrderId, t -> t));
+        Map<String, TradeOrderBO> tradeMap = list.stream().filter(t -> t.getOrderId() != null).collect(Collectors.toMap(TradeOrderBO::getOrderId, t -> t, (a, b) -> a));
 
         List<ImeiBO> imeiBOList = imeiFacade.list(new ImeiQuery().setOrderIdList(allOrderVOList.stream().map(AllOrderVO::getOrderCode).collect(Collectors.toList())));
-        Map<String, String> imeiMap = imeiBOList.stream().collect(Collectors.groupingBy(ImeiBO::getOrderId, Collectors.mapping(ImeiBO::getImel, Collectors.joining(","))));
+        Map<String, String> imeiMap = imeiBOList.stream().filter(i -> i.getOrderId() != null).collect(Collectors.groupingBy(ImeiBO::getOrderId, Collectors.mapping(ImeiBO::getImel, Collectors.joining(","))));
+        Map<String, String> snMap = imeiBOList.stream().filter(i -> i.getOrderId() != null).collect(Collectors.groupingBy(ImeiBO::getOrderId, Collectors.mapping(ImeiBO::getSn, Collectors.joining(","))));
         for (AllOrderVO orderListVO : allOrderVOList) {
             TradeOrderBO tradeOrderBO = tradeMap.get(orderListVO.getOrderCode());
-            if (Objects.isNull(tradeOrderBO)) {
-                continue;
+            if (Objects.nonNull(tradeOrderBO)) {
+                orderListVO.setTradePrice(tradeOrderBO.getTradePrice());
+                orderListVO.setCompanyName(tradeOrderBO.getTradeNickName());
+                if (!Objects.equals(orderListVO.getStatus(), OrderConsts.OrderStatus.REVOKE.getCode())) {
+                    orderListVO.setTrackingNumber(tradeOrderBO.getTrackingNumber());
+                }
             }
-            orderListVO.setTradePrice(tradeOrderBO.getTradePrice());
-            orderListVO.setCompanyName(tradeOrderBO.getTradeNickName());
-            orderListVO.setImei(imeiMap.get(orderListVO.getOrderCode()));
+            if (!Objects.equals(orderListVO.getStatus(), OrderConsts.OrderStatus.REVOKE.getCode())) {
+                orderListVO.setImei(imeiMap.get(orderListVO.getOrderCode()));
+                orderListVO.setSn(snMap.get(orderListVO.getOrderCode()));
+            }
         }
         return allOrderVOList;
     }

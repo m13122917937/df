@@ -11,6 +11,6 @@ public class UserPasswordNotMatchException extends UserException
 
     public UserPasswordNotMatchException()
     {
-        super("user.password.not.match", null);
+        super("user.password.not.match", null, "用户名或密码错误");
     }
 }

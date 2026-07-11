@@ -40,16 +40,6 @@ public class ChaseOrderController extends BaseController {
         return AjaxResult.success();
     }
 
-    @Anonymous
-
-    @PostMapping("/revoke/ori")
-    public AjaxResult revokeOriginal(@RequestBody RevokeOriParam revokeOriParam) {
-        Assert.notEmpty(revokeOriParam.getOriginalOrderIdList(), "订单编号参数不能为空");
-        logger.info("撤销订单/追单,机器人参数：{}", JacksonUtil.toJson(revokeOriParam.getOriginalOrderIdList()));
-        orderBizService.revokeOriginalList(revokeOriParam);
-
-        return AjaxResult.success();
-    }
 
 
     @PostMapping("hanging")

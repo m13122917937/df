@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.core.redis.RedisKeyUtil;
+import com.ruoyi.consts.AdminRedisKey;
 import com.ruoyi.mapper.sys.DictDistrictConvert;
 import com.ruoyi.system.facade.IDictDistrictFacade;
 import com.ruoyi.system.model.consts.DictDistrictConsts;
@@ -35,10 +36,10 @@ public class DictDistrictController {
     @GetMapping("/province/list")
     public AjaxResult list() {
 
-        List<DictDistrictVO> list = redisCache.getCacheObject(RedisKeyUtil.generate(SysRedisKey.ROOT_KEY, "province"));
+        List<DictDistrictVO> list = redisCache.getCacheObject(RedisKeyUtil.generate(AdminRedisKey.ADMIN_BASE, SysRedisKey.ROOT_KEY, "province"));
         if (CollectionUtil.isEmpty(list)) {
             list = DictDistrictConvert.INSTANCE.toVo(dictDistrictFacade.list(new DictDistrictQuery().setLevel(DictDistrictConsts.Level.PROVINCE.getValue())));
-            redisCache.setCacheObject(RedisKeyUtil.generate(SysRedisKey.ROOT_KEY, "province"), list, 1, TimeUnit.DAYS);
+            redisCache.setCacheObject(RedisKeyUtil.generate(AdminRedisKey.ADMIN_BASE, SysRedisKey.ROOT_KEY, "province"), list, 1, TimeUnit.DAYS);
         }
         return AjaxResult.success(list);
     }
@@ -47,10 +48,10 @@ public class DictDistrictController {
     @GetMapping("/city/{province}")
     public AjaxResult list(@PathVariable("province") Long province) {
 
-        List<DictDistrictVO> list = redisCache.getCacheObject(RedisKeyUtil.generate(SysRedisKey.ROOT_KEY, "city", String.valueOf(province)));
+        List<DictDistrictVO> list = redisCache.getCacheObject(RedisKeyUtil.generate(AdminRedisKey.ADMIN_BASE, SysRedisKey.ROOT_KEY, "city", String.valueOf(province)));
         if (CollectionUtil.isEmpty(list)) {
             list = DictDistrictConvert.INSTANCE.toVo(dictDistrictFacade.list(new DictDistrictQuery().setLevel(DictDistrictConsts.Level.CITY.getValue()).setPid(province)));
-            redisCache.setCacheObject(RedisKeyUtil.generate(SysRedisKey.ROOT_KEY, "city", String.valueOf(province)), list, 1, TimeUnit.DAYS);
+            redisCache.setCacheObject(RedisKeyUtil.generate(AdminRedisKey.ADMIN_BASE, SysRedisKey.ROOT_KEY, "city", String.valueOf(province)), list, 1, TimeUnit.DAYS);
         }
         return AjaxResult.success(list);
     }

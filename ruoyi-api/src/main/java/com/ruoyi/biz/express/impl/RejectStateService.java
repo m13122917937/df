@@ -59,7 +59,7 @@ public class RejectStateService extends AbstractLogisticsState implements Logist
         if (StrUtil.isNotBlank(uncollectedKey)) {
             String sb = "**订单已自动退货追单，依据：物流节点中包含[" + "<font color='warning'>应客户要求,快件正在退回中</font>]**\r\n" +
                     ">内部单号：<font color='info'>" + orderBo.getOrderCode() + "</font>\r\n" +
-                    ">旺店通单号：<font color='info'>" + orderBo.getErpOrderId() + "</font>\r\n" +
+                    ">吉客云单号：<font color='info'>" + orderBo.getErpOrderId() + "</font>\r\n" +
                     ">原始单号：<font color='info'>" + orderBo.getOriginalOrderId() + "</font>\r\n" +
                     ">物流单号：<font color='info'>" + logisticsNo + "</font>\r\n";
             QWRobotUtil.sendMarkdownMsg(uncollectedKey, sb);

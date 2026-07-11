@@ -36,7 +36,7 @@
 }
 ::v-deep {
   .el-table .el-table__header-wrapper th {
-    color: #666666;
+    color: var(--adm-text-secondary);
   }
   #z_dialog {
     margin-top: 30vh;
@@ -90,8 +90,8 @@
     overflow: hidden;
   }
   .group-content .need-table-content-cell {
-    border-bottom: 1px solid #dfe6ec;
-    background: #fafafa;
+    border-bottom: 1px solid var(--adm-border);
+    background: var(--bg-hover);
   }
 }
 .han_address_box {

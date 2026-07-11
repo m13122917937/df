@@ -4,8 +4,9 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import com.ruoyi.consts.AdminRedisKey;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RAtomicLong;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -25,7 +26,7 @@ public class ContractNoGenerator {
     private static final String PREFIX = "HT";
 
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private RedissonClient redissonClient;
 
     /**
      * 生成下一个合同编号
@@ -36,9 +37,10 @@ public class ContractNoGenerator {
         Date now = new Date();
         String day = DateUtil.format(now, DatePattern.PURE_DATE_PATTERN);
         String key = AdminRedisKey.Contract.NO_DAILY_SEQ + day;
-        Long seq = stringRedisTemplate.opsForValue().increment(key);
+        RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
+        long seq = atomicLong.incrementAndGet();
         if (Objects.equals(seq, 1L)) {
-            stringRedisTemplate.expire(key, 2, TimeUnit.DAYS);
+            atomicLong.expire(2, TimeUnit.DAYS);
         }
         return PREFIX + day + String.format("%06d", seq);
     }

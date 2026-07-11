@@ -41,7 +41,7 @@ public class TradeQueryParams implements Serializable {
     private String status;
 
     /**
-     * [选填] 订单编号 (旺店通系统订单号)
+     * [选填] 订单编号 (吉客云系统订单号)
      */
     @JsonProperty("trade_no")
     private String tradeNo;

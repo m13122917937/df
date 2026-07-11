@@ -94,7 +94,7 @@ public class DeliveryOrderJob {
                 if (StrUtil.isNotBlank(webHook)) {
                     String msg = "**订单已自动毁单，依据：供应商发货超时[" +
                             ">内部单号：<font color='info'>" + orderBO.getOrderCode() + "</font>\r\n" +
-                            ">旺店通单号：<font color='info'>" + orderBO.getErpOrderId() + "</font>\r\n" +
+                            ">吉客云单号：<font color='info'>" + orderBO.getErpOrderId() + "</font>\r\n" +
                             ">原始单号：<font color='info'>" + orderBO.getOriginalOrderId() + "</font>\r\n" +
                             ">供应商名称：<font color='info'>" + companyBO.getCompanyName() + "</font>\r\n";
                     QWRobotUtil.sendMarkdownMsg(webHook, msg);

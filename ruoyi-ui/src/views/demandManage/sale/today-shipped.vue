@@ -1,0 +1,1180 @@
+<!--当日发货-->
+<template>
+  <div class="order-detail today-shipped-order">
+    <!-- 订单内容布局 -->
+    <div class="order-content-layout">
+      <div class="order-table-container-wrapper">
+        <!-- 品牌筛选 -->
+        <BrandFilter
+          ref="brandFilter"
+          :status="currentStatus"
+          :current-brand="selectedBrand"
+          :province-id="selectedRegion"
+          @change="handleBrandChange"
+        />
+      <SearchSection
+        :status="currentStatus"
+        :product-name-like="searchParams.productNameLike"
+        :company-id="searchParams.companyId"
+        :show-keyword-search="false"
+        :show-order-code="false"
+        :show-original-order-id="false"
+        :show-product-name-like="true"
+        :show-sku-name-like="false"
+        :show-company="true"
+        :show-payer-name="true"
+        :show-create-by="true"
+        :product-name-like-row2="true"
+        @search="handleSearch"
+        @reset="handleReset"
+      >
+        <template #toolbar>
+          <el-button type="primary" @click="$refs.newOrderDialog.open()">新建订单</el-button>
+          <el-button type="success" @click="$refs.importOrderDialog.open()">批量新建</el-button>
+        </template>
+      </SearchSection>
+        <!-- 订单表格 -->
+        <div class="order-table-container table-section">
+          <el-table
+            ref="table"
+            v-loading="loading"
+            :data="orderList"
+            stripe
+            size="medium"
+            center
+            style="width: 100%"
+            :fit="true"
+            height="100%"
+            :header-cell-style="{
+              background: 'var(--bg-table-header)',
+              color: 'var(--adm-text-secondary)',
+              fontWeight: 600,
+            }"
+            :cell-style="{ padding: '8px 0' }"
+          >
+            <!-- 空数据状态 -->
+            <template slot="empty">
+              <EmptyState text="暂无当日发货数据" />
+            </template>
+            <el-table-column
+              label="全部单号"
+              prop="orderCode"
+              width="230"
+              fixed="left"
+            >
+              <template slot-scope="scope">
+                <div class="order-numbers">
+                  <div class="order-number-item">
+                    {{
+                      scope.row.orderCode || "-"
+                    }}
+                    <i
+                      v-if="scope.row.orderCode"
+                      class="el-icon-copy-document copy-icon"
+                      @click="copyText(scope.row.orderCode)"
+                    ></i>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="payerName" label="付款主体" width="160" align="center" :show-overflow-tooltip="true">
+              <template slot-scope="scope">
+                {{ scope.row.payerName || '-' }}
+              </template>
+            </el-table-column>
+             <el-table-column prop="tradeCompanyName" label="供应商" width="400" align="center" :show-overflow-tooltip="true">
+              <template slot-scope="scope">
+                {{ scope.row.tradeCompanyName || '-' }}
+              </template>
+            </el-table-column>
+             <el-table-column
+              label="采购人/成交时间"
+              prop="createTime"
+              width="180"
+            >
+              <template slot-scope="scope">
+                <div class="order-numbers">
+                  <div class="order-number-item">
+                    {{ scope.row.createBy || "-" }}
+                  </div>
+                  <div class="order-number-item">
+                     {{
+                      scope.row.createTime || "-"
+                    }}
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="brand" label="品牌/品类" width="100" align="center">
+              <template slot-scope="scope">
+                <div class="order-productName">
+                  <div class="order-productName-line">
+                    <span v-if="scope.row.skuName" class="pn-model">{{
+                      scope.row.brand || "-"
+                    }}</span>
+                  </div>
+                  <div class="order-productName-line">
+                    <span v-if="scope.row.category" class="pn-model">{{
+                      scope.row.category
+                    }}</span>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="产品型号"
+              prop="productName"
+              min-width="250"
+              :show-overflow-tooltip="true"
+              align="center"
+            >
+              <template slot-scope="scope">
+                <div class="order-productName">
+                  <div class="order-productName-line">
+                    <span v-if="scope.row.skuName" class="pn-model">{{
+                      scope.row.productName || "-"
+                    }}</span>
+                  </div>
+                  <div class="order-productName-line">
+                    <span v-if="scope.row.skuName" class="pn-model">{{
+                      scope.row.skuName
+                    }}</span>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="quantity" label="入库/成交" width="90" align="center" >
+              <template slot-scope="scope">
+                {{ scope.row.warehouseQuantity || 0 }} / {{ scope.row.quantity || 0 }}
+              </template>
+            </el-table-column>
+            <el-table-column label="成交价" prop="tradePrice" width="90" align="center" />
+            <el-table-column prop="deliveryCode" label="送货码" width="90" align="center" >
+              <template slot-scope="scope">
+                {{ scope.row.deliveryCode || '-' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="remark" label="备注" width="300" align="center" :show-overflow-tooltip="true">
+              <template slot-scope="scope">
+                {{ scope.row.remark || '-' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="trackingNumber" label="物流信息" width="250" align="center">
+              <template slot-scope="scope">
+                <div style="text-align: left; line-height: 1.8;">
+                  <template v-if="scope.row.trackingCompany || scope.row.trackingNumber">
+                    <div v-if="scope.row.trackingCompany" style="margin-bottom: 2px;">
+                      <span>物流公司：</span>
+                      <el-tag size="mini" type="success">{{ getTrackingCompanyName(scope.row.trackingCompany) }}</el-tag>
+                    </div>
+                    <div v-if="scope.row.trackingNumber">
+                      <span>物流单号：</span>
+                      <el-tag size="mini" type="success">{{ scope.row.trackingNumber }}</el-tag>
+                    </div>
+                  </template>
+                  <el-tag v-else size="mini" type="danger">待上传物流单号</el-tag>
+                </div>
+              </template>
+            </el-table-column>
+            <!-- 操作 -->
+            <el-table-column label="操作" width="260" fixed="right" align="center">
+              <template slot-scope="scope">
+                <div class="operation-buttons">
+                  <el-button size="mini" type="info" @click="handleCopy(scope.row)">一键复制</el-button>
+                  <el-button size="mini" type="warning" @click="handleEditTracking(scope.row)">修改物流</el-button>
+                  <el-button size="mini" type="danger" @click="handleRevoke(scope.row)">撤销</el-button>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+          <!-- 分页器 -->
+          <div class="pagination-wrapper">
+            <el-pagination
+              :current-page="pagination.current"
+              :page-sizes="[30, 50, 100]"
+              :page-size="pagination.size"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="pagination.total"
+              class="custom-pagination"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 串码弹窗 -->
+    <ImeiDialog
+      :visible.sync="imeiDialogVisible"
+      :current-order="imeiDialogData"
+      @confirm="handleConfirmImei"
+      @cancel="handleCancelImei"
+      @close="handleCancelImei"
+    />
+
+    <NewOrderDialog ref="newOrderDialog" @created="onNewOrderCreated" />
+    <ImportOrderDialog ref="importOrderDialog" @imported="onImportCompleted" />
+    <CopyDialog :visible.sync="copyDialogVisible" :data="copyDialogData" />
+
+    <!-- 修改物流弹窗 -->
+    <el-dialog title="修改物流信息" :visible.sync="trackingDialogVisible" width="480px" :close-on-click-modal="false">
+      <el-form :model="trackingForm" label-width="90px">
+        <el-form-item label="物流公司">
+          <el-select v-model="trackingForm.trackingCompany" placeholder="请选择物流公司" style="width: 100%;">
+            <el-option v-for="item in trackingCompanyOptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="物流单号" v-if="trackingForm.trackingCompany !== '送货入仓'">
+          <el-input v-model="trackingForm.trackingNumber" placeholder="请输入物流单号" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="trackingDialogVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="trackingLoading" @click="handleTrackingConfirm">确 定</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import EmptyState from './components/EmptyState'
+import ImeiDialog from './components/ImeiDialog'
+import BrandFilter from './components/brandFilter'
+import SearchSection from '@/views/demandManage/wholesale/components/searchSection.vue'
+import NewOrderDialog from './components/NewOrderDialog'
+import ImportOrderDialog from './components/ImportOrderDialog'
+import CopyDialog from './components/CopyDialog'
+import { getPutinList, putinRevokeOrder, getProductBrandList, getProductNameList, getSkuList, saveOrder, updateTracking } from '@/api/sale'
+import { getBusinessCompanyListApi } from '@/api/business'
+import { getDeliveryTimeText } from '@/utils/deliveryTime'
+
+export default {
+  name: 'TodayOrder',
+  components: {
+    EmptyState,
+    ImeiDialog,
+    BrandFilter,
+    SearchSection,
+    NewOrderDialog,
+    ImportOrderDialog,
+    CopyDialog
+  },
+  data() {
+    return {
+      loading: false,
+      orderList: [],
+      selectedRegion: '',
+      selectedBrand: '',
+      currentStatus: 5, // 当日发货状态
+      // 搜索表单
+      searchParams: {
+        productNameLike: '',
+        companyId: '',
+        payerName: '',
+        createBy: ''
+      },
+      pagination: {
+        current: 1,
+        size: 30,
+        total: 0
+      },
+      // 串码弹窗相关数据
+      imeiDialogVisible: false,
+      imeiDialogData: {},
+      // 一键复制弹窗相关数据
+      copyDialogVisible: false,
+      copyDialogData: {},
+      // 修改物流弹窗相关数据
+      trackingDialogVisible: false,
+      trackingLoading: false,
+      trackingCompanyOptions: [
+        { value: '顺丰快递', label: '顺丰快递' },
+        { value: '京东', label: '京东' },
+        { value: '德邦', label: '德邦' },
+        { value: '送货入仓', label: '送货入仓' }
+      ],
+      trackingForm: {
+        orderCode: '',
+        trackingCompany: '',
+        trackingNumber: ''
+      },
+    }
+  },
+  computed: {
+  },
+  mounted() {
+    this.fetchOrderList()
+  },
+  methods: {
+    getTrackingCompanyName(value) {
+      if (!value) return value
+      const map = {
+        shunfeng: '顺丰快递',
+        jd: '京东',
+        debangwuliu: '德邦',
+        zs: '送货入仓'
+      }
+      return map[value] || value
+    },
+    // 发货时效显示方法
+    getDeliveryTimeText,
+    handleRegionChange(region) {
+      this.selectedRegion = region
+      this.pagination.current = 1
+      // 重新获取订单列表
+      this.fetchOrderList()
+    },
+    handleBrandChange(brand) {
+      this.selectedBrand = brand
+      this.pagination.current = 1
+      // 重新获取订单列表
+      this.fetchOrderList()
+    },
+    // 搜索处理
+    handleSearch(searchData) {
+      this.searchParams = { ...this.searchParams, ...searchData }
+      this.pagination.current = 1
+      this.fetchOrderList()
+    },
+    // 重置搜索
+    handleReset(searchData) {
+      this.searchParams = { ...this.searchParams, ...searchData }
+      this.pagination.current = 1
+      this.fetchOrderList()
+    },
+    async fetchOrderList() {
+      this.loading = true
+      const res = await getPutinList({
+        // province: this.selectedRegion,
+        brand: this.selectedBrand,
+        companyId: this.searchParams.companyId,
+        productName: this.searchParams.productNameLike,
+        payerName: this.searchParams.payerName,
+        createBy: this.searchParams.createBy,
+        statusList: [this.currentStatus]
+      }, {
+        pageNum: this.pagination.current,
+        pageSize: this.pagination.size
+      })
+      if (res && res.code === 200) {
+        this.orderList = res.rows
+        this.pagination.total = res.total
+      } else {
+        this.$message.error(res?.msg || '获取订单列表失败')
+      }
+      this.loading = false
+    },
+    handleSizeChange(size) {
+      this.pagination.size = size
+      this.fetchOrderList()
+    },
+    handleCurrentChange(current) {
+      this.pagination.current = current
+      this.fetchOrderList()
+    },
+    handleGrab(row) {
+      this.$message.success(`抢单成功：${row.orderNo}`)
+    },
+    handleView(row) {
+      this.$message.info(`查看订单：${row.orderNo}`)
+    },
+    // 串码选项相关方法
+    getCodeOptionType(codeOptions) {
+      const typeMap = {
+        0: 'success', // 发货前提供串码
+        1: 'warning', // 发货后提供串码
+        2: 'info' // 不需要串码
+      }
+      return typeMap[codeOptions] || 'info'
+    },
+    getCodeOptionText(codeOptions) {
+      const textMap = {
+        0: '发货前提供',
+        1: '发货后提供',
+        2: '不需要'
+      }
+      return textMap[codeOptions] || '未知'
+    },
+    // 格式化账期
+    formatAccountingPeriod(val) {
+      const n = Number(val)
+      if (!isFinite(n) || n < 0) return '-'
+      return n === 0 ? '当天' : `T+${n}`
+    },
+    // 复制文本到剪贴板
+    copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          this.$message.success('复制成功')
+        }).catch(() => {
+          this.fallbackCopyText(text)
+        })
+      } else {
+        this.fallbackCopyText(text)
+      }
+    },
+    // 降级复制方法
+    fallbackCopyText(text) {
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-999999px'
+      textArea.style.top = '-999999px'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      try {
+        document.execCommand('copy')
+        this.$message.success('复制成功')
+      } catch (err) {
+        this.$message.error('复制失败')
+      }
+      document.body.removeChild(textArea)
+    },
+    // 标签筛选相关方法
+    handleTagFilterConfirm(selectedObjects) {
+      this.$message.success('标签筛选已应用')
+    },
+    handleTagFilterCancel() {
+      console.log('取消标签筛选')
+    },
+    // 订单编号搜索相关方法
+    handleOrderNumberFilterConfirm(selectedObjects) {
+      this.$message.success('订单编号搜索已应用')
+    },
+    handleOrderNumberFilterCancel() {
+      console.log('取消订单编号搜索')
+    },
+    // 发货时效筛选相关方法
+    handleShippingTimeFilterConfirm(selectedObjects) {
+      this.$message.success('发货时效筛选已应用')
+    },
+    handleShippingTimeFilterCancel() {
+      console.log('取消发货时效筛选')
+    },
+    // 到货时效筛选相关方法
+    handleArrivalTimeFilterConfirm(selectedObjects) {
+      this.$message.success('到货时效筛选已应用')
+    },
+    handleArrivalTimeFilterCancel() {
+      console.log('取消到货时效筛选')
+    },
+    // 产品型号筛选相关方法
+    handleProductFilterConfirm(selectedObjects) {
+      this.$message.success('产品型号筛选已应用')
+    },
+    handleProductFilterCancel() {
+      console.log('取消产品型号筛选')
+    },
+    // 揽收状态筛选相关方法
+    handlePickupStatusFilterConfirm(selectedObjects) {
+      this.$message.success('揽收状态筛选已应用')
+    },
+    handlePickupStatusFilterCancel() {
+      console.log('取消揽收状态筛选')
+    },
+    // 操作按钮相关方法
+    handleEditTracking(row) {
+      this.trackingForm = {
+        orderCode: row.orderCode,
+        trackingCompany: row.trackingCompany || '',
+        trackingNumber: row.trackingNumber || ''
+      }
+      this.trackingDialogVisible = true
+    },
+    async handleTrackingConfirm() {
+      this.trackingLoading = true
+      try {
+        const res = await updateTracking(this.trackingForm)
+        if (res && res.code === 200) {
+          this.$message.success('修改物流信息成功')
+          this.trackingDialogVisible = false
+          this.fetchOrderList()
+        } else {
+          this.$message.error(res?.msg || '修改物流信息失败')
+        }
+      } catch (error) {
+        console.error('修改物流信息失败', error)
+        this.$message.error('修改物流信息失败，请稍后重试')
+      } finally {
+        this.trackingLoading = false
+      }
+    },
+    handleWarehouseDelivery(row) {
+      console.log('仓配代发:', row)
+      this.$message.success(`订单 ${row.orderNo} 已设置为仓配代发`)
+    },
+    // 串码信息相关方法
+    handleImeiInfo(row) {
+      this.imeiDialogData = { ...row }
+      this.imeiDialogVisible = true
+    },
+    // 撤销订单（确认后调用接口）
+    async handleRevoke(row) {
+      if (!row || !row.orderCode) {
+        this.$message.warning('无效的订单，无法撤销')
+        return
+      }
+      try {
+        await this.$confirm('确认要撤销该订单吗？', '确认撤销', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      } catch {
+        return
+      }
+      try {
+        const res = await putinRevokeOrder(row.orderCode)
+        if (res && res.code === 200) {
+          this.$message.success('撤销成功')
+          this.fetchOrderList()
+          // refresh BrandFilter data after revoke
+          if (this.$refs.brandFilter && typeof this.$refs.brandFilter.getBrandData === 'function') {
+            try {
+              this.$refs.brandFilter.getBrandData()
+            } catch (err) {
+              // ignore errors from BrandFilter refresh
+              console.warn('刷新 BrandFilter 失败', err)
+            }
+          }
+        } else {
+          this.$message.error(res?.msg || '撤销失败')
+        }
+      } catch (error) {
+        console.error('撤销接口调用失败', error)
+        this.$message.error('撤销失败，请稍后重试')
+      }
+    },
+
+    handleConfirmImei() {
+      this.imeiDialogVisible = false
+    },
+    handleCancelImei() {
+      this.imeiDialogVisible = false
+    },
+
+    // 一键复制订单信息
+    handleCopy(row) {
+      const copyText = `订单号：${row.orderCode}
+供应商：${row.tradeCompanyName || '-'}
+产品型号：${row.productName || '-'} ${row.skuName || '-'}
+数量：${row.quantity || 0}
+送货码：${row.deliveryCode || '-'}`
+      this.copyText(copyText)
+    },
+
+    handleBatchDownload() {
+      this.$message.success('批量下载功能')
+    }
+    ,
+    // 新建订单：打开弹窗（此按钮已在 OrderSearch 的 toolbar 中触发 handleCreateOrder）
+    openNewOrderDialog() {
+      this.newOrderForm = {
+        brandId: '',
+        productId: '',
+        skuId: '',
+        noWarehouseSkuCode: '',
+        quantity: null,
+        purchasePrice: '',
+        remark: ''
+      }
+      this.loadBrandOptions()
+      this.newOrderDialogVisible = true
+    },
+    handleCancelNewOrder() {
+      this.newOrderDialogVisible = false
+    },
+    // 创建订单：调用后端 saveOrder 接口，companyId 来自 OrderSearch（this.searchForm.companyId）
+    async handleCreateOrder() {
+      // 如果 toolbar 的按钮直接调用此方法，会在这里打开弹窗
+      if (!this.newOrderDialogVisible) {
+        this.openNewOrderDialog()
+        return
+      }
+
+      const f = this.newOrderForm
+
+      if (!f.supplierId) {
+        this.$message.warning('请选择供应商')
+        return
+      }
+
+      if (!f.noWarehouseSkuCode && !f.productCode) {
+        this.$message.warning('请先选择SKU')
+        return
+      }
+
+      if (!f.quantity || Number(f.quantity) <= 0) {
+        this.$message.warning('请填写有效的需求数量')
+        return
+      }
+      // 采购价格必须为数字且 >= 0
+      const priceNum = Number(f.purchasePrice)
+      if (Number.isNaN(priceNum) || priceNum < 0) {
+        this.$message.warning('采购价格必须为数字且不可小于 0')
+        return
+      }
+
+      if (!f.accountingPeriod && f.accountingPeriod !== 0) {
+        this.$message.warning('请选择账期')
+        return
+      }
+
+
+      // companyId 从新建弹窗选择的供应商获取
+      const companyId = this.newOrderForm?.supplierId
+
+      // 构造提交数据，按后端接口要求字段名
+      const payload = {
+        companyId: companyId ? Number(companyId) : '',
+        accountingPeriod: Number(f.accountingPeriod || 0),
+        price: Number(f.purchasePrice),
+        quantity: Number(f.quantity),
+        remark: f.remark || '',
+        skuCode: f.productCode || f.noWarehouseSkuCode || ''
+      }
+
+      try {
+        const res = await saveOrder(payload)
+        if (res && res.code === 200) {
+          this.$message.success(res.msg || '新建订单成功')
+          this.newOrderDialogVisible = false
+          this.fetchOrderList()
+          // refresh BrandFilter after creating a new order
+          if (this.$refs.brandFilter && typeof this.$refs.brandFilter.getBrandData === 'function') {
+            try {
+              this.$refs.brandFilter.getBrandData()
+            } catch (err) {
+              console.warn('刷新 BrandFilter 失败', err)
+            }
+          }
+        } else {
+          this.$message.error(res?.msg || '新建订单失败')
+        }
+      } catch (error) {
+        console.error('saveOrder 调用失败', error)
+      }
+    },
+    loadBrandOptions() {
+      // 从后端获取品牌列表
+      return (async () => {
+        try {
+          const res = await getProductBrandList()
+          const list = res?.rows || res?.data || []
+          this.brandOptions = Array.isArray(list)
+            ? list.map(item => {
+                const v = item.brand || item.brandName || item.name || item.value || item
+                return { label: v, value: v }
+              })
+            : []
+        } catch (error) {
+          console.error('获取品牌列表失败', error)
+          this.brandOptions = []
+        }
+      })()
+    },
+    async loadProductOptions(brandId) {
+      // 根据品牌从后端获取商品名称列表
+      this.productOptions = []
+      this.newOrderForm.productId = ''
+      this.newOrderForm.skuId = ''
+      this.skuOptions = []
+      if (!brandId) return
+      try {
+        const res = await getProductNameList({ brand: brandId })
+        const list = res?.rows || res?.data || []
+        this.productOptions = Array.isArray(list)
+          ? list.map(item => {
+              const v = item.productName || item.name || item.product || item
+              return { label: v, value: v }
+            })
+          : []
+      } catch (error) {
+        console.error('获取商品列表失败', error)
+        this.productOptions = []
+      }
+    },
+    async loadSkuOptions(productId) {
+      // 根据品牌+商品从后端获取 SKU 列表（分页最大）
+      this.skuOptions = []
+      this.newOrderForm.skuId = ''
+      const brandId = this.newOrderForm.brandId || ''
+      if (!productId && !brandId) return
+      try {
+        const payload = {
+          brand: brandId || '',
+          category: '',
+          productName: productId || ''
+        }
+        const res = await getSkuList(payload, { pageNum: 1, pageSize: 1000 })
+        const list = res?.rows || res?.data || []
+        this.skuOptions = Array.isArray(list)
+          ? list.map(item => {
+              const label = item.skuName || item.skuCode || item.sku || item.name || item
+              const value = item.skuId || item.skuCode || label
+              return {
+                label,
+                value,
+                skuCode: item.skuCode || item.sku || '',
+                specName: item.specName || item.mode || ''
+              }
+            })
+          : []
+      } catch (error) {
+        console.error('获取 SKU 列表失败', error)
+        this.skuOptions = []
+      }
+    }
+    ,
+    onSkuChange(selectedValue) {
+      const option = this.skuOptions.find(s => s.value === selectedValue)
+      if (option) {
+        this.newOrderForm.mode = option.specName || ''
+        this.newOrderForm.productCode = option.skuCode || ''
+      } else {
+        this.newOrderForm.mode = ''
+        this.newOrderForm.productCode = ''
+      }
+    }
+    ,
+
+    // 供应商远程搜索（用于新建订单弹窗）
+    async handleSupplierRemote(keyword = '') {
+      const trimmed = (keyword || '').trim()
+      this.supplierLoading = true
+      try {
+        const pageData = {
+          pageNum: 1,
+          pageSize: 30
+        }
+        const params = {}
+        if (trimmed) params.companyNameLike = trimmed
+        const res = await getBusinessCompanyListApi(params,pageData)
+        const list = res?.rows || res?.data || []
+        this.supplierOptions = Array.isArray(list)
+          ? list.map(item => ({
+              label: item.companyName,
+              value: item.id,
+              raw: item
+            }))
+          : []
+      } catch (error) {
+        console.error('获取供应商列表失败', error)
+        this.supplierOptions = []
+      } finally {
+        this.supplierLoading = false
+      }
+    },
+    handleSupplierVisible(visible) {
+      if (visible && !this.supplierOptions.length) {
+        this.handleSupplierRemote()
+      }
+    },
+    handleSupplierChange(val) {
+      // value is supplier id
+      this.newOrderForm.supplierId = val
+    },
+    handleSupplierClear() {
+      this.newOrderForm.supplierId = ''
+    },
+    // called when NewOrderDialog emits created
+    onNewOrderCreated(res) {
+      // refresh list and brand filter
+      this.fetchOrderList()
+      if (this.$refs.brandFilter && typeof this.$refs.brandFilter.getBrandData === 'function') {
+        try {
+          this.$refs.brandFilter.getBrandData()
+        } catch (err) {
+          console.warn('刷新 BrandFilter 失败', err)
+        }
+      }
+    },
+    // called when ImportOrderDialog emits imported
+    onImportCompleted() {
+      this.fetchOrderList()
+      if (this.$refs.brandFilter && typeof this.$refs.brandFilter.getBrandData === 'function') {
+        try {
+          this.$refs.brandFilter.getBrandData()
+        } catch (err) {
+          console.warn('刷新 BrandFilter 失败', err)
+        }
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@import './style/table-common.scss';
+
+// 筛选面板布局
+.filter-panels {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+/* 订单信息样式 */
+.order-numbers {
+  display: flex;
+  flex-direction: column;
+
+  .order-number-item {
+    padding: 0;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 20px;
+  }
+}
+
+// 产品型号样式
+.order-productName {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 操作按钮样式 */
+.operation-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  .el-button {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &.el-button--mini {
+      padding: 6px 12px;
+    font-size: 12px;
+    }
+  }
+}
+
+.order-productName-line {
+  font-size: 12px;
+  display: flex;
+  gap: 6px;
+  line-height: 20px;
+}
+
+.order-sku-line {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #909399;
+}
+
+/* 复制图标样式 */
+.copy-icon {
+  color: #409eff;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 4px;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #66b1ff;
+  }
+}
+
+/* 地址弹框样式 */
+:deep(.addr-popover) {
+  max-width: 520px;
+  padding: 12px;
+}
+
+.addr-content {
+  min-width: 200px;
+}
+
+.addr-line {
+  line-height: 22px;
+  margin-bottom: 4px;
+
+  &.main {
+    font-size: 14px;
+    color: #303133;
+    font-weight: 500;
+  }
+
+  &.sub {
+    font-size: 13px;
+    color: #606266;
+  }
+}
+.pending-order {
+  // 订单内容布局
+  .order-content-layout {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    min-height: 0; // 确保flex子元素可以收缩
+  }
+
+  .order-table-container {
+    flex: 1;
+    background: var(--bg-card);
+    border-radius: 8px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  // 响应式布局
+  @media (max-width: 1200px) {
+    .order-content-layout {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .order-table-container {
+      overflow-x: auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+
+      .header-actions {
+        justify-content: center;
+      }
+    }
+
+    .order-content-layout {
+      margin-bottom: 16px;
+    }
+
+    .pagination-wrapper {
+      margin-top: 20px;
+      text-align: right;
+      padding: 20px;
+      background: var(--bg-card);
+      border-radius: 6px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-tags);
+
+      .custom-pagination {
+        .el-pagination__sizes,
+        .el-pagination__jump {
+          display: none;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-header {
+      padding: 16px;
+      margin-bottom: 16px;
+
+      .page-title {
+        font-size: 18px;
+      }
+
+      .page-subtitle {
+        font-size: 12px;
+      }
+    }
+
+    .operation-buttons {
+      flex-direction: column;
+      gap: 4px;
+
+      .el-button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// 弹窗样式优化
+::v-deep .el-dialog {
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+  .el-dialog__header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+
+    .el-dialog__title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .el-dialog__headerbtn {
+      top: 20px;
+      right: 24px;
+
+      .el-dialog__close {
+        color: white;
+        font-size: 20px;
+
+        &:hover {
+          color: #ffd700;
+        }
+      }
+    }
+  }
+
+  .el-dialog__body {
+    padding: 24px;
+  }
+
+  .el-dialog__footer {
+    padding: 20px 24px;
+    background: var(--bg-hover);
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid var(--border-tags);
+
+    .el-button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
+
+.operation-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  .el-button {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &.el-button--mini {
+      padding: 6px 12px;
+    font-size: 12px;
+    }
+  }
+}
+
+.status-message {
+  color: #f56c6c;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  padding: 8px 0;
+  background: rgba(245, 108, 108, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid #f56c6c;
+  margin-top: 8px;
+}
+
+// 动画效果
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(2px);
+  }
+}
+
+.status-text {
+  display: flex;
+  cursor: pointer;
+  color: #606266;
+
+  .status-icon {
+    font-size: 12px;
+    margin-left: 4px;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+  }
+
+  &:hover {
+    color: #409EFF;
+
+    .status-icon {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+}
+
+.status-tooltip-content {
+  p {
+    margin: 0 0 8px 0;
+    line-height: 1.5;
+    font-size: 13px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      color: #e6a23c;
+    }
+  }
+}
+.new-order-form ::v-deep .el-select {
+  width: 100%;
+}
+</style>
+
+<style>
+/* 全局状态popover样式 */
+.status-popover {
+  background: #606266 !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.status-popover .el-popover__arrow {
+  border-top-color: #606266 !important;
+}
+
+.status-popover .status-tooltip-content {
+  color: #fff;
+}
+
+.status-popover .status-tooltip-content p strong {
+  color: #ffd700 !important;
+}
+
+</style>

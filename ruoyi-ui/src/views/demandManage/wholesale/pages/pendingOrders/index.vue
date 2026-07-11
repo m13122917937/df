@@ -92,16 +92,8 @@
             :data="tableDataList"
             style="width: 100%"
             @selection-change="handleSelectionChange"
-            v-table-height="{ bottomOffset: 100 }"
+            height="100%"
             element-loading-text="数据加载中"
-            :height="tableWrapHeight"
-            :cell-style="{ height: '60px' }"
-            :header-cell-style="{
-              height: '48px',
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
           >
             <!-- 空数据状态 -->
             <template slot="empty">
@@ -385,7 +377,6 @@ export default {
       exportLoading: false,
       tableDataList: [],
       totalNum: 0,
-      tableWrapHeight: 400, // 表格外框高度
       currentOrder: null,
       returnReason: 5, // 退货追单原因
       multipleSelection: [],

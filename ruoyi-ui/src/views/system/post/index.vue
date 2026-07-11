@@ -313,3 +313,16 @@ export default {
   }
 }
 </script>
+
+<style scoped lang="scss">
+.app-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+
+  .el-table {
+    flex: 1;
+  }
+}
+</style>

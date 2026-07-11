@@ -11,6 +11,6 @@ public class BlackListException extends UserException
 
     public BlackListException()
     {
-        super("login.blocked", null);
+        super("login.blocked", null, "登录已被禁止，请联系管理员");
     }
 }

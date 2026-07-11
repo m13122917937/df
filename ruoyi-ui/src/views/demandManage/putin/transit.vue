@@ -41,8 +41,8 @@
             :fit="true"
             height="100%"
             :header-cell-style="{
-              background: '#f7f8fa',
-              color: '#606266',
+              background: 'var(--bg-table-header)',
+              color: 'var(--adm-text-secondary)',
               fontWeight: 600,
             }"
             :cell-style="{ padding: '8px 0' }"
@@ -668,7 +668,7 @@ export default {
 
   &.sub {
     font-size: 13px;
-    color: #606266;
+    color: var(--adm-text-secondary);
   }
 }
 .pending-order {
@@ -682,9 +682,9 @@ export default {
 
   .order-table-container {
     flex: 1;
-    background: white;
+    background: var(--bg-card);
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
   }
 
@@ -719,9 +719,9 @@ export default {
       margin-top: 20px;
       text-align: right;
       padding: 20px;
-      background: #fff;
+      background: var(--bg-card);
       border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-card);
       border: 1px solid #f0f0f0;
 
       .custom-pagination {
@@ -795,7 +795,7 @@ export default {
 
   .el-dialog__footer {
     padding: 20px 24px;
-    background: #fafbfc;
+    background: var(--bg-hover);
     border-radius: 0 0 12px 12px;
     border-top: 1px solid #e4e7ed;
 
@@ -872,7 +872,7 @@ export default {
 .status-text {
   display: flex;
   cursor: pointer;
-  color: #606266;
+  color: var(--adm-text-secondary);
 
   .status-icon {
     font-size: 12px;

@@ -34,6 +34,8 @@ public class Transactions {
     private BigDecimal amount;
             /** 交易后该账户的余额（可选，建议由应用维护） */
     private BigDecimal balanceAfter;
+            /** 按交易对方汇总的交易总额（净额） */
+    private BigDecimal totalAmountByCounterparty;
             /** 具体支付方式（如刷卡、扫码、转账等） */
     private String paymentMethod;
             /** 交易对方（如“星巴克”、“张三”、“工资入账”） */

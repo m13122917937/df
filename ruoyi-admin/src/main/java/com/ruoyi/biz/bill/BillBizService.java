@@ -26,6 +26,7 @@ import com.ruoyi.order.model.bo.HangingOrderBO;
 import com.ruoyi.order.model.bo.OrderBO;
 import com.ruoyi.order.model.bo.TradeOrderBO;
 import com.ruoyi.order.model.consts.HandingOrderConsts;
+import com.ruoyi.order.model.consts.OrderConsts;
 import com.ruoyi.order.model.consts.TradeOrderConsts;
 import com.ruoyi.order.model.query.HangingOrderQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
@@ -136,6 +137,12 @@ public class BillBizService {
         if (Objects.isNull(orderBO)) {
             return;
         }
+        // 已有账单则跳过（防止重复出账）
+        BillBO existBill = billFacade.getOne(new BillQuery().setOrderCode(orderBO.getOrderCode()));
+        if (Objects.nonNull(existBill)) {
+            log.info("订单{}已有账单，跳过生成", orderBO.getOrderCode());
+            return;
+        }
         log.info("开始生成订单账单：{}", orderBO.getOrderCode());
         HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
         if (Objects.isNull(hangingOrderBO)) {
@@ -171,25 +178,24 @@ public class BillBizService {
 
     /**
      * 获取结算日期
-     *
-     * @param orderBO
-     * @param hangingOrderBO
-     * @return
+     * <p>入仓取挂单账期，代发优先取供应商账期（无则仍取挂单账期）。</p>
+     * <p>结算日期 = 发货时间 + 账期 + 1 天，若早于今天则置为明天。</p>
      */
-    private LocalDate getSettlementDate(OrderBO orderBO, HangingOrderBO hangingOrderBO,BillParam billParam) {
-        CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(hangingOrderBO.getLastCompeteCompany()));
-        DateTime dateTime = null;
-        if (Objects.isNull(companyBO) || Objects.isNull(companyBO.getAccountingPeriod())) {
-            dateTime = DateUtil.offsetDay(orderBO.getSendTime(), hangingOrderBO.getAccountingPeriod() + 1);
-        } else {
-            billParam.setAccounting(companyBO.getAccountingPeriod());
-            dateTime = DateUtil.offsetDay(orderBO.getSendTime(), companyBO.getAccountingPeriod() + 1);
+    private LocalDate getSettlementDate(OrderBO orderBO, HangingOrderBO hangingOrderBO, BillParam billParam) {
+        Integer accountingPeriod = hangingOrderBO.getAccountingPeriod();
+        // 代发订单优先取供应商账期
+        if (Objects.equals(OrderConsts.OrderType.O2O.getCode(), orderBO.getOrderType())) {
+            CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(hangingOrderBO.getLastCompeteCompany()));
+            if (Objects.nonNull(companyBO) && Objects.nonNull(companyBO.getAccountingPeriod())) {
+                accountingPeriod = companyBO.getAccountingPeriod();
+                billParam.setAccounting(accountingPeriod);
+            }
         }
+        DateTime dateTime = DateUtil.offsetDay(orderBO.getSendTime(), accountingPeriod + 1);
         if (dateTime.isBeforeOrEquals(DateUtil.date())) {
             return LocalDate.now().plusDays(1);
         }
         return dateTime.toLocalDateTime().toLocalDate();
-
     }
 
     public List<BillSumVO> queryBillSUMExport(Long payCompanyId, Long supplierId, Integer billType) {

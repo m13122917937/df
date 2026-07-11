@@ -1,25 +1,64 @@
 <template>
   <div class="navbar">
-    <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <div class="navbar-left">
+      <top-nav v-if="topNav" id="topmenu-container" class="topmenu-container" />
+    </div>
 
-    <breadcrumb v-if="!topNav" id="breadcrumb-container" class="breadcrumb-container" />
-    <top-nav v-if="topNav" id="topmenu-container" class="topmenu-container" />
+    <!-- Right: Actions -->
+    <div class="navbar-right">
+      <button class="icon-btn" title="通知">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="dot-indicator"></span>
+      </button>
+      <button class="icon-btn" title="帮助">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </button>
+      <button class="icon-btn" title="快捷入口">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </button>
 
-    <div class="right-menu">
-      <template v-if="device!=='mobile'">
-        <search id="header-search" class="right-menu-item" />
-      </template>
+      <screenfull class="screenfull-btn" />
 
-      <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="hover">
+      <button class="icon-btn theme-toggle" :title="isDark ? '切换白天模式' : '切换暗黑模式'" @click="toggleThemeMode">
+        <svg v-if="!isDark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
+      <el-dropdown class="avatar-container" trigger="hover">
         <div class="avatar-wrapper">
           <img :src="avatar" class="user-avatar">
-          <span class="user-nickname"> {{ nickName }} </span>
         </div>
         <el-dropdown-menu slot="dropdown">
           <router-link to="/user/profile">
-            <el-dropdown-item>个人中心</el-dropdown-item>
+            <el-dropdown-item>
+              <span>{{ nickName }}</span>
+              <span class="dropdown-sub">个人中心</span>
+            </el-dropdown-item>
           </router-link>
-
           <el-dropdown-item divided @click.native="logout">
             <span>退出登录</span>
           </el-dropdown-item>
@@ -31,51 +70,40 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import Breadcrumb from '@/components/Breadcrumb'
 import TopNav from '@/components/TopNav'
-import Hamburger from '@/components/Hamburger'
 import Screenfull from '@/components/Screenfull'
-import SizeSelect from '@/components/SizeSelect'
-import Search from '@/components/HeaderSearch'
-import RuoYiGit from '@/components/RuoYi/Git'
-import RuoYiDoc from '@/components/RuoYi/Doc'
 
 export default {
   emits: ['setLayout'],
   components: {
-    Breadcrumb,
     TopNav,
-    Hamburger,
     Screenfull,
-    SizeSelect,
-    Search,
-    RuoYiGit,
-    RuoYiDoc
   },
   computed: {
     ...mapGetters([
-      'sidebar',
       'avatar',
       'device',
       'nickName'
     ]),
-    setting: {
-      get() {
-        return this.$store.state.settings.showSettings
-      }
-    },
     topNav: {
       get() {
         return this.$store.state.settings.topNav
       }
+    },
+    isDark() {
+      return this.$store.state.settings.themeMode === 'dark'
     }
   },
   methods: {
-    toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
-    },
     setLayout(event) {
       this.$emit('setLayout')
+    },
+    toggleThemeMode() {
+      const newMode = this.isDark ? 'light' : 'dark'
+      this.$store.dispatch('settings/changeSetting', {
+        key: 'themeMode',
+        value: newMode
+      })
     },
     logout() {
       this.$confirm('确定注销并退出系统吗？', '提示', {
@@ -94,99 +122,125 @@ export default {
 
 <style lang="scss" scoped>
 .navbar {
-  height: 50px;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 20px;
+  background: var(--bg-navbar);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'HarmonyOS Sans', 'PingFang SC', system-ui, sans-serif;
   position: relative;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  z-index: 10;
+}
 
-  .hamburger-container {
-    line-height: 46px;
-    height: 100%;
-    float: left;
-    cursor: pointer;
-    transition: background .3s;
-    -webkit-tap-highlight-color:transparent;
+.navbar-left {
+  display: inline-flex;
+  align-items: center;
+}
+
+.navbar-right {
+  flex: 0 0 auto;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--menu-text);
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  position: relative;
+
+  &:hover {
+    background: var(--menu-hover-bg);
+    color: var(--menu-hover-text);
+  }
+}
+
+.dot-indicator {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FF5E57;
+  border: 2px solid var(--bg-navbar);
+}
+
+.avatar-container {
+  margin-left: 4px;
+  cursor: pointer;
+
+  .avatar-wrapper {
+    display: flex;
+    align-items: center;
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+}
+
+.topmenu-container {
+  position: static;
+  display: inline-flex;
+  width: auto;
+  border-bottom: none !important;
+}
+
+.screenfull-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--menu-text);
+  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  &:hover {
+    background: var(--menu-hover-bg);
+    color: var(--menu-hover-text);
+  }
+}
+
+::v-deep .el-dropdown-menu {
+  border-radius: 12px;
+  border: 1px solid var(--adm-border);
+  box-shadow: var(--shadow-popup);
+  padding: 4px;
+  background: var(--contextmenu-bg);
+
+  .el-dropdown-menu__item {
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--adm-text-primary);
 
     &:hover {
-      background: rgba(0, 0, 0, .025)
+      background: var(--contextmenu-hover);
+      color: #5B7CFA;
     }
   }
+}
 
-  .breadcrumb-container {
-    float: left;
-  }
-
-  .topmenu-container {
-    position: absolute;
-    left: 50px;
-  }
-
-  .errLog-container {
-    display: inline-block;
-    vertical-align: top;
-  }
-
-  .right-menu {
-    float: right;
-    height: 100%;
-    line-height: 50px;
-
-    &:focus {
-      outline: none;
-    }
-
-    .right-menu-item {
-      display: inline-block;
-      padding: 0 8px;
-      height: 100%;
-      font-size: 18px;
-      color: #5a5e66;
-      vertical-align: text-bottom;
-
-      &.hover-effect {
-        cursor: pointer;
-        transition: background .3s;
-
-        &:hover {
-          background: rgba(0, 0, 0, .025)
-        }
-      }
-    }
-
-    .avatar-container {
-      margin-right: 0px;
-      padding-right: 0px;
-
-      .avatar-wrapper {
-        margin-top: 10px;
-        right: 8px;
-        position: relative;
-
-        .user-avatar {
-          cursor: pointer;
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-        }
-
-        .user-nickname{
-          position: relative;
-          bottom: 10px;
-          left: 2px;
-          font-size: 14px;
-          font-weight: bold;
-        }
-
-        .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 25px;
-          font-size: 12px;
-        }
-      }
-    }
-  }
+.dropdown-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--adm-text-tertiary);
+  margin-top: 1px;
 }
 </style>

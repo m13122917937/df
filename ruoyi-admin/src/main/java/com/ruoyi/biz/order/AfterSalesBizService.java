@@ -2,14 +2,7 @@
 package com.ruoyi.biz.order;
 
 import cn.hutool.core.date.DateUtil;
-import com.ruoyi.bill.constant.BillConsts;
-import com.ruoyi.bill.constant.BillPayPlanConsts;
-import com.ruoyi.bill.facade.IBillFacade;
-import com.ruoyi.bill.model.bo.BillBO;
-import com.ruoyi.bill.model.param.BillParam;
-import com.ruoyi.bill.model.query.BillQuery;
 import com.ruoyi.common.core.domain.user.LoginUser;
-import com.ruoyi.mapper.bill.BillConvert;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.model.bo.OrderBO;
 import com.ruoyi.order.model.consts.OrderConsts;
@@ -21,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Objects;
 
 @Slf4j
@@ -30,9 +22,6 @@ public class AfterSalesBizService {
 
     @Autowired
     IOrderFacade orderFacade;
-
-    @Autowired
-    IBillFacade billFacade;
 
     /**
      * 添加售后订单
@@ -59,18 +48,6 @@ public class AfterSalesBizService {
                 log.info("售后订单添加失败：{}", orderCode);
                 continue;
             }
-            //添加财务负账单
-            BillBO billBO = billFacade.getOne(new BillQuery().setOrderCode(orderCode).setReversed(BillConsts.BillReversedType.FORWARD_DIRECTION.getCode()));
-            if (Objects.isNull(billBO)) {
-                log.info("售后订单未生成财务账单，不能售后：{}", orderCode);
-                continue;
-            }
-            // 生成财务负账单
-            BillParam billParam = BillConvert.INSTANCE.toBillParam(billBO);
-            billParam.setPlanId(null).setPayPlan(BillPayPlanConsts.PayPlan.NOT_PAYMENT.getCode()).setSettlementDate(LocalDate.now().plusDays(1))
-                    .setQuantity(-billParam.getQuantity()).setBillingAmount(billParam.getBillingAmount().negate()).setTradePrice(billParam.getTradePrice().negate())
-                    .setUpdateTime(DateUtil.date()).setUpdateBy(loginUser.getUserId()).setId(null);
-            billFacade.save(billParam);
 
         }
     }

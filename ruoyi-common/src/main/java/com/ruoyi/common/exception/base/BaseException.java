@@ -52,8 +52,7 @@ public class BaseException extends RuntimeException {
 
     @Override
     public String getMessage() {
-
-        return this.message;
+        return this.defaultMessage != null ? this.defaultMessage : this.message;
     }
 
     public String getModule() {

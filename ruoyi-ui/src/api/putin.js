@@ -105,3 +105,44 @@ export function updateTracking(data) {
     data,
   });
 }
+
+/**
+ * 下载导入模板
+ */
+export function downloadImportTemplate() {
+  return request({
+    url: `/warehousing/order/import/template`,
+    method: "get",
+    responseType: "blob",
+  });
+}
+
+/**
+ * 校验导入文件
+ * @param {File} file
+ */
+export function importValidate(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request({
+    url: `/warehousing/order/import/validate`,
+    method: "post",
+    data: formData,
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+}
+
+/**
+ * 导入文件并创建订单
+ * @param {File} file
+ */
+export function importExcel(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request({
+    url: `/warehousing/order/import`,
+    method: "post",
+    data: formData,
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+}

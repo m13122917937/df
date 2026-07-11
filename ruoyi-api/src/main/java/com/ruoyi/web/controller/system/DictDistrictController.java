@@ -38,7 +38,7 @@ public class DictDistrictController {
         List<DictDistrictVO> list = redisCache.getCacheObject(RedisKeyUtil.generate(ApiRedisKey.SYSTEM_PROVINCE));
         if (CollectionUtil.isEmpty(list)) {
             list = DictDistrictConvert.INSTANCE.toVo(dictDistrictFacade.list(new DictDistrictQuery().setLevel(DictDistrictConsts.Level.PROVINCE.getValue())));
-            redisCache.setCacheObject(RedisKeyUtil.generate(ApiRedisKey.SYSTEM_PROVINCE), list, 1, TimeUnit.DAYS);
+            redisCache.setCacheObject(ApiRedisKey.SYSTEM_PROVINCE, list, 1, TimeUnit.DAYS);
         }
         return AjaxResult.success(list);
     }

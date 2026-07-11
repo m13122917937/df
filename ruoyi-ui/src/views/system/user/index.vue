@@ -568,3 +568,82 @@ export default {
   }
 }
 </script>
+
+<style scoped lang="scss">
+.app-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+  box-sizing: border-box;
+
+  .head-container {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+
+    .el-input {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  .el-tree {
+    background: transparent;
+    color: var(--adm-text-primary);
+  }
+
+  .el-row {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .splitpanes {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .splitpanes__pane {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .el-col {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+  }
+
+  .el-form--inline {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+  }
+
+  .el-table {
+    flex: 1;
+  }
+
+  :deep(.pagination-container) {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 8px;
+    flex-shrink: 0;
+  }
+
+  .mb8 {
+    .el-col {
+      height: auto;
+      display: inline;
+    }
+  }
+
+  .splitpanes__splitter {
+    background: var(--border-tags);
+  }
+}
+</style>

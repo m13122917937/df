@@ -322,20 +322,7 @@ export function confirmEndingOrderApi(params) {
 
 
 
-//afterOrder------售后订单--start
-/**
- * @description: 获取售后列表
- * @param {*} params
- * @returns
- */
-export function getAfterSalesListApi(params) {
-  return request({
-    url: `/order/new/list/afterSales`,
-    method: "get",
-    params,
-  });
-}
-//afterOrder------end
+//afterOrder------售后订单--end
 
 
 

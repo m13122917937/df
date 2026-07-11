@@ -11,9 +11,12 @@ import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.order.OrderQueryParam;
 import com.ruoyi.jky.param.warehouse.WarehouseListParam;
 import com.ruoyi.job.JkyOrderSyncJob;
+import com.ruoyi.job.JkyRefundSyncJob;
+import com.ruoyi.job.JkyGoodsSyncJob;
 import com.ruoyi.job.JkyVendorSyncJob;
 import com.ruoyi.jky.rep.order.OrderQueryRep;
 import com.ruoyi.jky.rep.warehouse.WarehouseListRep;
+import com.ruoyi.job.util.SyncTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,12 @@ public class JkyOrderTest {
     private JkyVendorSyncJob jkyVendorSyncJob;
 
     @Autowired
+    private JkyRefundSyncJob jkyRefundSyncJob;
+
+    @Autowired
+    private JkyGoodsSyncJob jkyGoodsSyncJob;
+
+    @Autowired
     private RedisCache redisCache;
 
 
@@ -58,6 +67,30 @@ public class JkyOrderTest {
     public void executeJkyVendorSyncJob() {
         redisCache.deleteObject(AdminRedisKey.Jky.VENDOR_SYNC_LOCK);
         jkyVendorSyncJob.execute();
+    }
+
+    @Autowired
+    SyncTimeUtil syncTimeUtil;
+    /**
+     * 执行吉客云售后订单同步定时任务。
+     */
+    @Test
+    public void executeJkyRefundSyncJob() {
+        redisCache.deleteObject(AdminRedisKey.Jky.REFUND_SYNC_LOCK);
+        redisCache.deleteObject(AdminRedisKey.Jky.REFUND_LAST_SYNC_TIME);
+        jkyRefundSyncJob.execute();
+//        DateTime dateTime = DateUtil.offsetDay(DateUtil.date(), -3);
+//        syncTimeUtil.saveSyncTime(AdminRedisKey.Jky.REFUND_LAST_SYNC_TIME, dateTime);
+    }
+
+    /**
+     * 执行吉客云商品SKU同步定时任务。
+     */
+    @Test
+    public void executeJkyGoodsSyncJob() {
+        redisCache.deleteObject(AdminRedisKey.Jky.GOODS_SYNC_LOCK);
+        redisCache.deleteObject(AdminRedisKey.Jky.GOODS_LAST_SYNC_TIME);
+        jkyGoodsSyncJob.execute();
     }
 
     /**

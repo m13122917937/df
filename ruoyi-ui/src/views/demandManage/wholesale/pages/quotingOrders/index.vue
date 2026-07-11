@@ -92,18 +92,10 @@
             center
             :fit="true"
             v-loading="tableLoading"
-            v-table-height="{ bottomOffset: 100 }"
             :data="tableDataList"
             style="width: 100%"
             element-loading-text="数据加载中"
-            :height="tableHeight"
-            :min-width="180"
-            :header-cell-style="{
-              height: '48px',
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
+            height="100%"
             @selection-change="handleSelectionChange"
           >
             <!-- 空数据状态 -->
@@ -447,7 +439,6 @@ export default {
       tableDataList: [],
       addressList: [],
       totalNum: 0,
-      tableHeight: 500,
       returnOrderDialog: false,
       currentOrder: [],
       revocationLoading: false,

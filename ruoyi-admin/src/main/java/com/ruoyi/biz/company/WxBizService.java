@@ -60,12 +60,12 @@ public class WxBizService {
             UserLoginBO userLoginBO = new UserLoginBO();
             if (Objects.isNull(memberBO)) {
                 userLoginBO.setNewUser(Boolean.TRUE);
-                redisCache.setCacheObject(UserRedisKey.USER_KEY.USER_LOGIN_KEY.getKey() + uuid, userLoginBO, 30, TimeUnit.MINUTES);
+                redisCache.setCacheObject(UserRedisKey.USER_LOGIN_QR_CODE + uuid, userLoginBO, 30, TimeUnit.MINUTES);
                 return;
             }
             userLoginBO.setUserId(memberBO.getUserId()).setNewUser(Boolean.FALSE);
             // 登录成功设置key
-            redisCache.setCacheObject(UserRedisKey.USER_KEY.USER_LOGIN_KEY.getKey() + uuid, userLoginBO, 30, TimeUnit.MINUTES);
+            redisCache.setCacheObject(UserRedisKey.USER_LOGIN_QR_CODE + uuid, userLoginBO, 30, TimeUnit.MINUTES);
         }
 
     }

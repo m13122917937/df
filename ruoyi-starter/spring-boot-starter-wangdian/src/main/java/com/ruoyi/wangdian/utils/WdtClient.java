@@ -85,9 +85,9 @@ public class WdtClient {
     private static final long TIMESTAMP_BASE = 1325347200L;
 
     /**
-     * 生成旺店通开放平台签名
+     * 生成开放平台签名
      *
-     * @param sid        卖家账号（由旺店通分配）
+     * @param sid        卖家账号（由ERP分配）
      * @param appKey     appkey
      * @param appSecret  完整 appsecret，格式：secret:salt
      * @param method     接口方法名，如 wms.stockout.Sales.weighingExt
@@ -166,7 +166,7 @@ public class WdtClient {
                     wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp, pager.get("page_size"), pager.get("page_no"), pager.get("calc_total"));
         }
         String json = JacksonUtil.toJson(bodyParams);
-        log.info("旺店通请求地址：{},请求参数：{}", url, json);
+        log.info("ERP请求地址：{},请求参数：{}", url, json);
         String body = HttpRequest.post(url).body(json).timeout(wdProperties.getConnectTimeout()).execute().body();
         return body;
     }
@@ -185,7 +185,7 @@ public class WdtClient {
                     wdProperties.getAppkey(), method, salt, wdProperties.getSid(), sign, timestamp, (Integer) pager.get("page_size"), (Integer) pager.get("page_no"), (Integer) pager.get("calc_total"));
         }
         String json = JacksonUtil.toJson(bodyParams);
-        log.info("旺店通请求地址：{},请求参数：{}", url, json);
+        log.info("ERP请求地址：{},请求参数：{}", url, json);
         String body = HttpRequest.post(url).body(json).timeout(wdProperties.getConnectTimeout()).execute().body();
         return body;
     }
@@ -201,7 +201,7 @@ public class WdtClient {
     public GoodsQueryWithSpecRep queryGoodsWithSpec(GoodsQueryParams params, Pager pager) throws IOException {
         Map<String, Object> pagerMap = JacksonUtil.beanToMap(pager);
         String response = execute("goods.Goods.queryWithSpec", params, pagerMap);
-        log.info("旺店通查询商品，返回结果：{}", response);
+        log.info("ERP查询商品，返回结果：{}", response);
         GoodsQueryWithSpecRep result = JacksonUtil.parse(response, GoodsQueryWithSpecRep.class);
         if (Objects.isNull(result) || !result.isSuccess()) {
             throw new ServiceException(result != null ? result.getMessage() : "查询商品失败");

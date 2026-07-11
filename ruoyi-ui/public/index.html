@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script>
+      // 在页面渲染前立即应用已保存的主题，防止白屏闪烁
+      (function(){
+        try {
+          var setting = JSON.parse(localStorage.getItem('layout-setting'));
+          if (setting && setting.themeMode === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch(e) {}
+      })();
+    </script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="renderer" content="webkit">

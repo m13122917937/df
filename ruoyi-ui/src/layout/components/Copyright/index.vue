@@ -26,10 +26,10 @@ export default {
   height: 36px;
   padding: 10px 20px;
   text-align: right;
-  background-color: #f8f8f8;
-  color: #666;
+  background-color: var(--bg-card);
+  color: var(--adm-text-secondary);
   font-size: 14px;
-  border-top: 1px solid #e7e7e7;
+  border-top: 1px solid var(--adm-border);
   z-index: 999;
 }
 </style>

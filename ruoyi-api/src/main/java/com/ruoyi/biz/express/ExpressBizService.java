@@ -157,7 +157,11 @@ public class ExpressBizService {
         // 如果已经验证了 二销 ， 现在填写了物流单号
         if (Objects.equals(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode(), orderBO.getSubStatus())) {
             orderParam.setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode());
-            jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, expressOrderForm);
+            RouteSubscribeBO routeSubscribeBO = new RouteSubscribeBO()
+                    .setOrderCode(orderBO.getOrderCode())
+                    .setLogisticsNo(expressOrderForm.getTrackingNumber())
+                    .setLogisticsCode(expressOrderForm.getTrackingCompanyCode());
+            jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
         }
         // 更新订单发货时间,和子状态
         orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));

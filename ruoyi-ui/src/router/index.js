@@ -31,6 +31,10 @@ import Layout from '@/layout'
 // 公共路由
 export const constantRoutes = [
   {
+    path: "/",
+    redirect: "/monery/paymentToday",
+  },
+  {
     path: "/redirect",
     component: Layout,
     hidden: true,
@@ -75,42 +79,74 @@ export const constantRoutes = [
   //   ]
   // },
   {
-    path: "",
+    path: "/demandManage/wholesale",
     component: Layout,
-    redirect: "demandManage/wholesale/creatingOrders",
+    hidden: true,
     children: [
       {
-        path: "index",
+        path: "",
         component: () => import("@/views/demandManage/wholesale/index"),
+        name: "Wholesale",
+        meta: { title: "代发订单" },
       },
     ],
   },
   {
-    path: "",
+    path: "/monery/paymentToday",
     component: Layout,
-    redirect: "monery/paymentToday/pay-delivery",
+    hidden: true,
     children: [
       {
-        path: "index",
-        component: () => import("@/views//monery/paymentToday/index"),
+        path: "",
+        component: () => import("@/views/monery/paymentToday/index"),
+        name: "PaymentToday",
+        meta: { title: "今日应付" },
       },
     ],
   },
   {
-    path: "",
+    path: "/demandManage/putin",
     component: Layout,
-    redirect: "demandManage/putin/today-send",
+    hidden: true,
     children: [
       {
-        path: "index",
+        path: "",
         component: () => import("@/views/demandManage/putin/index"),
+        name: "Putin",
+        meta: { title: "入仓订单" },
+      },
+    ],
+  },
+  {
+    path: "/demandManage/sale",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/demandManage/sale/index"),
+        name: "Sale",
+        meta: { title: "销售订单" },
+      },
+    ],
+  },
+  {
+    path: "/pickManage/warehouse",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/pickManage/warehouse/index"),
+        name: "PickWarehouse",
+        meta: { title: "拣货入仓" },
       },
     ],
   },
   {
     path: "",
     component: Layout,
-    redirect: "pickManage/warehouse/pick-ing",
+    redirect: "/pickManage/warehouse",
     children: [
       {
         path: "index",

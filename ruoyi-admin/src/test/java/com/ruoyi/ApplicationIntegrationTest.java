@@ -14,6 +14,7 @@ import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.job.*;
+import com.ruoyi.product.facade.IProductSkuFacade;
 import com.ruoyi.web.form.order.AddressCompletedParams;
 import com.ruoyi.web.form.order.OrderAddForm;
 import org.junit.jupiter.api.Test;

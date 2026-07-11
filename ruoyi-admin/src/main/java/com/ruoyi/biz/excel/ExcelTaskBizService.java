@@ -41,7 +41,6 @@ public class ExcelTaskBizService {
     /**
      * 创建导出任务（同步）
      *
-     * @param query  查询条件
      * @param userId 当前用户ID
      * @return 任务信息
      */

@@ -30,6 +30,8 @@ public final class JkyApiMethod {
 
     public static final String SEND_DIRECT = "wms-wos.order.senddirect";
 
+    public static final String CREATE_CASH_OR_COST_REC_PAY_BILL = "fin-fbs.billinfo.createcashorcostrecpaybill";
+
     private JkyApiMethod() {
     }
 

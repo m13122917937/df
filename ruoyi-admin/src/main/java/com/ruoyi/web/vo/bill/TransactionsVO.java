@@ -77,6 +77,13 @@ public class TransactionsVO {
     private BigDecimal balanceAfter;
 
     /**
+     * 交易总额（按交易对方汇总净额）
+     */
+
+    @ExcelProperty("交易总额")
+    private BigDecimal totalAmountByCounterparty;
+
+    /**
      * 具体支付方式（如刷卡、扫码、转账等）
      */
 

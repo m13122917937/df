@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Component
 public class CompanyCapitalBizService {
 
-    BigDecimal amount = new BigDecimal("50");
+    BigDecimal amount = new BigDecimal("20");
 
     BigDecimal rate = new BigDecimal("0.8");
 

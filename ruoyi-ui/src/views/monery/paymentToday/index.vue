@@ -4,7 +4,7 @@
     <StatsTabs v-model="activeTab" @tab-change="handleTabChange" />
     <!-- 订单内容区域 -->
     <div class="order-content">
-      <router-view />
+      <component :is="activeComponent" />
     </div>
   </div>
 </template>
@@ -12,45 +12,35 @@
 <script>
 import StatsTabs from './components/StatsTabs'
 
+const pageComponents = {
+  payDelivery: () => import('./pay-delivery.vue'),
+  payPutin: () => import('./pay-putin.vue'),
+}
+
 export default {
   name: 'PaymentToday',
   components: {
-    StatsTabs
+    StatsTabs,
+    payDelivery: pageComponents.payDelivery,
+    payPutin: pageComponents.payPutin,
   },
   data() {
     return {
-      activeTab: ''
+      activeTab: 'pay-delivery'
     }
   },
-  watch: {
-    '$route'() {
-      this.setActiveTabFromRoute()
+  computed: {
+    activeComponent() {
+      const map = {
+        'pay-delivery': 'payDelivery',
+        'pay-putin': 'payPutin',
+      }
+      return map[this.activeTab] || 'payDelivery'
     }
-  },
-  mounted() {
-    // 根据当前路由设置活跃标签
-    this.setActiveTabFromRoute()
   },
   methods: {
-    setActiveTabFromRoute() {
-      const routePath = this.$route.path
-      if (routePath.includes('/pay-delivery')) {
-        this.activeTab = 'pay-delivery'
-      } else if (routePath.includes('/pay-putin')) {
-        this.activeTab = 'pay-putin'
-      }
-    },
     handleTabChange(tabKey) {
-      // 根据标签键值跳转到对应的子路由
-      const routeMap = {
-        'pay-delivery': '/monery/paymentToday/pay-delivery',
-        'pay-putin': '/monery/paymentToday/pay-putin'
-      }
-
-      const targetRoute = routeMap[tabKey]
-      if (targetRoute && targetRoute !== this.$route.path) {
-        this.$router.push(targetRoute)
-      }
+      this.activeTab = tabKey
     }
   }
 }

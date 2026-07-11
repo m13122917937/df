@@ -29,8 +29,6 @@ public class DeductionController extends BaseController {
     DeductionBizService deductionBizService;
 
     @PostMapping("/list")
-
-
     public TableDataInfo pageList(@RequestBody @Validated DeductionListForm deductionListForm) {
         DeductionQuery deductionQuery = DeductionConvert.INSTANCE.toQueryParam(deductionListForm);
 
@@ -38,7 +36,6 @@ public class DeductionController extends BaseController {
 
         return getDataTable(DeductionConvert.INSTANCE.toVOList(deductionBOPageBO.getData()), deductionBOPageBO.getTotal());
     }
-
 
     @PostMapping("/save")
     public AjaxResult save(@RequestBody @Validated DeductionSaveForm deductionSaveForm) {
@@ -48,17 +45,15 @@ public class DeductionController extends BaseController {
         return AjaxResult.success();
     }
 
-
     @GetMapping("/{orderCode}")
     public AjaxResult delete(@PathVariable("orderCode")String orderCode) {
         DeductionInfoVO info = deductionBizService.info(orderCode);
         return AjaxResult.success(info);
     }
 
-
-    @GetMapping("/revoke/{orderCode}")
-    public AjaxResult revoke(@PathVariable("orderCode")String orderCode) {
-        deductionBizService.revoke(orderCode);
+    @GetMapping("/revoke/{id}")
+    public AjaxResult revoke(@PathVariable("id") Long id) {
+        deductionBizService.revoke(id);
         return AjaxResult.success();
     }
 

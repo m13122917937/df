@@ -1,27 +1,42 @@
 <template>
-  <div class="product-mapping-wrap">
-    <!-- 状态切换 -->
-    <div class="tabs-section">
-      <el-tabs v-model="query.status" @tab-click="initTable" >
-        <el-tab-pane label="待处理" name="1" />
-        <el-tab-pane label="已确认" name="2" />
-        <el-tab-pane label="已拒绝" name="3" />
-      </el-tabs>
+  <div class="wholesale-container">
+    <!-- Metric Cards -->
+    <div class="metrics-row">
+      <div
+        v-for="tab in tabs"
+        :key="tab.status"
+        class="metric-card"
+        :class="{ active: query.status === tab.status }"
+        @click="switchTab(tab.status)"
+      >
+        <div class="metric-icon" :style="{ background: tab.bg, color: tab.color }" v-html="tab.icon">
+        </div>
+        <div class="metric-content">
+          <span class="metric-label">{{ tab.label }}</span>
+        </div>
+      </div>
     </div>
-   <div class="search-card">
-        <div class="search-row">
-          <div class="search-item">
-            <label class="search-label">商品名称</label>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Search (参照 wholesale searchSection 风格) -->
+      <div class="search-section">
+        <div class="search-toolbar">
+          <div class="toolbar-search">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
             <el-input
               v-model.trim="query.productNameLike"
-              placeholder="请输入商品名称"
+              placeholder="搜索商品名称"
               clearable
               size="small"
               class="search-input"
               @keyup.enter.native="handleSearch"
             />
           </div>
-          <div class="search-actions">
+          <div class="toolbar-actions">
             <el-button type="primary" icon="el-icon-search" size="small" @click="handleSearch">
               搜索
             </el-button>
@@ -31,120 +46,72 @@
           </div>
         </div>
       </div>
-    <!-- 查询区 + 表格 -->
-    <div class="table-section">
-      <el-table
-        v-loading="loading"
-        :data="tableData"
-       :header-cell-style="{
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
-            :cell-style="{ padding: '8px 0' }"
-        stripe
-        border
-        size="medium"
-        height="100%"
-        element-loading-text="数据加载中"
-      >
-         <!-- 空数据状态 -->
-        <template slot="empty">
-          <EmptyState text="暂无映射数据" />
-        </template>
-        <el-table-column prop="id" label="id" min-width="50" align="center" />
-        <el-table-column
-          prop="category"
-          label="类别"
-          min-width="120"
-          align="center"
-        />
-        <el-table-column
-          prop="brand"
-          label="品牌"
-          min-width="120"
-          align="center"
-        />
-        <el-table-column
-          prop="productName"
-          label="商品名"
-          min-width="120"
-          align="center"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="skuName"
-          label="sku名"
-          min-width="120"
-          align="center"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="snModel"
-          label="识别型号"
-          min-width="250"
-          align="center"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="createTime"
-          label="创建时间"
-          min-width="180"
-          align="center"
-        />
-        <el-table-column
-          prop="confirmName"
-          label="确认人"
-          min-width="120"
-          align="center"
-        />
-        <el-table-column  label="操作" fixed="right" width="180" align="center">
-        <!-- <el-table-column  label="操作" fixed="right" width="180" align="center"> -->
-          <template slot-scope="{ row }">
-            <el-link type="primary" :underline="false" @click="approve(row)" v-if="query.status === '1'"
-              >同意</el-link
-            >
-            <el-divider direction="vertical" v-if="query.status === '1'" />
-            <el-link type="danger" :underline="false" @click="reject(row)" v-if="query.status === '1'"
-              >拒绝</el-link
-            >
-            <el-divider direction="vertical" v-if="query.status === '1'" />
-            <el-link type="info" :underline="false" @click="remove(row)"
-              >删除</el-link
-            >
-          </template>
-        </el-table-column>
-      </el-table>
-    </div>
 
-    <!-- 分页 -->
-    <div class="pagination-section">
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="query.pageNum"
-        :page-sizes="[30, 50, 100]"
-        :page-size="query.pageSize"
-        :total="total"
-        layout="total, sizes, prev, pager, next, jumper"
-      />
+      <!-- Table -->
+      <div class="table-section">
+        <el-table
+          v-loading="loading"
+          :data="tableData"
+          header-cell-class-name="table-header-cell"
+          :cell-style="{ padding: '8px 0' }"
+          stripe
+          border
+          size="medium"
+          height="100%"
+          element-loading-text="数据加载中"
+        >
+          <template slot="empty">
+            <EmptyState text="暂无映射数据" />
+          </template>
+          <el-table-column prop="id" label="id" min-width="50" align="center" />
+          <el-table-column prop="category" label="类别" min-width="120" align="center" />
+          <el-table-column prop="brand" label="品牌" min-width="120" align="center" />
+          <el-table-column prop="productName" label="商品名" min-width="120" align="center" show-overflow-tooltip />
+          <el-table-column prop="skuName" label="sku名" min-width="120" align="center" show-overflow-tooltip />
+          <el-table-column prop="snModel" label="识别型号" min-width="250" align="center" show-overflow-tooltip />
+          <el-table-column prop="createTime" label="创建时间" min-width="180" align="center" />
+          <el-table-column prop="confirmName" label="确认人" min-width="120" align="center" />
+          <el-table-column label="操作" fixed="right" width="180" align="center">
+            <template slot-scope="{ row }">
+              <el-link type="primary" :underline="false" @click="approve(row)" v-if="query.status === '1'">同意</el-link>
+              <el-divider direction="vertical" v-if="query.status === '1'" />
+              <el-link type="danger" :underline="false" @click="reject(row)" v-if="query.status === '1'">拒绝</el-link>
+              <el-divider direction="vertical" v-if="query.status === '1'" />
+              <el-link type="info" :underline="false" @click="remove(row)">删除</el-link>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-section">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="query.pageNum"
+          :page-sizes="[30, 50, 100]"
+          :page-size="query.pageSize"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import EmptyState from "@/views/demandManage/wholesale/components/emptyState.vue";
-import {
-  getRelListApi,
-  agreeApi,
-  delApi,
-  refuseApi,
-} from "@/api/productMapping";
+import { getRelListApi, agreeApi, delApi, refuseApi } from "@/api/productMapping";
+
+const icons = {
+  clock: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+  close: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+}
+
 export default {
   name: "ProductMappingIndex",
-  components: {
-    EmptyState
-  },
+  components: { EmptyState },
   data() {
     return {
       loading: false,
@@ -158,12 +125,22 @@ export default {
       },
       tableData: [],
       total: 0,
+      tabs: [
+        { status: "1", label: "待处理", icon: icons.clock, bg: "rgba(255,179,64,0.08)", color: "#FFB340" },
+        { status: "2", label: "已确认", icon: icons.check, bg: "rgba(52,199,89,0.08)", color: "#34C759" },
+        { status: "3", label: "已拒绝", icon: icons.close, bg: "rgba(148,163,184,0.08)", color: "#94A3B8" },
+      ],
     };
   },
   created() {
     this.fetchData();
   },
   methods: {
+    switchTab(status) {
+      this.query.status = status;
+      this.query.pageNum = 1;
+      this.fetchData();
+    },
     handleSearch() {
       this.query.pageNum = 1;
       this.fetchData();
@@ -189,10 +166,6 @@ export default {
     },
     handleCurrentChange(page) {
       this.query.pageNum = page;
-      this.fetchData();
-    },
-    initTable() {
-      this.query.pageNum = 1;
       this.fetchData();
     },
     approve(row) {
@@ -235,16 +208,11 @@ export default {
     async fetchData() {
       if (this.loading) return;
       this.loading = true;
-      const pageData = {
-        pageNum: this.query.pageNum,
-        pageSize: this.query.pageSize,
-      }
+      const pageData = { pageNum: this.query.pageNum, pageSize: this.query.pageSize };
       const queryData = {
-        // brand: this.query.brand,
-        // category: this.query.category,
         productNameLike: this.query.productNameLike,
         status: Number(this.query.status),
-      }
+      };
       const res = await getRelListApi(pageData, queryData);
       if (res.code === 200) {
         this.tableData = res.rows || [];
@@ -256,132 +224,199 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-@import "@/assets/styles/common/order-components.scss";
-.product-mapping-wrap {
-  padding: 16px;
+<style scoped lang="scss">
+.wholesale-container {
+  padding: 0;
+  background: var(--bg-page);
+  height: calc(100vh - 112px);
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 90px);
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'HarmonyOS Sans', 'PingFang SC', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-.tabs-section {
-  background: #fff;
-  padding: 0 12px;
-}
+/* ==================== Metrics Row ==================== */
 
-.table-section {
-  flex: 1;
-  overflow: auto;
-}
-
-.search-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 8px 24px rgba(15, 35, 95, 0.08);
-  border: 1px solid #eef2ff;
-  margin-bottom: 12px;
+.metrics-row {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  padding: 0 32px;
+  margin: 12px 0 12px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
 }
 
-.search-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.search-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.search-item {
- width: 400px;
+.metric-card {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  min-width: 120px;
+  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  box-shadow: var(--shadow-card);
+  border: 1px solid transparent;
 
-.search-label {
-  font-size: 14px;
-  color: #606266;
-  white-space: nowrap;
-}
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
 
-.search-input {
-  flex: 1;
-}
-
-.search-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.pagination-section {
-  text-align: right;
-  padding: 20px;
-  padding-bottom: 0;
-
-  .el-pagination {
-    .el-pagination__total {
-      color: #606266;
-      font-weight: 500;
-    }
-
-    .el-pagination__sizes {
-      .el-select .el-input__inner {
-        height: 28px;
-        line-height: 28px;
-      }
-    }
-
-    .el-pager li {
-      min-width: 28px;
-      height: 28px;
-      line-height: 28px;
-      border-radius: 4px;
-      margin: 0 2px;
-
-      &.active {
-        background-color: #409eff;
-        color: #fff;
-      }
-
-      &:hover {
-        color: #409eff;
-      }
-    }
-
-    .btn-prev,
-    .btn-next {
-      height: 28px;
-      line-height: 28px;
-      border-radius: 4px;
-      margin: 0 2px;
-
-      &:hover {
-        color: #409eff;
-      }
-    }
-
-    .el-pagination__jump {
-      color: #606266;
-
-      .el-input__inner {
-        height: 28px;
-        line-height: 28px;
-        width: 50px;
-      }
-    }
+  &.active {
+    border-color: #5B7CFA;
+    box-shadow: 0 4px 16px rgba(91,124,250,0.12);
   }
 }
 
-.sub {
-  color: #909399;
-  font-size: 12px;
+.metric-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.metric-icon :deep(svg) {
+  width: 14px;
+  height: 14px;
+}
+
+.metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.metric-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--adm-text-primary);
+  white-space: nowrap;
+}
+
+/* ==================== Main Content ==================== */
+
+.main-content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ==================== Search Section (wholesale 风格) ==================== */
+
+.search-section {
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+.search-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toolbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--adm-border);
+  background: var(--bg-hover);
+  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  width: 360px;
+  flex-shrink: 0;
+
+  &:focus-within {
+    border-color: #5B7CFA;
+    background: var(--bg-card);
+    box-shadow: 0 0 0 3px rgba(91,124,250,0.08);
+  }
+}
+
+.search-icon {
+  flex-shrink: 0;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  height: 36px;
+  font-size: 13px;
+  color: var(--adm-text-primary);
+  width: 100%;
+
+  &::placeholder {
+    color: var(--adm-text-tertiary);
+  }
+}
+
+/* 覆盖 el-input 在自定义搜索框内的边框/背景 */
+.toolbar-search :deep(.el-input__inner) {
+  border: none !important;
+  background: transparent !important;
+  padding: 0;
+  height: 36px;
+  line-height: 36px;
+  box-shadow: none !important;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ==================== Table ==================== */
+
+.table-section {
+  flex: 1;
+  overflow: hidden;
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+::v-deep .table-header-cell {
+  background: var(--bg-table-header) !important;
+  color: var(--adm-text-secondary) !important;
+  font-weight: 600;
+}
+
+.pagination-section {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding: 4px 0;
+}
+
+/* ==================== Responsive ==================== */
+
+@media (max-width: 1200px) {
+  .metrics-row {
+    padding: 0 16px;
+  }
+  .main-content {
+    padding: 0 16px 16px;
+  }
 }
 </style>

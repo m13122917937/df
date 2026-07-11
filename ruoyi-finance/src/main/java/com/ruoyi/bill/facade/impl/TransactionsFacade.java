@@ -1,6 +1,10 @@
 package com.ruoyi.bill.facade.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.bill.convert.TransactionsCov;
 import com.ruoyi.bill.domain.Transactions;
 import com.ruoyi.bill.facade.ITransactionsFacade;
@@ -17,7 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -68,6 +74,35 @@ public class TransactionsFacade implements ITransactionsFacade {
     @Override
     public void delete(TransactionsQuery transactionsQuery) {
         transactionsService.remove(DynamicCondition.toWrapper(transactionsQuery));
+    }
+
+    @Override
+    public void updateCounterpartyTotal(Long accountId, String counterparty) {
+        if (accountId == null || StrUtil.isBlank(counterparty)) {
+            return;
+        }
+        // 计算该交易方的净额
+        QueryWrapper<Transactions> query = Wrappers.query();
+        query.select("COALESCE(SUM(CASE WHEN category = 0 THEN amount ELSE -amount END), 0) as total")
+                .eq("account_id", accountId)
+                .eq("counterparty", counterparty)
+                .eq("deleted", 0);
+        List<Map<String, Object>> maps = transactionsService.listMaps(query);
+        BigDecimal total = BigDecimal.ZERO;
+        if (CollUtil.isNotEmpty(maps) && maps.get(0) != null) {
+            Object totalObj = maps.get(0).get("total");
+            if (totalObj instanceof BigDecimal) {
+                total = (BigDecimal) totalObj;
+            } else if (totalObj instanceof Number) {
+                total = BigDecimal.valueOf(((Number) totalObj).doubleValue());
+            }
+        }
+        // 更新该交易方的所有记录
+        Transactions update = new Transactions();
+        update.setTotalAmountByCounterparty(total);
+        transactionsService.update(update, Wrappers.<Transactions>lambdaUpdate()
+                .eq(Transactions::getAccountId, accountId)
+                .eq(Transactions::getCounterparty, counterparty));
     }
 
 }

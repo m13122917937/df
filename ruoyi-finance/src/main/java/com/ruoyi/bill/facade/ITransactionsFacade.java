@@ -29,5 +29,9 @@ public interface ITransactionsFacade {
 
     void delete(TransactionsQuery transactionsQuery);
 
+    /**
+     * 重新计算并更新指定 accountId + counterparty 的交易总额
+     */
+    void updateCounterpartyTotal(Long accountId, String counterparty);
 
 }

@@ -94,10 +94,18 @@ public class BillVO {
     @DateTimeFormat("yyyy-MM-dd") // ← 关键：指定日期格式
     private Date signedDate;
     /**
+     * 发货时间
+     */
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @ExcelProperty(index = 9, value = "发货时间")
+    @DateTimeFormat("yyyy-MM-dd")
+    private Date shipmentsDate;
+    /**
      * 结算日期
      */
 
-    @ExcelProperty(index = 9, value = "结算日期")
+    @ExcelProperty(index = 10, value = "结算日期")
     @DateTimeFormat("yyyy-MM-dd") // ← 关键：指定日期格式
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date settlementDate;

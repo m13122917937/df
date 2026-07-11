@@ -11,6 +11,21 @@ NProgress.configure({ showSpinner: false })
 
 const whiteList = ['/login', '/register']
 
+// 递归查找第一个叶子路由的完整路径（跳过 redirect: noRedirect 的父级）
+function findFirstPath(routes) {
+  for (const route of routes) {
+    if (route.path === '*' || route.path === '/404') continue
+    if (!route.children || route.children.length === 0) {
+      return route.path
+    }
+    const childPath = findFirstPath(route.children)
+    if (childPath) {
+      return route.path + '/' + childPath
+    }
+  }
+  return null
+}
+
 const isWhiteList = (path) => {
   return whiteList.some(pattern => isPathMatch(pattern, path))
 }
@@ -34,14 +49,25 @@ router.beforeEach((to, from, next) => {
           store.dispatch('GenerateRoutes').then(accessRoutes => {
             // 根据roles权限生成可访问的路由表
             router.addRoutes(accessRoutes) // 动态添加可访问路由表
-            next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
+            // 根路径无对应路由，重定向到有权限的第一个菜单
+            if (to.path === '/') {
+              const firstPath = findFirstPath(accessRoutes)
+              next({ path: firstPath || '/404', replace: true })
+            } else {
+              next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
+            }
           })
         }).catch(err => {
-            store.dispatch('LogOut').then(() => {
+            store.dispatch('LogOut').finally(() => {
               Message.error(err)
-              next({ path: '/' })
+              next('/login')
             })
           })
+      } else if (to.path === '/') {
+        // 角色已加载但目标是根路径（无对应路由），重定向到有权限的第一个菜单
+        const routes = store.state.permission.addRoutes || []
+        const firstPath = findFirstPath(routes)
+        next({ path: firstPath || '/404', replace: true })
       } else {
         next()
       }

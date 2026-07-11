@@ -30,4 +30,6 @@ public class WarehousingOrderParam {
 
     private Long createBy;
 
+    private List<Integer> orderTypeList;
+
 }

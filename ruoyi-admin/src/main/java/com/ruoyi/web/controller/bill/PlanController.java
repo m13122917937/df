@@ -17,8 +17,6 @@ public class PlanController extends BaseController {
     @Autowired
     PlanBizService planBizService;
 
-
-
     @GetMapping("/{planId}")
     public AjaxResult info(@PathVariable("planId") Long planId) {
 

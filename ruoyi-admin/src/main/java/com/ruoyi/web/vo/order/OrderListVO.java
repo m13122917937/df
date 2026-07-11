@@ -40,7 +40,7 @@ public class OrderListVO {
      * 原始订单号
      */
 
-    @ExcelProperty(value = "旺店通订单号")
+    @ExcelProperty(value = "吉客云单号")
     private String erpOrderId;
 
 

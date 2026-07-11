@@ -104,12 +104,11 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="balanceAfter"
-        label="交易后余额"
+        label="交易总额"
         min-width="120"
       >
         <template slot-scope="scope">
-          {{ formatAmount(scope.row.balanceAfter) }}
+          {{ formatAmount(scope.row.totalAmountByCounterparty) }}
         </template>
       </el-table-column>
       <el-table-column

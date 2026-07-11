@@ -6,6 +6,12 @@
           <div class="setting-drawer-title">
             <h3 class="drawer-title">主题风格设置</h3>
           </div>
+
+          <div class="drawer-item">
+            <span>暗黑模式</span>
+            <el-switch v-model="themeModeSwitch" class="drawer-switch" />
+          </div>
+
           <div class="setting-drawer-block-checbox">
             <div class="setting-drawer-block-checbox-item" @click="handleTheme('theme-dark')">
               <img src="@/assets/images/dark.svg" alt="dark">
@@ -97,6 +103,17 @@ export default {
     }
   },
   computed: {
+    themeModeSwitch: {
+      get() {
+        return this.$store.state.settings.themeMode === 'dark'
+      },
+      set(val) {
+        this.$store.dispatch('settings/changeSetting', {
+          key: 'themeMode',
+          value: val ? 'dark' : 'light'
+        })
+      }
+    },
     fixedHeader: {
       get() {
         return this.$store.state.settings.fixedHeader
@@ -203,6 +220,7 @@ export default {
     },
     saveSetting() {
       this.$modal.loading("正在保存到本地，请稍候...")
+      const themeMode = this.$store.state.settings.themeMode
       this.$cache.local.set(
         "layout-setting",
         `{
@@ -214,7 +232,8 @@ export default {
             "dynamicTitle":${this.dynamicTitle},
             "footerVisible":${this.footerVisible},
             "sideTheme":"${this.sideTheme}",
-            "theme":"${this.theme}"
+            "theme":"${this.theme}",
+            "themeMode":"${themeMode}"
           }`
       )
       setTimeout(this.$modal.closeLoading(), 1000)
@@ -264,7 +283,7 @@ export default {
           height: 100%;
           padding-top: 15px;
           padding-left: 24px;
-          color: #1890ff;
+          color: #5B7CFA;
           font-weight: 700;
           font-size: 14px;
         }

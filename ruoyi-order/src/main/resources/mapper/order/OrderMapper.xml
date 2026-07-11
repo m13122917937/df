@@ -157,6 +157,12 @@
             <if test="orderType!=null">
                 and  o.order_type = #{orderType}
             </if>
+            <if test="orderTypeList != null and orderTypeList.size > 0">
+                and o.order_type in
+                <foreach item="type" collection="orderTypeList" open="(" separator="," close=")">
+                    #{type}
+                </foreach>
+            </if>
             <if test="deliveryCode!=null">
                and oto.delivery_code = #{deliveryCode}
             </if>
@@ -445,6 +451,5 @@
         order by  o.${sort}
 
     </select>
-
 
 </mapper>

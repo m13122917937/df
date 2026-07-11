@@ -8,15 +8,15 @@ import com.ruoyi.common.core.redis.RedisKeyUtil;
 import com.ruoyi.config.properties.WxMpProperties;
 import com.ruoyi.config.properties.WxPayProperties;
 import lombok.AllArgsConstructor;
-import me.chanjar.weixin.common.redis.RedisTemplateWxRedisOps;
+import me.chanjar.weixin.common.redis.RedissonWxRedisOps;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
 import me.chanjar.weixin.mp.config.impl.WxMpRedisConfigImpl;
+import org.redisson.api.RedissonClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(value = {WxMpProperties.class, WxPayProperties.class})
 public class WxConfiguration {
 
-    private final StringRedisTemplate redisTemplate;
+    private final RedissonClient redissonClient;
 
     @Bean
     public WxMpService wxMpService(final WxMpProperties mpProperties) {
@@ -40,7 +40,7 @@ public class WxConfiguration {
         service.setMultiConfigStorages(configs.stream().map(a -> {
             WxMpDefaultConfigImpl configStorage;
             if (mpProperties.isUseRedis()) {
-                configStorage = new WxMpRedisConfigImpl(new RedisTemplateWxRedisOps(redisTemplate), RedisKeyUtil.generate("fy_wx", a.getAppId()));
+                configStorage = new WxMpRedisConfigImpl(new RedissonWxRedisOps(redissonClient), RedisKeyUtil.generate("fy_wx", a.getAppId()));
             } else {
                 configStorage = new WxMpDefaultConfigImpl();
             }

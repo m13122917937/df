@@ -87,5 +87,4 @@ public class ParseUserInfoUtil {
         return new ParsedAddress(name, phone, address);
     }
 
-
 }

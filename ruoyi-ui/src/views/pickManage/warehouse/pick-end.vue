@@ -372,6 +372,13 @@ export default {
 <style lang="scss" scoped>
 @import './style/table-common.scss';
 
+// 覆盖 table-common.scss 中的固定高度，适应 flex 布局
+.order-table-container-wrapper {
+  height: auto !important;
+  flex: 1;
+  min-height: 0;
+}
+
 // 筛选面板布局
 .filter-panels {
   display: flex;

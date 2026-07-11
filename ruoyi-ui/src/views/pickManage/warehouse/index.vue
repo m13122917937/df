@@ -4,53 +4,40 @@
     <StatsTabs v-model="activeTab" @tab-change="handleTabChange" />
     <!-- 订单内容区域 -->
     <div class="order-content">
-      <router-view />
+      <component :is="activeComponent" />
     </div>
   </div>
 </template>
 
 <script>
 import StatsTabs from './components/StatsTabs/StatsTabs'
+import PickIng from './pick-ing'
+import PickEnd from './pick-end'
 
 export default {
-  name: 'OrderManagement',
+  name: 'PickWarehouse',
   components: {
-    StatsTabs
+    StatsTabs,
+    PickIng,
+    PickEnd,
   },
   data() {
     return {
-      activeTab: ''
+      activeTab: 'pick-ing'
     }
   },
-  watch: {
-    '$route'() {
-      this.setActiveTabFromRoute()
+  computed: {
+    activeComponent() {
+      const map = {
+        'pick-ing': 'PickIng',
+        'pick-end': 'PickEnd',
+      }
+      return map[this.activeTab] || 'PickIng'
     }
-  },
-  mounted() {
-    // 根据当前路由设置活跃标签
-    this.setActiveTabFromRoute()
   },
   methods: {
-    setActiveTabFromRoute() {
-      const routePath = this.$route.path
-      if (routePath.includes('/pick-ing')) {
-        this.activeTab = 'pick-ing'
-      } else if (routePath.includes('/pick-end')) {
-        this.activeTab = 'pick-end'
-      }
-    },
     handleTabChange(tabKey) {
-      // 根据标签键值跳转到对应的子路由
-      const routeMap = {
-        'pick-ing': '/pickManage/warehouse/pick-ing',
-        'pick-end': '/pickManage/warehouse/pick-end',
-      }
-
-      const targetRoute = routeMap[tabKey]
-      if (targetRoute && targetRoute !== this.$route.path) {
-        this.$router.push(targetRoute)
-      }
+      this.activeTab = tabKey
     }
   }
 }
@@ -58,7 +45,7 @@ export default {
 
 <style lang="scss" scoped>
 .order-management {
-  height: 100%;
+  height: calc(100vh - 112px);
   display: flex;
   flex-direction: column;
   flex: 1;

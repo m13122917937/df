@@ -1,6 +1,5 @@
 package com.ruoyi.biz.express.impl;
 
-import com.ruoyi.biz.bill.BillBizService;
 import com.ruoyi.biz.express.AbstractLogisticsState;
 import com.ruoyi.biz.express.LogisticsState;
 import com.ruoyi.biz.express.bean.LogisticsStateParam;
@@ -27,9 +26,6 @@ public class SignStateService extends AbstractLogisticsState implements Logistic
     @Autowired
     private ICompanyFacade companyFacade;
 
-    @Autowired
-    BillBizService billBizService;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void doAction(LogisticsStateParam stateParam) {
@@ -46,8 +42,6 @@ public class SignStateService extends AbstractLogisticsState implements Logistic
             orderParam.setSignedTime(stateParam.getSignDate());
         }
         orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderId));
-        // 生成账单
-        billBizService.generateBill(orderBo);
         log.info("快递签收处理完成-->orderId={}, no={}", orderId, logisticsNo);
 
     }

@@ -49,4 +49,14 @@ public class DeductionInfoVO {
 
     @ExcelProperty(value = "发货时间")
     private Date sendTime;
+
+    /**
+     * 串码（SN）
+     */
+    private String sn;
+
+    /**
+     * 86码/IMEI
+     */
+    private String imei;
 }

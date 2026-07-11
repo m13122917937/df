@@ -18,9 +18,9 @@
         <span class="status-count">{{ getStatusCount(statusKey) }}</span>
       </div>
     </div>
-    <!-- 路由内容区域 -->
+    <!-- 子页面内容区域 -->
     <div class="main-content">
-      <router-view />
+      <component :is="currentPageComponent" />
     </div>
   </div>
 </template>
@@ -31,7 +31,7 @@ export default {
   name: 'WholesaleIndex',
   data() {
     return {
-      currentStatus: 'transitOrders',
+      currentStatus: 'creatingOrders',
       currentBrand: 'all',
       countHeader: [],
       // 状态映射配置
@@ -45,12 +45,28 @@ export default {
         'returnOrders': { status: '7', label: '追单', icon: 'el-icon-warning' },
         'abnormalOrders': { status: '8', label: '异常订单', icon: 'el-icon-refresh-left' },
         'confirmedOrders': { status: '10', label: '确认收货', icon: 'el-icon-circle-check' },
-        'afterOrders': { status: '12', label: '售后', icon: 'el-icon-close' },
         'cancelledOrders': { status: '11', label: '撤销', icon: 'el-icon-close' }
       }
     }
   },
   computed: {
+    // 根据当前状态动态加载对应的子页面组件
+    currentPageComponent() {
+      const pageMap = {
+        'creatingOrders': () => import('./pages/creatingOrders/index'),
+        'pendingOrders': () => import('./pages/pendingOrders/index'),
+        'quotingOrders': () => import('./pages/quotingOrders/index'),
+        'shippingOrders': () => import('./pages/shippingOrders/index'),
+        'shippedOrders': () => import('./pages/shippedOrders/index'),
+        'transitOrders': () => import('./pages/transitOrders/index'),
+        'returnOrders': () => import('./pages/returnOrders/index'),
+        'abnormalOrders': () => import('./pages/abnormalOrders/index'),
+        'confirmedOrders': () => import('./pages/confirmedOrders/index'),
+        'cancelledOrders': () => import('./pages/cancelledOrders/index'),
+        'ruleList': () => import('./pages/ruleList/index'),
+      }
+      return pageMap[this.currentStatus] || null
+    },
     // 根据状态获取对应的数量
     getStatusCount() {
       return (statusKey) => {
@@ -91,9 +107,10 @@ export default {
     },
     handleStatusChange(status) {
       this.currentStatus = status
-      // 路由跳转到对应的子页面
+      // 用 query 参数切换状态，不改变路径，避免 TagsView 开新 tab
       this.$router.push({
-        path: `/demandManage/wholesale/${status}`
+        path: '/demandManage/wholesale',
+        query: { status }
       })
     },
     handleBrandChange(brandId) {
@@ -102,11 +119,10 @@ export default {
       console.log('选择品牌:', brandId)
     },
     updateStatusFromRoute(route) {
-      // 从路由路径中提取状态
-      const path = route.path
-      const statusMatch = path.match(/\/wholesale\/(\w+)$/)
-      if (statusMatch) {
-        this.currentStatus = statusMatch[1]
+      // 从 query 参数中读取状态
+      const status = route.query && route.query.status
+      if (status && this.statusConfig[status]) {
+        this.currentStatus = status
       }
     }
   }
@@ -117,6 +133,11 @@ export default {
 .wholesale-container {
   padding: 6px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 112px);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .wholesale-container::before {
@@ -133,13 +154,13 @@ export default {
 /* 状态栏样式 */
 .status-bar {
   display: flex;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   /* padding: 6px; */
   margin-bottom: 6px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--adm-border);
   overflow-x: auto;
   gap: 20px;
 }
@@ -180,7 +201,7 @@ export default {
 }
 
 .status-item:hover {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  background: var(--menu-hover-bg);
   transform: translateY(-1px);
   box-shadow: 0 2px 12px rgba(64, 158, 255, 0.2);
 }
@@ -214,13 +235,13 @@ export default {
 
 /* 品牌筛选样式 */
 .brand-filter {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--adm-border);
 }
 
 .brand-buttons {
@@ -256,13 +277,16 @@ export default {
 
 /* 主内容区域 */
 .main-content {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--adm-border);
   overflow: hidden;
-  min-height: calc(100vh - 166px);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 /* 响应式设计 */

@@ -23,6 +23,11 @@ public class OrderAddForm {
     @ExcelProperty(value = "订单编号")
     private String erpOrderId;
     /**
+     * 吉客云唯一单号（jy开头）
+     */
+    @ExcelIgnore
+    private String jkyTradeNo;
+    /**
      * 原始订单号
      */
     @NotBlank(message = "原始订单号不能为空", groups = AddGroup.class)

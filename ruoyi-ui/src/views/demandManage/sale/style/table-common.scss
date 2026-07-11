@@ -1,0 +1,42 @@
+// Flex column layout to fill parent height and keep pagination visible
+.order-detail {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-content-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-table-container-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-table-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  :deep(.el-table) {
+    flex: 1;
+  }
+}
+
+.pagination-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--adm-card);
+  border-radius: var(--adm-radius-card);
+  box-shadow: var(--adm-shadow-card);
+}

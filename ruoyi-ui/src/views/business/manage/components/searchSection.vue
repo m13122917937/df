@@ -178,24 +178,7 @@ export default {
 
 <style scoped lang="scss">
 .search-section {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 24px;
-  padding: 20px;
-  border: 1px solid #f0f0f0;
   position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #409eff 0%, #66b1ff 100%);
-    border-radius: 8px 8px 0 0;
-  }
 
   .search-form {
     .search-row {

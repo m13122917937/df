@@ -1,6 +1,5 @@
 package com.ruoyi.order.model.consts;
 
-import com.ruoyi.common.exception.ServiceException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -33,16 +32,6 @@ public interface ApplyConsts {
 
         private final Integer code;
         private final String message;
-
-
-        public static Type getType(Integer code) {
-            for (Type value : values()) {
-                if (value.code.equals(code)) {
-                    return value;
-                }
-            }
-            throw new ServiceException("申请类型错误");
-        }
 
     }
 

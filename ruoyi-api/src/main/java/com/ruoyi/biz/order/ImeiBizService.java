@@ -3,6 +3,7 @@ package com.ruoyi.biz.order;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.mapper.order.ImeiConvert;
 import com.ruoyi.order.facade.*;
@@ -48,6 +49,9 @@ public class ImeiBizService {
     @Autowired
     IImeiSkuRelFacade imeiSkuRelFacade;
 
+    @Autowired
+    JkyStockInAndDeliveryBizService jkyBizService;
+
 
     /**
      *
@@ -71,10 +75,15 @@ public class ImeiBizService {
         Assert.notNull(tradeOrderBO, "抢单记录不存在");
         imeiFacade.delete(new ImeiQuery().setOrderId(imeiOrderParam.getOrderCode()).setTradeNo(tradeOrderBO.getId()));
         List<ImeiBO> list = new ArrayList<>();
-        list.add(getImeiBO(imeiOrderParam.getImeiCode(), imeiOrderParam.getSn(), orderBO, tradeOrderBO));
+        ImeiBO result = getImeiBO(imeiOrderParam.getImeiCode(), imeiOrderParam.getSn(), orderBO, tradeOrderBO);
+        list.add(result);
 
-        //修改订单子状态
-        orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES.getCode()), new OrderQuery().setOrderCode(orderBO.getOrderCode()));
+        // 只有串码验证通过(型号一致/查询正常)才修改订单子状态
+        Integer activated = result.getActivated();
+        if (Objects.equals(activated, ImeiConsts.Activated.SUCCESS.getCode())) {
+            orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES.getCode()), new OrderQuery().setOrderCode(orderBO.getOrderCode()));
+            jkyBizService.createJkyStockIn(orderBO);
+        }
         return ImeiConvert.INSTANCE.listvo(list);
     }
 
@@ -107,8 +116,8 @@ public class ImeiBizService {
             } else {
                 // 已经有留存,判断串码型号是否一致
                 if (Objects.equals(imeiSkuRelBO.getStatus(), ImeiConsts.ImeiRel.OK.getCode())
-                        && Objects.equals(imeiSkuRelBO.getSkuName(), orderBO.getSkuName())
-                        && Objects.equals(imeiSkuRelBO.getProductName(), orderBO.getProductName())) {
+                        && Objects.equals(StrUtil.trim(imeiSkuRelBO.getSkuName()), StrUtil.trim(orderBO.getSkuName()))
+                        && Objects.equals(StrUtil.trim(imeiSkuRelBO.getProductName()), StrUtil.trim(orderBO.getProductName()))) {
                     imeiBO.setActivated(ImeiConsts.Activated.SUCCESS.getCode());
                 } else {
                     imeiBO.setActivated(ImeiConsts.Activated.MODEL_NOT_CONSISTENT.getCode());

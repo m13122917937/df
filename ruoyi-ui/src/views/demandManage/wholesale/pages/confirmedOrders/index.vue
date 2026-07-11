@@ -57,12 +57,6 @@
             style="width: 100%"
             :fit="true"
             height="100%"
-            :header-cell-style="{
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
-            :cell-style="{ padding: '8px 0' }"
           >
             <!-- 空数据状态 -->
             <template slot="empty">
@@ -583,6 +577,15 @@ export default {
 
 <style scoped lang="scss">
 @import "@/assets/styles/common/order-components.scss";
+
+.orders-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
+.table-section {
+  max-height: none;
+}
 
 /* 响应式设计 */
 @media (max-width: 1200px) {

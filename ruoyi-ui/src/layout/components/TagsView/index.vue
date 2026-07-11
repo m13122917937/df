@@ -5,26 +5,28 @@
         v-for="tag in visitedViews"
         ref="tag"
         :key="tag.path"
-        :class="{ 'active': isActive(tag), 'has-icon': tagsIcon }"
+        :class="{ 'active': isActive(tag) }"
         :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
         tag="span"
         class="tags-view-item"
-        :style="activeStyle(tag)"
         @click.middle.native="!isAffix(tag)?closeSelectedTag(tag):''"
         @contextmenu.prevent.native="openMenu(tag,$event)"
       >
-        <svg-icon v-if="tagsIcon && tag.meta && tag.meta.icon && tag.meta.icon !== '#'" :icon-class="tag.meta.icon" />
-        {{ tag.title }}
-        <span v-if="!isAffix(tag)" class="el-icon-close" @click.prevent.stop="closeSelectedTag(tag)" />
+        <span class="tab-label">{{ getTabTitle(tag) }}</span>
+        <span class="tab-close" @click.prevent.stop="closeSelectedTag(tag)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </span>
       </router-link>
     </scroll-pane>
     <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
-      <li @click="refreshSelectedTag(selectedTag)"><i class="el-icon-refresh-right"></i> 刷新页面</li>
-      <li v-if="!isAffix(selectedTag)" @click="closeSelectedTag(selectedTag)"><i class="el-icon-close"></i> 关闭当前</li>
-      <li @click="closeOthersTags"><i class="el-icon-circle-close"></i> 关闭其他</li>
-      <li v-if="!isFirstView()" @click="closeLeftTags"><i class="el-icon-back"></i> 关闭左侧</li>
-      <li v-if="!isLastView()" @click="closeRightTags"><i class="el-icon-right"></i> 关闭右侧</li>
-      <li @click="closeAllTags(selectedTag)"><i class="el-icon-circle-close"></i> 全部关闭</li>
+      <li @click="refreshSelectedTag(selectedTag)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> 刷新页面</li>
+      <li v-if="!isAffix(selectedTag)" @click="closeSelectedTag(selectedTag)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 关闭当前</li>
+      <li @click="closeOthersTags"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> 关闭其他</li>
+      <li v-if="!isFirstView()" @click="closeLeftTags"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> 关闭左侧</li>
+      <li v-if="!isLastView()" @click="closeRightTags"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> 关闭右侧</li>
+      <li @click="closeAllTags(selectedTag)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> 全部关闭</li>
     </ul>
   </div>
 </template>
@@ -53,9 +55,6 @@ export default {
     },
     theme() {
       return this.$store.state.settings.theme
-    },
-    tagsIcon() {
-      return this.$store.state.settings.tagsIcon
     }
   },
   watch: {
@@ -76,6 +75,29 @@ export default {
     this.addTags()
   },
   methods: {
+    getTabTitle(tag) {
+      const title = tag.title || ''
+      const path = tag.path || ''
+      // 主路由页面直接返回原始标题，不添加模块前缀
+      const mainRoutes = ['/demandManage/wholesale', '/demandManage/putin', '/demandManage/sale', '/monery/paymentToday', '/pickManage/warehouse']
+      if (mainRoutes.includes(path)) {
+        return title
+      }
+      const moduleMap = [
+        { pattern: '/demandManage/wholesale/', prefix: '代发-', keyword: '代发' },
+        { pattern: '/wholesale', prefix: '代发-', keyword: '代发' },
+        { pattern: '/demandManage/putin/', prefix: '入仓-', keyword: '入仓' },
+        { pattern: '/putin', prefix: '入仓-', keyword: '入仓' },
+        { pattern: '/demandManage/sale/', prefix: '销售-', keyword: '销售' },
+        { pattern: '/sale', prefix: '销售-', keyword: '销售' },
+      ]
+      for (const { pattern, prefix, keyword } of moduleMap) {
+        if (path.includes(pattern) && !title.includes(keyword)) {
+          return prefix + title
+        }
+      }
+      return title
+    },
     isActive(route) {
       return route.path === this.$route.path
     },
@@ -127,7 +149,6 @@ export default {
     initTags() {
       const affixTags = this.affixTags = this.filterAffixTags(this.routes)
       for (const tag of affixTags) {
-        // Must have tag name
         if (tag.name) {
           this.$store.dispatch('tagsView/addVisitedView', tag)
         }
@@ -145,7 +166,6 @@ export default {
         for (const tag of tags) {
           if (tag.to.path === this.$route.path) {
             this.$refs.scrollPane.moveToTarget(tag)
-            // when query is different then update
             if (tag.to.fullPath !== this.$route.fullPath) {
               this.$store.dispatch('tagsView/updateVisitedView', this.$route)
             }
@@ -200,22 +220,37 @@ export default {
       if (latestView) {
         this.$router.push(latestView.fullPath)
       } else {
-        // now the default is to redirect to the home page if there is no tags-view,
-        // you can adjust it according to your needs.
-        if (view.name === 'Dashboard') {
-          // to reload home page
-          this.$router.replace({ path: '/redirect' + view.fullPath })
-        } else {
-          this.$router.push('/')
+        const firstRoute = this.getFirstRoute()
+        if (firstRoute) {
+          this.$router.push(firstRoute)
         }
       }
     },
+    getFirstRoute() {
+      const sidebarRoutes = this.$store.state.permission.sidebarRouters || []
+      for (const route of sidebarRoutes) {
+        if (route.hidden) continue
+        if (route.redirect && route.redirect !== 'noredirect') {
+          return route.redirect
+        }
+        if (route.children && route.children.length > 0) {
+          for (const child of route.children) {
+            if (child.hidden) continue
+            if (child.redirect && child.redirect !== 'noredirect') return child.redirect
+            if (child.path) {
+              return (route.path ? route.path + '/' + child.path : child.path).replace(/\/+/g, '/')
+            }
+          }
+        }
+      }
+      return '/'
+    },
     openMenu(tag, e) {
       const menuMinWidth = 105
-      const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
-      const offsetWidth = this.$el.offsetWidth // container width
-      const maxLeft = offsetWidth - menuMinWidth // left boundary
-      const left = e.clientX - offsetLeft + 15 // 15: margin right
+      const offsetLeft = this.$el.getBoundingClientRect().left
+      const offsetWidth = this.$el.offsetWidth
+      const maxLeft = offsetWidth - menuMinWidth
+      const left = e.clientX - offsetLeft + 15
 
       if (left > maxLeft) {
         this.left = maxLeft
@@ -239,97 +274,120 @@ export default {
 
 <style lang="scss" scoped>
 .tags-view-container {
-  height: 34px;
+  height: 56px;
   width: 100%;
-  background: #fff;
-  border-bottom: 1px solid #d8dce5;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .12), 0 0 3px 0 rgba(0, 0, 0, .04);
+  background: var(--bg-navbar);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'HarmonyOS Sans', 'PingFang SC', system-ui, sans-serif;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  position: relative;
+  z-index: 5;
+
   .tags-view-wrapper {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    flex: 1;
+    overflow: hidden;
+
     .tags-view-item {
-      display: inline-block;
       position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 40px;
+      min-width: 110px;
+      padding: 0 18px;
+      border: 1.5px solid var(--border-tags);
+      border-radius: 12px;
+      margin-right: 12px;
       cursor: pointer;
-      height: 26px;
-      line-height: 26px;
-      border: 1px solid #d8dce5;
-      color: #495060;
-      background: #fff;
-      padding: 0 8px;
-      font-size: 12px;
-      margin-left: 5px;
-      margin-top: 4px;
-      &:first-of-type {
-        margin-left: 15px;
+      color: var(--menu-text);
+      font-size: 14px;
+      font-weight: 500;
+      background: transparent;
+      text-decoration: none;
+      user-select: none;
+      transition: color 150ms ease;
+      flex-shrink: 0;
+      white-space: nowrap;
+
+      &:hover {
+        color: var(--tag-hover-text);
       }
-      &:last-of-type {
-        margin-right: 15px;
-      }
+
       &.active {
-        background-color: #42b983;
-        color: #fff;
-        border-color: #42b983;
-        &::before {
-          content: '';
-          background: #fff;
-          display: inline-block;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          position: relative;
-          margin-right: 2px;
+        color: var(--tag-active-text);
+        font-weight: 600;
+        border: 1.5px solid var(--tag-active-text);
+      }
+
+      .tab-label {
+        line-height: 1;
+      }
+
+      .tab-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        opacity: 1;
+        pointer-events: auto;
+        transition: opacity 150ms ease, background 150ms ease;
+        color: var(--adm-text-tertiary);
+        flex-shrink: 0;
+        margin-left: -2px;
+
+        &:hover {
+          background: var(--tag-hover-bg);
+          color: var(--adm-text-secondary);
+        }
+
+        svg {
+          width: 14px;
+          height: 14px;
         }
       }
     }
   }
 
-  .tags-view-item.active.has-icon::before {
-    content: none !important;
-  }
-
   .contextmenu {
     margin: 0;
-    background: #fff;
+    background: var(--contextmenu-bg);
     z-index: 3000;
     position: absolute;
     list-style-type: none;
-    padding: 5px 0;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 400;
-    color: #333;
-    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, .3);
-    li {
-      margin: 0;
-      padding: 7px 16px;
-      cursor: pointer;
-      &:hover {
-        background: #eee;
-      }
-    }
-  }
-}
-</style>
+    padding: 4px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--adm-text-primary);
+    border: 1px solid var(--adm-border);
+    box-shadow: var(--shadow-popup);
+    min-width: 140px;
 
-<style lang="scss">
-//reset element css of el-icon-close
-.tags-view-wrapper {
-  .tags-view-item {
-    .el-icon-close {
-      width: 16px;
-      height: 16px;
-      vertical-align: 2px;
-      border-radius: 50%;
-      text-align: center;
-      transition: all .3s cubic-bezier(.645, .045, .355, 1);
-      transform-origin: 100% 50%;
-      &:before {
-        transform: scale(.6);
-        display: inline-block;
-        vertical-align: -3px;
-      }
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 150ms ease, color 200ms ease-out;
+      color: var(--menu-text);
+      font-size: 13px;
+
       &:hover {
-        background-color: #b4bccc;
-        color: #fff;
+        background: var(--contextmenu-hover);
+        color: var(--menu-active-text);
+      }
+
+      svg {
+        flex-shrink: 0;
       }
     }
   }

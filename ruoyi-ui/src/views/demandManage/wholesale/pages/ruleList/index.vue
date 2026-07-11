@@ -270,7 +270,7 @@ export default {
 <style scoped lang="scss">
 .rule-list-container {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--bg-page);
   min-height: 100vh;
 }
 
@@ -280,13 +280,13 @@ export default {
   align-items: center;
   margin-bottom: 20px;
   padding: 15px 20px;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
 
   .left-info {
     font-size: 14px;
-    color: #606266;
+    color: var(--adm-text-secondary);
     display: flex;
     align-items: center;
     span{
@@ -308,9 +308,9 @@ export default {
 }
 
 .table-container {
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -342,7 +342,7 @@ export default {
 .quality-requirements {
   line-height: 1.4;
   font-size: 12px;
-  color: #606266;
+  color: var(--adm-text-secondary);
 }
 
 .action-buttons {
@@ -374,8 +374,8 @@ export default {
 ::v-deep .el-table {
   .el-table__header {
     th {
-      background-color: #f5f7fa !important;
-      color: #606266 !important;
+      background-color: var(--bg-table-header) !important;
+      color: var(--adm-text-secondary) !important;
       font-weight: 500;
     }
   }
@@ -383,14 +383,14 @@ export default {
   .el-table__body {
     tr {
       &:nth-child(even) {
-        background-color: #fafafa;
+        background-color: var(--bg-hover);
       }
     }
   }
 
   .el-table__row {
     &:hover {
-      background-color: #f5f7fa !important;
+      background-color: var(--bg-hover) !important;
     }
   }
 }

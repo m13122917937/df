@@ -8,12 +8,9 @@ import cn.hutool.http.HttpException;
 import cn.hutool.http.HttpUtil;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.JacksonUtil;
-import com.ruoyi.kuaidi100.factory.DesensitizedOrderStrategyFactory;
 import com.ruoyi.kuaidi100.model.ApiInfoConstant;
 import com.ruoyi.kuaidi100.model.e.EOrderRequestParam;
 import com.ruoyi.kuaidi100.model.e.EOrderResult;
-import com.ruoyi.kuaidi100.model.strategy.DesensitizedOrderRequest;
-import com.ruoyi.kuaidi100.model.strategy.PlatformType;
 import com.ruoyi.kuaidi100.properties.ExpressProperties;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,24 +22,8 @@ import java.util.Map;
 @Slf4j
 public class EExpressClient extends ExpressClient{
 
-    private DesensitizedOrderStrategyFactory strategyFactory;
-
     public EExpressClient(ExpressProperties expressProperties) {
         super(expressProperties);
-    }
-
-    public EExpressClient(ExpressProperties expressProperties, DesensitizedOrderStrategyFactory strategyFactory) {
-        super(expressProperties);
-        this.strategyFactory = strategyFactory;
-    }
-
-    /**
-     * 设置策略工厂（用于依赖注入）
-     *
-     * @param strategyFactory 策略工厂
-     */
-    public void setStrategyFactory(DesensitizedOrderStrategyFactory strategyFactory) {
-        this.strategyFactory = strategyFactory;
     }
 
     /**
@@ -156,29 +137,4 @@ public class EExpressClient extends ExpressClient{
         }
     }
 
-    /**
-     * 提交脱敏订单（使用策略模式）
-     *
-     * <p>根据平台类型自动选择对应的策略来构建订单参数并提交
-     *
-     * @param request 脱敏订单请求
-     * @return EOrderResult 解析后的响应结果
-     */
-    public EOrderResult submitDesensitizedOrder(DesensitizedOrderRequest request) {
-        if (strategyFactory == null) {
-            log.error("【脱敏订单】策略工厂未初始化，无法提交脱敏订单");
-            throw new ServiceException("策略工厂未初始化");
-        }
-
-        // 1. 根据平台类型获取对应的策略
-        PlatformType platformType = request.getPlatformType();
-        log.info("【脱敏订单】开始处理{}脱敏订单，平台订单ID: {}", platformType.getName(), request.getThirdOrderId());
-
-        // 2. 使用策略构建订单参数
-        EOrderRequestParam param = strategyFactory.getStrategy(platformType).buildOrderParam(request);
-
-        // 3. 提交订单
-        return submitOrder(param);
     }
-
-}

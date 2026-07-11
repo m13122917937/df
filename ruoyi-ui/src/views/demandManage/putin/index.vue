@@ -4,7 +4,7 @@
     <StatsTabs v-model="activeTab" @tab-change="handleTabChange" />
     <!-- 订单内容区域 -->
     <div class="order-content">
-      <router-view />
+      <component :is="activeComponent" />
     </div>
   </div>
 </template>
@@ -12,51 +12,41 @@
 <script>
 import StatsTabs from './components/StatsTabs/StatsTabs'
 
+const pageComponents = {
+  todayShipped: () => import('./today-shipped.vue'),
+  transit: () => import('./transit.vue'),
+  collected: () => import('./collected.vue'),
+  putinReturn: () => import('./return.vue'),
+}
+
 export default {
   name: 'OrderManagement',
   components: {
-    StatsTabs
+    StatsTabs,
+    todayShipped: pageComponents.todayShipped,
+    transit: pageComponents.transit,
+    collected: pageComponents.collected,
+    putinReturn: pageComponents.putinReturn,
   },
   data() {
     return {
-      activeTab: ''
+      activeTab: 'today-send'
     }
   },
-  watch: {
-    '$route'() {
-      this.setActiveTabFromRoute()
+  computed: {
+    activeComponent() {
+      const map = {
+        'today-send': 'todayShipped',
+        'transit': 'transit',
+        'confirm': 'collected',
+        'return': 'putinReturn',
+      }
+      return map[this.activeTab] || 'todayShipped'
     }
-  },
-  mounted() {
-    // 根据当前路由设置活跃标签
-    this.setActiveTabFromRoute()
   },
   methods: {
-    setActiveTabFromRoute() {
-      const routePath = this.$route.path
-      if (routePath.includes('/return')) {
-        this.activeTab = 'return'
-      } else if (routePath.includes('/today-shipped')) {
-        this.activeTab = 'today-send'
-      } else if (routePath.includes('/transit')) {
-        this.activeTab = 'transit'
-      }  else if (routePath.includes('/collected')) {
-        this.activeTab = 'confirm'
-      } 
-    },
     handleTabChange(tabKey) {
-      // 根据标签键值跳转到对应的子路由
-      const routeMap = {
-        'today-send': '/demandManage/putin/today-shipped',
-        'transit': '/demandManage/putin/transit',
-        'confirm': '/demandManage/putin/collected',
-        'return': '/demandManage/putin/return',
-      }
-
-      const targetRoute = routeMap[tabKey]
-      if (targetRoute && targetRoute !== this.$route.path) {
-        this.$router.push(targetRoute)
-      }
+      this.activeTab = tabKey
     }
   }
 }
@@ -64,7 +54,7 @@ export default {
 
 <style lang="scss" scoped>
 .order-management {
-  height: 100%;
+  height: calc(100vh - 112px);
   display: flex;
   flex-direction: column;
   flex: 1;

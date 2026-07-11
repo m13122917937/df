@@ -63,7 +63,7 @@
 
   .need-table-header-cell {
     padding: 0 0 10px 8px;
-    background-color: #ffffff !important;
+    background-color: var(--bg-card) !important;
     border: 0 !important;
 
     .cell {
@@ -92,7 +92,7 @@
   .group-content .need-table-content-cell {
     border-top: 1px solid #dfe6ec;
     border-bottom: 0 !important;
-    background: #fafafa;
+    background: var(--bg-hover);
   }
 
   .delivery-time {
@@ -150,8 +150,8 @@
 
 .cancelCheckedHeader {
   text-align: left;
-  border: 1px solid #e7e7e7;
-  background: #f8f8f8;
+  border: 1px solid var(--border-tags);
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 8.5px 8px;
   margin-left: -4px;
@@ -195,7 +195,7 @@
   padding: 2px 5px;
   height: 26px;
   line-height: 22px;
-  background-color: #e7e7e7;
+  background-color: var(--bg-hover);
   margin: 3px 5px 3px 3px;
   border-radius: 3px;
 }

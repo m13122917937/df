@@ -1,5 +1,6 @@
 package com.ruoyi.biz.bill;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
 import com.ruoyi.bill.constant.BillConsts;
@@ -22,14 +23,16 @@ import com.ruoyi.bill.model.query.PayerQuery;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
-import com.ruoyi.common.utils.Arith;
 import com.ruoyi.mapper.bill.BillConvert;
 import com.ruoyi.mapper.bill.DeductionConvert;
+import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.facade.ITradeOrderFacade;
+import com.ruoyi.order.model.bo.ImeiBO;
 import com.ruoyi.order.model.bo.OrderBO;
 import com.ruoyi.order.model.bo.TradeOrderBO;
 import com.ruoyi.order.model.consts.TradeOrderConsts;
+import com.ruoyi.order.model.query.ImeiQuery;
 import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
 import com.ruoyi.user.facade.ICompanyBankFacade;
@@ -44,7 +47,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -56,6 +61,9 @@ public class DeductionBizService {
 
     @Autowired
     IOrderFacade orderFacade;
+
+    @Autowired
+    IImeiFacade imeiFacade;
 
     @Autowired
     ITradeOrderFacade tradeOrderFacade;
@@ -107,7 +115,7 @@ public class DeductionBizService {
                 .reversed(BillConsts.BillReversedType.ORDER_ABATE.getCode()).brand(orderBO.getBrand()).category(orderBO.getCategory()).productName(orderBO.getProductName()).skuName(orderBO.getSkuName())
                 .skuCode(orderBO.getSkuCode()).quantity(orderBO.getQuantity()).tradePrice(new BigDecimal(200)).billingAmount(new BigDecimal(200))
                 .payPlan(BillPayPlanConsts.PayPlan.NOT_PAYMENT.getCode()).status(BillConsts.BillPayStatus.NO_PAY_STATUS.getCode()).accounting(0)
-                .supplierId(tradeOrderBO.getTradeCompanyId()).supplierName(tradeOrderBO.getTradeNickName()).supplierBankId(companyBankBO.getId()).signedDate(DateUtil.date())
+                .supplierId(tradeOrderBO.getTradeCompanyId()).supplierName(tradeOrderBO.getTradeNickName()).supplierBankId(companyBankBO != null ? companyBankBO.getId() : null).signedDate(DateUtil.date())
                 .createTime(DateUtil.date()).shipmentsDate(orderBO.getShipmentsTime()).settlementDate(DateUtil.offsetDay(DateUtil.date(), 1).toLocalDateTime().toLocalDate()).build();
         PayerConfigBO payerConfigBO = payerConfigFacade.getOne(new PayerConfigQuery().setKeyWord(orderBO.getShopName()));
         if (Objects.isNull(payerConfigBO)) {
@@ -135,23 +143,33 @@ public class DeductionBizService {
         deductionInfoVO.setProductName(orderBO.getProductName()).setSkuName(orderBO.getSkuName());
         deductionInfoVO.setShopName(orderBO.getShopName()).setCompanyName(tradeOrderBO.getTradeNickName());
         deductionInfoVO.setSendTime(orderBO.getSendTime());
+        // 查询串码信息
+        List<ImeiBO> imeiBOS = imeiFacade.list(new ImeiQuery().setOrderId(orderCode));
+        if (CollectionUtil.isNotEmpty(imeiBOS)) {
+            deductionInfoVO.setSn(imeiBOS.stream().map(ImeiBO::getSn).filter(Objects::nonNull).collect(Collectors.joining(",")));
+            deductionInfoVO.setImei(imeiBOS.stream().map(ImeiBO::getImel).filter(Objects::nonNull).collect(Collectors.joining(",")));
+        }
         return deductionInfoVO;
     }
 
-    public void revoke(String orderCode) {
+    public void revoke(Long id) {
 
-        DeductionBO deductionBO = deductionFacade.getOne(new DeductionQuery().setOrderCode(orderCode));
-        Assert.notNull(deductionBO, "订单不存在");
-        Assert.isTrue(Objects.equals(deductionBO.getStatus(), DeductionConsts.Status.DEDUCTION.getCode()), "订单扣罚已经撤销");
+        DeductionBO deductionBO = deductionFacade.getOne(new DeductionQuery().setId(id));
+        Assert.notNull(deductionBO, "扣罚记录不存在");
+        Assert.isTrue(Objects.equals(deductionBO.getStatus(), DeductionConsts.Status.DEDUCTION.getCode()), "扣罚已经撤销");
 
-        deductionFacade.update(new DeductionParam().setStatus(DeductionConsts.Status.REVOKE.getCode()), new DeductionQuery().setId(deductionBO.getId()));
-        BillBO billBO = billFacade.getOne(new BillQuery().setOrderCode(orderCode).setBillType(BillConsts.BillType.ONE_ITEM_SEND.getCode()));
-        BillParam billParam = BillConvert.INSTANCE.toBillParam(billBO);
-        billParam.setPayPlan(BillPayPlanConsts.PayPlan.NOT_PAYMENT.getCode());
-        billParam.setSettlementDate(DateUtil.offsetDay(DateUtil.date(), 1).toLocalDateTime().toLocalDate());
-        billParam.setStatus(BillConsts.BillPayStatus.NO_PAY_STATUS.getCode());
-        billParam.setCreateTime(DateUtil.date());
-        billParam.setBillingAmount(billParam.getBillingAmount().negate());
-        billFacade.save(billParam);
+        deductionFacade.update(new DeductionParam().setStatus(DeductionConsts.Status.REVOKE.getCode()), new DeductionQuery().setId(id));
+
+        BillBO billBO = billFacade.getOne(new BillQuery().setOrderCode(deductionBO.getOrderCode()).setBillType(BillConsts.BillType.ONE_ITEM_SEND.getCode()));
+        if (Objects.nonNull(billBO)) {
+            BillParam billParam = BillConvert.INSTANCE.toBillParam(billBO);
+            billParam.setPayPlan(BillPayPlanConsts.PayPlan.NOT_PAYMENT.getCode());
+            billParam.setSettlementDate(DateUtil.offsetDay(DateUtil.date(), 1).toLocalDateTime().toLocalDate());
+            billParam.setStatus(BillConsts.BillPayStatus.NO_PAY_STATUS.getCode());
+            billParam.setCreateTime(DateUtil.date());
+            billParam.setBillingAmount(billParam.getBillingAmount().negate());
+            billFacade.save(billParam);
+        }
     }
+
 }

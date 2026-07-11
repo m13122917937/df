@@ -265,9 +265,9 @@ export function getDeductionApi(orderCode) {
  * @param {*} orderCode
  * @returns
  */
-export function getDeductionRevokeApi(orderCode) {
+export function getDeductionRevokeApi(id) {
   return request({
-    url: `/bill/deduction/revoke/${orderCode}`,
+    url: `/bill/deduction/revoke/${id}`,
     method: "get",
   });
 }

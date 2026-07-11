@@ -36,7 +36,7 @@ export default {
     pageSizes: {
       type: Array,
       default() {
-        return [10, 20, 30, 50]
+        return [50, 80, 100]
       }
     },
     // 移动端页码按钮的数量端默认值5
@@ -105,7 +105,7 @@ export default {
 
 <style scoped>
 .pagination-container {
-  background: #fff;
+  background: var(--bg-card);
 }
 .pagination-container.hidden {
   display: none;

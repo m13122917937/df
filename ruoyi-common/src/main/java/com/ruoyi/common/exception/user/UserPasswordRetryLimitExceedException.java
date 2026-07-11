@@ -11,6 +11,7 @@ public class UserPasswordRetryLimitExceedException extends UserException
 
     public UserPasswordRetryLimitExceedException(int retryLimitCount, int lockTime)
     {
-        super("user.password.retry.limit.exceed", new Object[] { retryLimitCount, lockTime });
+        super("user.password.retry.limit.exceed", new Object[] { retryLimitCount, lockTime },
+                "密码错误次数已达上限，请" + lockTime + "分钟后重试");
     }
 }

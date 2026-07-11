@@ -87,19 +87,11 @@
             stripe
             size="medium"
             center
-            :cell-style="{ height: '60px' }"
-            :header-cell-style="{
-              height: '48px',
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
             :data="tableDataList"
             style="width: 100%"
             class="nl-table-default"
             element-loading-text="数据加载中"
-            :height="tableHeight"
-            v-table-height="{ bottomOffset: 94 }"
+            height="100%"
             @selection-change="handleSelectionChange"
           >
             <!-- 空数据状态 -->
@@ -277,7 +269,7 @@
             </el-table-column>
             <el-table-column
               fixed="right"
-              width="220"
+              width="280"
               class-name="action-btn-list"
             >
               <template slot="header">
@@ -411,7 +403,6 @@ export default {
   data() {
     return {
       SUB_STATUS: SUB_STATUS,
-      tableHeight: 500,
       returnOrderDialog: false,
       tableLoading: false,
       tableDataList: [],

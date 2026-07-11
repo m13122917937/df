@@ -12,6 +12,8 @@ import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
+import com.ruoyi.order.facade.IJkyLogisticsTaskFacade;
+import com.ruoyi.order.model.param.JkyLogisticsTaskParam;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
 import com.ruoyi.jky.JkyTemplate;
@@ -74,7 +76,7 @@ public class JkyStockInAndDeliveryBizService {
     private IPayerFacade payerFacade;
 
     @Autowired
-    private IRouteSubscribeFacade routeSubscribeFacade;
+    private IJkyLogisticsTaskFacade jkyLogisticsTaskFacade;
 
     /**
      * 创建吉客云验货、入库、更新物流、上报序列号并直接发货。
@@ -83,7 +85,15 @@ public class JkyStockInAndDeliveryBizService {
      * @param routeSubscribeBO 物流订阅信息（为 null 时跳过物流更新）
      */
     public void createJkyStockIn(OrderBO orderBO, RouteSubscribeBO routeSubscribeBO) {
-        List<String> snList = queryJkySnList(orderBO);
+        List<ImeiBO> imeiList = queryJkyImeiList(orderBO);
+        if (CollectionUtil.isEmpty(imeiList)) {
+            log.warn("串码不存在，请你核查{}", orderBO.getOrderCode());
+            return;
+        }
+        if (Objects.isNull(routeSubscribeBO)) {
+            log.warn("物流单号不存在，请你核查{}", orderBO.getOrderCode());
+            return;
+        }
         TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery()
                 .setOrderId(orderBO.getOrderCode())
                 .setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
@@ -91,86 +101,45 @@ public class JkyStockInAndDeliveryBizService {
 
 
         // 1. 创建库存并入库
-        StockCreateAndStockInParam stockInParam = builderJkyStockIn(orderBO, tradeOrderBO, orderBO.getQuantity(), snList);
+        StockCreateAndStockInParam stockInParam = builderJkyStockIn(orderBO, tradeOrderBO, orderBO.getQuantity(), imeiList);
         jkyTemplate.createAndStockIn(stockInParam);
         // 2. 验货
-        InspectParam inspectParam = builderJkyInspect(orderBO, snList);
+        InspectParam inspectParam = builderJkyInspect(orderBO, imeiList);
         jkyTemplate.inspect(inspectParam);
 
-        // 3. 更新物流信息
-        if (Objects.nonNull(routeSubscribeBO)) {
-            LogisticsUpdateParam logisticsUpdateParam = builderJkyLogisticsUpdate(orderBO, routeSubscribeBO);
-            jkyTemplate.updateLogisticsInfo(logisticsUpdateParam);
-        } else {
-            log.info("订单号：{}，未查询到物流订阅信息，跳过吉客云更新物流", orderBO.getOrderCode());
-        }
+        // 3. 插入延迟任务，5分钟后更新物流信息
+        JkyLogisticsTaskParam param = builderJkyLogisticsTaskParam(orderBO, routeSubscribeBO);
+        jkyLogisticsTaskFacade.save(param);
+        log.info("订单号：{}，已插入吉客云物流更新延迟任务", orderBO.getOrderCode());
+
     }
 
-    /**
-     * 三方物流回调处理：解析 bizdata JSON，更新吉客云物流信息。
-     */
-    public void handleDeliveryCallback(final String bizdata) {
-        if (StrUtil.isBlank(bizdata)) {
-            log.warn("三方物流回调 bizdata 为空");
-            return;
-        }
-        JkyCallbackForm form = parseBizdata(bizdata);
-        if (form == null) {
-            return;
-        }
-        LogisticsUpdateParam.LogisticsUpdateItem item = new LogisticsUpdateParam.LogisticsUpdateItem();
-        item.setOrderNo(StrUtil.blankToDefault(form.getDeliveryOrderNo(), form.getOwnerOrderNo()));
-        item.setLogisticNo(form.getLogisticNo());
-        item.setLogisticName(resolveJkyLogisticsName(form.getLogisticName()));
-        item.setLogisticCode(resolveJkyLogisticsCode(form.getLogisticCode()));
-
-        LogisticsUpdateParam param = new LogisticsUpdateParam();
-        param.setBizdata(Collections.singletonList(item));
-
-        jkyTemplate.updateLogisticsInfo(param);
-    }
-
-    private static JkyCallbackForm parseBizdata(final String bizdata) {
-        try {
-            Map<String, Object> map = JacksonUtil.parse(bizdata, Map.class);
-            JkyCallbackForm form = new JkyCallbackForm();
-            form.setDeliveryOrderNo(StrUtil.toStringOrNull(map.get("deliveryorderno")));
-            form.setOwnerOrderNo(StrUtil.toStringOrNull(map.get("ownerorderno")));
-            form.setWarehouseCode(StrUtil.toStringOrNull(map.get("warehousecode")));
-            form.setOwnerCode(StrUtil.toStringOrNull(map.get("ownercode")));
-            form.setLogisticNo(StrUtil.toStringOrNull(map.get("logisticNo")));
-            form.setLogisticName(StrUtil.toStringOrNull(map.get("logisticName")));
-            form.setLogisticCode(StrUtil.toStringOrNull(map.get("logisticCode")));
-            return form;
-        } catch (Exception e) {
-            log.error("bizdata 解析失败：{}", bizdata, e);
-            return null;
-        }
-    }
-
-    private JkyStockInAndDeliveryParam builderJkyStockInAndDelivery(OrderBO orderBO, LogisticsUpdateParam logisticsUpdateParam) {
-        TradeOrderBO tradeOrderBO = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(orderBO.getOrderCode()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()));
-        Assert.notNull(tradeOrderBO, "吉客云入库成交订单不存在");
-        List<String> snList = queryJkySnList(orderBO);
-        return new JkyStockInAndDeliveryParam()
-                .setInspectParam(builderJkyInspect(orderBO, snList))
-                .setStockInParam(builderJkyStockIn(orderBO, tradeOrderBO, orderBO.getQuantity(), snList))
-                .setLogisticsUpdateParam(logisticsUpdateParam);
-    }
-
-    private InspectParam builderJkyInspect(OrderBO orderBO, List<String> snList) {
+    private InspectParam builderJkyInspect(OrderBO orderBO, List<ImeiBO> imeiList) {
         InspectParam.InspectDetail detail = new InspectParam.InspectDetail();
         detail.setSkuBarcode(orderBO.getSkuCode());
-        detail.setSnList(snList.get(0));
+        if (CollectionUtil.isNotEmpty(imeiList)) {
+            detail.setSnList(imeiList.get(0).getSn());
+        }
         InspectParam param = new InspectParam();
-        param.setNumber(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
+        param.setNumber(orderBO.getErpOrderId());
         param.setInspectDetailList(Collections.singletonList(detail));
         param.setIsCheckOrder(0);
         param.setIsRefundDetect(0);
         return param;
     }
 
-    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, TradeOrderBO tradeOrderBO, Integer quantity, List<String> snList) {
+    private JkyLogisticsTaskParam builderJkyLogisticsTaskParam(OrderBO orderBO, RouteSubscribeBO routeSubscribeBO) {
+        return new JkyLogisticsTaskParam()
+                .setOrderCode(orderBO.getOrderCode())
+                .setErpOrderId(orderBO.getErpOrderId())
+                .setLogisticsNo(routeSubscribeBO.getLogisticsNo())
+                .setLogisticsName(resolveJkyLogisticsName(DictUtils.getDictLabel(DictDataConsts.P_EXPRESS_COMPANY, routeSubscribeBO.getLogisticsCode())))
+                .setStatus(0)
+                .setExecuteTime(DateUtil.offsetMinute(DateUtil.date(), 5))
+                .setCreateTime(DateUtil.date());
+    }
+
+    private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, TradeOrderBO tradeOrderBO, Integer quantity, List<ImeiBO> imeiList) {
         ProductSkuBO productSkuBO = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(orderBO.getSkuCode()));
         Assert.notNull(productSkuBO, "吉客云入库商品不存在");
         PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(orderBO.getPayerId()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
@@ -186,8 +155,11 @@ public class JkyStockInAndDeliveryBizService {
         StockCreateAndStockInParam.StockInDetailView detail = new StockCreateAndStockInParam.StockInDetailView()
                 .setSkuBarcode(productSkuBO.getSkuCode()).setRelDetailId(tradeOrderBO.getId()).setSkuCount(new BigDecimal(quantity))
                 .setSkuPrice(tradeOrderBO.getTradePrice()).setIsCertified(1).setRowRemark(remark);
-        if (CollectionUtil.isNotEmpty(snList)) {
-            detail.setSerialList(snList.stream().map(sn -> new StockCreateAndStockInParam.Serial().setSerialNo(sn)).collect(Collectors.toList()));
+        if (CollectionUtil.isNotEmpty(imeiList)) {
+            detail.setSerialList(imeiList.stream().map(imei -> {
+//                String serialNo = Objects.equals("小米", orderBO.getBrand()) ? imei.getImel() : imei.getSn();
+                return new StockCreateAndStockInParam.Serial().setSerialNo(imei.getSn()).setSerialNo2(imei.getImel());
+            }).collect(Collectors.toList()));
         }
         return new StockCreateAndStockInParam().setVendCode(companyBO.getOutNo()).setApplyDepartCode(JkyTemplate.STOCK_IN_APPLY_DEPART_CODE).setApplyCompanyCode(payerBO.getOutCode())
                 .setInWarehouseCode(ruoYiConfig.getWarehouseNo()).setRelDataId(orderBO.getOrderCode()).setApplyUserName("system")
@@ -195,58 +167,8 @@ public class JkyStockInAndDeliveryBizService {
                 .setLogisticName(tradeOrderBO.getTrackingCompany()).setLogisticNo(tradeOrderBO.getTrackingNumber()).setStockInDetailViews(Collections.singletonList(detail));
     }
 
-    private SnReportParam builderSnReport(OrderBO orderBO, List<String> snList) {
-        ProductSkuBO productSkuBO = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(orderBO.getSkuCode()));
-        Assert.notNull(productSkuBO, "吉客云序列号上报商品不存在");
-        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(orderBO.getPayerId()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
-        Assert.notNull(payerBO, "吉客云序列号上报付款主体不存在");
-        Assert.notBlank(payerBO.getOutCode(), "吉客云序列号上报付款主体吉客云编号不能为空");
-
-        SnReportParam.SnReportGoods goods = new SnReportParam.SnReportGoods();
-        goods.setOutSkuCode(productSkuBO.getSkuCode());
-        goods.setName(StrUtil.blankToDefault(orderBO.getProductName(), orderBO.getSkuName()));
-        goods.setBarcode(productSkuBO.getSkuCode());
-        goods.setSnlist(snList);
-
-        SnReportParam param = new SnReportParam();
-        param.setDeliveryorderno(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
-        param.setOwnerorderno(orderBO.getOrderCode());
-        param.setWarehousecode(ruoYiConfig.getWarehouseNo());
-        param.setOwnercode(payerBO.getOutCode());
-        param.setOutbizcode(orderBO.getOrderCode());
-        param.setOperatorcode("system");
-        param.setOperatorname("system");
-        param.setOperatetime(DateUtil.now());
-        param.setGoods(Collections.singletonList(goods));
-        return param;
-    }
-
-    private List<String> queryJkySnList(OrderBO orderBO) {
-        List<ImeiBO> list = iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
-        return list.stream().map(item -> Objects.equals("小米", orderBO.getBrand()) ? item.getImel() : item.getSn()).collect(Collectors.toList());
-    }
-
-    private LogisticsUpdateParam builderJkyLogisticsUpdate(OrderBO orderBO, RouteSubscribeBO routeSubscribeBO) {
-        LogisticsUpdateParam.LogisticsUpdateItem item = new LogisticsUpdateParam.LogisticsUpdateItem();
-        item.setOrderNo(StrUtil.blankToDefault(orderBO.getErpOrderId(), orderBO.getOrderCode()));
-        item.setLogisticNo(routeSubscribeBO.getLogisticsNo());
-        item.setLogisticName(resolveJkyLogisticsName(DictUtils.getDictLabel(DictDataConsts.P_EXPRESS_COMPANY, routeSubscribeBO.getLogisticsCode())));
-        item.setLogisticCode(resolveJkyLogisticsCode(routeSubscribeBO.getLogisticsCode()));
-        LogisticsUpdateParam param = new LogisticsUpdateParam();
-        param.setBizdata(Collections.singletonList(item));
-        return param;
-    }
-
-    private static String resolveJkyLogisticsCode(final String logisticsCode) {
-        if (StrUtil.isBlank(logisticsCode)) {
-            return null;
-        }
-        switch (logisticsCode) {
-            case "shunfeng":
-                return "0001";
-            default:
-                return logisticsCode;
-        }
+    private List<ImeiBO> queryJkyImeiList(OrderBO orderBO) {
+        return iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
     }
 
     private static String resolveJkyLogisticsName(final String logisticsName) {
@@ -261,3 +183,4 @@ public class JkyStockInAndDeliveryBizService {
         }
     }
 }
+

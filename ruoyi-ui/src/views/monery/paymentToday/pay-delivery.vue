@@ -1332,10 +1332,10 @@ export default {
 .search-section {
   margin-bottom: 20px;
   padding: 10px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-tags);
+  box-shadow: var(--shadow-card);
   position: relative;
   overflow: hidden;
 }
@@ -1380,7 +1380,7 @@ export default {
 .search-label {
   font-size: 14px;
   font-weight: 500;
-  color: #606266;
+  color: var(--adm-text-secondary);
   margin: 0;
   display: flex;
   align-items: center;
@@ -1407,15 +1407,14 @@ export default {
   font-size: 14px;
   padding: 12px 16px;
   transition: all 0.3s ease;
-  border: 2px solid #e4e7ed;
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  border: 2px solid var(--border-tags);
+  background: var(--bg-card);
 }
 
 .search-select :deep(.el-input__inner):focus {
   border-color: #409eff;
   box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
-  background: #fafbfc;
+  background: var(--bg-hover);
 }
 
 .search-actions {
@@ -1428,7 +1427,7 @@ export default {
 .toolbar-slot {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e4e7ed;
+  border-top: 1px solid var(--border-tags);
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -1455,8 +1454,8 @@ export default {
   height: 36px;
   font-size: 14px;
   border-radius: 8px;
-  color: #606266;
-  border-color: #dcdfe6;
+  color: var(--adm-text-secondary);
+  border-color: var(--border-tags);
   transition: all 0.3s ease;
   width: 100px;
 }
@@ -1464,7 +1463,7 @@ export default {
 .reset-btn:hover {
   color: #409eff;
   border-color: #409eff;
-  background: #f0f9ff;
+  background: var(--bg-hover);
 }
 
 .export-btn {
@@ -1472,8 +1471,8 @@ export default {
   font-size: 14px;
   font-weight: 500;
   border-radius: 8px;
-  color: #606266;
-  border-color: #dcdfe6;
+  color: var(--adm-text-secondary);
+  border-color: var(--border-tags);
   transition: all 0.3s ease;
   padding: 0 16px;
 }
@@ -1481,14 +1480,14 @@ export default {
 .export-btn:hover {
   color: #409eff;
   border-color: #409eff;
-  background: #f0f9ff;
+  background: var(--bg-hover);
   transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
 }
 
 .empty-block {
   padding: 24px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
 }
 
 .plan-tabs {
@@ -1526,7 +1525,7 @@ export default {
   align-items: center;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid var(--border-tags);
 }
 
 .plan-amount {
@@ -1541,11 +1540,11 @@ export default {
 }
 
 .table-section {
-  background: #fff;
+  background: var(--bg-card);
   padding: 24px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--border-tags);
   flex: 1;
   overflow: auto;
   display: flex;
@@ -1557,18 +1556,18 @@ export default {
     flex: 1;
 
     th {
-      background-color: #fafafa;
-      color: #303133;
+      background-color: var(--bg-table-header);
+      color: var(--adm-text-primary);
       font-weight: 600;
-      border-bottom: 1px solid #ebeef5;
+      border-bottom: 1px solid var(--border-tags);
     }
 
     td {
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-tags);
     }
 
     .el-table__row:hover {
-      background-color: #f5f7fa;
+      background-color: var(--bg-hover);
     }
   }
 }
@@ -1583,7 +1582,7 @@ export default {
 .load-more-tip {
   text-align: center;
   padding: 12px 0;
-  color: #909399;
+  color: var(--adm-text-tertiary);
   font-size: 14px;
 }
 
@@ -1630,7 +1629,7 @@ export default {
 
 .cashier-title__subtitle {
   font-size: 13px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
   font-weight: normal;
 }
 
@@ -1642,14 +1641,14 @@ export default {
 
 .cashier-card {
   padding: 16px;
-  border: 1px solid #ebeef5;
+  border: 1px solid var(--border-tags);
   border-radius: 8px;
-  background-color: #fafbff;
+  background-color: var(--bg-hover);
 }
 
 .cashier-card__label {
   font-size: 13px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
   margin-bottom: 6px;
   display: flex;
   align-items: center;
@@ -1658,7 +1657,7 @@ export default {
 
 .cashier-card__value {
   font-size: 16px;
-  color: #303133;
+  color: var(--adm-text-primary);
   font-weight: 500;
   word-break: break-all;
 }
@@ -1673,20 +1672,20 @@ export default {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border: 1px dashed #dcdfe6;
+  border: 1px dashed var(--border-tags);
   border-radius: 6px;
-  background-color: #fff;
+  background-color: var(--bg-card);
 }
 
 .cashier-meta__label {
   font-size: 13px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
 }
 
 .cashier-meta__value {
   flex: 1;
   font-weight: 500;
-  color: #303133;
+  color: var(--adm-text-primary);
 }
 
 .cashier-copy-btn {
@@ -1716,12 +1715,12 @@ export default {
 .cashier-upload-card__title {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: var(--adm-text-primary);
 }
 
 .cashier-upload-card__desc {
   font-size: 12px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
   margin-top: 4px;
 }
 
@@ -1735,12 +1734,12 @@ export default {
   padding: 24px;
   width: 100%;
   border: none;
-  background-color: #f9fafc;
+  background-color: var(--bg-hover);
   box-sizing: border-box;
 }
 .cashier-upload ::v-deep .el-upload{
   width: 100%;
-  border: 1px dashed #dcdfe6;
+  border: 1px dashed var(--border-tags);
 }
 .cashier-upload ::v-deep .el-upload__text em {
   color: #409EFF;
@@ -1749,7 +1748,7 @@ export default {
 
 .cashier-count {
   font-size: 12px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
 }
 
 .cashier-preview {
@@ -1758,9 +1757,9 @@ export default {
   gap: 12px;
   margin-top: 12px;
   padding: 12px;
-  border: 1px dashed #e4e7ed;
+  border: 1px dashed var(--border-tags);
   border-radius: 6px;
-  background-color: #fff;
+  background-color: var(--bg-card);
 }
 
 .cashier-preview__img {
@@ -1778,8 +1777,8 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
-  background: #f5f7fa;
-  color: #909399;
+  background: var(--bg-hover);
+  color: var(--adm-text-tertiary);
   font-size: 12px;
 }
 
@@ -1798,7 +1797,7 @@ export default {
 
 .cashier-preview__name {
   font-size: 14px;
-  color: #303133;
+  color: var(--adm-text-primary);
   font-weight: 500;
 }
 

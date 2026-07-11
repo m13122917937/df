@@ -16,6 +16,7 @@ import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.JkyStockInAndDeliveryParam;
 import com.ruoyi.jky.param.delivery.DeliveryOrderParam;
 import com.ruoyi.jky.param.delivery.SendDirectParam;
+import com.ruoyi.jky.param.fin.CreateCashOrCostRecPayBillParam;
 import com.ruoyi.jky.param.goods.GoodsListParam;
 import com.ruoyi.jky.param.inspect.InspectParam;
 import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
@@ -30,6 +31,7 @@ import com.ruoyi.jky.param.warehouse.WarehouseListParam;
 import com.ruoyi.jky.properties.JkyProperties;
 import com.ruoyi.jky.rep.JkyStockInAndDeliveryRep;
 import com.ruoyi.jky.rep.delivery.DeliveryOrderRep;
+import com.ruoyi.jky.rep.fin.CreateCashOrCostRecPayBillRep;
 import com.ruoyi.jky.rep.goods.GoodsListRep;
 import com.ruoyi.jky.rep.inspect.InspectRep;
 import com.ruoyi.jky.rep.logistics.LogisticsUpdateRep;
@@ -50,8 +52,6 @@ import java.util.Map;
 public class JkyTemplate {
 
     protected static final String BIZ_CONTENT = "bizcontent";
-
-    private static final String BIZ_DATA = "bizdata";
 
     public static final String STOCK_IN_APPLY_DEPART_CODE = "0001";
 
@@ -89,11 +89,11 @@ public class JkyTemplate {
     /**
      * 分页查询货品信息。
      */
-    public JkyResponse<List<GoodsListRep>> goodsList(final GoodsListParam param) {
+    public JkyResponse<GoodsListRep.GoodsListWrapper> goodsList(final GoodsListParam param) {
         if (isDisabled(JkyApiMethod.GOODS_LIST)) {
             return new JkyResponse<>();
         }
-        return execute(JkyApiMethod.GOODS_LIST, BIZ_CONTENT, param, new TypeReference<JkyResponse<List<GoodsListRep>>>() {
+        return execute(JkyApiMethod.GOODS_LIST, BIZ_CONTENT, param, new TypeReference<JkyResponse<GoodsListRep.GoodsListWrapper>>() {
         });
     }
 
@@ -112,7 +112,7 @@ public class JkyTemplate {
      * 查询销售单。
      */
     public JkyResponse<OrderQueryRep> queryOrders(final OrderQueryParam param) {
-        if (isDisabled(JkyApiMethod.ORDER_QUERY)) {
+        if (isDisabled(JkyApiMethod.QM_ORDER_QUERY)) {
             return new JkyResponse<>();
         }
         return execute(JkyApiMethod.QM_ORDER_QUERY, BIZ_CONTENT, param, new TypeReference<JkyResponse<OrderQueryRep>>() {
@@ -142,17 +142,17 @@ public class JkyTemplate {
         });
     }
 
-
-    /**
-     * 发货单 SN 通知。
-     */
-    public JkyResponse<SnReportRep> reportSerialNumbers(final SnReportParam param) {
-        if (isDisabled(JkyApiMethod.SN_REPORT)) {
-            return new JkyResponse<>();
-        }
-        return execute(JkyApiMethod.SN_REPORT, BIZ_DATA, param, new TypeReference<JkyResponse<SnReportRep>>() {
-        });
-    }
+//
+//    /**
+//     * 发货单 SN 通知。
+//     */
+//    public JkyResponse<SnReportRep> reportSerialNumbers(final SnReportParam param) {
+//        if (isDisabled(JkyApiMethod.SN_REPORT)) {
+//            return new JkyResponse<>();
+//        }
+//        return execute(JkyApiMethod.SN_REPORT, BIZ_DATA, param, new TypeReference<JkyResponse<SnReportRep>>() {
+//        });
+//    }
 
     /**
      * 创建库存并入库。
@@ -178,18 +178,6 @@ public class JkyTemplate {
     }
 
     /**
-     * 获取发货单。
-     */
-    public JkyResponse<DeliveryOrderRep> getDeliveryOrder(final DeliveryOrderParam param) {
-        if (isDisabled(JkyApiMethod.DELIVERY_ORDER_GET)) {
-            return new JkyResponse<>();
-        }
-        return execute(JkyApiMethod.DELIVERY_ORDER_GET, BIZ_CONTENT, param,
-                new TypeReference<JkyResponse<DeliveryOrderRep>>() {
-                });
-    }
-
-    /**
      * 销售单驳回审核。
      */
     public JkyResponse<Object> reject(final RejectParam param) {
@@ -200,39 +188,30 @@ public class JkyTemplate {
         });
     }
 
+//    /**
+//     * 直接发货。
+//     */
+//    public JkyResponse<Object> sendDirect(final SendDirectParam param) {
+//        if (isDisabled(JkyApiMethod.SEND_DIRECT)) {
+//            return new JkyResponse<>();
+//        }
+//        return execute(JkyApiMethod.SEND_DIRECT, BIZ_CONTENT, param, new TypeReference<JkyResponse<Object>>() {
+//        });
+//    }
+
+
+
     /**
-     * 直接发货。
+     * 创建收付款单（支持现收收入、支付费用）。
      */
-    public JkyResponse<Object> sendDirect(final SendDirectParam param) {
-        if (isDisabled(JkyApiMethod.SEND_DIRECT)) {
+    public JkyResponse<CreateCashOrCostRecPayBillRep> createCashOrCostRecPayBill(final CreateCashOrCostRecPayBillParam param) {
+        if (isDisabled(JkyApiMethod.CREATE_CASH_OR_COST_REC_PAY_BILL)) {
             return new JkyResponse<>();
         }
-        return execute(JkyApiMethod.SEND_DIRECT, BIZ_CONTENT, param, new TypeReference<JkyResponse<Object>>() {
-        });
+        return execute(JkyApiMethod.CREATE_CASH_OR_COST_REC_PAY_BILL, BIZ_CONTENT, param,
+                new TypeReference<JkyResponse<CreateCashOrCostRecPayBillRep>>() {
+                });
     }
-
-    /**
-     * 组合操作：验货、入库、更新物流、上报序列号。
-     */
-    public JkyStockInAndDeliveryRep inspectStockInAndDelivery(final JkyStockInAndDeliveryParam param) {
-        JkyStockInAndDeliveryRep rep = new JkyStockInAndDeliveryRep();
-        if (isDisabled("inspectStockInAndDelivery")) {
-            return rep;
-        }
-        try {
-            if (param.getStockInParam() != null) {
-                rep.setStockInResponse(createAndStockIn(param.getStockInParam()));
-            }
-            if (param.getInspectParam() != null) {
-                rep.setInspectResponse(inspect(param.getInspectParam()));
-            }
-        } catch (Exception e) {
-            log.error("吉客云验货入库发货失败：{}", e.getMessage(), e);
-            throw new ServiceException("验货入库发货失败");
-        }
-        return rep;
-    }
-
 
     protected boolean isDisabled(final String method) {
         if (Boolean.TRUE.equals(jkyProperties.getEnabled())) {

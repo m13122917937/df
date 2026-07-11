@@ -1,6 +1,7 @@
 package com.ruoyi.biz.bill;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.ruoyi.bill.facade.IPayerFacade;
 import com.ruoyi.bill.facade.ITransactionsFacade;
 import com.ruoyi.bill.model.bo.PayerBO;
@@ -66,6 +67,10 @@ public class TransactionsBizService {
         // 更新银行卡余额
         updatePayerBalance(param.getAccountId(), newBalance, loginUser);
         log.info("流水记录添加成功，ID: {}, 原余额: {}, 新余额: {}", savedTransaction.getId(), currentBalance, newBalance);
+
+        // 更新交易方汇总总额
+        transactionsFacade.updateCounterpartyTotal(param.getAccountId(), param.getCounterparty());
+
         return savedTransaction;
     }
 
@@ -85,6 +90,9 @@ public class TransactionsBizService {
 
         log.info("流水记录更新成功，ID: {}", transactionsForm.getId());
 
+        // 重新计算交易方汇总总额
+        recalculateCounterpartyTotalAfterUpdate(originalTransaction, updateParam);
+
         // 如需要则重新计算余额
         if (needRecalculate) {
             recalculateBalancesAfterUpdate(originalTransaction, updateParam, userId);
@@ -103,6 +111,11 @@ public class TransactionsBizService {
         // 删除流水记录
         transactionsFacade.delete(new TransactionsQuery().setId(id));
         log.info("流水记录删除成功，ID: {}", id);
+
+        // 重新计算被删交易方的总额
+        if (StrUtil.isNotBlank(deletedTransaction.getCounterparty())) {
+            transactionsFacade.updateCounterpartyTotal(deletedTransaction.getAccountId(), deletedTransaction.getCounterparty());
+        }
 
         // 重新计算后续流水的余额
         recalculateSubsequentTransactionsAfterDelete(deletedTransaction, userId);
@@ -371,6 +384,26 @@ public class TransactionsBizService {
                 .build();
 
         transactionsFacade.update(updateParam, new TransactionsQuery().setId(transactionId));
+    }
+
+    /**
+     * 更新后重新计算交易方汇总总额
+     */
+    private void recalculateCounterpartyTotalAfterUpdate(TransactionsBO original, TransactionsParam updated) {
+        String oldCounterparty = original.getCounterparty();
+        String newCounterparty = updated.getCounterparty();
+        Long accountId = original.getAccountId();
+
+        if (!Objects.equals(oldCounterparty, newCounterparty)) {
+            if (StrUtil.isNotBlank(oldCounterparty)) {
+                transactionsFacade.updateCounterpartyTotal(accountId, oldCounterparty);
+            }
+            if (StrUtil.isNotBlank(newCounterparty)) {
+                transactionsFacade.updateCounterpartyTotal(accountId, newCounterparty);
+            }
+        } else if (StrUtil.isNotBlank(oldCounterparty)) {
+            transactionsFacade.updateCounterpartyTotal(accountId, oldCounterparty);
+        }
     }
 
     /**

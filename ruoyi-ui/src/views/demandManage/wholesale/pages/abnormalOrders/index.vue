@@ -71,15 +71,9 @@
             stripe
             size="medium"
             center
-            style="width: 100%; min-height: 400px"
+            style="width: 100%"
             :fit="true"
             height="100%"
-            :header-cell-style="{
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
-            :cell-style="{ padding: '8px 0' }"
           >
             <!-- 空数据状态 -->
             <template slot="empty">

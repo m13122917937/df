@@ -449,10 +449,10 @@ export default {
   .search-section {
     margin-bottom: 20px;
     padding: 10px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    background: var(--bg-card);
     border-radius: 12px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-tags);
+    box-shadow: var(--shadow-card);
     position: relative;
     overflow: hidden;
   }
@@ -497,7 +497,7 @@ export default {
   .search-label {
     font-size: 14px;
     font-weight: 500;
-    color: #606266;
+    color: var(--adm-text-secondary);
     margin: 0;
     display: flex;
     align-items: center;
@@ -526,16 +526,15 @@ export default {
     font-size: 14px;
     padding: 12px 16px;
     transition: all 0.3s ease;
-    border: 2px solid #e4e7ed;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    border: 2px solid var(--border-tags);
+    background: var(--bg-card);
   }
 
   .search-select :deep(.el-input__inner):focus,
   .search-input :deep(.el-input__inner):focus {
     border-color: #409eff;
     box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
-    background: #fafbfc;
+    background: var(--bg-hover);
   }
 
   .search-actions {
@@ -548,7 +547,7 @@ export default {
   .toolbar-slot {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid #e4e7ed;
+    border-top: 1px solid var(--border-tags);
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -575,7 +574,7 @@ export default {
     height: 36px;
     font-size: 14px;
     border-radius: 8px;
-    color: #606266;
+    color: var(--adm-text-secondary);
     border-color: #dcdfe6;
     transition: all 0.3s ease;
     min-width: 100px;
@@ -584,7 +583,7 @@ export default {
   .reset-btn:hover {
     color: #409eff;
     border-color: #409eff;
-    background: #f0f9ff;
+    background: var(--bg-hover);
   }
 
   // 导出按钮区域
@@ -594,11 +593,11 @@ export default {
 
   // 表格区域
   .table-section {
-    background: #fff;
+    background: var(--bg-card);
     padding: 24px;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #f0f0f0;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border-tags);
     flex: 1;
     overflow: auto;
 
@@ -607,18 +606,18 @@ export default {
       overflow: hidden;
 
       th {
-        background-color: #fafafa;
-        color: #303133;
+        background-color: var(--bg-table-header);
+        color: var(--adm-text-primary);
         font-weight: 600;
-        border-bottom: 1px solid #ebeef5;
+        border-bottom: 1px solid var(--border-tags);
       }
 
       td {
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid var(--border-tags);
       }
 
       .el-table__row:hover {
-        background-color: #f5f7fa;
+        background-color: var(--bg-hover);
       }
     }
   }
@@ -628,10 +627,10 @@ export default {
     margin-top: 20px;
     text-align: right;
     padding: 20px;
-    background: #fff;
+    background: var(--bg-card);
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #f0f0f0;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border-tags);
   }
 
   // 主题色相关类
@@ -657,14 +656,14 @@ export default {
       line-height: 1.5;
 
       .info-label {
-        color: #909399;
+        color: var(--adm-text-tertiary);
         font-weight: 500;
         margin-right: 4px;
         flex-shrink: 0;
       }
 
       .info-value {
-        color: #606266;
+        color: var(--adm-text-secondary);
         word-break: break-all;
       }
     }
@@ -684,14 +683,14 @@ export default {
       line-height: 1.5;
 
       .info-label {
-        color: #909399;
+        color: var(--adm-text-tertiary);
         font-weight: 500;
         margin-right: 4px;
         flex-shrink: 0;
       }
 
       .info-value {
-        color: #606266;
+        color: var(--adm-text-secondary);
         word-break: break-all;
       }
     }

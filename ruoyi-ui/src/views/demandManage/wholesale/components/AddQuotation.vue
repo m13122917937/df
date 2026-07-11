@@ -302,7 +302,7 @@
 
     <div slot="footer" class="dialog-footer">
       <el-button @click="handleCancel">取消</el-button>
-      <el-button type="primary" @click="handleConfirm">确定</el-button>
+      <el-button type="primary" :loading="submitLoading" :disabled="submitLoading" @click="handleConfirm">确定</el-button>
     </div>
   </el-dialog>
 </template>
@@ -373,6 +373,7 @@ export default {
         // 其他要求
         otherRequire: "",
       },
+      submitLoading: false,
     };
   },
   computed: {
@@ -571,11 +572,14 @@ export default {
         return;
       }
 
+      this.submitLoading = true;
       apiQuotation(this.formData).then((res) => {
         if (res.code == 200) {
           this.$emit("confirm");
           this.$emit("update:visible", false);
         }
+      }).finally(() => {
+        this.submitLoading = false;
       });
     },
 

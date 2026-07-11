@@ -23,7 +23,7 @@ public class OrderVO {
     private String orderCode;
 
 
-    @ExcelProperty(value = "旺店通单号")
+    @ExcelProperty(value = "吉客云单号")
     private String erpOrderId;
 
 

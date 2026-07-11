@@ -59,4 +59,6 @@ public class WarehousingOrderVO {
 
     private String remark;
 
+    private Integer orderType;
+
 }

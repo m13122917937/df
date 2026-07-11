@@ -2,6 +2,7 @@
 <template>
   <div class="app-container contract-page">
     <!-- 筛选区 -->
+    <div class="search-card">
     <el-form
       :model="queryForm"
       ref="queryForm"
@@ -81,15 +82,18 @@
         <el-button icon="el-icon-refresh" @click="handleReset">重置</el-button>
       </el-form-item>
     </el-form>
+    </div>
 
     <!-- 表格 -->
-    <el-table
-      v-loading="loading"
-      :data="tableData"
-      border
-      stripe
-      style="width: 100%"
-    >
+    <div class="table-wrapper">
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        border
+        stripe
+        style="width: 100%"
+        height="100%"
+      >
       <el-table-column label="合同编号" prop="contractNo" min-width="150" />
       <el-table-column label="合同名称" prop="contractName" min-width="180" />
       <el-table-column label="类型" width="100">
@@ -178,14 +182,18 @@
         </template>
       </el-table-column>
     </el-table>
+    </div>
 
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      :page.sync="queryForm.pageNum"
-      :limit.sync="queryForm.pageSize"
-      @pagination="loadData"
-    />
+    <div class="pagination-wrapper">
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        :page.sync="queryForm.pageNum"
+        :limit.sync="queryForm.pageSize"
+        :page-sizes="[30, 50, 100]"
+        @pagination="loadData"
+      />
+    </div>
 
     <contract-form-dialog
       :visible.sync="formVisible"
@@ -234,7 +242,7 @@ export default {
       total: 0,
       queryForm: {
         pageNum: 1,
-        pageSize: 10,
+        pageSize: 30,
         contractTypeList: [],
         statusList: [],
         ourPayerId: null,
@@ -380,13 +388,49 @@ export default {
 
 <style lang="scss" scoped>
 .contract-page {
-  .query-form {
-    .el-form-item {
-      margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 112px);
+  background: var(--bg-page);
+  padding: 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  .search-card {
+    flex-shrink: 0;
+    background: var(--adm-card);
+    border-radius: var(--adm-radius-card);
+    box-shadow: var(--adm-shadow-card);
+    padding: 16px;
+    margin-bottom: 12px;
+
+    .query-form {
+      .el-form-item {
+        margin-bottom: 0;
+      }
     }
+  }
+  .table-wrapper {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    background: var(--adm-card);
+    border-radius: var(--adm-radius-card);
+    box-shadow: var(--adm-shadow-card);
   }
   .danger-text {
     color: #f56c6c;
+  }
+  .pagination-wrapper {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 12px 24px;
+    margin-top: 12px;
+    background: var(--adm-card);
+    border-radius: var(--adm-radius-card);
+    box-shadow: var(--adm-shadow-card);
   }
 }
 </style>

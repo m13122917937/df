@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -138,7 +139,7 @@ public class JkyGoodsSyncJob {
         param.setSkuCode(skuCode);
         param.setSpuCode(goods.getGoodsNo());
         param.setProductName(removeSpecName(goods.getGoodsName(), goods.getSkuName()));
-        param.setBrand(goods.getBrandName());
+        param.setBrand(normalizeBrand(goods.getBrandName()));
         param.setCategory(goods.getCateName());
         param.setSpecName(goods.getSkuName());
         param.setBarCode(goods.getSkuBarcode());
@@ -154,6 +155,19 @@ public class JkyGoodsSyncJob {
             return goodsName;
         }
         return StrUtil.removeSuffix(goodsName, skuName);
+    }
+
+    /**
+     * 统一品牌名，将"红米"映射为"小米"
+     */
+    private String normalizeBrand(String brand) {
+        if (StrUtil.isBlank(brand)) {
+            return brand;
+        }
+        if (Objects.equals("红米", brand) || Objects.equals("Redmi", brand)) {
+            return "小米";
+        }
+        return brand;
     }
 
     private String firstNotBlank(String... values) {

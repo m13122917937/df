@@ -1,7 +1,7 @@
 // base color
 :root {
-  --color-primary: #4677ed;
-  --base-sidebar-width: 172px;
+  --color-primary: #5B7CFA;
+  --base-sidebar-width: 220px;
   --red: #c03639;
   --pink: #e65d6e;
   // 圆角
@@ -31,6 +31,79 @@
 
   // 表格颜色
   --table-header-bg: #f0f6ff;
+
+  // 主题色 - 背景
+  --bg-page: #F5F7FB;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --bg-navbar: rgba(255,255,255,.82);
+  --bg-hover: #F8FAFC;
+  --bg-active: #EEF4FF;
+  --bg-input: #FFFFFF;
+  --bg-table-header: #f8f8f9;
+
+  // 主题色 - 边框
+  --border-sidebar: #F1F5F9;
+  --border-tags: #EEF2F7;
+
+  // 主题色 - 菜单
+  --menu-text: #64748B;
+  --menu-hover-bg: #F8FAFC;
+  --menu-hover-text: #1E293B;
+  --menu-active-text: #3B82F6;
+  --menu-active-bg: #EEF4FF;
+
+  // 主题色 - 标签页
+  --tag-bg: transparent;
+  --tag-hover-bg: #F8FAFC;
+  --tag-hover-text: #334155;
+  --tag-active-bg: #EEF4FF;
+  --tag-active-text: #3B82F6;
+
+  // 主题色 - 阴影 & 浮层
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-popup: 0 8px 24px rgba(0,0,0,0.08);
+  --contextmenu-bg: #FFFFFF;
+  --contextmenu-hover: #F8FAFC;
+}
+
+// 暗色主题
+[data-theme="dark"] {
+  --nl-color-title: #E2E8F0;
+  --nl-color: #CBD5E1;
+  --nl-color-weak: #94A3B8;
+  --nl-color-tip: #64748B;
+  --nl-color-disable: #4A5568;
+  --table-header-bg: #1E2430;
+
+  --bg-page: #0F1117;
+  --bg-card: #1A1D27;
+  --bg-sidebar: #1A1D27;
+  --bg-navbar: rgba(15,17,23,.85);
+  --bg-hover: #262930;
+  --bg-active: #1E293B;
+  --bg-input: #1A1D27;
+  --bg-table-header: #1E2430;
+
+  --border-sidebar: #262930;
+  --border-tags: #262930;
+
+  --menu-text: #94A3B8;
+  --menu-hover-bg: #262930;
+  --menu-hover-text: #E2E8F0;
+  --menu-active-text: #60A5FA;
+  --menu-active-bg: #1E293B;
+
+  --tag-bg: transparent;
+  --tag-hover-bg: #262930;
+  --tag-hover-text: #CBD5E1;
+  --tag-active-bg: #1E293B;
+  --tag-active-text: #60A5FA;
+
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-popup: 0 8px 24px rgba(0,0,0,0.4);
+  --contextmenu-bg: #1A1D27;
+  --contextmenu-hover: #262930;
 }
 
 $blue: #324157;
@@ -44,9 +117,8 @@ $panGreen: #30b08f;
 $deepGreen: #169bd5;
 
 // 默认菜单主题风格
-$base-menu-color: #333;
-$base-menu-color-active: #4677ed;
-// $base-menu-background:#304156;
+$base-menu-color: #1E293B;
+$base-menu-color-active: #5B7CFA;
 $base-menu-background: #fff;
 $base-logo-title-color: #ffffff;
 
@@ -54,11 +126,8 @@ $base-menu-light-color: rgba(0, 0, 0, 0.7);
 $base-menu-light-background: #ffffff;
 $base-logo-light-title-color: #001529;
 
-// $base-sub-menu-background:#1f2d3d;
-// $base-sub-menu-hover:#001528;
-
 $base-sub-menu-background: #fff;
-$base-sub-menu-hover: #edf3fe;
+$base-sub-menu-hover: #EEF4FF;
 
 // 圆角
 $mini-radius: var(--mini-radius);
@@ -78,8 +147,8 @@ $max-space: var(--max-space);
 // $base-change-box: #fb650a;
 // $base-changed-box: #fb650a;
 
-$base-change-box: #4677ed;
-$base-changed-box: #4677ed;
+$base-change-box: #5B7CFA;
+$base-changed-box: #5B7CFA;
 
 // 自定义暗色菜单风格
 /**
@@ -96,7 +165,7 @@ $base-sub-menu-background:#000c17;
 $base-sub-menu-hover:#001528;
 */
 
-$base-sidebar-width: 172px;
+$base-sidebar-width: 220px;
 
 // the :export directive is the magic sauce for webpack
 // https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass

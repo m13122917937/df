@@ -47,6 +47,10 @@ public class TransactionsBO {
      */
     private BigDecimal balanceAfter;
     /**
+     * 按交易对方汇总的交易总额（净额）
+     */
+    private BigDecimal totalAmountByCounterparty;
+    /**
      * 具体支付方式（如刷卡、扫码、转账等）
      */
     private String paymentMethod;

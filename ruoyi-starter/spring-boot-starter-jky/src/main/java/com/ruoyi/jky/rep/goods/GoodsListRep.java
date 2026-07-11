@@ -165,6 +165,11 @@ public class GoodsListRep {
     private String skuField30;
 
     @Data
+    public static class GoodsListWrapper {
+        private List<GoodsListRep> goods;
+    }
+
+    @Data
     public static class ImgUrlRep {
 
         private Long goodsId;

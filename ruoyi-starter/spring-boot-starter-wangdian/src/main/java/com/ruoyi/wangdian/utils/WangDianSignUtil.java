@@ -15,9 +15,9 @@ public class WangDianSignUtil {
     private static final long TIMESTAMP_BASE = 1325347200L;
 
     /**
-     * 生成旺店通开放平台签名
+     * 生成开放平台签名
      *
-     * @param sid        卖家账号（由旺店通分配）
+     * @param sid        卖家账号（由ERP分配）
      * @param appKey     appkey
      * @param appSecret  完整 appsecret，格式：secret:salt
      * @param method     接口方法名，如 wms.stockout.Sales.weighingExt

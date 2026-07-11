@@ -25,6 +25,10 @@ public class OrderParam {
      */
     private String erpOrderId;
     /**
+     * 吉客云唯一单号（jy开头）
+     */
+    private String jkyTradeNo;
+    /**
      * 原始订单号
      */
     private String originalOrderId;

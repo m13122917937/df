@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.company;
 
+import cn.hutool.core.util.StrUtil;
 import com.ruoyi.biz.company.CompanyBizService;
 import com.ruoyi.biz.company.MemberBizService;
 import com.ruoyi.common.core.controller.BaseController;
@@ -68,7 +69,7 @@ public class CompanyController extends BaseController {
         LoginUser loginUser = getLoginUser();
         CompanyParam companyParam = CompanyConvert.INSTANCE.toCompanyAddParam(companyForm);
         companyParam.setCreator(loginUser.getUsername()).setCreatorId(loginUser.getUserId());
-        CompanyBO companyBO = companyBizService.add(companyParam);
+        CompanyBO companyBO = companyBizService.add(companyParam.setCompanyName(StrUtil.trim(companyParam.getCompanyName())));
         return AjaxResult.success(CompanyConvert.INSTANCE.toVo(companyBO));
     }
 

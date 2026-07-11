@@ -1,7 +1,6 @@
 package com.ruoyi.web.controller.order;
 
 import com.alibaba.excel.EasyExcel;
-import com.ruoyi.biz.excel.ExcelOrderReadListener;
 import com.ruoyi.biz.order.ImeiBizService;
 import com.ruoyi.biz.order.OrderBizService;
 import com.ruoyi.common.annotation.Anonymous;
@@ -9,7 +8,6 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.model.page.PageBO;
-import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.validator.ValidatorUtils;
 import com.ruoyi.common.validator.group.AddGroup;
@@ -23,7 +21,6 @@ import com.ruoyi.web.form.rule.RuleForm;
 import com.ruoyi.web.vo.order.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,33 +38,6 @@ public class OrderController extends BaseController {
 
     @Autowired
     private ImeiBizService imeiBizService;
-
-
-    /**
-     * 上传文件
-     */
-    @Anonymous
-    @PostMapping("/upload")
-    public AjaxResult upload(@RequestParam("file") MultipartFile file) throws Exception {
-
-        checkExcel(file);
-
-        ExcelOrderReadListener excelPlateformReadListener = new ExcelOrderReadListener(orderBizService);
-        EasyExcel.read(file.getInputStream(), OrderAddForm.class, excelPlateformReadListener).sheet().doRead();
-
-        return AjaxResult.success();
-    }
-
-    @Anonymous
-    @PostMapping("add")
-    public AjaxResult add(@Validated(value = AddGroup.class) @RequestBody OrderAddForm orderAddForm) {
-
-        log.info("添加订单，订单信息:{}", JacksonUtil.toJson(orderAddForm));
-
-        orderBizService.add(orderAddForm);
-
-        return AjaxResult.success();
-    }
 
 
     @PostMapping("list")
@@ -95,8 +65,6 @@ public class OrderController extends BaseController {
         EasyExcel.write(response.getOutputStream(), OrderListVO.class).sheet("sheet1").doWrite(orderListExport);
     }
 
-
-
     @GetMapping("list/{orderId}/imei")
     public AjaxResult imei(@PathVariable("orderId") String orderCode) {
 
@@ -104,7 +72,6 @@ public class OrderController extends BaseController {
 
         return AjaxResult.success(list);
     }
-
 
 
     @PostMapping("quotation")
@@ -120,8 +87,6 @@ public class OrderController extends BaseController {
 
 
     @GetMapping("/province/count")
-
-
     public AjaxResult provinceCount(ProvinceForm provinceForm) {
 
         ValidatorUtils.validateEntity(provinceForm);

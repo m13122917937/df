@@ -559,8 +559,8 @@ export default {
     },
     headerCellStyle() {
       return {
-        background: '#f7f8fa',
-        color: '#303133',
+        background: 'var(--bg-table-header)',
+        color: 'var(--adm-text-primary)',
         fontWeight: 600
       }
     },
@@ -1084,16 +1084,16 @@ export default {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 100px);
+  height: calc(100vh - 100px);
   box-sizing: border-box;
 }
 
 .search-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 8px 24px rgba(15, 35, 95, 0.08);
-  border: 1px solid #eef2ff;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-tags);
   margin-bottom: 12px;
   position: relative;
   overflow: hidden;
@@ -1121,13 +1121,13 @@ export default {
 
 .search-group + .search-group {
   padding-top: 16px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--border-tags);
 }
 
 .search-group-title {
   font-size: 13px;
   font-weight: 600;
-  color: #909399;
+  color: var(--adm-text-tertiary);
   margin-bottom: 10px;
   letter-spacing: 0.5px;
 }
@@ -1150,7 +1150,7 @@ export default {
 .search-label {
   font-size: 14px;
   font-weight: 500;
-  color: #606266;
+  color: var(--adm-text-secondary);
   margin: 0;
   display: flex;
   align-items: center;
@@ -1180,15 +1180,15 @@ export default {
   font-size: 14px;
   padding: 6px 10px;
   transition: all 0.3s ease;
-  border: 2px solid #e4e7ed;
-  background: #fff;
+  border: 2px solid var(--border-tags);
+  background: var(--bg-card);
 }
 
 .search-input :deep(.el-input__inner:focus),
 .search-input :deep(.el-range-editor.is-active) {
   border-color: #409eff;
   box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
-  background: #fafbfc;
+  background: var(--bg-hover);
 }
 
 .search-actions-bar {
@@ -1198,7 +1198,7 @@ export default {
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 12px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid var(--border-tags);
 }
 
 .primary-actions {
@@ -1243,11 +1243,11 @@ export default {
   padding: 0 4px 8px;
 
   .data-tip {
-    color: #606266;
+    color: var(--adm-text-secondary);
     font-size: 14px;
 
     strong {
-      color: #303133;
+      color: var(--adm-text-primary);
       margin-left: 4px;
     }
   }
@@ -1257,12 +1257,17 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(15, 35, 95, 0.08);
-  border: 1px solid #eef2ff;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-tags);
   overflow: hidden;
   min-height: 0;
+}
+
+/* 覆盖全局 table-section 的 max-height 限制，让表格填满剩余空间 */
+.table-wrapper.table-section {
+  max-height: none;
 }
 
 .pagination-wrapper {
@@ -1275,7 +1280,7 @@ export default {
   flex-direction: column;
   gap: 4px;
   font-size: 13px;
-  color: #303133;
+  color: var(--adm-text-primary);
 }
 
 .order-product-line {
@@ -1292,35 +1297,35 @@ export default {
 
 .supplier-line {
   font-size: 13px;
-  color: #303133;
+  color: var(--adm-text-primary);
   line-height: 24px;
 }
 
 .time-line {
   font-size: 13px;
-  color: #303133;
+  color: var(--adm-text-primary);
   line-height: 20px;
 }
 
 .sub-status {
   margin-top: 4px;
   font-size: 13px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
 }
 
 .batch-tips {
   margin-top: 10px;
-  color: #909399;
+  color: var(--adm-text-tertiary);
   font-size: 13px;
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 
   span {
-    background: #f4f6fb;
+    background: var(--bg-hover);
     padding: 2px 8px;
     border-radius: 4px;
-    color: #606266;
+    color: var(--adm-text-secondary);
   }
 }
 

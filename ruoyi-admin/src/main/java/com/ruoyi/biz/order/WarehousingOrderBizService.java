@@ -115,6 +115,10 @@ public class WarehousingOrderBizService {
     @Autowired
     IPayerFacade payerFacade;
 
+    protected Integer getOrderType() {
+        return OrderConsts.OrderType.PROCUREMENT.getCode();
+    }
+
     /**
      * 入仓订单列表
      *
@@ -125,8 +129,10 @@ public class WarehousingOrderBizService {
     public PageBO<WarehousingOrderVO> orderList(WarehousingOrderParam warehousingOrderParam, PageParamV2 pageParamV2) {
         DateTime dateTime = DateUtil.offsetDay(DateUtil.date(), -15);
         OrderQuery orderQuery = new OrderQuery().setProductName(warehousingOrderParam.getProductName()).setStatusList(warehousingOrderParam.getStatusList())
-                .setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode()).setDeliveryCode(warehousingOrderParam.getDeliveryCode())
-                .setCompanyId(warehousingOrderParam.getCompanyId()).setBrand(warehousingOrderParam.getBrand()).setCreateTime(dateTime).setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode())
+                .setDeliveryCode(warehousingOrderParam.getDeliveryCode())
+                .setOrderTypeList(warehousingOrderParam.getOrderTypeList())
+                .setOrderType(CollectionUtil.isEmpty(warehousingOrderParam.getOrderTypeList()) ? getOrderType() : null)
+                .setCompanyId(warehousingOrderParam.getCompanyId()).setBrand(warehousingOrderParam.getBrand()).setCreateTime(dateTime)
                 .setPayerName(warehousingOrderParam.getPayerName()).setCreateBy(warehousingOrderParam.getCreateBy());
         PageBO<CompanyOrderBO> companyOrderBOPageBO = orderFacade.companyListPage(orderQuery, pageParamV2);
         List<WarehousingOrderVO> vo = WarehousingConvert.INSTANCE.toVO(companyOrderBOPageBO.getData());
@@ -134,7 +140,9 @@ public class WarehousingOrderBizService {
         List<SysUser> userBOS = sysUserFacade.selectUserByIds(userIds);
         Map<Long, String> userBOMap = userBOS.stream().collect(Collectors.toMap(userBO -> userBO.getUserId(), userBO -> userBO.getNickName()));
         for (WarehousingOrderVO warehousingOrderVO : vo) {
-            warehousingOrderVO.setCreateBy(String.valueOf(userBOMap.get(Convert.toLong(warehousingOrderVO.getCreateBy()))));
+            Long userId = Convert.toLong(warehousingOrderVO.getCreateBy());
+            String nickName = userBOMap.get(userId);
+            warehousingOrderVO.setCreateBy(nickName);
         }
         return new PageBO<>(vo, companyOrderBOPageBO.getTotal());
     }
@@ -163,7 +171,7 @@ public class WarehousingOrderBizService {
         String orderERPCode = IdUtil.objectId();
         DateTime now = DateUtil.date();
         // 构建订单
-        OrderParam orderParam = new OrderParam().setErpOrderId(orderERPCode).setOriginalOrderId(orderERPCode).setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode())
+        OrderParam orderParam = new OrderParam().setErpOrderId(orderERPCode).setOriginalOrderId(orderERPCode).setOrderType(getOrderType())
                 .setShopName(OrderConsts.SHOP_NAME).setPlatform(OrderConsts.PLATFORM).setBrand(productSkuBO.getBrand()).setCategory(productSkuBO.getCategory())
                 .setProductName(productSkuBO.getProductName()).setSkuName(productSkuBO.getSpecName()).setSkuCode(productSkuBO.getSkuCode()).setQuantity(warehousingSaveParam.getQuantity())
                 .setPayerId(payerBO.getId()).setPayerName(payerBO.getNickName())
@@ -183,7 +191,7 @@ public class WarehousingOrderBizService {
         HangingOrderBO hangingOrderBO = hangingOrderFacade.save(hangingOrderParam);
 
         // 构建trade 对象
-        TradeOrderParam tradeOrderParam = new TradeOrderParam().setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode()).setTradeCompanyId(warehousingSaveParam.getCompanyId());
+        TradeOrderParam tradeOrderParam = new TradeOrderParam().setOrderType(getOrderType()).setTradeCompanyId(warehousingSaveParam.getCompanyId());
         tradeOrderParam.setTradeUserId(memberBO.getUserId()).setTradeUserPhone(memberBO.getPhone()).setTradeUserName(memberBO.getNickName()).setAccountingPeriod(warehousingSaveParam.getAccountingPeriod());
         tradeOrderParam.setTradeCompanyId(companyBO.getId()).setTradeCompanyName(companyBO.getCompanyName()).setTradeNickName(companyBO.getNickName()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode());
         tradeOrderParam.setUpdateTime(DateUtil.date()).setUpdateBy(loginUser.getUserId()).setDeliveryCode(RandomUtil.randomInt(100000, 1000000));
@@ -219,7 +227,7 @@ public class WarehousingOrderBizService {
         DateTime dateTime = DateUtil.offsetDay(DateUtil.date(), -15);
 
         List<BrandCountBO> brandCountBOS = orderFacade.brandCount(new OrderQuery().setStatus(provinceForm.getStatus()).setStatusList(provinceForm.getStatusList())
-                .setCreateTimeStart(dateTime).setOrderType(OrderConsts.OrderType.PROCUREMENT.getCode()));
+                .setCreateTimeStart(dateTime).setOrderType(getOrderType()));
 
         return OrderConvert.INSTANCE.toBrandCountVO(brandCountBOS);
 

@@ -86,7 +86,6 @@
           <el-table
             ref="multipleTable"
             v-loading="tableLoading"
-            v-table-height="{ bottomOffset: 96 }"
             size="medium"
             stripe
             center
@@ -95,14 +94,7 @@
             style="width: 100%"
             element-loading-text="数据加载中"
             @selection-change="handleSelectionChange"
-            :height="tableHeight"
-            :cell-style="{ height: '40px' }"
-            :header-cell-style="{
-              height: '48px',
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
+            height="100%"
           >
             <!-- 空数据状态 -->
             <template slot="empty">
@@ -354,7 +346,6 @@ export default {
       tableLoading: false,
       tableDataList: [],
       totalNum: 0,
-      tableHeight: 500,
       returnOrderDialog: false,
       orderData: {},
       procurementDialogVisible: false,

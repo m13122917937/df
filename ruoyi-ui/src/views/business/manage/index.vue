@@ -1,6 +1,7 @@
 <template>
   <div class="business-manage-container">
     <!-- 搜索组件 -->
+    <div class="search-card">
     <SearchSection
       :form-data="searchForm"
       @search="handleSearch"
@@ -15,6 +16,7 @@
         >
       </template>
     </SearchSection>
+    </div>
 
     <!-- 数据表格区域 -->
     <div class="table-section">
@@ -384,38 +386,34 @@ export default {
 
 <style scoped lang="scss">
 .business-manage-container {
-  padding: 20px;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 112px);
+  background: var(--bg-page);
+  padding: 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  .search-card {
+    flex-shrink: 0;
+    background: var(--adm-card);
+    border-radius: var(--adm-radius-card);
+    box-shadow: var(--adm-shadow-card);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
 
   .table-section {
-    background: #fff;
-    padding: 24px;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #f0f0f0;
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
+    min-height: 0;
+    background: var(--adm-card);
+    border-radius: var(--adm-radius-card);
+    box-shadow: var(--adm-shadow-card);
+    padding: 16px 0 0;
 
-    .el-table {
-      border-radius: 6px;
-      overflow: hidden;
-
-      th {
-        background-color: #fafafa;
-        color: #303133;
-        font-weight: 600;
-        border-bottom: 1px solid #ebeef5;
-      }
-
-      td {
-        border-bottom: 1px solid #f0f0f0;
-      }
-
-      .el-table__row:hover {
-        background-color: #f5f7fa;
-      }
+    :deep(.el-table) {
+      height: 100%;
     }
   }
 
@@ -423,69 +421,18 @@ export default {
     display: flex;
     gap: 6px;
     justify-content: space-around;
-
-    &:last-of-type {
-      margin-top: 10px;
-    }
   }
 
   .pagination-section {
-    text-align: right;
-    padding: 20px;
-    padding-bottom: 0;
-
-    .el-pagination {
-      .el-pagination__total {
-        color: #606266;
-        font-weight: 500;
-      }
-
-      .el-pagination__sizes {
-        .el-select .el-input__inner {
-          height: 28px;
-          line-height: 28px;
-        }
-      }
-
-      .el-pager li {
-        min-width: 28px;
-        height: 28px;
-        line-height: 28px;
-        border-radius: 4px;
-        margin: 0 2px;
-
-        &.active {
-          background-color: #409eff;
-          color: #fff;
-        }
-
-        &:hover {
-          color: #409eff;
-        }
-      }
-
-      .btn-prev,
-      .btn-next {
-        height: 28px;
-        line-height: 28px;
-        border-radius: 4px;
-        margin: 0 2px;
-
-        &:hover {
-          color: #409eff;
-        }
-      }
-
-      .el-pagination__jump {
-        color: #606266;
-
-        .el-input__inner {
-          height: 28px;
-          line-height: 28px;
-          width: 50px;
-        }
-      }
-    }
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 12px 24px;
+    margin-top: 12px;
+    background: var(--adm-card);
+    border-radius: var(--adm-radius-card);
+    box-shadow: var(--adm-shadow-card);
   }
 }
 

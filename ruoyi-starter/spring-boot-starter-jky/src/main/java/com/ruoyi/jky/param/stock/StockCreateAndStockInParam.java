@@ -165,6 +165,8 @@ public class StockCreateAndStockInParam {
 
         /** 序列号 */
         private String serialNo;
+        /** 86 */
+        private String serialNo2;
 
         /** 箱号 */
         private String caseNumber;

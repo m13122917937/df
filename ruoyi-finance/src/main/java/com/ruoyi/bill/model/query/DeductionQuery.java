@@ -52,7 +52,7 @@ public class DeductionQuery {
     @QueryField( operator = DynamicCondition.Operator.IN, field = "original_order_id")
     private List<String> originalOrderIdList;
     /**
-     * 旺店通id
+     * 吉客云id
      */
     private String erpId;
     /**

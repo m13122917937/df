@@ -84,10 +84,17 @@ export default {
   width: 100%;
   ::v-deep {
     .el-scrollbar__bar {
-      bottom: 0px;
+      display: none !important;
     }
     .el-scrollbar__wrap {
-      height: 49px;
+      height: 56px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .el-scrollbar__wrap::-webkit-scrollbar {
+      display: none;
     }
   }
 }

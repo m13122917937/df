@@ -10,6 +10,7 @@ import com.ruoyi.web.form.order.BrandForm;
 import com.ruoyi.web.form.order.PickingOrderForm;
 import com.ruoyi.web.form.order.TrackingForm;
 import com.ruoyi.web.form.order.WarehousingOrderParam;
+import com.ruoyi.web.form.order.WarehousingImportResult;
 import com.ruoyi.web.form.order.WarehousingSaveParam;
 import com.ruoyi.web.vo.order.BrandCountVO;
 import com.ruoyi.web.vo.order.OrderListVO;
@@ -17,7 +18,9 @@ import com.ruoyi.web.vo.order.WarehousingOrderVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -28,13 +31,13 @@ public class WarehousingController extends BaseController {
 
 
     @Autowired
-    WarehousingOrderBizService wOrderBizService;
+    WarehousingOrderBizService warehousingOrderBizService;
 
 
     @GetMapping("/brand/count")
     public AjaxResult brandCount(BrandForm provinceForm) {
 
-        List<BrandCountVO> brandCountVOS = wOrderBizService.brandCount(provinceForm);
+        List<BrandCountVO> brandCountVOS = warehousingOrderBizService.brandCount(provinceForm);
 
         return AjaxResult.success(brandCountVOS);
     }
@@ -42,7 +45,7 @@ public class WarehousingController extends BaseController {
 
     @PostMapping("list")
     public TableDataInfo list(@RequestBody WarehousingOrderParam warehousingOrderParam) {
-        PageBO<WarehousingOrderVO> orderWaitVOPageBO = wOrderBizService.orderList(warehousingOrderParam, startParamV2("create_time desc"));
+        PageBO<WarehousingOrderVO> orderWaitVOPageBO = warehousingOrderBizService.orderList(warehousingOrderParam, startParamV2("create_time desc"));
         return getDataTable(orderWaitVOPageBO.getData(), orderWaitVOPageBO.getTotal());
     }
 
@@ -50,17 +53,33 @@ public class WarehousingController extends BaseController {
     @PostMapping("save")
     public AjaxResult add(@Validated @RequestBody WarehousingSaveParam warehousingSaveParam) {
 
-        wOrderBizService.save(warehousingSaveParam, getLoginUser());
+        warehousingOrderBizService.save(warehousingSaveParam, getLoginUser());
 
         return AjaxResult.success();
     }
 
 
+    @GetMapping("/import/template")
+    public void downloadTemplate(HttpServletResponse response) throws IOException {
+        warehousingOrderBizService.downloadTemplate(response);
+    }
+
+    @PostMapping("/import/validate")
+    public AjaxResult importValidate(@RequestParam("file") MultipartFile file) {
+        WarehousingImportResult result = warehousingOrderBizService.importValidate(file);
+        return AjaxResult.success(result);
+    }
+
+    @PostMapping("/import")
+    public AjaxResult importExcel(@RequestParam("file") MultipartFile file) {
+        return warehousingOrderBizService.importFromExcel(file, getLoginUser());
+    }
+
 
     @PostMapping("revoke/{orderCode}")
     public AjaxResult revoke(@PathVariable("orderCode") String orderCode) {
 
-        wOrderBizService.revoke(orderCode, getLoginUser());
+        warehousingOrderBizService.revoke(orderCode, getLoginUser());
 
         return AjaxResult.success();
     }
@@ -75,7 +94,7 @@ public class WarehousingController extends BaseController {
     @PostMapping("confirm/{orderCode}")
     public AjaxResult confirm(@PathVariable("orderCode") String orderCode) {
 
-        wOrderBizService.confirm(orderCode, getLoginUser());
+        warehousingOrderBizService.confirm(orderCode, getLoginUser());
 
         return AjaxResult.success();
     }
@@ -91,7 +110,7 @@ public class WarehousingController extends BaseController {
     @PostMapping("picking")
     public AjaxResult picking(@Validated() @RequestBody PickingOrderForm pickingOrderForm) throws IOException {
 
-        wOrderBizService.picking(pickingOrderForm, getLoginUser());
+        warehousingOrderBizService.picking(pickingOrderForm, getLoginUser());
 
         return AjaxResult.success();
     }
@@ -102,7 +121,7 @@ public class WarehousingController extends BaseController {
     @PostMapping("tracking")
     public AjaxResult updateTracking(@Validated @RequestBody TrackingForm trackingForm) {
 
-        wOrderBizService.updateTracking(trackingForm);
+        warehousingOrderBizService.updateTracking(trackingForm);
 
         return AjaxResult.success();
     }
