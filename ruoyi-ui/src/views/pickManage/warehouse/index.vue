@@ -83,8 +83,8 @@ export default {
 .metrics-row {
   display: flex;
   gap: 8px;
-  padding: 0 32px;
-  margin: 12px 0 12px;
+  padding: 0 20px;
+  margin: 8px 0 8px;
   overflow-x: auto;
   flex-shrink: 0;
   scrollbar-width: none;
@@ -150,17 +150,17 @@ export default {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 0 32px 32px;
+  padding: 0 20px 20px;
 }
 
 /* ==================== Responsive ==================== */
 
 @media (max-width: 1200px) {
   .metrics-row {
-    padding: 0 16px;
+    padding: 0 12px;
   }
   .main-content {
-    padding: 0 16px 16px;
+    padding: 0 12px 12px;
   }
   .metric-card {
     min-width: 105px;
