@@ -1098,15 +1098,6 @@ export default {
   position: relative;
   overflow: hidden;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #4b8dff, #55d3ff);
-  }
 }
 
 .search-grid {

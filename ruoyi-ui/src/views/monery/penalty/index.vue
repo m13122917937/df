@@ -457,16 +457,6 @@ export default {
     overflow: hidden;
   }
 
-  .search-section::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #409eff, #67c23a, #e6a23c);
-  }
-
   .search-content {
     display: flex;
     align-items: flex-end;
