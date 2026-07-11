@@ -324,23 +324,11 @@ export default {
 
   .search-section {
     margin-bottom: 20px;
-    padding: 10px;
+    padding: 12px 16px;
     background: var(--bg-card);
-    border-radius: 12px;
+    border-radius: var(--radius);
     border: 1px solid var(--border-tags);
     box-shadow: var(--shadow-card);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .search-section::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #409eff, #67c23a, #e6a23c);
   }
 
   .search-content {
@@ -381,14 +369,6 @@ export default {
     white-space: nowrap;
     min-width: fit-content;
     flex-shrink: 0;
-  }
-
-  .search-label::before {
-    content: "";
-    width: 4px;
-    height: 4px;
-    background: #409eff;
-    border-radius: 50%;
   }
 
   .search-input {
@@ -468,9 +448,8 @@ export default {
   .table-section {
     background: var(--bg-card);
     padding: 24px;
-    border-radius: 6px;
+    border-radius: var(--radius);
     box-shadow: var(--shadow-card);
-    border: 1px solid #f0f0f0;
     flex: 1;
     overflow: auto;
 
@@ -498,11 +477,10 @@ export default {
   .pagination-section {
     margin-top: 20px;
     text-align: right;
-    padding: 20px;
+    padding: 12px 24px;
     background: var(--bg-card);
-    border-radius: 6px;
+    border-radius: var(--radius);
     box-shadow: var(--shadow-card);
-    border: 1px solid #f0f0f0;
   }
 }
 </style>

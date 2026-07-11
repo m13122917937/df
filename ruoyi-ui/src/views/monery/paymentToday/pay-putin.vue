@@ -1355,23 +1355,11 @@ export default {
 
 .search-section {
   margin-bottom: 20px;
-  padding: 10px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.search-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #409eff, #67c23a, #e6a23c);
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-tags);
+  box-shadow: var(--shadow-card);
 }
 
 .search-content {
@@ -1412,14 +1400,6 @@ export default {
   white-space: nowrap;
   min-width: fit-content;
   flex-shrink: 0;
-}
-
-.search-label::before {
-  content: "";
-  width: 4px;
-  height: 4px;
-  background: #409eff;
-  border-radius: 50%;
 }
 
 .search-select {
