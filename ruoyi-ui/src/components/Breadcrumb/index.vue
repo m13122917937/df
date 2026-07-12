@@ -30,43 +30,29 @@ export default {
   },
   methods: {
     getBreadcrumb() {
-      // only show routes with meta.title
       let matched = []
-      const router = this.$route
-      const pathNum = this.findPathNum(router.path)
-      // multi-level menu
-      if (pathNum > 2) {
-        const reg = /\/\w+/gi
-        const pathList = router.path.match(reg).map((item, index) => {
-          if (index !== 0) item = item.slice(1)
-          return item
-        })
-        this.getMatched(pathList, this.$store.getters.defaultRoutes, matched)
-      } else {
-        matched = router.matched.filter(item => item.meta && item.meta.title)
+      const currentPath = this.$route.path
+      this.walkRoutes(currentPath, this.$store.getters.defaultRoutes, matched, '')
+      if (matched.length === 0) {
+        matched = this.$route.matched.filter(item => item.meta && item.meta.title)
       }
-      // 判断是否为首页
       if (!this.isDashboard(matched[0])) {
-        matched = [{ path: "/index", meta: { title: "首页" } }].concat(matched)
+        matched = [{ path: '/index', meta: { title: '首页' } }].concat(matched)
       }
       this.levelList = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
     },
-    findPathNum(str, char = "/") {
-      let index = str.indexOf(char)
-      let num = 0
-      while (index !== -1) {
-        num++
-        index = str.indexOf(char, index + 1)
-      }
-      return num
-    },
-    getMatched(pathList, routeList, matched) {
-      let data = routeList.find(item => item.path == pathList[0] || (item.name += '').toLowerCase() == pathList[0])
-      if (data) {
-        matched.push(data)
-        if (data.children && pathList.length) {
-          pathList.shift()
-          this.getMatched(pathList, data.children, matched)
+    walkRoutes(currentPath, routeList, matched, parentPath) {
+      for (const route of routeList) {
+        const routePath = route.path || ''
+        const fullPath = routePath.startsWith('/') ? routePath : (parentPath ? parentPath + '/' + routePath : routePath)
+        if (currentPath === fullPath || currentPath.startsWith(fullPath + '/')) {
+          if (route.meta && route.meta.title) {
+            matched.push(route)
+          }
+          if (route.children && route.children.length > 0) {
+            this.walkRoutes(currentPath, route.children, matched, fullPath)
+          }
+          return
         }
       }
     },

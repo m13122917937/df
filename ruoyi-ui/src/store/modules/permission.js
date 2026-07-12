@@ -44,7 +44,7 @@ const permission = {
           router.addRoutes(asyncRoutes);
           commit("SET_ROUTES", rewriteRoutes);
           commit("SET_SIDEBAR_ROUTERS", constantRoutes.concat(sidebarRoutes));
-          commit("SET_DEFAULT_ROUTES", sidebarRoutes);
+          commit("SET_DEFAULT_ROUTES", constantRoutes.concat(sidebarRoutes));
           commit("SET_TOPBAR_ROUTES", sidebarRoutes);
           resolve(rewriteRoutes);
         });
