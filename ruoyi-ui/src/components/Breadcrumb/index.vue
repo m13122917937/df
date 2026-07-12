@@ -32,7 +32,8 @@ export default {
     getBreadcrumb() {
       let matched = []
       const currentPath = this.$route.path
-      this.walkRoutes(currentPath, this.$store.getters.defaultRoutes, matched, '')
+      const routes = this.$store.getters.defaultRoutes || []
+      this.walkRoutes(currentPath, routes, matched, '')
       if (matched.length === 0) {
         matched = this.$route.matched.filter(item => item.meta && item.meta.title)
       }
@@ -44,7 +45,6 @@ export default {
     walkRoutes(currentPath, routeList, matched, parentPath) {
       for (const route of routeList) {
         const routePath = route.path || ''
-        // Empty-path child: this is the default child of a Layout parent
         if (!routePath) {
           if (currentPath === parentPath || currentPath === parentPath + '/') {
             if (route.meta && route.meta.title) matched.push(route)

@@ -104,7 +104,6 @@ export default {
       const crumbs = [];
       const path = this.$route.path;
       const routers = this.sidebarRouters || [];
-      // Find module
       for (const module of routers) {
         if (module.hidden) continue;
         const group = this.findInModule(module, path);
@@ -113,7 +112,6 @@ export default {
           if (group !== module) {
             crumbs.push(group.meta && group.meta.title || group.name);
           }
-          // Find the leaf page title
           const pageTitle = this.$route.meta && this.$route.meta.title;
           if (pageTitle) {
             crumbs.push(pageTitle);
@@ -125,15 +123,24 @@ export default {
     }
   },
   methods: {
+    resolveRelPath(base, path) {
+      if (!path) return base || '';
+      if (path.startsWith('/')) return path;
+      if (!base) return path;
+      return (base.endsWith('/') ? base : base + '/') + path;
+    },
     findInModule(module, targetPath) {
       if (!module.children) return null;
+      const modPath = module.path || '';
       for (const child of module.children) {
-        if (child.path === targetPath) return module;
-        if (child.path && targetPath.startsWith(child.path + '/')) return module;
-        if (child.children) {
+        if (child.hidden) continue;
+        const childFull = this.resolveRelPath(modPath, child.path);
+        if (childFull === targetPath) return module;
+        if (child.children && targetPath.startsWith(childFull + '/')) {
           for (const grandchild of child.children) {
-            if (grandchild.path === targetPath) return child;
-            if (grandchild.path && targetPath.startsWith(grandchild.path + '/')) return child;
+            if (grandchild.hidden) continue;
+            const gFull = this.resolveRelPath(childFull, grandchild.path);
+            if (gFull === targetPath) return child;
           }
         }
       }
