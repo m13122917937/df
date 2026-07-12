@@ -44,11 +44,17 @@ export default {
     walkRoutes(currentPath, routeList, matched, parentPath) {
       for (const route of routeList) {
         const routePath = route.path || ''
+        // Empty-path child: this is the default child of a Layout parent
+        if (!routePath) {
+          if (currentPath === parentPath || currentPath === parentPath + '/') {
+            if (route.meta && route.meta.title) matched.push(route)
+            if (route.children) this.walkRoutes(currentPath, route.children, matched, parentPath)
+          }
+          continue
+        }
         const fullPath = routePath.startsWith('/') ? routePath : (parentPath ? parentPath + '/' + routePath : routePath)
         if (currentPath === fullPath || currentPath.startsWith(fullPath + '/')) {
-          if (route.meta && route.meta.title) {
-            matched.push(route)
-          }
+          if (route.meta && route.meta.title) matched.push(route)
           if (route.children && route.children.length > 0) {
             this.walkRoutes(currentPath, route.children, matched, fullPath)
           }
