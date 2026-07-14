@@ -1,7 +1,14 @@
 <template>
   <div class="wholesale-container">
     <!-- Metric Cards -->
-    <div class="metrics-row">
+    <div
+      ref="metricsRow"
+      class="metrics-row"
+      @mousedown="onDragStart"
+      @mousemove="onDragging"
+      @mouseup="onDragEnd"
+      @mouseleave="onDragEnd"
+    >
       <div
         v-for="item in tabs"
         :key="item.key"
@@ -50,6 +57,10 @@ export default {
   data() {
     return {
       activeTab: 'today-send',
+      isDragging: false,
+      dragStartX: 0,
+      dragScrollLeft: 0,
+      dragMoved: false,
       tabs: [
         { key: 'today-send', title: '当日发货', icon: icons.send, bg: 'rgba(52,199,89,0.08)', color: '#34C759' },
         { key: 'transit', title: '在途', icon: icons.truck, bg: 'rgba(91,124,250,0.08)', color: '#5B7CFA' },
@@ -70,7 +81,23 @@ export default {
     }
   },
   methods: {
+    onDragStart(e) {
+      this.isDragging = true
+      this.dragStartX = e.pageX
+      this.dragScrollLeft = this.$refs.metricsRow.scrollLeft
+      this.dragMoved = false
+    },
+    onDragging(e) {
+      if (!this.isDragging) return
+      const dx = e.pageX - this.dragStartX
+      if (Math.abs(dx) > 5) this.dragMoved = true
+      this.$refs.metricsRow.scrollLeft = this.dragScrollLeft - dx
+    },
+    onDragEnd() {
+      this.isDragging = false
+    },
     handleTabChange(tabKey) {
+      if (this.dragMoved) return
       this.activeTab = tabKey
     }
   }

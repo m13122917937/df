@@ -1,7 +1,14 @@
 <template>
   <div class="wholesale-container">
     <!-- Metric Cards -->
-    <div class="metrics-row">
+    <div
+      ref="metricsRow"
+      class="metrics-row"
+      @mousedown="onDragStart"
+      @mousemove="onDragging"
+      @mouseup="onDragEnd"
+      @mouseleave="onDragEnd"
+    >
       <div
         v-for="tab in tabs"
         :key="tab.status"
@@ -129,6 +136,10 @@ export default {
       },
       tableData: [],
       total: 0,
+      isDragging: false,
+      dragStartX: 0,
+      dragScrollLeft: 0,
+      dragMoved: false,
       tabs: [
         { status: "1", label: "待处理", icon: icons.clock, bg: "rgba(255,179,64,0.08)", color: "#FFB340" },
         { status: "2", label: "已确认", icon: icons.check, bg: "rgba(52,199,89,0.08)", color: "#34C759" },
@@ -140,7 +151,23 @@ export default {
     this.fetchData();
   },
   methods: {
+    onDragStart(e) {
+      this.isDragging = true
+      this.dragStartX = e.pageX
+      this.dragScrollLeft = this.$refs.metricsRow.scrollLeft
+      this.dragMoved = false
+    },
+    onDragging(e) {
+      if (!this.isDragging) return
+      const dx = e.pageX - this.dragStartX
+      if (Math.abs(dx) > 5) this.dragMoved = true
+      this.$refs.metricsRow.scrollLeft = this.dragScrollLeft - dx
+    },
+    onDragEnd() {
+      this.isDragging = false
+    },
     switchTab(status) {
+      if (this.dragMoved) return
       this.query.status = status;
       this.query.pageNum = 1;
       this.fetchData();

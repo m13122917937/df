@@ -1,7 +1,14 @@
 <template>
   <div class="wholesale-container">
     <!-- Metric Cards -->
-    <div class="metrics-row">
+    <div
+      ref="metricsRow"
+      class="metrics-row"
+      @mousedown="onDragStart"
+      @mousemove="onDragging"
+      @mouseup="onDragEnd"
+      @mouseleave="onDragEnd"
+    >
       <div
         v-for="(config, statusKey) in statusConfig"
         :key="statusKey"
@@ -47,6 +54,10 @@ export default {
     return {
       currentStatus: 'creatingOrders',
       countHeader: [],
+      isDragging: false,
+      dragStartX: 0,
+      dragScrollLeft: 0,
+      dragMoved: false,
       statusConfig: {
         creatingOrders: { status: '1', label: '新建中', icon: icons.edit, bg: 'rgba(91,124,250,0.08)', color: '#5B7CFA' },
         pendingOrders:  { status: '2', label: '待发布', icon: icons.clock, bg: 'rgba(255,179,64,0.08)', color: '#FFB340' },
@@ -99,6 +110,21 @@ export default {
     this.updateStatusFromRoute(this.$route)
   },
   methods: {
+    onDragStart(e) {
+      this.isDragging = true
+      this.dragStartX = e.pageX
+      this.dragScrollLeft = this.$refs.metricsRow.scrollLeft
+      this.dragMoved = false
+    },
+    onDragging(e) {
+      if (!this.isDragging) return
+      const dx = e.pageX - this.dragStartX
+      if (Math.abs(dx) > 5) this.dragMoved = true
+      this.$refs.metricsRow.scrollLeft = this.dragScrollLeft - dx
+    },
+    onDragEnd() {
+      this.isDragging = false
+    },
     async getCountHeader() {
       try {
         const res = await getCountHeaderApi()
@@ -111,6 +137,7 @@ export default {
       }
     },
     handleStatusChange(status) {
+      if (this.dragMoved) return
       this.currentStatus = status
       this.$router.push({
         path: '/demandManage/wholesale',
