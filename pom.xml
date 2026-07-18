@@ -70,6 +70,7 @@
         <module>ruoyi-user</module>
         <module>ruoyi-order</module>
         <module>ruoyi-finance</module>
+        <module>ruoyi-analysis</module>
         <module>ruoyi-starter</module>
         <module>ruoyi-api</module>
     </modules>

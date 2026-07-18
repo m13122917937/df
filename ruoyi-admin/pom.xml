@@ -81,6 +81,11 @@
         </dependency>
         <dependency>
             <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-analysis</artifactId>
+            <version>${ruoyi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ruoyi</groupId>
             <artifactId>spring-boot-starter-jky</artifactId>
         </dependency>
         <dependency>

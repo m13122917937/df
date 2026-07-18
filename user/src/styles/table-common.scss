@@ -1,0 +1,244 @@
+// 订单详情样式
+.order-detail {
+  padding: 10px;
+  padding-bottom: 0;
+  background: #f5f7fa;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  // 页面头部样式
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 6px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    color: white;
+
+    .header-left {
+      .page-title {
+        margin: 0 0 4px 0;
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        i {
+          font-size: 28px;
+          color: #ffd700;
+        }
+
+        .page-warning {
+          margin-left: 20px;
+          background: #fff2e8;
+          padding: 4px 12px;
+          border-radius: 6px;
+          font-size: 14px;
+          color: #e74c3c;
+          font-weight: 500;
+        }
+      }
+
+      .page-subtitle {
+        font-size: 14px;
+        opacity: 0.9;
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+
+
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+
+      .action-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+      }
+    }
+  }
+
+  // 订单内容布局
+  .order-content-layout {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+    min-height: 0; // 确保flex子元素可以收缩
+   
+    .filter-panels {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .order-table-container-wrapper {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: auto;
+      height: calc(100vh - 210px);
+    }
+    // 表格容器样式
+    .order-table-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(8, 6, 6, 0.08);
+      overflow: auto;
+      position: relative;
+      -webkit-overflow-scrolling: touch;
+
+      // 表格样式
+      .order-table {
+        flex: 1;
+        background: #fff;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+        min-width: 100%;
+        // Element UI表格样式覆盖
+        ::v-deep .el-table__header {
+          background: #fafbfc;
+
+          th {
+            background: #fafbfc !important;
+            color: #2c3e50;
+            font-weight: 600;
+            border-bottom: 2px solid #e4e7ed;
+          }
+        }
+
+        ::v-deep .el-table__body {
+          tr {
+            transition: all 0.3s ease;
+
+            &:hover {
+              background: #f0f9ff !important;
+            }
+          }
+
+          td {
+            border-bottom: 1px solid #f0f0f0;
+          }
+        }
+
+        ::v-deep .el-table--striped .el-table__body tr.el-table__row--striped td {
+          background: #fafbfc;
+        }
+      }
+
+      // 分页样式
+      .pagination-wrapper {
+        padding: 10px 24px;
+        text-align: right;
+        background: #fafbfc;
+        border-top: 1px solid #e4e7ed;
+
+        .custom-pagination {
+          ::v-deep .el-pagination {
+            justify-content: center;
+
+            .el-pager li {
+              border-radius: 6px;
+              margin: 0 2px;
+              transition: all 0.3s ease;
+
+              &:hover {
+                background: #409eff;
+                color: white;
+              }
+
+              &.active {
+                background: #409eff;
+                color: white;
+              }
+            }
+
+            .btn-prev,
+            .btn-next {
+              border-radius: 6px;
+              transition: all 0.3s ease;
+
+              &:hover {
+                background: #409eff;
+                color: white;
+              }
+            }
+          }
+        }
+      }
+
+      &::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    }
+  }
+}
+
+// 动画效果
+@keyframes warning-pulse {
+  0% {
+    background: rgba(245, 8, 8, 0.15);
+    border-color: rgba(245, 8, 8, 0.3);
+    box-shadow: 0 0 0 0 rgba(245, 8, 8, 0.4);
+  }
+
+  50% {
+    background: rgba(245, 8, 8, 0.25);
+    border-color: rgba(245, 8, 8, 0.5);
+    box-shadow: 0 0 0 4px rgba(245, 8, 8, 0.1);
+  }
+
+  100% {
+    background: rgba(245, 8, 8, 0.15);
+    border-color: rgba(245, 8, 8, 0.3);
+    box-shadow: 0 0 0 0 rgba(245, 8, 8, 0.4);
+  }
+}
+
+@keyframes warning-bounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-3px);
+  }
+
+  60% {
+    transform: translateY(-2px);
+  }
+}

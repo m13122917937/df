@@ -331,16 +331,17 @@ export default {
   ::v-deep .el-dialog {
     border-radius: 8px;
     overflow: hidden;
+    background: var(--adm-card);
   }
 
   ::v-deep .el-dialog__header {
-    background: #f5f7fa;
-    color: #303133;
+    background: var(--bg-table-header);
+    color: var(--adm-text-primary);
     padding: 20px 24px;
-    border-bottom: 1px solid #e4e7ed;
+    border-bottom: 1px solid var(--adm-border);
 
     .el-dialog__title {
-      color: #303133;
+      color: var(--adm-text-primary);
       font-size: 18px;
       font-weight: 600;
     }
@@ -350,11 +351,11 @@ export default {
       right: 24px;
 
       .el-dialog__close {
-        color: #909399;
+        color: var(--adm-text-tertiary);
         font-size: 20px;
 
         &:hover {
-          color: #409eff;
+          color: var(--primary-color, #409eff);
         }
       }
     }
@@ -362,7 +363,7 @@ export default {
 
   ::v-deep .el-dialog__body {
     padding: 24px;
-    background: #fff;
+    background: var(--adm-card);
   }
 
   .company-form {
@@ -370,7 +371,7 @@ export default {
       margin-bottom: 20px;
 
       .el-form-item__label {
-        color: #303133;
+        color: var(--adm-text-primary);
         font-weight: 500;
         font-size: 14px;
       }
@@ -379,13 +380,15 @@ export default {
         .el-input {
           .el-input__inner {
             border-radius: 4px;
-            border: 1px solid #dcdfe6;
+            border: 1px solid var(--adm-border);
+            background: var(--adm-card);
+            color: var(--adm-text-primary);
             transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
             height: 32px;
             line-height: 32px;
 
             &:focus {
-              border-color: #409eff;
+              border-color: var(--primary-color, #409eff);
             }
           }
         }
@@ -408,9 +411,9 @@ export default {
   }
 
   .dialog-footer {
-    background: #f8f9fa;
+    background: var(--bg-table-header);
     padding: 16px 24px;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--adm-border);
     text-align: right;
 
     .el-button {
@@ -425,12 +428,12 @@ export default {
       }
 
       &.el-button--primary {
-        background-color: #409eff;
-        border-color: #409eff;
+        background-color: var(--primary-color, #409eff);
+        border-color: var(--primary-color, #409eff);
 
         &:hover {
-          background-color: #66b1ff;
-          border-color: #66b1ff;
+          background-color: var(--primary-hover, #66b1ff);
+          border-color: var(--primary-hover, #66b1ff);
         }
       }
     }

@@ -15,7 +15,17 @@
       "Bash(curl -s http://localhost:7772/getRouters)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:7772/getInfo)",
       "Bash(curl -s http://localhost:7772/getInfo)",
-      "Bash(curl -s http://localhost:7772/login -X POST -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"admin123\"}')"
+      "Bash(curl -s http://localhost:7772/login -X POST -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"admin123\"}')",
+      "Read(//d/work/jie/adm/**)",
+      "Bash(python3 skills/ui-ux-pro-max/scripts/search.py \"admin dashboard management menu search filter\" --design-system -p \"ADM Menu Search\" -f markdown)",
+      "Bash(awk '{ *)",
+      "Bash(mv tmp_fix src/layout/components/TagsView/index.vue)",
+      "Bash(mv tmp_fix3 src/layout/components/TagsView/index.vue)",
+      "Bash(awk ' *)",
+      "Bash(mv tmp_star2 src/layout/components/TagsView/index.vue)",
+      "Bash(mv tmp_star3 src/layout/components/TagsView/index.vue)",
+      "Bash(mv tmp_final src/layout/components/TagsView/index.vue)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:1024)"
     ]
   }
 }
