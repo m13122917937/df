@@ -84,5 +84,15 @@ public class Imei {
     @TableLogic
     private Integer deleted;
 
+    /**
+     * 型号不一致时识别出的商品名称
+     */
+    private String recognizedProductName;
+
+    /**
+     * 型号不一致时识别出的 SKU 规格
+     */
+    private String recognizedSkuName;
+
 
 }

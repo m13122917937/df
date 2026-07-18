@@ -93,7 +93,7 @@ export default {
       captchaEnabled: false,
       // 注册开关
       register: false,
-      redirect: "/demandManage/wholesale/creatingOrders"
+      redirect: "/"
     }
   },
 

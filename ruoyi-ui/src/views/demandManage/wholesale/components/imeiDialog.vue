@@ -219,7 +219,7 @@ export default {
 .imei-info-section {
   margin-bottom: 20px;
   padding: 16px;
-  background-color: #f8f9fa;
+  background-color: var(--bg-table-header);
   border-radius: 4px;
 }
 
@@ -239,7 +239,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
-  border-top: 1px dashed #e4e7ed;
+  border-top: 1px dashed var(--border-tags);
 
   &:first-of-type {
     border-top: none;
@@ -257,7 +257,7 @@ export default {
 
 .label {
   width: 80px;
-  color: #606266;
+  color: var(--nl-color-weak);
   font-weight: 500;
   margin-right: 8px;
   flex-shrink: 0;
@@ -265,13 +265,13 @@ export default {
 
 .value {
   flex: 1;
-  color: #303133;
+  color: var(--nl-color);
   margin-right: 8px;
 }
 
 .copy-icon {
   cursor: pointer;
-  color: #c0c4cc;
+  color: var(--nl-color-tip);
   transition: color 0.3s;
   font-size: 14px;
 
@@ -283,7 +283,7 @@ export default {
 .dialog-footer {
   text-align: right;
   padding-top: 20px;
-  border-top: 1px solid #e4e7ed;
+  border-top: 1px solid var(--border-tags);
 }
 
 .dialog-footer .el-button {

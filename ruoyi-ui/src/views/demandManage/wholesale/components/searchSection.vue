@@ -486,9 +486,9 @@ export default {
   flex-shrink: 0;
 
   &:focus-within {
-    border-color: #5B7CFA;
+    border-color: var(--adm-primary);
     background: var(--bg-card);
-    box-shadow: 0 0 0 3px rgba(91,124,250,0.08);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.08);
   }
 }
 
@@ -543,14 +543,14 @@ export default {
   border-radius: 100px;
   font-size: 12px;
   font-weight: 500;
-  color: #5B7CFA;
-  background: rgba(91,124,250,0.08);
+  color: var(--primary-color);
+  background: rgba(var(--primary-rgb), 0.08);
   cursor: pointer;
   transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
   white-space: nowrap;
 
   &:hover {
-    background: rgba(91,124,250,0.15);
+    background: rgba(var(--primary-rgb), 0.15);
   }
 
   .chip-label {
@@ -558,7 +558,7 @@ export default {
   }
 
   .chip-value {
-    color: #5B7CFA;
+    color: var(--primary-color);
     font-weight: 500;
     max-width: 100px;
     overflow: hidden;
@@ -580,17 +580,9 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
   color: var(--adm-text-secondary);
   background: transparent;
   border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  font-family: inherit;
-  white-space: nowrap;
 
   &:hover {
     background: var(--bg-hover);
@@ -611,7 +603,7 @@ export default {
   height: 18px;
   padding: 0 5px;
   border-radius: 9px;
-  background: #5B7CFA;
+  background: var(--primary-color);
   color: #fff;
   font-size: 11px;
   font-weight: 600;
@@ -628,25 +620,18 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
-  border-radius: 8px;
-  font-size: 13px;
   font-weight: 600;
   color: #FFFFFF;
-  background: #5B7CFA;
+  background: var(--primary-color);
   border: none;
-  cursor: pointer;
-  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  font-family: inherit;
-  white-space: nowrap;
 
   &:hover {
-    background: #6C89FF;
-    box-shadow: 0 4px 16px rgba(91,124,250,0.18);
+    background: var(--primary-hover);
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.18);
   }
 
   &:active {
-    background: #486AF4;
+    background: var(--primary-active);
   }
 }
 

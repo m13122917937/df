@@ -45,7 +45,7 @@ export default {
     return {
       activeTab: 'pay-delivery',
       tabs: [
-        { key: 'pay-delivery', label: '代发', icon: icons.send, bg: 'rgba(91,124,250,0.08)', color: '#5B7CFA' },
+        { key: 'pay-delivery', label: '代发', icon: icons.send, bg: 'rgba(var(--primary-rgb), 0.08)', color: 'var(--primary-color)' },
         { key: 'pay-putin', label: '入仓', icon: icons.box, bg: 'rgba(52,199,89,0.08)', color: '#34C759' },
       ],
     }
@@ -85,8 +85,8 @@ export default {
 .metrics-row {
   display: flex;
   gap: 8px;
-  padding: 0 20px;
-  margin: 8px 0 8px;
+  padding: 0 var(--page-padding);
+  margin: var(--page-section-gap) 0;
   overflow-x: auto;
   flex-shrink: 0;
   scrollbar-width: none;
@@ -113,8 +113,8 @@ export default {
   }
 
   &.active {
-    border-color: #5B7CFA;
-    box-shadow: 0 4px 16px rgba(91,124,250,0.12);
+    border-color: var(--adm-primary);
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.12);
   }
 }
 
@@ -152,17 +152,17 @@ export default {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 0 20px 20px;
+  padding: 0 var(--page-padding) var(--page-padding);
 }
 
 /* ==================== Responsive ==================== */
 
 @media (max-width: 1200px) {
   .metrics-row {
-    padding: 0 12px;
+    padding: 0 var(--page-padding);
   }
   .main-content {
-    padding: 0 12px 12px;
+    padding: 0 var(--page-padding) var(--page-padding);
   }
   .metric-card {
     min-width: 105px;

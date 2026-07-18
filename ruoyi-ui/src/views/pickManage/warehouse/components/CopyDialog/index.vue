@@ -147,14 +147,14 @@ export default {
     }
 
     .copy-icon {
-      color: #409eff;
+      color: var(--primary-color);
       cursor: pointer;
       font-size: 16px;
       margin-left: 8px;
       transition: color 0.3s;
 
       &:hover {
-        color: #66b1ff;
+        color: var(--primary-hover);
       }
     }
   }

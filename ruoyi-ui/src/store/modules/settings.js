@@ -3,9 +3,12 @@ import defaultSettings from "@/settings"
 const { sideTheme, showSettings, topNav, tagsView, fixedHeader, sidebarLogo, dynamicTitle, themeMode } = defaultSettings
 
 const storageSetting = JSON.parse(localStorage.getItem("layout-setting")) || ""
+// 优先使用 primaryColor，兼容旧版 stored theme
+const savedPrimary = storageSetting.primaryColor || storageSetting.theme || "#1677FF"
 const state = {
   title: "",
-  theme: storageSetting.theme || "#5B7CFA",
+  primaryColor: savedPrimary,
+  theme: savedPrimary,
   sideTheme: storageSetting.sideTheme || sideTheme,
   themeMode: storageSetting.themeMode || themeMode,
   showSettings: showSettings,

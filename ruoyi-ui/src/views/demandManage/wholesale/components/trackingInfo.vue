@@ -1,6 +1,6 @@
 <template>
-  <div class="tracking-info" :class="{ 'tracking-info-clickable': clickable }" @click="handleClick">
-    <span class="company">{{ company || '-' }}</span>
+  <div class="tracking-info" :class="{ 'tracking-info-clickable': clickable, 'show-company': showCompany }" @click="handleClick">
+    <span v-if="showCompany" class="company">{{ company || '-' }}</span>
     <span class="divider">｜</span>
     <span class="number">{{ number || '-' }}</span>
   </div>
@@ -17,6 +17,10 @@ export default {
     number: {
       type: String,
       default: ''
+    },
+    showCompany: {
+      type: Boolean,
+      default: true
     },
     clickable: {
       type: Boolean,
@@ -56,6 +60,10 @@ export default {
 
   .divider {
     color: #dcdfe6;
+  }
+
+  &:not(.show-company) .divider {
+    display: none;
   }
 
   .number {

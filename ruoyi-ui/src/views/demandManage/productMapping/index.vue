@@ -273,8 +273,8 @@ export default {
 .metrics-row {
   display: flex;
   gap: 8px;
-  padding: 0 32px;
-  margin: 12px 0 12px;
+  padding: 0 var(--page-padding);
+  margin: var(--page-section-gap) 0;
   overflow-x: auto;
   flex-shrink: 0;
   scrollbar-width: none;
@@ -301,8 +301,8 @@ export default {
   }
 
   &.active {
-    border-color: #5B7CFA;
-    box-shadow: 0 4px 16px rgba(91,124,250,0.12);
+    border-color: var(--adm-primary);
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.12);
   }
 }
 
@@ -340,16 +340,16 @@ export default {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 0 32px 32px;
+  padding: 0 var(--page-padding) var(--page-padding);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--page-section-gap);
 }
 
 /* ==================== Search Section ==================== */
 
 .search-section {
-  padding: 12px 16px;
+  padding: 12px var(--page-card-padding);
   background: var(--bg-card);
   border-radius: var(--radius);
   border: 1px solid var(--border-tags);
@@ -415,10 +415,10 @@ export default {
 
 @media (max-width: 1200px) {
   .metrics-row {
-    padding: 0 16px;
+    padding: 0 var(--page-padding);
   }
   .main-content {
-    padding: 0 16px 16px;
+    padding: 0 var(--page-padding) var(--page-padding);
   }
 }
 </style>

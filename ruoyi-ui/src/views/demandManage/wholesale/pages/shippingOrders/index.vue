@@ -82,12 +82,13 @@
         <!-- 订单表格 -->
         <div class="table-section">
           <el-table
+            :key="tableFilterKey"
             ref="table"
             v-loading="tableLoading"
             stripe
             size="medium"
             center
-            :data="tableDataList"
+            :data="filteredTableData"
             style="width: 100%"
             class="nl-table-default"
             element-loading-text="数据加载中"
@@ -115,9 +116,8 @@
             >
               <!-- 表头 -->
               <template #header>
-                <div>
-                  <div class="text">{{ item.label }}</div>
-                </div>
+                <FilterHeader v-if="isFilterable(item.prop)" :label="item.label" :value="columnSearch[getFilterProp(item.prop)] || []" :options="colFilterOptions[getFilterProp(item.prop)] || []" @update:value="columnSearch[getFilterProp(item.prop)] = $event" />
+                <span v-else>{{ item.label }}</span>
               </template>
               <!-- 表身 -->
               <template slot-scope="{ row }">
@@ -385,9 +385,11 @@ import {
 } from "@/utils/wholesaleUtils";
 import PriceChips from "@/views/demandManage/wholesale/components/priceChips.vue";
 import ImeiDialog from "@/views/demandManage/wholesale/components/imeiDialog.vue";
+import tableFilterMixin from "@/mixins/tableFilter";
 
 export default {
   name: "Consignment",
+  mixins: [tableFilterMixin],
   components: {
     FilterPanel,
     BrandFilter,
@@ -407,6 +409,7 @@ export default {
       tableLoading: false,
       tableDataList: [],
       columnData: column,
+      tableFilterKey: 0,
       exportLoading: false,
       forwardDeliveryLoading: false,
       multipleSelection: [],
@@ -438,9 +441,29 @@ export default {
   },
 
   mounted() {
+    this.initColumnSearch(['orderStyle', 'subStatus'], {
+      orderStyle: { display: row => ({ 0: '百补', 1: '百亿微派', 2: '国补' })[row.orderStyle] ?? '-' },
+      platformShop: { display: row => `${row.platform} - ${row.shopName}` },
+      brandCategory: { display: row => `${row.brand} - ${row.category}` },
+      productSku: { display: row => `${row.productName} - ${row.skuName}` },
+      addressDisplay: { display: row => `${row.provinceName || ''} ${row.cityName || ''}`.trim() },
+    });
     this.getData();
   },
   methods: {
+    isFilterable(prop) {
+      const noFilterProps = ['orderNumbers', 'quantity', 'price', 'lastShippingTime', 'erpTradeTime', 'deliveryTime', 'lastCompeteTime', 'tradeCompanyName']
+      return !noFilterProps.includes(prop)
+    },
+    getFilterProp(prop) {
+      const propMap = {
+        platform: 'platformShop',
+        brand: 'brandCategory',
+        sku: 'productSku',
+        address: 'addressDisplay',
+      }
+      return propMap[prop] || prop
+    },
     /**
      * 格式化日期时间 - 使用公用工具函数
      * @param {string} dateTime - 日期时间字符串
@@ -646,6 +669,7 @@ export default {
           return;
          }
          this.tableDataList = rows || [];
+         this.tableFilterKey++;
          this.totalNum = total || 0;
          this.multipleSelection = [];
          this.$nextTick(() => {

@@ -1,7 +1,7 @@
 <template>
   <div class="tree-panel">
     <div class="tree-header">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B7CFA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" :stroke="'var(--primary-color)'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
         <circle cx="12" cy="10" r="3"/>
       </svg>
@@ -189,7 +189,7 @@ export default {
   transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
 
   .tree-item.active & {
-    background: #5B7CFA;
+    background: var(--primary-color);
   }
 }
 
@@ -213,7 +213,7 @@ export default {
   transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
 
   .tree-item.active & {
-    background: rgba(91,124,250,0.12);
+    background: rgba(var(--primary-rgb), 0.12);
     color: var(--color-primary);
   }
 }

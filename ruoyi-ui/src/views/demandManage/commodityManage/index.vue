@@ -323,7 +323,7 @@ export default {
   .commodity-manage {
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: var(--page-padding);
     min-height: calc(100vh - 100px);
     box-sizing: border-box;
   }

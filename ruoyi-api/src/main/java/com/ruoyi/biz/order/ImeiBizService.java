@@ -127,7 +127,11 @@ public class ImeiBizService {
                 }
             }
         }
-        imeiFacade.update(new ImeiParam().setActivated(imeiBO.getActivated()), new ImeiQuery().setId(imeiBO.getId()));
+        ImeiParam updateParam = new ImeiParam()
+                .setActivated(imeiBO.getActivated())
+                .setRecognizedProductName(imeiBO.getRecognizedProductName())
+                .setRecognizedSkuName(imeiBO.getRecognizedSkuName());
+        imeiFacade.update(updateParam, new ImeiQuery().setId(imeiBO.getId()));
         return imeiBO;
     }
 

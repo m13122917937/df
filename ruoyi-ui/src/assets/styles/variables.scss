@@ -1,6 +1,14 @@
 // base color
 :root {
   --color-primary: #5B7CFA;
+  // 主色动态变量（由 ThemeColorPanel 控制）
+  --primary-color: #1677FF;
+  --primary-rgb: 22, 119, 255;
+  --primary-hover: #4A94FF;
+  --primary-active: #005FE6;
+  --primary-light: #EBF3FF;
+  --primary-light-bg: #D6E8FF;
+  --primary-border: #B0D4FF;
   --base-sidebar-width: 220px;
   --red: #c03639;
   --pink: #e65d6e;
@@ -22,6 +30,11 @@
   --large-space: 12px;
   --max-space: 20px;
 
+  // 页面布局规范：页面外边距、区块间距、卡片内边距统一使用这三个变量
+  --page-padding: 16px;
+  --page-section-gap: 12px;
+  --page-card-padding: 16px;
+
   // 文本颜色
   --nl-color-title: #000; // 强调文本颜色，如标题文本、数字。
   --nl-color: #1f1f1f; // 默认的文本颜色符合W3C标准。
@@ -40,6 +53,8 @@
   --bg-hover: #F8FAFC;
   --bg-active: #EEF4FF;
   --bg-input: #FFFFFF;
+  --search-bg: #F1F4F9;
+  --search-hover-bg: #E9EDF4;
   --bg-table-header: #f8f8f9;
 
   // 主题色 - 边框
@@ -50,24 +65,26 @@
   --menu-text: #64748B;
   --menu-hover-bg: #F8FAFC;
   --menu-hover-text: #1E293B;
-  --menu-active-text: #3B82F6;
-  --menu-active-bg: #EEF4FF;
+  --menu-active-text: var(--primary-color, #3B82F6);
+  --menu-active-bg: var(--primary-light-bg, #EEF4FF);
 
   // 主题色 - 双栏模块导航
-  --sidebar-expanded-width: 300px;
+  --sidebar-expanded-width: 260px;
   --module-nav-width: 80px;
   --module-nav-bg: #F8FAFC;
   --module-nav-hover-bg: #EEF4FF;
-  --module-nav-active-bg: #1677FF;
+  --module-nav-active-bg: var(--primary-color, #1677FF);
   --module-nav-active-text: #FFFFFF;
-  --biz-menu-width: 220px;
+  --biz-menu-width: 180px;
 
   // 主题色 - 标签页
   --tag-bg: transparent;
   --tag-hover-bg: #F8FAFC;
   --tag-hover-text: #334155;
-  --tag-active-bg: #EEF4FF;
-  --tag-active-text: #3B82F6;
+  --tag-active-bg: var(--primary-light-bg, #EEF4FF);
+  --tag-active-text: var(--primary-color, #3B82F6);
+  --star-fav-color: #E8A317;
+  --star-fav-rgb: 232, 163, 23;
 
   // 主题色 - 阴影 & 浮层
   --shadow-card: 0 2px 8px rgba(0,0,0,0.04);
@@ -92,6 +109,8 @@
   --bg-hover: #262930;
   --bg-active: #1E293B;
   --bg-input: #1A1D27;
+  --search-bg: #1E2430;
+  --search-hover-bg: #262930;
   --bg-table-header: #1E2430;
 
   --border-sidebar: #262930;
@@ -100,21 +119,23 @@
   --menu-text: #94A3B8;
   --menu-hover-bg: #262930;
   --menu-hover-text: #E2E8F0;
-  --menu-active-text: #60A5FA;
+  --menu-active-text: var(--primary-color, #60A5FA);
   --menu-active-bg: #1E293B;
 
   --module-nav-bg: #14161E;
   --module-nav-hover-bg: #262930;
-  --module-nav-active-bg: #1677FF;
+  --module-nav-active-bg: var(--primary-color, #1677FF);
   --module-nav-active-text: #FFFFFF;
-  --biz-menu-width: 220px;
-  --sidebar-expanded-width: 300px;
+  --biz-menu-width: 180px;
+  --sidebar-expanded-width: 260px;
 
   --tag-bg: transparent;
   --tag-hover-bg: #262930;
   --tag-hover-text: #CBD5E1;
   --tag-active-bg: #1E293B;
-  --tag-active-text: #60A5FA;
+  --tag-active-text: var(--primary-color, #60A5FA);
+  --star-fav-color: #FFC940;
+  --star-fav-rgb: 255, 201, 64;
 
   --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
   --shadow-popup: 0 8px 24px rgba(0,0,0,0.4);
@@ -197,3 +218,6 @@ $base-sidebar-width: 220px;
   logoTitleColor: $base-logo-title-color;
   logoLightTitleColor: $base-logo-light-title-color;
 }
+
+// 表格筛选弹出层 - 确保不被裁剪
+.table-filter-popper { z-index: 9999 !important; }

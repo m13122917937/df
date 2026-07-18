@@ -237,13 +237,13 @@ export default {
   }
   
   ::v-deep .el-dialog__header {
-    background: #f5f7fa;
-    color: #303133;
+    background: var(--bg-table-header);
+    color: var(--adm-text-primary);
     padding: 20px 24px;
-    border-bottom: 1px solid #e4e7ed;
+    border-bottom: 1px solid var(--adm-border);
     
     .el-dialog__title {
-      color: #303133;
+      color: var(--adm-text-primary);
       font-size: 18px;
       font-weight: 600;
     }
@@ -253,11 +253,11 @@ export default {
       right: 24px;
       
       .el-dialog__close {
-        color: #909399;
+        color: var(--adm-text-tertiary);
         font-size: 20px;
         
         &:hover {
-          color: #409eff;
+          color: var(--primary-color);
         }
       }
     }
@@ -265,7 +265,7 @@ export default {
   
   ::v-deep .el-dialog__body {
     padding: 20px 24px;
-    background: #fff;
+    background: var(--adm-card);
   }
   
   .dialog-header {
@@ -280,7 +280,7 @@ export default {
       align-items: center;
       
       .company-label {
-        color: #606266;
+        color: var(--adm-text-secondary);
         font-size: 14px;
         margin-right: 8px;
       }
@@ -288,7 +288,7 @@ export default {
       .company-name {
         font-size: 14px;
         font-weight: 500;
-        color: #303133;
+        color: var(--adm-text-primary);
       }
     }
   }
@@ -296,10 +296,10 @@ export default {
   .sub-account-table {
     ::v-deep .el-table__header {
       th {
-        background: #fafafa;
-        color: #303133;
+        background: var(--bg-table-header);
+        color: var(--adm-text-primary);
         font-weight: 600;
-        border-bottom: 1px solid #ebeef5;
+        border-bottom: 1px solid var(--adm-border);
         padding: 12px 0;
         text-align: center;
       }
@@ -308,11 +308,11 @@ export default {
     ::v-deep .el-table__body {
       tr {
         &:hover {
-          background: #f5f7fa;
+          background: var(--bg-hover);
         }
         
         td {
-          border-bottom: 1px solid #f0f0f0;
+          border-bottom: 1px solid var(--adm-border);
           padding: 12px 0;
           text-align: center;
         }
@@ -335,17 +335,17 @@ export default {
       
       .switch-label {
         font-size: 12px;
-        color: #606266;
+        color: var(--adm-text-secondary);
         min-width: 20px;
       }
     }
     
     .delete-btn {
-      color: #409eff;
+      color: var(--primary-color);
       padding: 0;
       
       &:hover {
-        color: #66b1ff;
+        color: var(--primary-hover);
       }
     }
   }
@@ -357,7 +357,7 @@ export default {
     
     ::v-deep .el-pagination {
       .el-pagination__total {
-        color: #606266;
+        color: var(--adm-text-secondary);
         font-weight: 400;
       }
       
@@ -368,7 +368,7 @@ export default {
       }
       
       .el-pagination__jump {
-        color: #606266;
+        color: var(--adm-text-secondary);
         
         .el-input {
           width: 50px;

@@ -302,7 +302,7 @@ export default {
 
 <style scoped lang="scss">
 .sales-return {
-  padding: 8px;
+  padding: var(--page-padding);
   background: var(--bg-page);
   height: calc(100vh - 112px);
   display: flex;

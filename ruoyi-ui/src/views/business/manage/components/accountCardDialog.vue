@@ -167,18 +167,19 @@ export default {
   ::v-deep .el-dialog {
     border-radius: 12px;
     overflow: hidden;
+    background: var(--bg-card);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     backdrop-filter: blur(10px);
   }
   
   ::v-deep .el-dialog__header {
-    background: #f5f7fa;
-    color: #303133;
+    background: var(--bg-table-header);
+    color: var(--nl-color-title);
     padding: 20px 24px;
-    border-bottom: 1px solid #e4e7ed;
+    border-bottom: 1px solid var(--border-tags);
     
     .el-dialog__title {
-      color: #303133;
+      color: var(--nl-color-title);
       font-size: 18px;
       font-weight: 600;
     }
@@ -188,7 +189,7 @@ export default {
       right: 24px;
       
       .el-dialog__close {
-        color: #909399;
+        color: var(--nl-color-weak);
         font-size: 20px;
         
         &:hover {
@@ -200,11 +201,12 @@ export default {
   
   ::v-deep .el-dialog__body {
     padding: 0;
-    background: #fff;
+    background: var(--bg-card);
   }
   
   .dialog-content {
     padding: 24px;
+    background: var(--bg-card);
   }
   
   .table-header {
@@ -213,9 +215,9 @@ export default {
     align-items: center;
     margin-bottom: 20px;
     padding: 16px 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: var(--bg-table-header);
     border-radius: 8px;
-    border: 1px solid #e4e7ed;
+    border: 1px solid var(--border-tags);
     
     .header-left {
       display: flex;
@@ -226,17 +228,17 @@ export default {
         margin: 0;
         font-size: 16px;
         font-weight: 600;
-        color: #303133;
+        color: var(--nl-color-title);
         line-height: 1.4;
       }
       
       .table-count {
         font-size: 13px;
-        color: #909399;
-        background: #fff;
+        color: var(--nl-color-weak);
+        background: var(--bg-card);
         padding: 4px 8px;
         border-radius: 12px;
-        border: 1px solid #e4e7ed;
+        border: 1px solid var(--border-tags);
       }
     }
     
@@ -264,13 +266,22 @@ export default {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    ::v-deep .el-table,
+    ::v-deep .el-table__body-wrapper,
+    ::v-deep .el-table__fixed-body-wrapper,
+    ::v-deep .el-table__fixed,
+    ::v-deep .el-table__fixed-right {
+      background: var(--bg-card);
+      color: var(--nl-color);
+    }
     
     ::v-deep .el-table__header {
       th {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        color: #303133;
+        background: var(--bg-table-header);
+        color: var(--nl-color-title);
         font-weight: 600;
-        border-bottom: 2px solid #dee2e6;
+        border-bottom: 2px solid var(--border-tags);
         padding: 16px 0;
         text-align: center;
         font-size: 14px;
@@ -279,20 +290,26 @@ export default {
     
     ::v-deep .el-table__body {
       tr {
+        background: var(--bg-card);
         transition: all 0.3s ease;
         
         &:hover {
-          background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+          background: var(--bg-hover);
           transform: translateY(-1px);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
+
+        &:hover > td {
+          background: var(--bg-hover);
+        }
         
         td {
-          border-bottom: 1px solid #f0f0f0;
+          background: var(--bg-card);
+          border-bottom: 1px solid var(--border-tags);
           padding: 14px 0;
           text-align: center;
           font-size: 13px;
-          color: #606266;
+          color: var(--nl-color);
         }
       }
     }
@@ -301,7 +318,7 @@ export default {
       padding: 40px 0;
       
       .el-table__empty-text {
-        color: #909399;
+        color: var(--nl-color-weak);
         font-size: 14px;
       }
     }
@@ -315,14 +332,14 @@ export default {
       .company-name {
         font-size: 14px;
         font-weight: 600;
-        color: #303133;
+        color: var(--nl-color-title);
         line-height: 1.4;
       }
       
       .company-alias {
         .alias-text {
           font-size: 12px;
-          color: #909399;
+          color: var(--nl-color-weak);
           font-style: italic;
           line-height: 1.2;
         }
@@ -340,9 +357,9 @@ export default {
         }
         
         .default-tag {
-          background-color: white;
+          background-color: var(--bg-card);
           border-color: #f56c6c;
-          color: #303133;
+          color: var(--nl-color-title);
           font-weight: 500;
         }
       }
@@ -367,9 +384,9 @@ export default {
   }
   
   .dialog-footer {
-    background: #f8f9fa;
+    background: var(--bg-table-header);
     padding: 16px 24px;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--border-tags);
     text-align: right;
     
     .el-button {

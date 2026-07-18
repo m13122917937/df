@@ -86,13 +86,14 @@
         <!-- 订单表格 -->
         <div class="table-section">
           <el-table
+            :key="tableFilterKey"
             ref="multipleTable"
             stripe
             size="medium"
             center
             :fit="true"
             v-loading="tableLoading"
-            :data="tableDataList"
+            :data="filteredTableData"
             style="width: 100%"
             element-loading-text="数据加载中"
             height="100%"
@@ -115,9 +116,8 @@
             >
               <!-- 表头 -->
               <template #header>
-                <div>
-                  <div class="text">{{ item.label }}</div>
-                </div>
+                <FilterHeader v-if="isFilterable(item.prop)" :label="item.label" :value="columnSearch[getFilterProp(item.prop)] || []" :options="colFilterOptions[getFilterProp(item.prop)] || []" @update:value="columnSearch[getFilterProp(item.prop)] = $event" />
+                <span v-else>{{ item.label }}</span>
               </template>
               <!-- 表身 -->
               <template slot-scope="{ row }">
@@ -414,8 +414,10 @@ import {
 import PriceChips from "@/views/demandManage/wholesale/components/priceChips.vue";
 import AddQuotation from "../../components/AddQuotation.vue"
 import OptimizedCountdownText from "../../components/OptimizedCountdownText.vue";
+import tableFilterMixin from "@/mixins/tableFilter";
 export default {
   name: "quotingOrders",
+  mixins: [tableFilterMixin],
   components: {
     BrandFilter,
     FilterPanel,
@@ -434,6 +436,7 @@ export default {
       orderData:null,
       SUB_STATUS:SUB_STATUS,
       columnData: column,
+      tableFilterKey: 0,
       disabledLoading: false,
       tableLoading: false,
       tableDataList: [],
@@ -471,7 +474,15 @@ export default {
       },
     };
   },
+
   mounted() {
+    this.initColumnSearch(['orderStyle', 'accountingPeriod'], {
+      orderStyle: { display: row => ({ 0: '百补', 1: '百亿微派', 2: '国补' })[row.orderStyle] ?? '-' },
+      platformShop: { display: row => `${row.platform} - ${row.shopName}` },
+      brandCategory: { display: row => `${row.brand} - ${row.category}` },
+      productSku: { display: row => `${row.productName} - ${row.skuName}` },
+      addressDisplay: { display: row => `${row.provinceName || ''} ${row.cityName || ''}`.trim() },
+    });
     this.getData();
     // this.startCountdownRefresh();
   },
@@ -481,6 +492,19 @@ export default {
   },
 
   methods: {
+    isFilterable(prop) {
+      const noFilterProps = ['orderNumbers', 'quantity', 'price', 'lastShippingTime', 'erpTradeTime', 'deliveryTime', 'lastCompeteTime', 'tradeCompanyName']
+      return !noFilterProps.includes(prop)
+    },
+    getFilterProp(prop) {
+      const propMap = {
+        platform: 'platformShop',
+        brand: 'brandCategory',
+        sku: 'productSku',
+        address: 'addressDisplay',
+      }
+      return propMap[prop] || prop
+    },
     /**
      * 格式化日期时间 - 使用公用工具函数
      * @param {string} dateTime - 日期时间字符串
@@ -665,6 +689,7 @@ export default {
       }
       this.tableLoading = false;
       this.tableDataList = rows || [];
+      this.tableFilterKey++;
       this.totalNum = total || 0;
     },
 
@@ -878,6 +903,7 @@ export default {
         if (res.code === 200) {
           // 只更新倒计时相关的数据，避免影响用户操作
           this.tableDataList = res.rows || [];
+          this.tableFilterKey++;
           this.totalNum = res.total || 0;
         }
       } catch (error) {

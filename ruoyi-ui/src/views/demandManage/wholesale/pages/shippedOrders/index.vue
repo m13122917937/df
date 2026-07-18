@@ -58,8 +58,9 @@
         <!-- 订单表格 -->
         <div class="table-section">
           <el-table
+            :key="tableFilterKey"
             ref="table"
-            :data="tableData"
+            :data="filteredTableData"
             v-loading="loading"
             stripe
             size="medium"
@@ -74,6 +75,9 @@
             </template>
             <!-- 单号：(订单编码) + (原始订单号) -->
             <el-table-column prop="orderStyle" label="订单类型" width="90" fixed="left" align="center">
+              <template slot="header">
+                <FilterHeader label="订单类型" :value="columnSearch.orderStyle || []" :options="colFilterOptions.orderStyle || []" @update:value="columnSearch.orderStyle = $event" />
+              </template>
               <template slot-scope="scope">
                 <OrderStyleBadge
                   :order-style="scope.row.orderStyle"
@@ -86,28 +90,6 @@
               min-width="300"
               fixed="left"
             >
-              <template slot-scope="scope">
-                <div class="order-numbers">
-                  <div class="order-number-item">内部单号:
-                    {{
-                      scope.row.orderCode || "-"
-                    }}
-                    <i
-                      v-if="scope.row.orderCode"
-                      class="el-icon-copy-document copy-icon"
-                      @click="copyText(scope.row.orderCode)"
-                    ></i>
-                  </div>
-                  <div class="order-number-item"> 商家单号:
-                    {{ scope.row.originalOrderId || "-" }}
-                    <i
-                      v-if="scope.row.originalOrderId"
-                      class="el-icon-copy-document copy-icon"
-                      @click="copyText(scope.row.originalOrderId)"
-                    ></i>
-                  </div>
-                </div>
-              </template>
             </el-table-column>
 
             <!-- 最晚发货时间 -->
@@ -122,11 +104,14 @@
               </template>
             </el-table-column>
 
-            <el-table-column prop="trackingCompany" label="物流信息" width="240" align="center">
+            <el-table-column prop="trackingNumber" label="物流信息" width="240" align="center">
+              <template slot="header">
+                <FilterHeader label="物流信息" :value="columnSearch.trackingNumber || []" :options="colFilterOptions.trackingNumber || []" @update:value="columnSearch.trackingNumber = $event" />
+              </template>
               <template slot-scope="scope">
                 <TrackingInfo
-                  :company="scope.row.trackingCompany"
                   :number="scope.row.trackingNumber"
+                  :show-company="false"
                   :data="scope.row"
                   @click="handleReturn(scope.row, 2)"
                 />
@@ -135,6 +120,9 @@
 
             <!-- 平台 -->
             <el-table-column label="平台/店铺" prop="platform" min-width="200" align="center">
+              <template slot="header">
+                <FilterHeader label="平台/店铺" :value="columnSearch.platformShop || []" :options="colFilterOptions.platformShop || []" @update:value="columnSearch.platformShop = $event" />
+              </template>
               <template slot-scope="scope">
                 <div>{{ scope.row.platform || "-" }}</div>
                 <div>{{ scope.row.shopName || "-" }}</div>
@@ -144,6 +132,9 @@
 
             <!-- 品牌 -->
             <el-table-column label="品牌/品类" prop="brand" min-width="200" align="center">
+              <template slot="header">
+                <FilterHeader label="品牌/品类" :value="columnSearch.brandCategory || []" :options="colFilterOptions.brandCategory || []" @update:value="columnSearch.brandCategory = $event" />
+              </template>
               <template slot-scope="scope">
                 <div>{{ scope.row.brand || "-" }}</div>
                 <div>{{ scope.row.category || "-" }}</div>
@@ -157,6 +148,9 @@
               min-width="200"
               :show-overflow-tooltip="true"
             >
+              <template slot="header">
+                <FilterHeader label="产品型号" :value="columnSearch.productSku || []" :options="colFilterOptions.productSku || []" @update:value="columnSearch.productSku = $event" />
+              </template>
               <template slot-scope="scope">
                 <div class="order-productName">
                   <div class="order-productName-line">
@@ -200,6 +194,9 @@
               :show-overflow-tooltip="true"
               align="center"
             >
+              <template slot="header">
+                <FilterHeader label="收货地" :value="columnSearch.addressDisplay || []" :options="colFilterOptions.addressDisplay || []" @update:value="columnSearch.addressDisplay = $event" />
+              </template>
               <template slot-scope="scope">
                 <el-popover
                   placement="top"
@@ -245,6 +242,9 @@
               min-width="150"
               align="center"
             >
+              <template slot="header">
+                <FilterHeader label="账期" :value="columnSearch.accountingPeriodType || []" :options="colFilterOptions.accountingPeriodType || []" @update:value="columnSearch.accountingPeriodType = $event" />
+              </template>
               <template slot-scope="scope">
                 <span>{{
                     formatAccountingPeriod(scope.row.accountingPeriod)
@@ -260,6 +260,9 @@
               :show-overflow-tooltip="true"
               align="center"
             >
+              <template slot="header">
+                <FilterHeader label="供应商" :value="columnSearch.supplierDisplay || []" :options="colFilterOptions.supplierDisplay || []" @update:value="columnSearch.supplierDisplay = $event" />
+              </template>
               <template slot-scope="scope">
                 <el-popover
                   placement="top"
@@ -377,6 +380,7 @@ import PriceChips from "@/views/demandManage/wholesale/components/priceChips.vue
 import EmptyState from "@/views/demandManage/wholesale/components/emptyState.vue";
 import TrackingInfo from "@/views/demandManage/wholesale/components/trackingInfo.vue";
 import OrderStyleBadge from '@/components/OrderStyleBadge'
+import tableFilterMixin from "@/mixins/tableFilter";
 import { apiGetDeliveryExport } from "@/api/creatingOrders";
 import { saveAs } from "file-saver";
 import { blobValidate } from "@/utils/ruoyi";
@@ -391,6 +395,7 @@ import {
 
 export default {
   name: "ShippedOrders",
+  mixins: [tableFilterMixin],
   components: {
     BrandFilter,
     FilterPanel,
@@ -408,6 +413,7 @@ export default {
     return {
       loading: false,
       // 表格数据
+      tableFilterKey: 0,
       tableData: [],
       pagination: {
         currentPage: 1,
@@ -439,7 +445,19 @@ export default {
       imeiDialogVisible: false,
     };
   },
+
   mounted() {
+    this.initColumnSearch(
+      ['orderStyle', 'trackingNumber', 'accountingPeriodType'],
+      {
+        orderStyle: { display: row => ({ 0: '百补', 1: '百亿微派', 2: '国补' })[row.orderStyle] ?? '-' },
+        brandCategory: { display: row => `${row.brand} - ${row.category}` },
+        platformShop: { display: row => `${row.platform} - ${row.shopName}` },
+        productSku: { display: row => `${row.productName} - ${row.skuName}` },
+        addressDisplay: { display: row => `${row.provinceName || ''} ${row.cityName || ''}`.trim() },
+        supplierDisplay: { display: row => row.tradeNickName || '-' },
+      }
+    );
     this.loadData();
   },
   methods: {
@@ -508,6 +526,7 @@ export default {
         let res = await getOrderSendListApi(pageData, params);
         if (res.code == 200) {
           this.tableData = res.rows;
+          this.tableFilterKey++;
           this.pagination.total = res.total;
         } else {
           this.$message.error(res.msg);

@@ -203,7 +203,7 @@ export default {
   gap: 6px;
   padding: 11px 16px;
   cursor: pointer;
-  color: #475569;
+  color: var(--menu-text, #475569);
   font-size: 14px;
   font-weight: 500;
   transition: color 180ms;
@@ -243,18 +243,18 @@ export default {
   margin: 0 12px;
   border-radius: 8px;
   cursor: pointer;
-  color: #475569;
+  color: var(--menu-text, #475569);
   font-size: 14px;
   font-weight: 400;
   transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
 
   &:hover {
-    background: #F1F5F9;
-    color: #1E293B;
+    background: var(--menu-hover-bg, #F1F5F9);
+    color: var(--menu-hover-text, #1E293B);
   }
 
   &.active {
-    background: #1677FF;
+    background: var(--primary-color, #1677FF);
     color: #FFFFFF;
     font-weight: 500;
 

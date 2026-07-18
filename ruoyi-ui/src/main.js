@@ -56,6 +56,8 @@ Vue.component('Editor', Editor)
 Vue.component('FileUpload', FileUpload)
 Vue.component('ImageUpload', ImageUpload)
 Vue.component('ImagePreview', ImagePreview)
+import FilterHeader from '@/components/FilterHeader'
+Vue.component('FilterHeader', FilterHeader)
 
 Vue.use(directive)
 Vue.use(plugins)

@@ -31,10 +31,6 @@ import Layout from '@/layout'
 // 公共路由
 export const constantRoutes = [
   {
-    path: "/",
-    redirect: "/monery/paymentToday",
-  },
-  {
     path: "/redirect",
     component: Layout,
     hidden: true,
@@ -78,82 +74,6 @@ export const constantRoutes = [
   //     }
   //   ]
   // },
-  {
-    path: "/demandManage/wholesale",
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/demandManage/wholesale/index"),
-        name: "Wholesale",
-        meta: { title: "代发订单" },
-      },
-    ],
-  },
-  {
-    path: "/monery/paymentToday",
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/monery/paymentToday/index"),
-        name: "PaymentToday",
-        meta: { title: "今日应付" },
-      },
-    ],
-  },
-  {
-    path: "/demandManage/putin",
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/demandManage/putin/index"),
-        name: "Putin",
-        meta: { title: "入仓订单" },
-      },
-    ],
-  },
-  {
-    path: "/demandManage/sale",
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/demandManage/sale/index"),
-        name: "Sale",
-        meta: { title: "销售订单" },
-      },
-    ],
-  },
-  {
-    path: "/pickManage/warehouse",
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/pickManage/warehouse/index"),
-        name: "PickWarehouse",
-        meta: { title: "拣货入仓" },
-      },
-    ],
-  },
-  {
-    path: "",
-    component: Layout,
-    redirect: "/pickManage/warehouse",
-    children: [
-      {
-        path: "index",
-        component: () => import("@/views/pickManage/warehouse/index"),
-      },
-    ],
-  },
   {
     path: "/user",
     component: Layout,

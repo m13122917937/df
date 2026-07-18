@@ -789,14 +789,14 @@ export default {
 
 /* 复制图标样式 */
 .copy-icon {
-  color: #409eff;
+  color: var(--primary-color);
   cursor: pointer;
   font-size: 14px;
   margin-left: 4px;
   transition: color 0.3s;
 
   &:hover {
-    color: #66b1ff;
+    color: var(--primary-hover);
   }
 }
 
@@ -1037,7 +1037,7 @@ export default {
   }
 
   &:hover {
-    color: #409eff;
+    color: var(--primary-color);
 
     .status-icon {
       opacity: 1;

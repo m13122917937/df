@@ -48,8 +48,9 @@
         <!-- 订单表格 -->
         <div class="table-section">
           <el-table
+            :key="tableFilterKey"
             ref="table"
-            :data="tableData"
+            :data="filteredTableData"
             v-loading="loading"
             stripe
             size="medium"
@@ -63,6 +64,9 @@
               <EmptyState text="暂无已确认订单数据" />
             </template>
             <el-table-column prop="orderStyle" label="订单类型" width="90" fixed="left" align="center">
+              <template slot="header">
+                <FilterHeader label="订单类型" :value="columnSearch.orderStyle || []" :options="colFilterOptions.orderStyle || []" @update:value="columnSearch.orderStyle = $event" />
+              </template>
               <template slot-scope="scope">
                 <OrderStyleBadge
                   :order-style="scope.row.orderStyle"
@@ -114,6 +118,9 @@
 
             <!-- 物流信息 -->
              <el-table-column prop="trackingCompany" label="物流信息" width="240" align="center">
+              <template slot="header">
+                <FilterHeader label="物流信息" :value="columnSearch.trackingNumber || []" :options="colFilterOptions.trackingNumber || []" @update:value="columnSearch.trackingNumber = $event" />
+              </template>
               <template slot-scope="scope">
                 <TrackingInfo
                   :company="scope.row.trackingCompany"
@@ -126,6 +133,9 @@
 
             <!-- 平台 -->
             <el-table-column label="平台/店铺" prop="platform" min-width="200" align="center">
+              <template slot="header">
+                <FilterHeader label="平台/店铺" :value="columnSearch.platformShop || []" :options="colFilterOptions.platformShop || []" @update:value="columnSearch.platformShop = $event" />
+              </template>
               <template slot-scope="scope">
                 <div>{{ scope.row.platform || "-" }}</div>
                 <div>{{ scope.row.shopName || "-" }}</div>
@@ -134,6 +144,9 @@
 
             <!-- 品牌 -->
             <el-table-column label="品牌/品类" prop="brand" min-width="200" align="center">
+              <template slot="header">
+                <FilterHeader label="品牌/品类" :value="columnSearch.brandCategory || []" :options="colFilterOptions.brandCategory || []" @update:value="columnSearch.brandCategory = $event" />
+              </template>
               <template slot-scope="scope">
                 <div>{{ scope.row.brand || "-" }}</div>
                 <div>{{ scope.row.category || "-" }}</div>
@@ -147,6 +160,9 @@
               min-width="200"
               :show-overflow-tooltip="true"
             >
+              <template slot="header">
+                <FilterHeader label="产品型号" :value="columnSearch.productSku || []" :options="colFilterOptions.productSku || []" @update:value="columnSearch.productSku = $event" />
+              </template>
               <template slot-scope="scope">
                 <div class="order-productName">
                   <div class="order-productName-line">
@@ -190,6 +206,9 @@
               :show-overflow-tooltip="true"
               align="center"
             >
+              <template slot="header">
+                <FilterHeader label="收货地" :value="columnSearch.addressDisplay || []" :options="colFilterOptions.addressDisplay || []" @update:value="columnSearch.addressDisplay = $event" />
+              </template>
               <template slot-scope="scope">
                 <el-popover
                   placement="top"
@@ -235,6 +254,9 @@
               min-width="130"
               align="center"
             >
+              <template slot="header">
+                <FilterHeader label="账期" :value="columnSearch.accountingPeriod || []" :options="colFilterOptions.accountingPeriod || []" @update:value="columnSearch.accountingPeriod = $event" />
+              </template>
               <template slot-scope="scope">
                 <span>{{
                   formatAccountingPeriod(scope.row.accountingPeriod)
@@ -250,6 +272,9 @@
               align="center"
               :show-overflow-tooltip="true"
             >
+              <template slot="header">
+                <FilterHeader label="供应商" :value="columnSearch.supplierDisplay || []" :options="colFilterOptions.supplierDisplay || []" @update:value="columnSearch.supplierDisplay = $event" />
+              </template>
               <template slot-scope="scope">
                 <el-popover
                   placement="top"
@@ -337,6 +362,7 @@ import ImeiDialog from "@/views/demandManage/wholesale/components/imeiDialog.vue
 import LogisticsDialog from "@/views/demandManage/wholesale/components/logisticsDialog.vue";
 import TrackingInfo from "@/views/demandManage/wholesale/components/trackingInfo.vue";
 import OrderStyleBadge from '@/components/OrderStyleBadge'
+import tableFilterMixin from "@/mixins/tableFilter";
 import { getOrderSendListApi, confirmEndingOrderApi } from "@/api/wholesale";
 import {
   createFormatDateTimeMethod,
@@ -348,6 +374,7 @@ import {
 
 export default {
   name: "ConfirmedOrders",
+  mixins: [tableFilterMixin],
   components: {
     BrandFilter,
     FilterPanel,
@@ -366,6 +393,7 @@ export default {
       currentBrand: "",
       currentLocation: "",
       // 表格数据
+      tableFilterKey: 0,
       tableData: [],
       // 分页信息
       pagination: {
@@ -391,6 +419,17 @@ export default {
     };
   },
   mounted() {
+    this.initColumnSearch(
+      ['orderStyle', 'trackingNumber', 'accountingPeriod'],
+      {
+        orderStyle: { display: row => ({ 0: '百补', 1: '百亿微派', 2: '国补' })[row.orderStyle] ?? '-' },
+        brandCategory: { display: row => `${row.brand} - ${row.category}` },
+        platformShop: { display: row => `${row.platform} - ${row.shopName}` },
+        productSku: { display: row => `${row.productName} - ${row.skuName}` },
+        addressDisplay: { display: row => `${row.provinceName || ''} ${row.cityName || ''}`.trim() },
+        supplierDisplay: { display: row => row.tradeNickName || '-' },
+      }
+    );
     this.init();
   },
   methods: {
@@ -501,6 +540,7 @@ export default {
 
         if (response && response.code === 200) {
           this.tableData = response.rows || [];
+          this.tableFilterKey++;
           this.pagination.total = response.total || 0;
         } else {
           this.$message.error(response?.msg || "获取数据失败");

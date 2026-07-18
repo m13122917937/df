@@ -58,7 +58,7 @@ export default {
     hasBizMenu: {
       immediate: true,
       handler(val) {
-        const w = val ? '300px' : '80px';
+        const w = val ? '260px' : '80px';
         document.documentElement.style.setProperty('--sidebar-expanded-width', w);
       }
     }

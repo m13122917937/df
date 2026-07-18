@@ -351,7 +351,7 @@ export default {
 .section-title {
   font-size: 13px;
   font-weight: 600;
-  color: #5B7CFA;
+  color: var(--primary-color);
   padding-bottom: 8px;
   margin-bottom: 12px;
   border-bottom: 1px solid #f0f0f0;

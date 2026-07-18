@@ -8,6 +8,53 @@ import { isPathMatch } from '@/utils/validate'
 import { isRelogin } from '@/utils/request'
 import Layout from '@/layout/index'
 
+function normalizeRoutePath(path) {
+  return ('/' + path).replace(/\/+/g, '/')
+}
+
+function joinRoutePath(basePath, routePath) {
+  if (!routePath) return normalizeRoutePath(basePath || '')
+  if (routePath.startsWith('/')) return normalizeRoutePath(routePath)
+  return normalizeRoutePath((basePath || '') + '/' + routePath)
+}
+
+function getFavoriteTabs() {
+  const storeFavorites = store.state.tagsView.favoriteTabs || []
+  if (storeFavorites.length > 0) return storeFavorites
+  try {
+    return JSON.parse(localStorage.getItem('layout-setting'))?.favoriteTabs || []
+  } catch (e) {
+    return []
+  }
+}
+
+function findRoutePath(routes, predicate, basePath = '') {
+  for (const route of routes) {
+    if (route.path === '*' || route.path === '/404') continue
+    const fullPath = joinRoutePath(basePath, route.path)
+    if (!route.children || route.children.length === 0) {
+      if (route.component !== Layout && predicate(fullPath, route)) return fullPath
+    }
+    const childPath = findRoutePath(route.children || [], predicate, fullPath)
+    if (childPath) return childPath
+  }
+  return null
+}
+
+function findFavoritePath(routes) {
+  const favorites = getFavoriteTabs()
+  for (const favoritePath of favorites) {
+    const normalizedFavorite = normalizeRoutePath(favoritePath)
+    const matchedPath = findRoutePath(routes, path => path === normalizedFavorite)
+    if (matchedPath) return matchedPath
+  }
+  return null
+}
+
+function resolveDefaultPath(routes) {
+  return findFavoritePath(routes) || findFirstPath(routes)
+}
+
 NProgress.configure({ showSpinner: false })
 
 const whiteList = ['/login', '/register']
@@ -67,8 +114,8 @@ router.beforeEach((to, from, next) => {
             router.addRoutes(accessRoutes) // 动态添加可访问路由表
             // 根路径无对应路由，重定向到有权限的第一个菜单
             if (to.path === '/') {
-              const firstPath = findFirstPath(accessRoutes)
-              next({ path: firstPath || '/404', replace: true })
+              const defaultPath = resolveDefaultPath(accessRoutes)
+              next({ path: defaultPath || '/404', replace: true })
             } else {
               next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
             }
@@ -82,8 +129,8 @@ router.beforeEach((to, from, next) => {
       } else if (to.path === '/') {
         // 角色已加载但目标是根路径（无对应路由），重定向到有权限的第一个菜单
         const routes = store.state.permission.addRoutes || []
-        const firstPath = findFirstPath(routes)
-        next({ path: firstPath || '/404', replace: true })
+        const defaultPath = resolveDefaultPath(routes)
+        next({ path: defaultPath || '/404', replace: true })
       } else {
         next()
       }

@@ -392,7 +392,7 @@ export default {
   flex-direction: column;
   height: calc(100vh - 112px);
   background: var(--bg-page);
-  padding: 12px;
+  padding: var(--page-padding);
   box-sizing: border-box;
   overflow: hidden;
 
@@ -401,8 +401,8 @@ export default {
     background: var(--adm-card);
     border-radius: var(--adm-radius-card);
     box-shadow: var(--adm-shadow-card);
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: var(--page-card-padding);
+    margin-bottom: var(--page-section-gap);
 
     .query-form {
       .el-form-item {
@@ -427,7 +427,7 @@ export default {
     justify-content: flex-end;
     align-items: center;
     padding: 12px 24px;
-    margin-top: 12px;
+    margin-top: var(--page-section-gap);
     background: var(--adm-card);
     border-radius: var(--adm-radius-card);
     box-shadow: var(--adm-shadow-card);

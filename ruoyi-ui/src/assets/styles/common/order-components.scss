@@ -71,6 +71,7 @@ body, .orders-wrap, .wrap {
 
 .table-section {
   flex: 1;
+  min-width: 0;
   max-height: calc(100vh - 460px);
   min-height: 300px;
   background: var(--adm-card);
@@ -166,9 +167,23 @@ body, .orders-wrap, .wrap {
   }
 
   .el-table__body-wrapper {
-    &::-webkit-scrollbar { width: 6px; height: 6px; }
-    &::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
-    &::-webkit-scrollbar-track { background: transparent; }
+    /*
+     * 外层 table-section 负责裁剪圆角，横向和纵向滚动只允许发生在
+     * Element 表格的 body wrapper 内，避免滚动条覆盖最后一行数据。
+     */
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: var(--adm-text-tertiary) var(--bg-hover);
+
+    &::-webkit-scrollbar { width: 8px; height: 8px; }
+    &::-webkit-scrollbar-thumb {
+      background: var(--adm-text-tertiary);
+      border: 1px solid var(--bg-hover);
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-track { background: var(--bg-hover); }
+    &::-webkit-scrollbar-corner { background: var(--bg-hover); }
   }
 
   /* 列设置按钮 */

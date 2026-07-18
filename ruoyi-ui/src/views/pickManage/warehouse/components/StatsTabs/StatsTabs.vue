@@ -59,13 +59,13 @@ export default {
 
   <style lang="scss" scoped>
   .stats-tabs {
-    background: rgba(255,255,255,0.95);
+    background: var(--bg-card);
     border-radius: 10px;
     padding: 8px 12px;
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border-tags);
 
     .stats-items {
       display: flex;
@@ -85,15 +85,15 @@ export default {
         position: relative;
 
         &:hover {
-          background: linear-gradient(135deg, #f0f9ff 0%, #e8f5ff 100%);
+          background: var(--bg-hover);
           transform: translateY(-2px);
         }
 
         &.active {
-          background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+          background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
           color: #fff;
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(64,158,255,0.2);
+          box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.2);
         }
 
         .status-content {

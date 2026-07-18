@@ -17,7 +17,8 @@
     <!-- 数据表格 -->
     <div class="table-container">
       <el-table
-        :data="tableDataList"
+        :key="tableFilterKey"
+        :data="filteredTableData"
         style="width: 100%"
         v-loading="tableLoading"
         border
@@ -25,12 +26,24 @@
       >
       <el-table-column type="selection" width="55" align="center"></el-table-column>
       <el-table-column prop="brand" label="品牌" min-width="200" align="center">
+        <template slot="header">
+          <FilterHeader label="品牌" :value="columnSearch.brand || []" :options="colFilterOptions.brand || []" @update:value="columnSearch.brand = $event" />
+        </template>
       </el-table-column>
       <el-table-column prop="category" label="品类" min-width="200" align="center">
+        <template slot="header">
+          <FilterHeader label="品类" :value="columnSearch.category || []" :options="colFilterOptions.category || []" @update:value="columnSearch.category = $event" />
+        </template>
       </el-table-column>
       <el-table-column prop="provinceName" label="省" min-width="200" align="center">
+        <template slot="header">
+          <FilterHeader label="省" :value="columnSearch.provinceName || []" :options="colFilterOptions.provinceName || []" @update:value="columnSearch.provinceName = $event" />
+        </template>
       </el-table-column>
       <el-table-column prop="productName" label="产品型号" min-width="200" align="center">
+        <template slot="header">
+          <FilterHeader label="产品型号" :value="columnSearch.productSku || []" :options="colFilterOptions.productSku || []" @update:value="columnSearch.productSku = $event" />
+        </template>
         <template slot-scope="{ row }">
           <div>
             <div>{{ row.productName }}</div>
@@ -39,6 +52,9 @@
         </template>
       </el-table-column>
         <el-table-column prop="accountingPeriod" label="账期类型" width="100" align="center">
+          <template slot="header">
+            <FilterHeader label="账期类型" :value="columnSearch.accountingPeriod || []" :options="colFilterOptions.accountingPeriod || []" @update:value="columnSearch.accountingPeriod = $event" />
+          </template>
           <template slot-scope="{ row }">
           <div>
             {{ row.accountingPeriodType | accountingFilters}}
@@ -83,6 +99,9 @@
 
 
         <el-table-column prop="status" label="状态" min-width="200" align="center">
+          <template slot="header">
+            <FilterHeader label="状态" :value="columnSearch.status || []" :options="colFilterOptions.status || []" @update:value="columnSearch.status = $event" />
+          </template>
           <template slot-scope="scope">
             <div class="action-buttons">
               {{ scope.row.status == '1' ? '启用' : '暂停' }}
@@ -131,9 +150,11 @@
 <script>
 import AddRule from '../../components/AddRule.vue'
 import OrderStyleBadge from '@/components/OrderStyleBadge';
+import tableFilterMixin from "@/mixins/tableFilter";
 import { apiGetRuleList,apiDeleteRule,apiRuleEnable,apiRuleDisable } from '@/api/creatingOrders'
 export default {
   name: 'RuleList',
+  mixins: [tableFilterMixin],
   components: {
     AddRule,
     OrderStyleBadge
@@ -143,6 +164,7 @@ export default {
       selectedCount: 0,
       selectedItems: [],
       procurementDialogVisible: false,
+      tableFilterKey: 0,
       tableDataList: [],
       orderData:{},
       tableLoading:false
@@ -159,6 +181,9 @@ export default {
       }
   },
   mounted(){
+    this.initColumnSearch(['brand', 'category', 'provinceName', 'accountingPeriod', 'status'], {
+      productSku: { display: row => `${row.productName} - ${row.skuName}` },
+    });
     this.getData()
   },
   methods: {
@@ -196,7 +221,8 @@ export default {
     },
     goCreatingOrders(){
       this.$router.push({
-        path:"creatingOrders"
+        path: this.$route.path,
+        query: { status: 'creatingOrders' }
       })
     },
 
@@ -235,6 +261,7 @@ export default {
       }
       this.tableLoading = false
       this.tableDataList = rows || []
+      this.tableFilterKey++
       this.totalNum = total || 0
     },
     // 删除规则
@@ -269,7 +296,7 @@ export default {
 
 <style scoped lang="scss">
 .rule-list-container {
-  padding: 20px;
+  padding: var(--page-padding);
   background-color: var(--bg-page);
   min-height: 100vh;
 }

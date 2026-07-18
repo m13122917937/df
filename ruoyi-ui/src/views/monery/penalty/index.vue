@@ -441,7 +441,7 @@ export default {
 <style scoped lang="scss">
 .penalty-container {
   height: calc(100vh - 100px);
-  padding: 20px;
+  padding: var(--page-padding);
   display: flex;
   flex-direction: column;
 

@@ -4,16 +4,15 @@
 @import './element-ui.scss';
 @import './sidebar.scss';
 @import './btn.scss';
-@import './common/table-bar.scss';
 @import './common/global-scrollbar.scss';
 
 /* ==================== ADM Design Tokens ==================== */
 :root {
   --adm-bg: #F5F7FB;
   --adm-card: #FFFFFF;
-  --adm-primary: #5B7CFA;
-  --adm-primary-hover: #6C89FF;
-  --adm-primary-active: #486AF4;
+  --adm-primary: var(--primary-color, #5B7CFA);
+  --adm-primary-hover: var(--primary-hover, #6C89FF);
+  --adm-primary-active: var(--primary-active, #486AF4);
   --adm-success: #34C759;
   --adm-warning: #FFB340;
   --adm-danger: #FF5E57;
@@ -36,9 +35,9 @@
 [data-theme="dark"] {
   --adm-bg: #0F1117;
   --adm-card: #1A1D27;
-  --adm-primary: #6C89FF;
-  --adm-primary-hover: #8BA3FF;
-  --adm-primary-active: #5B7CFA;
+  --adm-primary: var(--primary-color, #6C89FF);
+  --adm-primary-hover: var(--primary-hover, #8BA3FF);
+  --adm-primary-active: var(--primary-active, #5B7CFA);
   --adm-text-primary: #E2E8F0;
   --adm-text-secondary: #94A3B8;
   --adm-text-tertiary: #64748B;
@@ -47,6 +46,67 @@
   --adm-shadow-card: 0 2px 8px rgba(0,0,0,0.3);
   --adm-shadow-hover: 0 8px 24px rgba(0,0,0,0.4);
   --adm-shadow-primary: 0 4px 16px rgba(91,124,250,0.25);
+}
+
+/* ==================== Theme Transition ==================== */
+
+html.theme-transitioning,
+html.theme-transitioning * {
+  transition-property: background-color, color, border-color, box-shadow !important;
+  transition-duration: 500ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+html.theme-transitioning svg {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning,
+  html.theme-transitioning * {
+    transition: none !important;
+  }
+}
+
+/* View Transitions API customization */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  mix-blend-mode: normal;
+}
+
+/* ==================== Global: 统一搜索/重置按钮大小 ==================== */
+
+.search-section,
+.order-search,
+.search-content,
+.search-actions {
+  .el-button,
+  .btn-search,
+  .btn-ghost,
+  .btn-reset {
+    height: 32px;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 0 16px;
+    line-height: 32px;
+  }
+
+  .btn-search,
+  .btn-ghost,
+  .btn-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-family: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+    border: none;
+    box-sizing: border-box;
+  }
 }
 
 body {
@@ -306,10 +366,11 @@ aside {
 
   // ========== 对话框 ==========
   .el-dialog {
-    background: #1A1D27 !important;
+    background: var(--bg-card) !important;
 
     .el-dialog__header {
-      border-bottom: 1px solid #262930 !important;
+      background: var(--bg-table-header) !important;
+      border-bottom: 1px solid var(--border-tags) !important;
     }
 
     .el-dialog__title {
@@ -317,12 +378,99 @@ aside {
     }
 
     .el-dialog__body {
+      background: var(--bg-card) !important;
       color: #94A3B8 !important;
     }
 
     .el-dialog__footer {
-      border-top: 1px solid #262930 !important;
+      background: var(--bg-table-header) !important;
+      border-top: 1px solid var(--border-tags) !important;
     }
+
+    .el-table,
+    .el-table__body-wrapper,
+    .el-table__fixed,
+    .el-table__fixed-right,
+    .el-table tr,
+    .el-table td.el-table__cell {
+      background: var(--bg-card) !important;
+      color: var(--nl-color) !important;
+    }
+
+    .el-table th.el-table__cell {
+      background: var(--bg-table-header) !important;
+      color: var(--nl-color-title) !important;
+      border-color: var(--border-tags) !important;
+    }
+
+    .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+      background: var(--bg-hover) !important;
+    }
+  }
+
+  // ========== 文字层级统一 ==========
+  .el-drawer__header,
+  .el-message-box__title,
+  .el-message-box__message,
+  .el-popover,
+  .el-notification__title,
+  .el-descriptions-item__content,
+  .el-tree-node__label,
+  .el-collapse-item__header,
+  .el-transfer-panel__item,
+  .el-result__title,
+  .el-empty__description p {
+    color: var(--nl-color) !important;
+  }
+
+  .el-drawer__body,
+  .el-message-box__content,
+  .el-notification__content,
+  .el-descriptions-item__label,
+  .el-collapse-item__wrap,
+  .el-result__subtitle,
+  .el-transfer-panel__header,
+  .el-empty__description {
+    color: var(--nl-color-weak) !important;
+  }
+
+  .el-drawer,
+  .el-message-box,
+  .el-popover,
+  .el-notification,
+  .el-descriptions,
+  .el-descriptions__body,
+  .el-tree,
+  .el-collapse,
+  .el-transfer-panel {
+    background: var(--bg-card) !important;
+    border-color: var(--border-tags) !important;
+  }
+
+  .el-descriptions-item__label.is-bordered-label,
+  .el-transfer-panel__header,
+  .el-collapse-item__header {
+    background: var(--bg-table-header) !important;
+    border-color: var(--border-tags) !important;
+  }
+
+  .el-descriptions .is-bordered-label,
+  .el-descriptions .is-bordered-content,
+  .el-tree-node__content,
+  .el-collapse-item__wrap,
+  .el-transfer-panel__item {
+    border-color: var(--border-tags) !important;
+  }
+
+  .el-tree-node__content:hover,
+  .el-transfer-panel__item:hover,
+  .el-collapse-item__header:hover {
+    background: var(--bg-hover) !important;
+  }
+
+  .el-loading-text,
+  .el-table__empty-text {
+    color: var(--nl-color-weak) !important;
   }
 
   // ========== 抽屉 ==========
@@ -1030,7 +1178,7 @@ aside {
 
 //main-container全局样式
 .app-container {
-  padding: 20px;
+  padding: var(--page-padding);
 }
 
 .components-container {

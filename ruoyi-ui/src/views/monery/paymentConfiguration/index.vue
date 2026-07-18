@@ -317,7 +317,7 @@ export default {
 
 <style scoped lang="scss">
 .payment-configuration-container {
-  padding: 20px;
+  padding: var(--page-padding);
   display: flex;
   flex-direction: column;
   height: calc(100vh - 100px);

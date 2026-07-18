@@ -114,13 +114,13 @@ export default {
   &:hover {
     border-color: var(--color-primary);
     color: var(--color-primary);
-    background: rgba(91,124,250,0.04);
+    background: rgba(var(--primary-rgb), 0.04);
   }
 
   &.active {
     border-color: var(--color-primary);
     color: var(--color-primary);
-    background: rgba(91,124,250,0.08);
+    background: rgba(var(--primary-rgb), 0.08);
   }
 
   .chip-count {
@@ -133,7 +133,7 @@ export default {
   }
 
   &.active .chip-count {
-    background: rgba(91,124,250,0.12);
+    background: rgba(var(--primary-rgb), 0.12);
     color: var(--color-primary);
   }
 }

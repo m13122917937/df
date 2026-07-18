@@ -159,12 +159,12 @@
               transition: all 0.3s ease;
 
               &:hover {
-                background: #409eff;
+                background: var(--primary-color);
                 color: white;
               }
 
               &.active {
-                background: #409eff;
+                background: var(--primary-color);
                 color: white;
               }
             }
@@ -175,7 +175,7 @@
               transition: all 0.3s ease;
 
               &:hover {
-                background: #409eff;
+                background: var(--primary-color);
                 color: white;
               }
             }

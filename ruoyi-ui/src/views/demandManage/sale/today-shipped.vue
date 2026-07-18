@@ -36,6 +36,7 @@
         <!-- 订单表格 -->
         <div class="order-table-container table-section">
           <el-table
+            :key="tableFilterKey"
             ref="table"
             v-loading="loading"
             :data="orderList"
@@ -78,11 +79,17 @@
               </template>
             </el-table-column>
             <el-table-column prop="payerName" label="付款主体" width="160" align="center" :show-overflow-tooltip="true">
+              <template slot="header" slot-scope="scope">
+                <filter-header label="付款主体" :value="columnSearch.payerName || []" :options="colFilterOptions.payerName || []" @update:value="columnSearch.payerName = $event" />
+              </template>
               <template slot-scope="scope">
                 {{ scope.row.payerName || '-' }}
               </template>
             </el-table-column>
              <el-table-column prop="tradeCompanyName" label="供应商" width="400" align="center" :show-overflow-tooltip="true">
+              <template slot="header" slot-scope="scope">
+                <filter-header label="供应商" :value="columnSearch.tradeCompanyName || []" :options="colFilterOptions.tradeCompanyName || []" @update:value="columnSearch.tradeCompanyName = $event" />
+              </template>
               <template slot-scope="scope">
                 {{ scope.row.tradeCompanyName || '-' }}
               </template>
@@ -106,6 +113,9 @@
               </template>
             </el-table-column>
             <el-table-column prop="brand" label="品牌/品类" width="100" align="center">
+              <template slot="header" slot-scope="scope">
+                <filter-header label="品牌/品类" :value="columnSearch.brand || []" :options="colFilterOptions.brand || []" @update:value="columnSearch.brand = $event" />
+              </template>
               <template slot-scope="scope">
                 <div class="order-productName">
                   <div class="order-productName-line">
@@ -128,6 +138,9 @@
               :show-overflow-tooltip="true"
               align="center"
             >
+              <template slot="header" slot-scope="scope">
+                <filter-header label="产品型号" :value="columnSearch.productName || []" :options="colFilterOptions.productName || []" @update:value="columnSearch.productName = $event" />
+              </template>
               <template slot-scope="scope">
                 <div class="order-productName">
                   <div class="order-productName-line">
@@ -160,6 +173,9 @@
               </template>
             </el-table-column>
             <el-table-column prop="trackingNumber" label="物流信息" width="250" align="center">
+              <template slot="header" slot-scope="scope">
+                <filter-header label="物流信息" :value="columnSearch.trackingNumber || []" :options="colFilterOptions.trackingNumber || []" @update:value="columnSearch.trackingNumber = $event" />
+              </template>
               <template slot-scope="scope">
                 <div style="text-align: left; line-height: 1.8;">
                   <template v-if="scope.row.trackingCompany || scope.row.trackingNumber">
@@ -248,9 +264,11 @@ import CopyDialog from './components/CopyDialog'
 import { getPutinList, putinRevokeOrder, getProductBrandList, getProductNameList, getSkuList, saveOrder, updateTracking } from '@/api/sale'
 import { getBusinessCompanyListApi } from '@/api/business'
 import { getDeliveryTimeText } from '@/utils/deliveryTime'
+import tableFilterMixin from '@/mixins/tableFilter'
 
 export default {
   name: 'TodayOrder',
+  mixins: [tableFilterMixin],
   components: {
     EmptyState,
     ImeiDialog,
@@ -263,6 +281,7 @@ export default {
   data() {
     return {
       loading: false,
+      tableFilterKey: 0,
       orderList: [],
       selectedRegion: '',
       selectedBrand: '',
@@ -302,8 +321,18 @@ export default {
     }
   },
   computed: {
+    tableData() {
+      return this.orderList
+    },
   },
   mounted() {
+    this.initColumnSearch(
+      ['payerName', 'tradeCompanyName', 'brand', 'productName', 'trackingNumber'],
+      {
+        brand: { display: row => (row.brand || '-') + (row.category ? '/' + row.category : '') },
+        productName: { display: row => (row.productName || '-') + (row.skuName ? '/' + row.skuName : '') }
+      }
+    )
     this.fetchOrderList()
   },
   methods: {
@@ -359,6 +388,7 @@ export default {
       })
       if (res && res.code === 200) {
         this.orderList = res.rows
+        this.tableFilterKey++
         this.pagination.total = res.total
       } else {
         this.$message.error(res?.msg || '获取订单列表失败')

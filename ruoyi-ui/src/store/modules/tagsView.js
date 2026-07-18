@@ -1,7 +1,8 @@
 const state = {
   visitedViews: [],
   cachedViews: [],
-  directViews: []
+  directViews: [],
+  favoriteTabs: JSON.parse(localStorage.getItem('layout-setting'))?.favoriteTabs || [],
 }
 
 const mutations = {
@@ -100,6 +101,20 @@ const mutations = {
   },
   SET_DIRECT_VIEWS: (state, data) => {
     state.directViews = data
+  },
+  TOGGLE_FAVORITE_TAB: (state, path) => {
+    const idx = state.favoriteTabs.indexOf(path)
+    if (idx > -1) {
+      state.favoriteTabs.splice(idx, 1)
+    } else {
+      state.favoriteTabs.push(path)
+    }
+    // 持久化到 localStorage
+    try {
+      const setting = JSON.parse(localStorage.getItem('layout-setting')) || {}
+      setting.favoriteTabs = state.favoriteTabs
+      localStorage.setItem('layout-setting', JSON.stringify(setting))
+    } catch (e) { /* ignore */ }
   }
 }
 
@@ -203,6 +218,9 @@ const actions = {
   },
   setDirectViews({ commit }, view) {
     commit("SET_DIRECT_VIEWS", view)
+  },
+  toggleFavorite({ commit }, path) {
+    commit("TOGGLE_FAVORITE_TAB", path)
   }
 }
 

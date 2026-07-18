@@ -63,7 +63,7 @@ export default {
       dragMoved: false,
       tabs: [
         { key: 'today-send', title: '当日发货', icon: icons.send, bg: 'rgba(52,199,89,0.08)', color: '#34C759' },
-        { key: 'transit', title: '在途', icon: icons.truck, bg: 'rgba(91,124,250,0.08)', color: '#5B7CFA' },
+        { key: 'transit', title: '在途', icon: icons.truck, bg: 'rgba(var(--primary-rgb), 0.08)', color: 'var(--primary-color)' },
         { key: 'confirm', title: '确认收货', icon: icons.check, bg: 'rgba(52,199,89,0.08)', color: '#34C759' },
         { key: 'return', title: '撤销订单', icon: icons.close, bg: 'rgba(148,163,184,0.08)', color: '#94A3B8' },
       ]
@@ -122,8 +122,8 @@ export default {
 .metrics-row {
   display: flex;
   gap: 8px;
-  padding: 0 32px;
-  margin: 12px 0 12px;
+  padding: 0 var(--page-padding);
+  margin: var(--page-section-gap) 0;
   overflow-x: auto;
   flex-shrink: 0;
   scrollbar-width: none;
@@ -150,8 +150,8 @@ export default {
   }
 
   &.active {
-    border-color: #5B7CFA;
-    box-shadow: 0 4px 16px rgba(91,124,250,0.12);
+    border-color: var(--adm-primary);
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.12);
   }
 }
 
@@ -189,17 +189,17 @@ export default {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 0 32px 32px;
+  padding: 0 var(--page-padding) var(--page-padding);
 }
 
 /* ==================== Responsive ==================== */
 
 @media (max-width: 1200px) {
   .metrics-row {
-    padding: 0 16px;
+    padding: 0 var(--page-padding);
   }
   .main-content {
-    padding: 0 16px 16px;
+    padding: 0 var(--page-padding) var(--page-padding);
   }
   .metric-card {
     min-width: 105px;

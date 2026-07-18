@@ -45,8 +45,9 @@
         <!-- 表格区域 -->
         <div class="table-section">
           <el-table
+            :key="tableFilterKey"
             ref="table"
-            :data="tableData"
+            :data="filteredTableData"
             v-loading="loading"
             stripe
             size="medium"
@@ -60,6 +61,9 @@
               <EmptyState text="暂无撤销订单数据" />
             </template>
             <el-table-column prop="orderStyle" label="订单类型" width="90" fixed="left" align="center">
+              <template slot="header">
+                <FilterHeader label="订单类型" :value="columnSearch.orderStyle || []" :options="colFilterOptions.orderStyle || []" @update:value="columnSearch.orderStyle = $event" />
+              </template>
               <template slot-scope="scope">
                 <OrderStyleBadge
                   :order-style="scope.row.orderStyle"
@@ -73,32 +77,13 @@
               min-width="300"
               fixed="left"
             >
-              <template slot-scope="scope">
-                <div class="order-numbers">
-                  <div class="order-number-item">内部单号:
-                     {{
-                      scope.row.orderCode || "-"
-                    }}
-                    <i
-                      v-if="scope.row.orderCode"
-                      class="el-icon-copy-document copy-icon"
-                      @click="copyText(scope.row.orderCode)"
-                    ></i>
-                  </div>
-                  <div class="order-number-item"> 商家单号:
-                    {{ scope.row.originalOrderId || "-" }}
-                    <i
-                      v-if="scope.row.originalOrderId"
-                      class="el-icon-copy-document copy-icon"
-                      @click="copyText(scope.row.originalOrderId)"
-                    ></i>
-                  </div>
-                </div>
-              </template>
             </el-table-column>
 
             <!-- 平台 -->
             <el-table-column label="平台/店铺" prop="platform" min-width="200" align="center">
+              <template slot="header">
+                <FilterHeader label="平台/店铺" :value="columnSearch.platformShop || []" :options="colFilterOptions.platformShop || []" @update:value="columnSearch.platformShop = $event" />
+              </template>
               <template slot-scope="scope">
                 <div>{{ scope.row.platform || "-" }}</div>
                 <div>{{ scope.row.shopName || "-" }}</div>
@@ -107,6 +92,9 @@
 
             <!-- 品牌 -->
             <el-table-column label="品牌/品类" prop="brand" min-width="200" align="center">
+              <template slot="header">
+                <FilterHeader label="品牌/品类" :value="columnSearch.brandCategory || []" :options="colFilterOptions.brandCategory || []" @update:value="columnSearch.brandCategory = $event" />
+              </template>
               <template slot-scope="scope">
                 <div>{{ scope.row.brand || "-" }}</div>
                 <div>{{ scope.row.category || "-" }}</div>
@@ -120,6 +108,9 @@
               min-width="200"
               :show-overflow-tooltip="true"
             >
+              <template slot="header">
+                <FilterHeader label="产品型号" :value="columnSearch.productSku || []" :options="colFilterOptions.productSku || []" @update:value="columnSearch.productSku = $event" />
+              </template>
               <template slot-scope="scope">
                 <div class="order-productName">
                   <div class="order-productName-line">
@@ -175,6 +166,9 @@
             </el-table-column>
 
             <el-table-column label="撤销原因" min-width="200" prop="revokeType" align="center">
+              <template slot="header">
+                <FilterHeader label="撤销原因" :value="columnSearch.revokeType || []" :options="colFilterOptions.revokeType || []" @update:value="columnSearch.revokeType = $event" />
+              </template>
               <template slot-scope="scope">
                 <span>{{ getRevokeReasonText(scope.row.revokeType) }}</span>
               </template>
@@ -188,6 +182,9 @@
               :show-overflow-tooltip="true"
               align="center"
             >
+              <template slot="header">
+                <FilterHeader label="收货地" :value="columnSearch.addressDisplay || []" :options="colFilterOptions.addressDisplay || []" @update:value="columnSearch.addressDisplay = $event" />
+              </template>
               <template slot-scope="scope">
                 <el-popover
                   placement="top"
@@ -244,6 +241,7 @@ import FilterPanel from "@/views/demandManage/wholesale/components/filterPanel.v
 import SearchSection from "@/views/demandManage/wholesale/components/searchSection.vue";
 import EmptyState from "@/views/demandManage/wholesale/components/emptyState.vue";
 import OrderStyleBadge from '@/components/OrderStyleBadge'
+import tableFilterMixin from "@/mixins/tableFilter";
 import { getOrderListApi } from "@/api/wholesale";
 import {
   createFormatDateTimeMethod,
@@ -253,6 +251,7 @@ import { SUB_STATUS } from "@/views/demandManage/wholesale/enum/index.js";
 
 export default {
   name: "CancelledOrders",
+  mixins: [tableFilterMixin],
   components: {
     BrandFilter,
     FilterPanel,
@@ -266,6 +265,8 @@ export default {
       loading: false,
       currentBrand: "",
       currentLocation: "",
+      // 表格重新渲染键
+      tableFilterKey: 0,
       // 表格数据
       tableData: [],
       // 分页信息
@@ -388,6 +389,7 @@ export default {
 
         if (response && response.code === 200) {
           this.tableData = response.rows || [];
+          this.tableFilterKey++;
           this.pagination.total = response.total || 0;
         } else {
           this.$message.error(response?.msg || "获取数据失败");
@@ -432,6 +434,16 @@ export default {
 
   },
   mounted() {
+    this.initColumnSearch(
+      ['orderStyle', 'revokeType'],
+      {
+        orderStyle: { display: row => ({ 0: '百补', 1: '百亿微派', 2: '国补' })[row.orderStyle] ?? '-' },
+        brandCategory: { display: row => `${row.brand} - ${row.category}` },
+        platformShop: { display: row => `${row.platform} - ${row.shopName}` },
+        productSku: { display: row => `${row.productName} - ${row.skuName}` },
+        addressDisplay: { display: row => `${row.provinceName || ''} ${row.cityName || ''}`.trim() },
+      }
+    );
     this.loadData();
   },
 };

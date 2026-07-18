@@ -59,12 +59,12 @@ export default {
       dragScrollLeft: 0,
       dragMoved: false,
       statusConfig: {
-        creatingOrders: { status: '1', label: '新建中', icon: icons.edit, bg: 'rgba(91,124,250,0.08)', color: '#5B7CFA' },
+        creatingOrders: { status: '1', label: '新建中', icon: icons.edit, bg: 'rgba(var(--primary-rgb), 0.08)', color: 'var(--primary-color)' },
         pendingOrders:  { status: '2', label: '待发布', icon: icons.clock, bg: 'rgba(255,179,64,0.08)', color: '#FFB340' },
         quotingOrders:  { status: '3', label: '报价中', icon: icons.dollar, bg: 'rgba(52,199,89,0.08)', color: '#34C759' },
-        shippingOrders: { status: '4', label: '发货中', icon: icons.truck, bg: 'rgba(91,124,250,0.08)', color: '#5B7CFA' },
+        shippingOrders: { status: '4', label: '发货中', icon: icons.truck, bg: 'rgba(var(--primary-rgb), 0.08)', color: 'var(--primary-color)' },
         shippedOrders:  { status: '5', label: '当日发货', icon: icons.send, bg: 'rgba(52,199,89,0.08)', color: '#34C759' },
-        transitOrders:  { status: '6', label: '在途', icon: icons.mapPin, bg: 'rgba(91,124,250,0.08)', color: '#5B7CFA' },
+        transitOrders:  { status: '6', label: '在途', icon: icons.mapPin, bg: 'rgba(var(--primary-rgb), 0.08)', color: 'var(--primary-color)' },
         returnOrders:   { status: '7', label: '追单', icon: icons.refreshCw, bg: 'rgba(255,179,64,0.08)', color: '#FFB340' },
         abnormalOrders: { status: '8', label: '异常订单', icon: icons.alertTriangle, bg: 'rgba(255,77,77,0.08)', color: '#FF4D4D' },
         confirmedOrders:{ status: '10', label: '确认收货', icon: icons.checkCircle, bg: 'rgba(52,199,89,0.08)', color: '#34C759' },
@@ -140,7 +140,7 @@ export default {
       if (this.dragMoved) return
       this.currentStatus = status
       this.$router.push({
-        path: '/demandManage/wholesale',
+        path: this.$route.path,
         query: { status },
       })
     },
@@ -172,8 +172,8 @@ export default {
 .metrics-row {
   display: flex;
   gap: 8px;
-  padding: 0 32px;
-  margin: 12px 0 12px;
+  padding: 0 var(--page-padding);
+  margin: var(--page-section-gap) 0;
   overflow-x: auto;
   flex-shrink: 0;
   scrollbar-width: none;
@@ -200,8 +200,8 @@ export default {
   }
 
   &.active {
-    border-color: #5B7CFA;
-    box-shadow: 0 4px 16px rgba(91,124,250,0.12);
+    border-color: var(--adm-primary);
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.12);
   }
 }
 
@@ -245,17 +245,17 @@ export default {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 0 32px 32px;
+  padding: 0 var(--page-padding) var(--page-padding);
 }
 
 /* ==================== Responsive ==================== */
 
 @media (max-width: 1200px) {
   .metrics-row {
-    padding: 0 16px;
+    padding: 0 var(--page-padding);
   }
   .main-content {
-    padding: 0 16px 16px;
+    padding: 0 var(--page-padding) var(--page-padding);
   }
   .metric-card {
     min-width: 105px;

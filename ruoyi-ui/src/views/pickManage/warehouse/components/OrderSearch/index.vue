@@ -229,7 +229,7 @@ export default {
         content: "";
         width: 4px;
         height: 4px;
-        background: #409eff;
+        background: var(--primary-color);
         border-radius: 50%;
       }
 
@@ -253,9 +253,9 @@ export default {
       }
 
       .el-button--primary {
-          background: linear-gradient(135deg, #409EFF 0%, #66b1ff 100%);
+          background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
           border: none;
-        box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+        box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.3);
       }
     }
   }

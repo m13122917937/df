@@ -12,6 +12,10 @@
         @click.middle.native="!isAffix(tag)?closeSelectedTag(tag):''"
         @contextmenu.prevent.native="openMenu(tag,$event)"
       >
+        <span class="tab-star" :class="{ 'is-favorite': isFavorite(tag) }" @click.prevent.stop="toggleFavoriteTag(tag)">
+          <svg v-if="isFavorite(tag)" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" class="star-icon-filled" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </span>
         <span class="tab-label">{{ getTabTitle(tag) }}</span>
         <span class="tab-close" @click.prevent.stop="closeSelectedTag(tag)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -22,6 +26,7 @@
     </scroll-pane>
     <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
       <li @click="refreshSelectedTag(selectedTag)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> 刷新页面</li>
+      <li @click="toggleFavoriteTag(selectedTag)"><svg v-if="isFavorite(selectedTag)" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" class="star-icon-filled" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> {{ isFavorite(selectedTag) ? '取消收藏' : '收藏此页' }}</li>
       <li v-if="!isAffix(selectedTag)" @click="closeSelectedTag(selectedTag)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 关闭当前</li>
       <li @click="closeOthersTags"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> 关闭其他</li>
       <li v-if="!isFirstView()" @click="closeLeftTags"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> 关闭左侧</li>
@@ -72,6 +77,9 @@ export default {
   },
   mounted() {
     this.initTags()
+    this.$nextTick(() => {
+      this.restoreFavoriteTabs()
+    })
     this.addTags()
   },
   methods: {
@@ -154,6 +162,28 @@ export default {
         }
       }
     },
+    restoreFavoriteTabs() {
+      const favorites = this.$store.state.tagsView.favoriteTabs
+      if (!favorites || favorites.length === 0) return
+      const visitedPaths = this.$store.state.tagsView.visitedViews.map(v => v.path)
+      const findAndAdd = (routes, basePath = '/') => {
+        for (const route of routes) {
+          const routePath = path.resolve(basePath, route.path)
+          if (favorites.includes(routePath) && !visitedPaths.includes(routePath) && route.name) {
+            this.$store.dispatch('tagsView/addView', {
+              fullPath: routePath,
+              path: routePath,
+              name: route.name,
+              meta: { ...route.meta, title: route.meta?.title || route.name }
+            })
+          }
+          if (route.children) {
+            findAndAdd(route.children, routePath)
+          }
+        }
+      }
+      findAndAdd(this.routes)
+    },
     addTags() {
       const { name } = this.$route
       if (name) {
@@ -180,7 +210,26 @@ export default {
         this.$store.dispatch('tagsView/delIframeView', this.$route)
       }
     },
+    isFavorite(tag) {
+      return this.$store.state.tagsView.favoriteTabs.includes(tag.path)
+    },
+    toggleFavoriteTag(tag) {
+      this.$store.dispatch('tagsView/toggleFavorite', tag.path)
+    },
     closeSelectedTag(view) {
+      if (this.isFavorite(view)) {
+        this.$confirm('该标签页已收藏，确定要关闭吗？', '提示', {
+          confirmButtonText: '确定关闭',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.doCloseSelectedTag(view)
+        }).catch(() => {})
+      } else {
+        this.doCloseSelectedTag(view)
+      }
+    },
+    doCloseSelectedTag(view) {
       this.$tab.closePage(view).then(({ visitedViews }) => {
         if (this.isActive(view)) {
           this.toLastView(visitedViews, view)
@@ -323,6 +372,31 @@ export default {
         border: 1.5px solid var(--tag-active-text);
       }
 
+      .tab-star {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        opacity: 0;
+        transition: opacity 150ms ease;
+
+        &.is-favorite {
+          opacity: 1;
+          color: var(--star-fav-color);
+        }
+
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+
+      &:hover .tab-star:not(.is-favorite) {
+        opacity: 0.6;
+      }
+
       .tab-label {
         line-height: 1;
       }
@@ -339,6 +413,7 @@ export default {
         transition: opacity 150ms ease, background 150ms ease;
         color: var(--adm-text-tertiary);
         flex-shrink: 0;
+        color: var(--star-fav-color);
         margin-left: -2px;
 
         &:hover {
@@ -388,6 +463,9 @@ export default {
 
       svg {
         flex-shrink: 0;
+      }
+      svg.star-icon-filled {
+        color: var(--star-fav-color);
       }
     }
   }

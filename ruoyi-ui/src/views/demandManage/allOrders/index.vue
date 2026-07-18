@@ -1081,7 +1081,7 @@ export default {
 <style scoped lang="scss">
 @import "@/assets/styles/common/order-components.scss";
 .all-orders-page {
-  padding: 12px;
+  padding: var(--page-padding);
   display: flex;
   flex-direction: column;
   height: calc(100vh - 100px);
@@ -1091,10 +1091,10 @@ export default {
 .search-card {
   background: var(--bg-card);
   border-radius: 12px;
-  padding: 16px;
+  padding: var(--page-card-padding);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-tags);
-  margin-bottom: 12px;
+  margin-bottom: var(--page-section-gap);
   position: relative;
   overflow: hidden;
 
@@ -1103,15 +1103,15 @@ export default {
 .search-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px 16px;
+  gap: var(--page-section-gap) var(--page-card-padding);
 }
 
 .search-group {
-  margin-bottom: 16px;
+  margin-bottom: var(--page-card-padding);
 }
 
 .search-group + .search-group {
-  padding-top: 16px;
+  padding-top: var(--page-card-padding);
   border-top: 1px solid var(--border-tags);
 }
 
@@ -1188,13 +1188,13 @@ export default {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
-  padding-top: 12px;
+  padding-top: var(--page-section-gap);
   border-top: 1px solid var(--border-tags);
 }
 
 .primary-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--page-section-gap);
 }
 
 .batch-actions {

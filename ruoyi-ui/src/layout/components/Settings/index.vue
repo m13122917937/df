@@ -203,6 +203,10 @@ export default {
         key: 'theme',
         value: val
       })
+      this.$store.dispatch('settings/changeSetting', {
+        key: 'primaryColor',
+        value: val
+      })
       this.theme = val
     },
     handleTheme(val) {
@@ -221,6 +225,7 @@ export default {
     saveSetting() {
       this.$modal.loading("正在保存到本地，请稍候...")
       const themeMode = this.$store.state.settings.themeMode
+      const primaryColor = this.$store.state.settings.primaryColor
       this.$cache.local.set(
         "layout-setting",
         `{
@@ -233,6 +238,7 @@ export default {
             "footerVisible":${this.footerVisible},
             "sideTheme":"${this.sideTheme}",
             "theme":"${this.theme}",
+            "primaryColor":"${primaryColor}",
             "themeMode":"${themeMode}"
           }`
       )
