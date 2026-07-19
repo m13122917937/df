@@ -110,5 +110,4 @@ esign:
 
 analysis:
   go-live-date: ${ANALYSIS_GO_LIVE_DATE:2026-07-18}
-  sync-cron: ${ANALYSIS_SYNC_CRON:0 0 2 * * ?}
 

@@ -17,10 +17,15 @@ public class AnalysisProperties {
     /**
      * 模块上线日期；该日期之前的数据永不写入分析表。
      */
-    private LocalDate goLiveDate = LocalDate.of(2099, 1, 1);
+    private String goLiveDate = "2099-01-01";
 
     /**
-     * 每日同步任务表达式。
+     * 获取按 ISO 日期格式解析的模块上线日期。
+     *
+     * @return 上线日期
      */
-    private String syncCron = "0 0 2 * * ?";
+    public LocalDate getGoLiveLocalDate() {
+        return LocalDate.parse(goLiveDate);
+    }
+
 }

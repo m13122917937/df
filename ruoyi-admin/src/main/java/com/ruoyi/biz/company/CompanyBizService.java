@@ -15,10 +15,15 @@ import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.vendor.VendorCreateParam;
 import com.ruoyi.jky.rep.vendor.VendorCreateRep;
 import com.ruoyi.user.facade.ICompanyFacade;
+import com.ruoyi.user.facade.IMemberFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
+import com.ruoyi.user.model.bo.MemberBO;
 import com.ruoyi.user.model.consts.CompanyEnum;
 import com.ruoyi.user.model.param.CompanyParam;
+import com.ruoyi.user.model.param.MemberCompanyParam;
 import com.ruoyi.user.model.query.CompanyQuery;
+import com.ruoyi.user.model.query.MemberCompanyQuery;
+import com.ruoyi.user.model.query.MemberQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +43,8 @@ public class CompanyBizService {
 
     @Autowired
     private ICompanyFacade companyFacade;
+    @Autowired
+    private IMemberFacade memberFacade;
 
     @Autowired
     private ContractBizService contractBizService;
@@ -60,6 +67,51 @@ public class CompanyBizService {
         createProvider(companyBO);
         initFrameworkContract(companyBO, companyParam.getCreatorId());
         return companyBO;
+    }
+
+    /**
+     * 分页查询企业。
+     *
+     * @param query 查询条件
+     * @param pageParam 分页参数
+     * @return 企业分页结果
+     */
+    public PageBO<CompanyBO> listPage(CompanyQuery query, PageParamV2 pageParam) {
+        return companyFacade.listPage(query, pageParam);
+    }
+
+    /**
+     * 更新企业并同步吉客云供应商。
+     *
+     * @param companyParam 企业参数
+     */
+    public void update(CompanyParam companyParam) {
+        companyFacade.update(companyParam, new CompanyQuery().setId(companyParam.getId()));
+        CompanyBO company = companyFacade.queryOne(new CompanyQuery().setId(companyParam.getId()));
+        createProvider(company);
+    }
+
+    /**
+     * 分页查询企业用户。
+     *
+     * @param query 查询条件
+     * @param pageParam 分页参数
+     * @return 企业用户分页结果
+     */
+    public PageBO<MemberBO> memberList(MemberQuery query, PageParamV2 pageParam) {
+        return memberFacade.memberList(query, pageParam);
+    }
+
+    /**
+     * 更新企业用户负责人类型。
+     *
+     * @param companyId 企业主键
+     * @param userId 用户主键
+     * @param owner 负责人类型
+     */
+    public void updateMemberOwner(Long companyId, Long userId, Integer owner) {
+        companyFacade.update(new MemberCompanyParam().setOwner(owner),
+                new MemberCompanyQuery().setCompanyId(companyId).setUserId(userId));
     }
 
     /**
@@ -154,4 +206,3 @@ public class CompanyBizService {
     }
 
 }
-

@@ -152,7 +152,7 @@ ruoyi-esign-starter/
 
 - Spring Boot 2.6.15+
 - Hutool 5.8.24+
-- FastJSON2 2.0.58+
+- Jackson 2.x
 - Lombok
 
 ## 认证流程

@@ -3,9 +3,9 @@ package com.ruoyi.job;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
+import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.model.bo.ImeiBO;
@@ -259,7 +259,7 @@ public class SecondSaleVerifyJob {
     private List<TopIdentCodeDTO> queryIdentCode(OrderBO orderBO, List<String> identCodes, String identType,
                                                  String rootCatId, String brandId) {
         AlibabaAscpLogisticsIdentcodeQueryRequest request = new AlibabaAscpLogisticsIdentcodeQueryRequest();
-        request.setIdentCodeList(JSONUtil.toJsonStr(identCodes));
+        request.setIdentCodeList(JacksonUtil.toJson(identCodes));
         request.setIdentType(identType);
         request.setRootCatId(rootCatId);
         request.setBrandId(brandId);

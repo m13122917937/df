@@ -19,6 +19,8 @@ import com.ruoyi.capital.model.param.CompanyCapitalLogParam;
 import com.ruoyi.capital.model.param.RechargeParam;
 import com.ruoyi.capital.model.query.RechargeQuery;
 import com.ruoyi.common.config.RuoYiConfig;
+import com.ruoyi.common.core.redis.RedisCache;
+import com.ruoyi.common.core.redis.RedisKeyUtil;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.config.properties.WxMpProperties;
@@ -28,6 +30,7 @@ import com.ruoyi.user.facade.ICompanyFacade;
 import com.ruoyi.user.facade.IMemberFacade;
 import com.ruoyi.user.model.bo.CompanyBO;
 import com.ruoyi.user.model.bo.MemberBO;
+import com.ruoyi.user.model.consts.UserRedisKey;
 import com.ruoyi.user.model.query.CompanyQuery;
 import com.ruoyi.user.model.query.MemberQuery;
 import com.ruoyi.web.form.pay.PayForm;
@@ -40,6 +43,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 支付业务服务 - H5微信支付预订单创建
@@ -75,6 +79,32 @@ public class PayBizService {
 
     @Autowired
     private RuoYiConfig ruoYiConfig;
+    @Autowired
+    private RedisCache redisCache;
+
+    /**
+     * 获取支付通知处理锁。
+     *
+     * @param tradeNo 交易单号
+     * @return 是否成功获取锁
+     */
+    public boolean tryLockPayNotify(String tradeNo) {
+        return redisCache.setIfAbsent(buildNotifyProcessKey(tradeNo), "locked", 24L, TimeUnit.HOURS);
+    }
+
+    /**
+     * 释放支付通知处理锁。
+     *
+     * @param tradeNo 交易单号
+     */
+    public void unlockPayNotify(String tradeNo) {
+        redisCache.deleteObject(buildNotifyProcessKey(tradeNo));
+    }
+
+    private String buildNotifyProcessKey(String tradeNo) {
+        return RedisKeyUtil.generate(UserRedisKey.ROOT_KEY, UserRedisKey.Pay.ROOT_KEY,
+                UserRedisKey.Pay.NOTIFY_PROCESS, tradeNo);
+    }
 
     /**
      * H5微信网页支付预下单 - 创建预订单并调用微信支付API

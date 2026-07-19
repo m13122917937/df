@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `ana_sync_log` (
 
 CREATE TABLE IF NOT EXISTS `ana_cost_config` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `config_type` varchar(32) NOT NULL COMMENT 'FIXED_COEFFICIENT/CASHBACK/PENALTY/PROMOTION/MARGIN/COLLECTION_DAYS/INTERNAL_COST/WAREHOUSE_COST',
+  `config_type` varchar(32) NOT NULL COMMENT 'REBATE/FIXED_COEFFICIENT/CASHBACK/PENALTY/PROMOTION/MARGIN/COLLECTION_DAYS/INTERNAL_COST/WAREHOUSE_COST/SHOP_WHITELIST',
   `business_date` date DEFAULT NULL,
   `month_value` char(7) DEFAULT NULL,
   `platform` varchar(64) DEFAULT NULL,
@@ -203,5 +203,105 @@ CREATE TABLE IF NOT EXISTS `ana_daily_metric` (
   KEY `idx_ana_metric_date` (`metric_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每日经营指标快照';
 
--- 数据库隔离要求：本脚本只创建 ana_* 新表，不向任何既有业务表、菜单表或任务表写数据。
--- 每日02:00同步由代码内 @Scheduled 调度，页面入口由前端静态路由注册。
+-- 经营分析业务数据只写 ana_* 新表；以下仅注册若依菜单和任务元数据。
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '运营管理', 0, 65, 'operationsManage', NULL, 1, 0, 'M', '0', '0', '', 'chart', 'admin', NOW(), '运营管理目录'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'operationsManage' AND parent_id = 0);
+SET @analysis_root = (SELECT menu_id FROM sys_menu WHERE path = 'operationsManage' AND parent_id = 0 LIMIT 1);
+
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '数据看板', @analysis_root, 1, 'databoard', NULL, 1, 0, 'M', '0', '0', '', 'dashboard', 'admin', NOW(), '经营分析数据看板'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'databoard' AND parent_id = @analysis_root);
+SET @analysis_board = (SELECT menu_id FROM sys_menu WHERE path = 'databoard' AND parent_id = @analysis_root LIMIT 1);
+
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '经营统计', @analysis_board, 1, 'operationStats', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'chart', 'admin', NOW(), '经营统计看板'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'operationStats' AND parent_id = @analysis_board);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '绩效汇总', @analysis_board, 2, 'performanceRollup', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'table', 'admin', NOW(), '经营绩效汇总'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'performanceRollup' AND parent_id = @analysis_board);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '产渠分析', @analysis_board, 3, 'channelProduction', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'tree', 'admin', NOW(), '品牌品类及渠道分析'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'channelProduction' AND parent_id = @analysis_board);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '人效分析', @analysis_board, 4, 'humanEfficiency', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'people', 'admin', NOW(), '经营人效分析'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'humanEfficiency' AND parent_id = @analysis_board);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '指标树', @analysis_board, 5, 'metricTree', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'tree-table', 'admin', NOW(), '利润指标树'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'metricTree' AND parent_id = @analysis_board);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '订单穿透', @analysis_board, 6, 'orderDetails', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'list', 'admin', NOW(), '经营订单明细'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'orderDetails' AND parent_id = @analysis_board);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '数据质量', @analysis_board, 7, 'dataQuality', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'bug', 'admin', NOW(), '经营数据质量'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'dataQuality' AND parent_id = @analysis_board);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '同步日志', @analysis_board, 8, 'syncLogs', 'operationsManage/syncLogs/index', 1, 0, 'C', '0', '0', 'analysis:sync:logs', 'time-range', 'admin', NOW(), '经营数据同步日志'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'syncLogs' AND parent_id = @analysis_board);
+
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '核算配置', @analysis_root, 2, 'accounting', NULL, 1, 0, 'M', '0', '0', '', 'edit', 'admin', NOW(), '经营核算配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'accounting' AND parent_id = @analysis_root);
+SET @analysis_config = (SELECT menu_id FROM sys_menu WHERE path = 'accounting' AND parent_id = @analysis_root LIMIT 1);
+
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '返利价保', @analysis_config, 1, 'rebateProtection', 'operationsManage/rebate/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'money', 'admin', NOW(), '返利价保配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'rebateProtection' AND parent_id = @analysis_config);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '固定系数', @analysis_config, 2, 'fixedCoefficient', 'operationsManage/config/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'skill', 'admin', NOW(), '固定系数配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'fixedCoefficient' AND parent_id = @analysis_config);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '返现', @analysis_config, 3, 'cashback', 'operationsManage/config/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'money', 'admin', NOW(), '返现配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'cashback' AND parent_id = @analysis_config);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '扣罚', @analysis_config, 4, 'penalty', 'operationsManage/config/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'bug', 'admin', NOW(), '扣罚配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'penalty' AND parent_id = @analysis_config);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '推广费', @analysis_config, 5, 'promotion', 'operationsManage/config/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'guide', 'admin', NOW(), '推广费用配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'promotion' AND parent_id = @analysis_config);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '保证金', @analysis_config, 6, 'margin', 'operationsManage/config/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'lock', 'admin', NOW(), '保证金配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'margin' AND parent_id = @analysis_config);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '回款天数', @analysis_config, 7, 'collectionDays', 'operationsManage/config/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'date', 'admin', NOW(), '回款天数配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'collectionDays' AND parent_id = @analysis_config);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '内部成本', @analysis_config, 8, 'internalCost', 'operationsManage/config/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'peoples', 'admin', NOW(), '内部成本配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'internalCost' AND parent_id = @analysis_config);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '仓储成本', @analysis_config, 9, 'warehouseCost', 'operationsManage/config/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'table', 'admin', NOW(), '仓储成本配置'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'warehouseCost' AND parent_id = @analysis_config);
+
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '原生BI', @analysis_root, 3, 'nativeBi', NULL, 1, 0, 'M', '0', '0', '', 'chart', 'admin', NOW(), '经营分析原生BI'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'nativeBi' AND parent_id = @analysis_root);
+SET @analysis_bi = (SELECT menu_id FROM sys_menu WHERE path = 'nativeBi' AND parent_id = @analysis_root LIMIT 1);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '拼多多营销竞价', @analysis_bi, 1, 'pddBid', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'chart', 'admin', NOW(), '拼多多营销竞价分析'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'pddBid' AND parent_id = @analysis_bi);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '价保核算明细', @analysis_bi, 2, 'rebateDetail', 'operationsManage/rebate/index', 1, 0, 'C', '0', '0', 'analysis:config:list', 'excel', 'admin', NOW(), '返利价保核算明细'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'rebateDetail' AND parent_id = @analysis_bi);
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '历史经营报表', @analysis_bi, 3, 'historyReport', 'operationsManage/dashboard/index', 1, 0, 'C', '0', '0', 'analysis:dashboard:list', 'documentation', 'admin', NOW(), '经营月报年报'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE path = 'historyReport' AND parent_id = @analysis_bi);
+
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '核算配置编辑', @analysis_config, 90, '#', NULL, 1, 0, 'B', '0', '0', 'analysis:config:edit', '#', 'admin', NOW(), '核算配置新增修改删除权限'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'analysis:config:edit');
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '核算配置导入', @analysis_config, 91, '#', NULL, 1, 0, 'B', '0', '0', 'analysis:config:import', '#', 'admin', NOW(), '核算配置导入权限'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'analysis:config:import');
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '核算配置导出', @analysis_config, 92, '#', NULL, 1, 0, 'B', '0', '0', 'analysis:config:export', '#', 'admin', NOW(), '核算配置导出权限'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'analysis:config:export');
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '经营数据同步', @analysis_board, 90, '#', NULL, 1, 0, 'B', '0', '0', 'analysis:sync:run', '#', 'admin', NOW(), '手动同步经营数据权限'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'analysis:sync:run');
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '经营数据重算', @analysis_board, 91, '#', NULL, 1, 0, 'B', '0', '0', 'analysis:calculate:rebuild', '#', 'admin', NOW(), '重算经营指标权限'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'analysis:calculate:rebuild');
+
+INSERT INTO sys_job (job_name, job_group, invoke_target, cron_expression, misfire_policy, concurrent, status, create_by, create_time, remark)
+SELECT '经营分析每日同步', 'ANALYSIS', 'analysisDailySyncJob.execute()', '0 0 2 * * ?', '3', '1', '0', 'admin', NOW(), '每日02:00同步前一自然日吉客云经营数据'
+WHERE NOT EXISTS (SELECT 1 FROM sys_job WHERE invoke_target = 'analysisDailySyncJob.execute()');

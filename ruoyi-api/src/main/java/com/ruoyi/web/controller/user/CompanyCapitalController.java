@@ -1,6 +1,6 @@
 package com.ruoyi.web.controller.user;
 
-import com.ruoyi.capital.facade.ICompanyCapitalFacade;
+import com.ruoyi.biz.company.CompanyCapitalBizService;
 import com.ruoyi.capital.model.bo.CompanyCapitalBO;
 import com.ruoyi.capital.model.bo.CompanyCapitalLogBO;
 import com.ruoyi.capital.model.consts.CompanyCapitalConsts;
@@ -35,7 +35,7 @@ import java.util.Objects;
 public class CompanyCapitalController extends BaseController {
 
     @Autowired
-    ICompanyCapitalFacade companyCapitalFacade;
+    private CompanyCapitalBizService companyCapitalBizService;
 
 
 
@@ -58,7 +58,9 @@ public class CompanyCapitalController extends BaseController {
     @ResponseBody
     public AjaxResult info() {
 
-        CompanyCapitalBO companyCapitalBO = companyCapitalFacade.queryOne(new CompanyCapitalQuery().setCompanyId(getDeptId()).setServiceType(CompanyCapitalConsts.Types.DEPOSIT.getCode()));
+        CompanyCapitalBO companyCapitalBO = companyCapitalBizService.queryOne(
+                new CompanyCapitalQuery().setCompanyId(getDeptId())
+                        .setServiceType(CompanyCapitalConsts.Types.DEPOSIT.getCode()));
         return Objects.isNull(companyCapitalBO) ? AjaxResult.success(BigDecimal.ZERO) : AjaxResult.success(companyCapitalBO.getAvailableAmount());
     }
 
@@ -69,7 +71,8 @@ public class CompanyCapitalController extends BaseController {
     public TableDataInfo list(@RequestBody CompanyCapitalLogForm logParam) {
         CompanyCapitalLogQuery query = CapitalConvert.INSTANCE.toLogQuery(logParam).setCompanyId(getDeptId());
         ;
-        PageBO<CompanyCapitalLogBO> pageBO = companyCapitalFacade.pageLog(query, startParamV2("create_time desc"));
+        PageBO<CompanyCapitalLogBO> pageBO = companyCapitalBizService.pageLog(
+                query, startParamV2("create_time desc"));
 
         return getDataTable(CapitalConvert.INSTANCE.toVO(pageBO.getData()), pageBO.getTotal());
     }
@@ -79,7 +82,8 @@ public class CompanyCapitalController extends BaseController {
     @GetMapping("/export")
     public void export(CompanyCapitalLogForm logParam) throws IOException {
 
-        List<CompanyCapitalLogBO> companyCapitalLogBOS = companyCapitalFacade.listLog(CapitalConvert.INSTANCE.toLogQuery(logParam).setCompanyId(getDeptId()));
+        List<CompanyCapitalLogBO> companyCapitalLogBOS = companyCapitalBizService.listLog(
+                CapitalConvert.INSTANCE.toLogQuery(logParam).setCompanyId(getDeptId()));
         List<CompanyCapitalLogVO> voList = CapitalConvert.INSTANCE.toVO(companyCapitalLogBOS);
         for (CompanyCapitalLogVO companyCapitalLogVO : voList) {
             companyCapitalLogVO.setTypeName(CompanyCapitalConsts.LogTypes.fromValue(companyCapitalLogVO.getType()).getMsg());

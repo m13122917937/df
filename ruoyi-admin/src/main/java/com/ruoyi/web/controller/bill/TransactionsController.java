@@ -3,7 +3,6 @@ package com.ruoyi.web.controller.bill;
 import com.alibaba.excel.EasyExcel;
 import com.ruoyi.bill.model.param.TransactionsParam;
 import com.ruoyi.biz.bill.TransactionsBizService;
-import com.ruoyi.bill.facade.ITransactionsFacade;
 import com.ruoyi.bill.model.bo.TransactionsBO;
 import com.ruoyi.bill.model.query.TransactionsQuery;
 import com.ruoyi.common.core.controller.BaseController;
@@ -36,9 +35,6 @@ public class TransactionsController extends BaseController {
     @Autowired
     private TransactionsBizService transactionsBizService;
 
-    @Autowired
-    private ITransactionsFacade transactionsFacade;
-
 
 
 
@@ -48,7 +44,8 @@ public class TransactionsController extends BaseController {
         TransactionsQuery query = new TransactionsQuery().setAccountId(transactionsQForm.getAccountId()).setCounterpartyLike(transactionsQForm.getCounterpartyLike())
                 .setTransactionDateStart(transactionsQForm.getTransactionDateStart()).setTransactionDateEnd(transactionsQForm.getTransactionDateEnd());
 
-        PageBO<TransactionsBO> transactionsBOPageBO = transactionsFacade.listPage(query, startParamV2("transaction_date desc"));
+        PageBO<TransactionsBO> transactionsBOPageBO = transactionsBizService.listPage(
+                query, startParamV2("transaction_date desc"));
         List<TransactionsVO> transactionsVOList = TransactionsConvert.INSTANCE.toVOList(transactionsBOPageBO.getData());
 
         return getDataTable(transactionsVOList, transactionsBOPageBO.getTotal());
@@ -65,7 +62,7 @@ public class TransactionsController extends BaseController {
 
         TransactionsQuery query = new TransactionsQuery().setAccountId(transactionsQForm.getAccountId()).setCounterpartyLike(transactionsQForm.getCounterpartyLike())
                 .setTransactionDateStart(transactionsQForm.getTransactionDateStart()).setTransactionDateEnd(transactionsQForm.getTransactionDateEnd());
-        List<TransactionsBO> list = transactionsFacade.list(query, SortBy.of("transaction_date asc"));
+        List<TransactionsBO> list = transactionsBizService.list(query, SortBy.of("transaction_date asc"));
 
         List<TransactionsVO> transactionsVOList = TransactionsConvert.INSTANCE.toVOList(list);
         EasyExcel.write(response.getOutputStream(), TransactionsVO.class).sheet("sheet1").doWrite(transactionsVOList);

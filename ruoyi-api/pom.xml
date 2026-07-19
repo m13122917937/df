@@ -33,13 +33,13 @@
         </dependency>
 
         <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-http</artifactId>
+            <groupId>com.aliyun.openservices</groupId>
+            <artifactId>ons-client</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.aliyun.openservices</groupId>
-            <artifactId>ons-client</artifactId>
+            <groupId>com.fadada.api</groupId>
+            <artifactId>fasc-openapi-java-sdk</artifactId>
         </dependency>
 
         <!-- 核心模块-->
@@ -127,12 +127,6 @@
         </dependency>
 
         <!-- 如果使用JUnit 5 (Spring Boot 2.5默认) -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -185,7 +179,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M9</version>
                 <configuration>
-                    <skipTests>true</skipTests>
+                    <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
         </plugins>

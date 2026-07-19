@@ -4,6 +4,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
+import com.alibaba.excel.EasyExcel;
+import com.ruoyi.biz.excel.ExcelPlateformReadListener;
 import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
@@ -24,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -48,6 +51,18 @@ public class ErrorOrderBizService {
 
     @Autowired
     IRouteSubscribeFacade routeSubscribeFacade;
+
+    /**
+     * 导入平台串码校验结果。
+     *
+     * @param file Excel 文件
+     * @throws IOException 文件读取失败
+     */
+    public void importPlatformResult(MultipartFile file) throws IOException {
+        ExcelPlateformReadListener listener = new ExcelPlateformReadListener(imeiFacade, orderFacade,
+                jkyStockInAndDeliveryBizService, routeSubscribeFacade);
+        EasyExcel.read(file.getInputStream(), ExcelPlatformVO.class, listener).sheet().doRead();
+    }
 
     /**
      * 订单列表

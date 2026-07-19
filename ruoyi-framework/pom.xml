@@ -71,6 +71,12 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- 解析登录客户端的操作系统和浏览器 -->
+        <dependency>
+            <groupId>eu.bitwalker</groupId>
+            <artifactId>UserAgentUtils</artifactId>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>

@@ -1,10 +1,8 @@
 package com.ruoyi.analysis.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.analysis.domain.AnalysisOrderFact;
 import com.ruoyi.analysis.mapper.AnalysisOrderFactMapper;
-import com.ruoyi.analysis.model.query.AnalysisQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +23,7 @@ public class AnalysisFactService extends ServiceImpl<AnalysisOrderFactMapper, An
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean upsert(AnalysisOrderFact fact) {
-        AnalysisOrderFact existing = getOne(new LambdaQueryWrapper<AnalysisOrderFact>()
-                .eq(AnalysisOrderFact::getFactKey, fact.getFactKey())
-                .last("limit 1"));
+        AnalysisOrderFact existing = baseMapper.selectByFactKey(fact.getFactKey());
         if (existing == null) {
             save(fact);
             return true;
@@ -44,29 +40,17 @@ public class AnalysisFactService extends ServiceImpl<AnalysisOrderFactMapper, An
      * @return 商品行事实列表
      */
     public List<AnalysisOrderFact> listByBusinessDate(LocalDate date) {
-        return list(new LambdaQueryWrapper<AnalysisOrderFact>()
-                .eq(AnalysisOrderFact::getBusinessDate, date));
+        return baseMapper.selectByBusinessDate(date);
     }
 
     /**
-     * 按统一条件查询订单明细。
+     * 按原订单和货品查找退款对应的最近商品行。
      *
-     * @param query 查询条件
-     * @return 商品行事实列表
+     * @param originalOrderNo 原订单号
+     * @param goodsNo 货品编码
+     * @return 匹配的订单事实
      */
-    public List<AnalysisOrderFact> listFacts(AnalysisQuery query) {
-        LambdaQueryWrapper<AnalysisOrderFact> wrapper = new LambdaQueryWrapper<>();
-        wrapper.ge(query.getStartDate() != null, AnalysisOrderFact::getBusinessDate, query.getStartDate())
-                .le(query.getEndDate() != null, AnalysisOrderFact::getBusinessDate, query.getEndDate())
-                .eq(query.getSubjectName() != null, AnalysisOrderFact::getSubjectName, query.getSubjectName())
-                .eq(query.getPlatform() != null, AnalysisOrderFact::getPlatform, query.getPlatform())
-                .eq(query.getShopName() != null, AnalysisOrderFact::getShopName, query.getShopName())
-                .eq(query.getBrand() != null, AnalysisOrderFact::getBrand, query.getBrand())
-                .eq(query.getCategory() != null, AnalysisOrderFact::getCategory, query.getCategory())
-                .eq(query.getGoodsNo() != null, AnalysisOrderFact::getGoodsNo, query.getGoodsNo())
-                .eq(query.getOrderType() != null, AnalysisOrderFact::getOrderType, query.getOrderType())
-                .eq(query.getCalcStatus() != null, AnalysisOrderFact::getCalcStatus, query.getCalcStatus())
-                .orderByDesc(AnalysisOrderFact::getBusinessDate, AnalysisOrderFact::getId);
-        return list(wrapper);
+    public AnalysisOrderFact findRefundSource(String originalOrderNo, String goodsNo) {
+        return baseMapper.selectRefundSource(originalOrderNo, goodsNo);
     }
 }

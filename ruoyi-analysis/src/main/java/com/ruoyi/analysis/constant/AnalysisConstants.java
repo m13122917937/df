@@ -17,7 +17,7 @@ public final class AnalysisConstants {
     public static final String SYNC_DAILY = "DAILY";
 
     public static final Set<String> CONFIG_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "FIXED_COEFFICIENT", "CASHBACK", "PENALTY", "PROMOTION", "MARGIN",
+            "REBATE", "FIXED_COEFFICIENT", "CASHBACK", "PENALTY", "PROMOTION", "MARGIN",
             "COLLECTION_DAYS", "INTERNAL_COST", "WAREHOUSE_COST", "SHOP_WHITELIST")));
 
     private AnalysisConstants() {

@@ -1,18 +1,16 @@
 package com.ruoyi.analysis.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.analysis.constant.AnalysisConstants;
 import com.ruoyi.analysis.convert.AnalysisConvert;
 import com.ruoyi.analysis.domain.AnalysisCostConfig;
 import com.ruoyi.analysis.mapper.AnalysisCostConfigMapper;
-import com.ruoyi.analysis.model.bo.AnalysisCostConfigBO;
 import com.ruoyi.analysis.model.param.AnalysisCostConfigParam;
-import com.ruoyi.analysis.model.query.AnalysisQuery;
 import com.ruoyi.common.exception.ServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,23 +21,14 @@ import java.util.List;
 public class AnalysisCostConfigService extends ServiceImpl<AnalysisCostConfigMapper, AnalysisCostConfig> {
 
     /**
-     * 查询核算配置。
+     * 查询指定日期生效的核算配置。
      *
-     * @param query 查询条件
-     * @return 配置列表
+     * @param date 经营日期
+     * @param month 月份
+     * @return 生效配置
      */
-    public List<AnalysisCostConfigBO> listConfigs(AnalysisQuery query) {
-        LambdaQueryWrapper<AnalysisCostConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(query.getConfigType() != null, AnalysisCostConfig::getConfigType, query.getConfigType())
-                .ge(query.getStartDate() != null, AnalysisCostConfig::getBusinessDate, query.getStartDate())
-                .le(query.getEndDate() != null, AnalysisCostConfig::getBusinessDate, query.getEndDate())
-                .eq(query.getPlatform() != null, AnalysisCostConfig::getPlatform, query.getPlatform())
-                .eq(query.getShopName() != null, AnalysisCostConfig::getShopName, query.getShopName())
-                .eq(query.getGoodsNo() != null, AnalysisCostConfig::getGoodsNo, query.getGoodsNo())
-                .eq(query.getBrand() != null, AnalysisCostConfig::getBrand, query.getBrand())
-                .eq(query.getCategory() != null, AnalysisCostConfig::getCategory, query.getCategory())
-                .orderByDesc(AnalysisCostConfig::getBusinessDate, AnalysisCostConfig::getId);
-        return AnalysisConvert.INSTANCE.toConfigBOList(list(wrapper));
+    public List<AnalysisCostConfig> listEffectiveByDate(LocalDate date, String month) {
+        return baseMapper.selectEffectiveByDate(date, month);
     }
 
     /**
@@ -74,6 +63,41 @@ public class AnalysisCostConfigService extends ServiceImpl<AnalysisCostConfigMap
     @Transactional(rollbackFor = Exception.class)
     public void deleteConfig(Long id) {
         removeById(id);
+    }
+
+    /**
+     * 批量导入核算配置，重复记录按参数决定是否覆盖。
+     *
+     * @param params 配置集合
+     * @param overwrite 是否覆盖重复数据
+     * @return 保存数量
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public int importConfigs(List<AnalysisCostConfigParam> params, boolean overwrite) {
+        int count = 0;
+        for (AnalysisCostConfigParam param : params) {
+            validateType(param.getConfigType());
+            AnalysisCostConfig existing = findDuplicate(param);
+            if (existing != null && !overwrite) {
+                throw new ServiceException("存在重复配置，请确认覆盖：" + duplicateDescription(param));
+            }
+            if (existing != null) {
+                param.setId(existing.getId());
+            }
+            saveConfig(param);
+            count++;
+        }
+        return count;
+    }
+
+    private AnalysisCostConfig findDuplicate(AnalysisCostConfigParam param) {
+        return baseMapper.selectDuplicate(param);
+    }
+
+    private String duplicateDescription(AnalysisCostConfigParam param) {
+        return String.join("/", param.getConfigType(), String.valueOf(param.getBusinessDate()),
+                String.valueOf(param.getPlatform()), String.valueOf(param.getShopName()),
+                String.valueOf(param.getGoodsNo()));
     }
 
     private void validateType(String configType) {

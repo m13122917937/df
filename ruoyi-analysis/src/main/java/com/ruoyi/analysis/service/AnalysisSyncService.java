@@ -7,10 +7,17 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.ruoyi.analysis.config.AnalysisProperties;
 import com.ruoyi.analysis.constant.AnalysisConstants;
+import com.ruoyi.analysis.convert.AnalysisSyncConvert;
 import com.ruoyi.analysis.domain.AnalysisOrderFact;
 import com.ruoyi.analysis.domain.AnalysisRefundFact;
 import com.ruoyi.analysis.domain.AnalysisSyncLog;
-import com.ruoyi.analysis.model.bo.AnalysisSyncBO;
+import com.ruoyi.analysis.mapper.AnalysisOrderFactMapper;
+import com.ruoyi.analysis.mapper.AnalysisRefundFactMapper;
+import com.ruoyi.analysis.mapper.AnalysisSyncLogMapper;
+import com.ruoyi.analysis.model.source.AnalysisOrderFactSource;
+import com.ruoyi.analysis.model.source.AnalysisRefundFactSource;
+import com.ruoyi.analysis.model.source.AnalysisSyncLogSource;
+import com.ruoyi.analysis.model.source.AnalysisSyncResult;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.jky.JkyTemplate;
@@ -33,6 +40,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 /**
  * 吉客云经营数据同步服务，只向 ana_* 新表写数据。
@@ -53,45 +62,43 @@ public class AnalysisSyncService {
     @Autowired
     private AnalysisProperties properties;
     @Autowired
-    private AnalysisFactService factService;
+    private AnalysisOrderFactMapper factMapper;
     @Autowired
-    private AnalysisRefundService refundService;
+    private AnalysisRefundFactMapper refundMapper;
     @Autowired
-    private AnalysisSyncLogService logService;
-    @Autowired
-    private AnalysisMetricService metricService;
+    private AnalysisSyncLogMapper logMapper;
 
     /**
      * 同步指定日期的发货、修改订单和退款并重算快照。
      *
      * @param date 目标自然日
-     * @return 同步结果
+     * @return 同步结果及受影响日期
      */
-    public AnalysisSyncBO syncDate(LocalDate date) {
+    public AnalysisSyncResult syncDate(LocalDate date) {
         validateDate(date);
         AnalysisSyncLog log = startLog(date);
         SyncCounter counter = new SyncCounter();
         try {
             Map<String, OrderQueryRep.OrderTradeRep> trades = loadOrders(date);
             counter.readCount += trades.size();
-            persistTrades(trades.values(), counter);
-            persistRefunds(loadRefunds(date), counter);
-            metricService.rebuildDate(date);
-            completeLog(log, counter, AnalysisConstants.STATUS_COMPLETE, null);
+            Set<LocalDate> affectedDates = persistTrades(trades.values(), counter);
+            affectedDates.addAll(persistRefunds(loadRefunds(date), counter));
+            affectedDates.add(date);
+            log = completeLog(log, counter, AnalysisConstants.STATUS_COMPLETE, null);
+            return new AnalysisSyncResult(com.ruoyi.analysis.convert.AnalysisConvert.INSTANCE.toBO(log), affectedDates);
         } catch (Exception exception) {
             completeLog(log, counter, AnalysisConstants.STATUS_FAILED, exception.getMessage());
             throw exception instanceof ServiceException ? (ServiceException) exception
                     : new ServiceException("经营分析同步失败：" + exception.getMessage());
         }
-        return com.ruoyi.analysis.convert.AnalysisConvert.INSTANCE.toBO(log);
     }
 
     /**
      * 同步前一自然日。
      *
-     * @return 同步结果
+     * @return 同步结果及受影响日期
      */
-    public AnalysisSyncBO syncYesterday() {
+    public AnalysisSyncResult syncYesterday() {
         return syncDate(LocalDate.now().minusDays(1));
     }
 
@@ -145,26 +152,29 @@ public class AnalysisSyncService {
         return param;
     }
 
-    private void persistTrades(Iterable<OrderQueryRep.OrderTradeRep> trades, SyncCounter counter) {
+    private Set<LocalDate> persistTrades(Iterable<OrderQueryRep.OrderTradeRep> trades, SyncCounter counter) {
+        Set<LocalDate> affectedDates = new LinkedHashSet<>();
         for (OrderQueryRep.OrderTradeRep trade : trades) {
             LocalDateTime consignTime = parseDateTime(trade.getConsignTime());
-            if (consignTime == null || consignTime.toLocalDate().isBefore(properties.getGoLiveDate())) {
+            if (consignTime == null || consignTime.toLocalDate().isBefore(properties.getGoLiveLocalDate())) {
                 counter.skipCount++;
                 continue;
             }
             List<AnalysisOrderFact> facts = buildFacts(trade, consignTime);
             for (AnalysisOrderFact fact : facts) {
-                if (factService.upsert(fact)) {
+                affectedDates.add(fact.getBusinessDate());
+                if (upsertFact(fact)) {
                     counter.insertCount++;
                 } else {
                     counter.updateCount++;
                 }
             }
         }
+        return affectedDates;
     }
 
     private List<AnalysisOrderFact> buildFacts(OrderQueryRep.OrderTradeRep trade, LocalDateTime consignTime) {
-        List<OrderQueryRep.OrderGoodsDetailRep> goods = nonGiftGoods(trade.getGoodsDetail());
+        List<OrderQueryRep.OrderGoodsDetailRep> goods = validGoods(trade.getGoodsDetail());
         List<AnalysisOrderFact> facts = new ArrayList<>();
         BigDecimal totalWeight = totalWeight(goods);
         BigDecimal payment = firstNonNull(trade.getPayment(), trade.getTotalFee(), totalWeight);
@@ -188,61 +198,36 @@ public class AnalysisSyncService {
     private AnalysisOrderFact buildFact(OrderQueryRep.OrderTradeRep trade,
                                         OrderQueryRep.OrderGoodsDetailRep goods, int index,
                                         LocalDateTime consignTime, BigDecimal payment, BigDecimal expense) {
-        AnalysisOrderFact fact = new AnalysisOrderFact();
         String lineKey = goodsLineKey(goods, index);
-        fact.setFactKey(trade.getTradeNo() + ":" + lineKey);
-        fact.setJkyTradeNo(trade.getTradeNo());
-        fact.setJkyOrderNo(trade.getOrderNo());
-        fact.setOriginalOrderNo(firstNotBlank(trade.getOnlineTradeNo(), trade.getSourceTradeNo(), trade.getOrderNo()));
-        fact.setGoodsLineKey(lineKey);
-        fact.setBusinessDate(consignTime.toLocalDate());
-        fact.setTradeTime(parseDateTime(trade.getTradeTime()));
-        fact.setConsignTime(consignTime);
-        fact.setCompleteTime(parseDateTime(trade.getCompleteTime()));
-        fact.setSourceModifiedTime(parseDateTime(trade.getBillDate()));
-        setDimensions(fact, trade, goods);
-        setAmounts(fact, goods, payment, expense);
-        fact.setOrderStatus(String.valueOf(trade.getTradeStatus()));
-        fact.setOrderType("NORMAL");
-        fact.setGiftFlag(zeroInt(goods.getIsGift()));
-        fact.setRawHash(SecureUtil.sha256(JacksonUtil.toJson(trade) + "#" + index));
-        return fact;
-    }
-
-    private void setDimensions(AnalysisOrderFact fact, OrderQueryRep.OrderTradeRep trade,
-                               OrderQueryRep.OrderGoodsDetailRep goods) {
-        fact.setSubjectName(trade.getCompanyName());
-        fact.setPlatform(StrUtil.blankToDefault(trade.getShopTypeCode(), "吉客云"));
-        fact.setShopId(trade.getShopId() == null ? null : String.valueOf(trade.getShopId()));
-        fact.setShopName(trade.getShopName());
-        fact.setWarehouseId(trade.getWarehouseId() == null ? null : String.valueOf(trade.getWarehouseId()));
-        fact.setWarehouseName(trade.getWarehouseName());
-        fact.setSupplierName(trade.getCompanyName());
-        fact.setGoodsId(goods.getGoodsId());
-        fact.setGoodsNo(firstNotBlank(goods.getGoodsNo(), goods.getOuterId()));
-        fact.setGoodsName(goods.getGoodsName());
-        fact.setSpecName(goods.getSpecName());
-    }
-
-    private void setAmounts(AnalysisOrderFact fact, OrderQueryRep.OrderGoodsDetailRep goods,
-                            BigDecimal payment, BigDecimal expense) {
         BigDecimal quantity = firstNonNull(goods.getNeedProcessCount(), goods.getSellCount(), BigDecimal.ZERO);
         BigDecimal goodsAmount = lineWeight(goods);
         BigDecimal cost = goods.getAssessmentCost() == null ? null : goods.getAssessmentCost().multiply(quantity);
-        fact.setQuantity(quantity);
-        fact.setUnitPrice(firstNonNull(goods.getSellPrice(), BigDecimal.ZERO));
-        fact.setGoodsAmount(goodsAmount);
-        fact.setPaymentAmount(payment);
-        fact.setDiscountAmount(zero(goods.getShareOrderDiscountFee()));
-        fact.setPlatformSubsidy(zero(goods.getGoodsPlatDiscountFee()).add(zero(goods.getShareOrderPlatDiscountFee())));
-        fact.setGovernmentSubsidy(BigDecimal.ZERO);
-        fact.setOrderExpense(expense);
-        fact.setAssessmentCost(goods.getAssessmentCost());
-        fact.setGoodsCost(cost);
-        fact.setGoodsIncentive(BigDecimal.ZERO);
-        fact.setGoodsGrossProfit(cost == null ? null : payment.add(fact.getPlatformSubsidy()).subtract(cost));
-        fact.setCalcStatus(cost == null ? AnalysisConstants.STATUS_INCOMPLETE : AnalysisConstants.STATUS_COMPLETE);
-        fact.setMissingReason(cost == null ? "吉客云未返回商品评估成本" : null);
+        BigDecimal subsidy = zero(goods.getGoodsPlatDiscountFee()).add(zero(goods.getShareOrderPlatDiscountFee()));
+        AnalysisOrderFactSource source = AnalysisOrderFactSource.builder()
+                .factKey(trade.getTradeNo() + ":" + lineKey).jkyTradeNo(trade.getTradeNo())
+                .jkyOrderNo(trade.getOrderNo()).originalOrderNo(firstNotBlank(trade.getOnlineTradeNo(),
+                        trade.getSourceTradeNo(), trade.getOrderNo())).goodsLineKey(lineKey)
+                .businessDate(consignTime.toLocalDate()).tradeTime(parseDateTime(trade.getTradeTime()))
+                .consignTime(consignTime).completeTime(parseDateTime(trade.getCompleteTime()))
+                .sourceModifiedTime(parseDateTime(trade.getBillDate())).subjectName(trade.getCompanyName())
+                .platform(StrUtil.blankToDefault(trade.getShopTypeCode(), "吉客云"))
+                .shopId(stringValue(trade.getShopId())).shopName(trade.getShopName())
+                .warehouseId(stringValue(trade.getWarehouseId())).warehouseName(trade.getWarehouseName())
+                .supplierName(trade.getCompanyName()).goodsId(goods.getGoodsId())
+                .goodsNo(firstNotBlank(goods.getGoodsNo(), goods.getOuterId())).goodsName(goods.getGoodsName())
+                .specName(goods.getSpecName()).quantity(quantity)
+                .unitPrice(firstNonNull(goods.getSellPrice(), BigDecimal.ZERO)).goodsAmount(goodsAmount)
+                .paymentAmount(payment).discountAmount(zero(goods.getShareOrderDiscountFee()))
+                .platformSubsidy(subsidy).governmentSubsidy(BigDecimal.ZERO).orderExpense(expense)
+                .assessmentCost(goods.getAssessmentCost()).goodsCost(cost).goodsIncentive(BigDecimal.ZERO)
+                .goodsGrossProfit(cost == null ? null : payment.add(subsidy).subtract(cost))
+                .orderStatus(String.valueOf(trade.getTradeStatus()))
+                .orderType(Objects.equals(goods.getIsGift(), 1) ? "GIFT" : "NORMAL")
+                .giftFlag(zeroInt(goods.getIsGift()))
+                .calcStatus(cost == null ? AnalysisConstants.STATUS_INCOMPLETE : AnalysisConstants.STATUS_COMPLETE)
+                .missingReason(cost == null ? "吉客云未返回商品评估成本" : null)
+                .rawHash(SecureUtil.sha256(JacksonUtil.toJson(trade) + "#" + index)).build();
+        return AnalysisSyncConvert.INSTANCE.toDomain(source);
     }
 
     private List<RefundQueryRep.TradeAfterOnlineWrapper> loadRefunds(LocalDate date) {
@@ -274,7 +259,8 @@ public class AnalysisSyncService {
         return param;
     }
 
-    private void persistRefunds(List<RefundQueryRep.TradeAfterOnlineWrapper> wrappers, SyncCounter counter) {
+    private Set<LocalDate> persistRefunds(List<RefundQueryRep.TradeAfterOnlineWrapper> wrappers, SyncCounter counter) {
+        Set<LocalDate> affectedDates = new LinkedHashSet<>();
         for (RefundQueryRep.TradeAfterOnlineWrapper wrapper : wrappers) {
             if (wrapper == null || wrapper.getTradeAfterOnlineDTO() == null) {
                 counter.skipCount++;
@@ -283,19 +269,21 @@ public class AnalysisSyncService {
             List<AnalysisRefundFact> facts = buildRefundFacts(wrapper);
             counter.readCount += facts.size();
             for (AnalysisRefundFact fact : facts) {
-                if (refundService.upsert(fact)) {
+                affectedDates.add(fact.getRefundDate());
+                if (upsertRefund(fact)) {
                     counter.insertCount++;
                 } else {
                     counter.updateCount++;
                 }
             }
         }
+        return affectedDates;
     }
 
     private List<AnalysisRefundFact> buildRefundFacts(RefundQueryRep.TradeAfterOnlineWrapper wrapper) {
         RefundQueryRep.RefundTradeRep trade = wrapper.getTradeAfterOnlineDTO();
         LocalDateTime successTime = parseDateTime(firstNotBlank(trade.getRefundSuccessTime(), trade.getGmtModified()));
-        if (successTime == null || successTime.toLocalDate().isBefore(properties.getGoLiveDate())) {
+        if (successTime == null || successTime.toLocalDate().isBefore(properties.getGoLiveLocalDate())) {
             return new ArrayList<>();
         }
         List<RefundQueryRep.RefundGoodsRep> goodsList = wrapper.getTradeAfterOnlineGoodsDTOList();
@@ -327,57 +315,69 @@ public class AnalysisSyncService {
     private AnalysisRefundFact buildRefundFact(RefundQueryRep.RefundTradeRep trade,
                                                RefundQueryRep.RefundGoodsRep goods, int index,
                                                LocalDateTime successTime, BigDecimal amount) {
-        AnalysisRefundFact fact = new AnalysisRefundFact();
         String lineKey = firstNotBlank(goods.getGoodsId(), goods.getOuterId(), goods.getOuterSkuId(), String.valueOf(index));
-        fact.setRefundKey(trade.getRefundNo() + ":" + lineKey);
-        fact.setRefundNo(trade.getRefundNo());
-        fact.setOriginalOrderNo(trade.getPlatOrderNo());
-        fact.setGoodsLineKey(lineKey);
-        fact.setGoodsNo(firstNotBlank(goods.getGoodsNo(), goods.getOuterId()));
-        fact.setGoodsName(firstNotBlank(goods.getGoodsName(), goods.getTradeGoodsName()));
-        fact.setRefundSuccessTime(successTime);
-        fact.setRefundDate(successTime.toLocalDate());
-        fact.setRefundAmount(amount);
-        fact.setPlatformRefundAmount(zero(trade.getPlatRefundAmount()));
-        fact.setRefundQuantity(zero(goods.getSellCount()));
-        fact.setHasGoodsReturn(zeroInt(trade.getHasGoodsReturn()));
-        fact.setReversedCost(BigDecimal.ZERO);
-        fact.setMatchStatus(AnalysisConstants.STATUS_PENDING);
-        fact.setRawHash(SecureUtil.sha256(JacksonUtil.toJson(trade) + JacksonUtil.toJson(goods)));
-        return fact;
+        AnalysisRefundFactSource source = AnalysisRefundFactSource.builder()
+                .refundKey(trade.getRefundNo() + ":" + lineKey).refundNo(trade.getRefundNo())
+                .originalOrderNo(trade.getPlatOrderNo()).goodsLineKey(lineKey)
+                .goodsNo(firstNotBlank(goods.getGoodsNo(), goods.getOuterId()))
+                .goodsName(firstNotBlank(goods.getGoodsName(), goods.getTradeGoodsName()))
+                .refundSuccessTime(successTime).refundDate(successTime.toLocalDate()).refundAmount(amount)
+                .platformRefundAmount(zero(trade.getPlatRefundAmount())).refundQuantity(zero(goods.getSellCount()))
+                .hasGoodsReturn(zeroInt(trade.getHasGoodsReturn())).reversedCost(BigDecimal.ZERO)
+                .matchStatus(AnalysisConstants.STATUS_PENDING)
+                .rawHash(SecureUtil.sha256(JacksonUtil.toJson(trade) + JacksonUtil.toJson(goods))).build();
+        return AnalysisSyncConvert.INSTANCE.toDomain(source);
     }
 
     private AnalysisSyncLog startLog(LocalDate date) {
-        AnalysisSyncLog log = new AnalysisSyncLog();
-        log.setSyncType(AnalysisConstants.SYNC_DAILY);
-        log.setWindowStart(date.atStartOfDay());
-        log.setWindowEnd(date.atTime(23, 59, 59));
-        log.setStatus(AnalysisConstants.STATUS_RUNNING);
-        log.setReadCount(0);
-        log.setInsertCount(0);
-        log.setUpdateCount(0);
-        log.setSkipCount(0);
-        log.setStartedTime(LocalDateTime.now());
-        logService.save(log);
+        AnalysisSyncLogSource source = AnalysisSyncLogSource.builder().syncType(AnalysisConstants.SYNC_DAILY)
+                .windowStart(date.atStartOfDay()).windowEnd(date.atTime(23, 59, 59))
+                .status(AnalysisConstants.STATUS_RUNNING).readCount(0).insertCount(0).updateCount(0)
+                .skipCount(0).startedTime(LocalDateTime.now()).build();
+        AnalysisSyncLog log = AnalysisSyncConvert.INSTANCE.toDomain(source);
+        logMapper.insert(log);
         return log;
     }
 
-    private void completeLog(AnalysisSyncLog log, SyncCounter counter, String status, String error) {
-        log.setStatus(status);
-        log.setReadCount(counter.readCount);
-        log.setInsertCount(counter.insertCount);
-        log.setUpdateCount(counter.updateCount);
-        log.setSkipCount(counter.skipCount);
-        log.setErrorMessage(StrUtil.sub(error, 0, 4000));
-        log.setFinishedTime(LocalDateTime.now());
-        logService.updateById(log);
+    private AnalysisSyncLog completeLog(AnalysisSyncLog log, SyncCounter counter, String status, String error) {
+        AnalysisSyncLogSource source = AnalysisSyncLogSource.builder().id(log.getId())
+                .syncType(log.getSyncType()).windowStart(log.getWindowStart()).windowEnd(log.getWindowEnd())
+                .status(status).readCount(counter.readCount).insertCount(counter.insertCount)
+                .updateCount(counter.updateCount).skipCount(counter.skipCount)
+                .errorMessage(StrUtil.sub(error, 0, 4000)).startedTime(log.getStartedTime())
+                .finishedTime(LocalDateTime.now()).build();
+        AnalysisSyncLog completed = AnalysisSyncConvert.INSTANCE.toDomain(source);
+        logMapper.updateById(completed);
+        return completed;
+    }
+
+    private boolean upsertFact(AnalysisOrderFact fact) {
+        AnalysisOrderFact existing = factMapper.selectByFactKey(fact.getFactKey());
+        if (existing == null) {
+            factMapper.insert(fact);
+            return true;
+        }
+        fact.setId(existing.getId());
+        factMapper.updateById(fact);
+        return false;
+    }
+
+    private boolean upsertRefund(AnalysisRefundFact fact) {
+        AnalysisRefundFact existing = refundMapper.selectByRefundKey(fact.getRefundKey());
+        if (existing == null) {
+            refundMapper.insert(fact);
+            return true;
+        }
+        fact.setId(existing.getId());
+        refundMapper.updateById(fact);
+        return false;
     }
 
     private void validateDate(LocalDate date) {
         if (date == null) {
             throw new ServiceException("同步日期不能为空");
         }
-        if (date.isBefore(properties.getGoLiveDate())) {
+        if (date.isBefore(properties.getGoLiveLocalDate())) {
             throw new ServiceException("禁止同步模块上线日期之前的数据");
         }
         if (!date.isBefore(LocalDate.now())) {
@@ -392,11 +392,11 @@ public class AnalysisSyncService {
         return JkyResponseUtil.getData(response);
     }
 
-    private List<OrderQueryRep.OrderGoodsDetailRep> nonGiftGoods(List<OrderQueryRep.OrderGoodsDetailRep> goods) {
+    private List<OrderQueryRep.OrderGoodsDetailRep> validGoods(List<OrderQueryRep.OrderGoodsDetailRep> goods) {
         List<OrderQueryRep.OrderGoodsDetailRep> result = new ArrayList<>();
         if (goods != null) {
             for (OrderQueryRep.OrderGoodsDetailRep item : goods) {
-                if (item != null && !Objects.equals(item.getIsGift(), 1)) {
+                if (item != null) {
                     result.add(item);
                 }
             }
@@ -458,6 +458,10 @@ public class AnalysisSyncService {
             }
         }
         return null;
+    }
+
+    private String stringValue(Object value) {
+        return value == null ? null : String.valueOf(value);
     }
 
     private BigDecimal firstNonNull(BigDecimal... values) {

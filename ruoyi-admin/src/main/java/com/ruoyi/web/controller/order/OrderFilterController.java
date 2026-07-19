@@ -2,10 +2,7 @@ package com.ruoyi.web.controller.order;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Assert;
-import com.ruoyi.bill.facade.IPayerConfigFacade;
-import com.ruoyi.bill.model.bo.PayerConfigBO;
-import com.ruoyi.bill.model.query.PayerConfigQuery;
+import com.ruoyi.biz.order.OrderFilterBizService;
 import com.ruoyi.biz.order.OrderBizService;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.web.form.order.OrderFilter;
@@ -16,10 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -28,6 +22,8 @@ public class OrderFilterController {
 
     @Autowired
     OrderBizService orderBizService;
+    @Autowired
+    private OrderFilterBizService orderFilterBizService;
 
     @PostMapping("countHeader")
     public AjaxResult countHeader(){
@@ -38,19 +34,9 @@ public class OrderFilterController {
         return AjaxResult.success(orderStatusVOS);
     }
 
-    @Autowired
-    private IPayerConfigFacade payerConfigFacade;
-
     @PostMapping("shopName")
     public AjaxResult shopNameList() {
-        List<PayerConfigBO> configs = payerConfigFacade.list(new PayerConfigQuery(), null);
-        List<String> shopNames = configs.stream()
-                .map(PayerConfigBO::getKeyWord)
-                .filter(Objects::nonNull)
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList());
-        return AjaxResult.success(shopNames);
+        return AjaxResult.success(orderFilterBizService.listShopNames());
     }
 
 }

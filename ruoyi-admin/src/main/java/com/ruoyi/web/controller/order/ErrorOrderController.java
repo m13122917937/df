@@ -3,8 +3,6 @@ package com.ruoyi.web.controller.order;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.alibaba.excel.EasyExcel;
-import com.ruoyi.biz.excel.ExcelPlateformReadListener;
-import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.biz.order.ErrorOrderBizService;
 import com.ruoyi.biz.order.ImeiBizService;
 import com.ruoyi.biz.order.OrderBizService;
@@ -12,9 +10,6 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.validator.ValidatorUtils;
-import com.ruoyi.express.facade.impl.RouteSubscribeFacade;
-import com.ruoyi.order.facade.IImeiFacade;
-import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.web.form.order.ErrorOrder;
 import com.ruoyi.web.form.order.ExcelForm;
 import com.ruoyi.web.vo.order.ExcelPlatformVO;
@@ -37,18 +32,6 @@ public class ErrorOrderController extends BaseController {
 
     @Autowired
     private ErrorOrderBizService errorOrderBizService;
-
-    @Autowired
-    IImeiFacade imeiFacade;
-
-    @Autowired
-    IOrderFacade orderFacade;
-
-    @Autowired
-    JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
-
-    @Autowired
-    RouteSubscribeFacade routeSubscribeFacade;
 
 
     /**
@@ -117,8 +100,7 @@ public class ErrorOrderController extends BaseController {
         if (!originalFilename.endsWith(".xlsx") && !originalFilename.endsWith(".xls")) {
             throw new ServerException("请上传excel文件");
         }
-        ExcelPlateformReadListener excelPlateformReadListener = new ExcelPlateformReadListener(imeiFacade, orderFacade, jkyStockInAndDeliveryBizService, routeSubscribeFacade);
-        EasyExcel.read(file.getInputStream(), ExcelPlatformVO.class, excelPlateformReadListener).sheet().doRead();
+        errorOrderBizService.importPlatformResult(file);
 
         return AjaxResult.success();
     }

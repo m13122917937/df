@@ -5,13 +5,10 @@ import com.ruoyi.biz.company.PayBizService;
 import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.redis.RedisCache;
-import com.ruoyi.common.core.redis.RedisKeyUtil;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.consts.WebConstants;
-import com.ruoyi.user.model.consts.UserRedisKey;
 import com.ruoyi.web.form.pay.PayForm;
 import com.ruoyi.web.vo.user.PrePayVO;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +18,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 扫码支付V2 - H5微信支付.
@@ -35,9 +31,6 @@ public class PayController extends BaseController {
 
     @Autowired
     private PayBizService payBizService;
-
-    @Autowired
-    private RedisCache redisCache;
 
     /**
      * H5微信支付 - 创建支付预定单
@@ -65,8 +58,7 @@ public class PayController extends BaseController {
     @RequestMapping(value = "/notify/{tradeNo}", method = {RequestMethod.GET, RequestMethod.POST})
     public String payNotify(@PathVariable("tradeNo") final String tradeNo, @RequestBody(required = false) final String data) {
         log.info("支付回调通知数据[ tradeNo:{}]:{}", tradeNo, data);
-        String processKey = RedisKeyUtil.generate(UserRedisKey.ROOT_KEY, UserRedisKey.Pay.ROOT_KEY, UserRedisKey.Pay.NOTIFY_PROCESS, tradeNo);
-        if (!redisCache.setIfAbsent(processKey, "locked", 24L, TimeUnit.HOURS)) {
+        if (!payBizService.tryLockPayNotify(tradeNo)) {
             return "处理中....";
         }
 
@@ -81,7 +73,7 @@ public class PayController extends BaseController {
             signatureHeader.setSignature(request.getHeader(WebConstants.SINGED_HEADER));
             return payBizService.payNotify(tradeNo, StringUtils.defaultString(data),signatureHeader);
         } catch (Exception e) {
-            redisCache.deleteObject(processKey);
+            payBizService.unlockPayNotify(tradeNo);
         }
         return null;
     }

@@ -11,7 +11,9 @@ import com.ruoyi.bill.model.param.TransactionsParam;
 import com.ruoyi.bill.model.query.PayerQuery;
 import com.ruoyi.bill.model.query.TransactionsQuery;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.SortBy;
+import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.web.form.bill.TransactionsForm;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,28 @@ public class TransactionsBizService {
     private static final String ASC_CREATED_AT = "transaction_date desc";
     private static final int CATEGORY_INCOME = 0;
     private static final int CATEGORY_EXPENSE = 1;
+
+    /**
+     * 分页查询流水。
+     *
+     * @param query 查询条件
+     * @param pageParam 分页参数
+     * @return 流水分页结果
+     */
+    public PageBO<TransactionsBO> listPage(TransactionsQuery query, PageParamV2 pageParam) {
+        return transactionsFacade.listPage(query, pageParam);
+    }
+
+    /**
+     * 查询流水列表。
+     *
+     * @param query 查询条件
+     * @param sortBy 排序条件
+     * @return 流水列表
+     */
+    public List<TransactionsBO> list(TransactionsQuery query, SortBy sortBy) {
+        return transactionsFacade.list(query, sortBy);
+    }
 
     /**
      * 添加流水记录并更新余额

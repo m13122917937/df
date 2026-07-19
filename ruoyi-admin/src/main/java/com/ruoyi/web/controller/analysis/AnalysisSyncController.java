@@ -3,8 +3,10 @@ package com.ruoyi.web.controller.analysis;
 import com.ruoyi.biz.analysis.AnalysisSyncBizService;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.web.convert.analysis.AnalysisWebConvert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,14 +28,16 @@ public class AnalysisSyncController extends BaseController {
      * 手动同步指定自然日。
      */
     @PostMapping("/sync/run")
+    @PreAuthorize("@ss.hasPermi('analysis:sync:run')")
     public AjaxResult sync(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
-        return AjaxResult.success(syncBizService.sync(date));
+        return AjaxResult.success(AnalysisWebConvert.INSTANCE.toSyncVO(syncBizService.sync(date)));
     }
 
     /**
      * 重算指定自然日。
      */
     @PostMapping("/calculate/rebuild")
+    @PreAuthorize("@ss.hasPermi('analysis:calculate:rebuild')")
     public AjaxResult rebuild(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         syncBizService.rebuild(date);
         return AjaxResult.success();
@@ -43,7 +47,8 @@ public class AnalysisSyncController extends BaseController {
      * 查询同步日志。
      */
     @GetMapping("/sync/logs")
+    @PreAuthorize("@ss.hasPermi('analysis:sync:logs')")
     public AjaxResult logs(@RequestParam(defaultValue = "50") int limit) {
-        return AjaxResult.success(syncBizService.logs(limit));
+        return AjaxResult.success(AnalysisWebConvert.INSTANCE.toSyncVOList(syncBizService.logs(limit)));
     }
 }

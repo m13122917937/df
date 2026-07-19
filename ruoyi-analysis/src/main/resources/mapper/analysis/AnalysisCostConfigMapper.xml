@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.analysis.mapper.AnalysisCostConfigMapper">
+
+    <sql id="baseSelect">
+        select * from ana_cost_config
+    </sql>
+
+    <select id="selectEffectiveByDate" resultType="com.ruoyi.analysis.domain.AnalysisCostConfig">
+        <include refid="baseSelect"/>
+        where business_date = #{businessDate}
+           or month_value = #{monthValue}
+           or (start_date &lt;= #{businessDate} and end_date &gt;= #{businessDate})
+    </select>
+
+    <select id="selectDuplicate" resultType="com.ruoyi.analysis.domain.AnalysisCostConfig">
+        <include refid="baseSelect"/>
+        where config_type = #{configType}
+        <if test="businessDate != null">and business_date = #{businessDate}</if>
+        <if test="monthValue != null and monthValue != ''">and month_value = #{monthValue}</if>
+        <if test="platform != null and platform != ''">and platform = #{platform}</if>
+        <if test="shopName != null and shopName != ''">and shop_name = #{shopName}</if>
+        <if test="originalOrderNo != null and originalOrderNo != ''">and original_order_no = #{originalOrderNo}</if>
+        <if test="goodsNo != null and goodsNo != ''">and goods_no = #{goodsNo}</if>
+        limit 1
+    </select>
+</mapper>

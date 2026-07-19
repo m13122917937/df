@@ -2,7 +2,7 @@ package com.ruoyi;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
+import com.ruoyi.common.utils.JacksonUtil;
 import com.taobao.api.ApiException;
 import com.taobao.api.TaobaoClient;
 import com.taobao.api.request.AlibabaAscpLogisticsIdentcodeQueryRequest;
@@ -45,7 +45,7 @@ public class TaobaoIdentCodeQueryTest {
 //        Assumptions.assumeTrue(StrUtil.isNotBlank(identCode), "请配置 fy.taobao.test.ident-code");
 
         AlibabaAscpLogisticsIdentcodeQueryRequest request = new AlibabaAscpLogisticsIdentcodeQueryRequest();
-        request.setIdentCodeList(JSONUtil.toJsonStr(Collections.singletonList("AF2QVB6205002644")));
+        request.setIdentCodeList(JacksonUtil.toJson(Collections.singletonList("AF2QVB6205002644")));
         request.setIdentType("SN");
         request.setRootCatId("1512");
         request.setBrandId("590022244");

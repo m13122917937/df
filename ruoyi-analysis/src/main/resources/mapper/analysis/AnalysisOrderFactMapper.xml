@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.analysis.mapper.AnalysisOrderFactMapper">
+
+    <sql id="baseSelect">
+        select * from ana_order_fact
+    </sql>
+
+    <select id="selectByFactKey" resultType="com.ruoyi.analysis.domain.AnalysisOrderFact">
+        <include refid="baseSelect"/>
+        where fact_key = #{factKey}
+        limit 1
+    </select>
+
+    <select id="selectByBusinessDate" resultType="com.ruoyi.analysis.domain.AnalysisOrderFact">
+        <include refid="baseSelect"/>
+        where business_date = #{businessDate}
+    </select>
+
+    <select id="selectRefundSource" resultType="com.ruoyi.analysis.domain.AnalysisOrderFact">
+        <include refid="baseSelect"/>
+        where original_order_no = #{originalOrderNo}
+        <if test="goodsNo != null and goodsNo != ''">and goods_no = #{goodsNo}</if>
+        order by business_date desc
+        limit 1
+    </select>
+</mapper>

@@ -147,12 +147,6 @@
             <version>3.37.0</version>
         </dependency>
 
-        <!-- 解析客户端操作系统、浏览器等 -->
-        <dependency>
-            <groupId>eu.bitwalker</groupId>
-            <artifactId>UserAgentUtils</artifactId>
-        </dependency>
-
         <!-- servlet包 -->
         <dependency>
             <groupId>javax.servlet</groupId>

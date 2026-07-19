@@ -1,11 +1,9 @@
 package com.ruoyi.user.facade.impl;
 
-import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.PageUtils;
-import com.ruoyi.framework.mybatis.DynamicCondition;
 import com.ruoyi.user.convert.AuthInfoConvert;
 import com.ruoyi.user.domain.AuthInfo;
 import com.ruoyi.user.facade.IAuthInfoFacade;
@@ -15,8 +13,7 @@ import com.ruoyi.user.model.param.AuthInfoParam;
 import com.ruoyi.user.model.query.AuthInfoQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -27,7 +24,7 @@ import java.util.List;
  * @date 2026-04-18
  */
 @Slf4j
-@Service
+@Component
 public class AuthInfoFacade implements IAuthInfoFacade {
 
     @Autowired
@@ -55,26 +52,20 @@ public class AuthInfoFacade implements IAuthInfoFacade {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public AuthInfoBO insert(AuthInfoParam authInfoParam) {
         AuthInfo authInfo = AuthInfoConvert.INSTANCE.paramToDomain(authInfoParam);
-        authInfo.setCreateTime(DateUtil.date());
-        authInfoService.save(authInfo);
-        return AuthInfoConvert.INSTANCE.domainToBo(authInfo);
+        return AuthInfoConvert.INSTANCE.domainToBo(authInfoService.insert(authInfo));
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean update(AuthInfoParam authInfoParam, AuthInfoQuery query) {
         AuthInfo authInfo = AuthInfoConvert.INSTANCE.paramToDomain(authInfoParam);
-        authInfo.setUpdateTime(DateUtil.date());
-        return authInfoService.update(authInfo, DynamicCondition.toWrapper(query));
+        return authInfoService.update(authInfo, query);
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteById(Integer id) {
-        return authInfoService.removeById(id);
+        return authInfoService.deleteById(id);
     }
 
 }

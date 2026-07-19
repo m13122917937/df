@@ -2,15 +2,26 @@ package com.ruoyi.capital.service;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Assert;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.capital.convert.CompanyCapitalLogCov;
 import com.ruoyi.capital.domain.CompanyCapital;
+import com.ruoyi.capital.domain.CompanyCapitalLog;
+import com.ruoyi.capital.mapper.CompanyCapitalLogMapper;
 import com.ruoyi.capital.mapper.CompanyCapitalMapper;
+import com.ruoyi.capital.model.consts.CompanyCapitalConsts;
+import com.ruoyi.capital.model.param.CompanyCapitalLogParam;
+import com.ruoyi.capital.model.query.CompanyCapitalLogQuery;
+import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.Arith;
+import com.ruoyi.framework.mybatis.DynamicCondition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -25,7 +36,104 @@ import java.util.Objects;
 @Service
 public class CompanyCapitalService extends ServiceImpl<CompanyCapitalMapper, CompanyCapital> {
     @Autowired
-    private CompanyCapitalMapper companyCapitalMapper;
+    private CompanyCapitalLogMapper companyCapitalLogMapper;
+
+    /**
+     * 修改企业可用资金并记录流水。
+     *
+     * @param logParam 资金流水参数
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void changeAvailable(CompanyCapitalLogParam logParam) {
+        CompanyCapital capital = queryOrInit(CompanyCapitalConsts.Types.DEPOSIT.getCode(), logParam.getCompanyId());
+        logParam.setCapitalId(capital.getId()).setCompanyId(capital.getCompanyId()).setCreateTime(DateUtil.date());
+        logParam.setSubtotal(Arith.add(logParam.getSubtotal(), logParam.getAddAmount()))
+                .setAvailableAmount(Arith.add(capital.getAvailableAmount(), logParam.getSubtotal()));
+        if (companyCapitalLogMapper.insert(CompanyCapitalLogCov.INSTANCE.toDomain(logParam)) <= 0) {
+            return;
+        }
+        updateAmount(capital, logParam.getAddAmount());
+    }
+
+    /**
+     * 冻结企业资金并记录流水。
+     *
+     * @param logParam 资金流水参数
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void freeze(CompanyCapitalLogParam logParam) {
+        validateBusinessKey(logParam);
+        CompanyCapital capital = queryOrInit(CompanyCapitalConsts.Types.DEPOSIT.getCode(), logParam.getCompanyId());
+        CompanyCapitalLog existing = findCapitalLog(capital.getId(), logParam);
+        if (Objects.nonNull(existing)) {
+            return;
+        }
+        CompanyCapitalLog capitalLog = CompanyCapitalLogCov.INSTANCE.toDomain(logParam)
+                .setCapitalId(capital.getId()).setCreateTime(DateUtil.date())
+                .setSubtotal(Arith.add(logParam.getAddAmount(), logParam.getOutAmount()));
+        capitalLog.setAddAmount(Objects.requireNonNullElse(logParam.getAddAmount(), BigDecimal.ZERO))
+                .setSubtotal(Objects.requireNonNullElse(logParam.getSubtotal(), BigDecimal.ZERO));
+        capitalLog.setAvailableAmount(Arith.add(capital.getAvailableAmount(),
+                Arith.add(logParam.getAddAmount(), logParam.getOutAmount())));
+        companyCapitalLogMapper.insert(capitalLog);
+        if (!updateFrozenAmount(capital, Arith.add(logParam.getAddAmount(), logParam.getOutAmount()))) {
+            throw new ServiceException("修改资金账号失败", HttpStatus.CAPITAL_WARN);
+        }
+    }
+
+    /**
+     * 解冻企业资金并更新流水。
+     *
+     * @param logParam 资金流水参数
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void unFreeze(CompanyCapitalLogParam logParam) {
+        validateBusinessKey(logParam);
+        CompanyCapital capital = queryOrInit(CompanyCapitalConsts.Types.DEPOSIT.getCode(), logParam.getCompanyId());
+        CompanyCapitalLog capitalLog = findCapitalLog(capital.getId(), logParam);
+        if (Objects.isNull(capitalLog) || isRepeatedAmount(capitalLog, logParam)) {
+            return;
+        }
+        BigDecimal addAmount = Arith.add(capitalLog.getAddAmount(), logParam.getAddAmount());
+        BigDecimal outAmount = Arith.add(capitalLog.getOutAmount(), logParam.getOutAmount());
+        if (Arith.gt(Arith.sub(addAmount, outAmount.abs()), BigDecimal.ZERO)) {
+            log.info("业务单号：{}，金额不一致，请检查, addAmount:{}, outAmount:{}",
+                    logParam.getOrderNo(), addAmount, outAmount);
+            return;
+        }
+        updateCapitalLog(capital, capitalLog, logParam);
+        if (!updateFrozenAmount(capital, Arith.add(logParam.getAddAmount(), logParam.getOutAmount()))) {
+            throw new ServiceException("修改资金账号失败", HttpStatus.CAPITAL_WARN);
+        }
+    }
+
+    private void validateBusinessKey(CompanyCapitalLogParam logParam) {
+        Assert.notBlank(logParam.getOrderNo(), "业务单号不能为空");
+        Assert.notNull(logParam.getCompanyId(), "企业ID不能为空");
+    }
+
+    private CompanyCapitalLog findCapitalLog(Long capitalId, CompanyCapitalLogParam logParam) {
+        CompanyCapitalLogQuery query = new CompanyCapitalLogQuery().setCapitalId(capitalId)
+                .setOrderNo(logParam.getOrderNo()).setType(logParam.getType()).setTradeId(logParam.getTradeId());
+        return companyCapitalLogMapper.selectOne(DynamicCondition.toWrapper(query));
+    }
+
+    private boolean isRepeatedAmount(CompanyCapitalLog capitalLog, CompanyCapitalLogParam logParam) {
+        BigDecimal outAmount = Objects.requireNonNullElse(logParam.getOutAmount(), BigDecimal.ZERO);
+        BigDecimal addAmount = Objects.requireNonNullElse(logParam.getAddAmount(), BigDecimal.ZERO);
+        return Arith.eq(capitalLog.getOutAmount(), outAmount) && Arith.eq(capitalLog.getAddAmount(), addAmount);
+    }
+
+    private void updateCapitalLog(CompanyCapital capital, CompanyCapitalLog capitalLog,
+                                  CompanyCapitalLogParam logParam) {
+        capitalLog.setAddAmount(Arith.add(capitalLog.getAddAmount(), logParam.getAddAmount()))
+                .setOutAmount(Arith.add(capitalLog.getOutAmount(), logParam.getOutAmount()))
+                .setAvailableAmount(Arith.add(capital.getAvailableAmount(), capitalLog.getAddAmount()))
+                .setUpdateTime(DateUtil.date())
+                .setSubtotal(Arith.add(capitalLog.getAddAmount(), capitalLog.getOutAmount()));
+        companyCapitalLogMapper.update(capitalLog,
+                new LambdaQueryWrapper<CompanyCapitalLog>().eq(CompanyCapitalLog::getId, capitalLog.getId()));
+    }
 
     /**
      * 查询初始化资金账号.

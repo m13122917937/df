@@ -7,7 +7,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.json.JSONUtil;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.esign.api.EsignFileApi;
 import com.ruoyi.esign.api.EsignSignApi;
@@ -245,6 +244,6 @@ public class EsignFileApiTest {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("column1", "测试内容");
         row.put("insertRow", true);
-        return JSONUtil.toJsonStr(Collections.singletonList(row));
+        return JacksonUtil.toJson(Collections.singletonList(row));
     }
 }

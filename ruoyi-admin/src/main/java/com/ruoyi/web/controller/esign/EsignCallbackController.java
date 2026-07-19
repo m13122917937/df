@@ -1,11 +1,11 @@
 package com.ruoyi.web.controller.esign;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ruoyi.biz.contract.ContractBizService;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.utils.JacksonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,14 +49,14 @@ public class EsignCallbackController extends BaseController {
             return null;
         }
         try {
-            JSONObject json = JSONUtil.parseObj(body);
-            String flowId = json.getStr("flowId");
+            JsonNode json = JacksonUtil.readTree(body);
+            String flowId = json.path("flowId").asText(null);
             if (StrUtil.isNotBlank(flowId)) {
                 return flowId;
             }
-            JSONObject action = json.getJSONObject("action");
-            if (action != null) {
-                return action.getStr("flowId");
+            JsonNode action = json.path("action");
+            if (action.isObject()) {
+                return action.path("flowId").asText(null);
             }
         } catch (Exception e) {
             log.warn("回调体解析flowId失败：{}", e.getMessage());

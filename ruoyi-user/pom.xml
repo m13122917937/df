@@ -42,11 +42,6 @@
             <artifactId>ruoyi-framework</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.fadada.api</groupId>
-            <artifactId>fasc-openapi-java-sdk</artifactId>
-        </dependency>
-
     </dependencies>
 
 

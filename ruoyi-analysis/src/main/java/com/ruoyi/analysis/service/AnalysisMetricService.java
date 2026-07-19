@@ -1,16 +1,25 @@
 package com.ruoyi.analysis.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.analysis.constant.AnalysisConstants;
 import com.ruoyi.analysis.config.AnalysisProperties;
+import com.ruoyi.analysis.convert.AnalysisMetricConvert;
+import com.ruoyi.analysis.convert.AnalysisConvert;
 import com.ruoyi.analysis.domain.AnalysisCostConfig;
 import com.ruoyi.analysis.domain.AnalysisDailyMetric;
 import com.ruoyi.analysis.domain.AnalysisOrderFact;
+import com.ruoyi.analysis.domain.AnalysisRebateActivity;
+import com.ruoyi.analysis.domain.AnalysisRebateDetail;
 import com.ruoyi.analysis.domain.AnalysisRefundFact;
+import com.ruoyi.analysis.mapper.AnalysisCostConfigMapper;
 import com.ruoyi.analysis.mapper.AnalysisDailyMetricMapper;
+import com.ruoyi.analysis.mapper.AnalysisOrderFactMapper;
+import com.ruoyi.analysis.mapper.AnalysisRebateActivityMapper;
+import com.ruoyi.analysis.mapper.AnalysisRebateDetailMapper;
+import com.ruoyi.analysis.mapper.AnalysisRefundFactMapper;
 import com.ruoyi.analysis.model.bo.AnalysisDashboardBO;
-import com.ruoyi.analysis.model.query.AnalysisQuery;
+import com.ruoyi.analysis.model.bo.AnalysisRebateBO;
+import com.ruoyi.analysis.model.source.AnalysisMetricCalculation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,11 +43,15 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
     private static final BigDecimal HUNDRED = new BigDecimal("100");
 
     @Autowired
-    private AnalysisFactService factService;
+    private AnalysisOrderFactMapper factMapper;
     @Autowired
-    private AnalysisRefundService refundService;
+    private AnalysisRefundFactMapper refundMapper;
     @Autowired
-    private AnalysisCostConfigService configService;
+    private AnalysisCostConfigMapper configMapper;
+    @Autowired
+    private AnalysisRebateActivityMapper rebateActivityMapper;
+    @Autowired
+    private AnalysisRebateDetailMapper rebateDetailMapper;
     @Autowired
     private AnalysisProperties properties;
 
@@ -49,18 +62,17 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
      */
     @Transactional(rollbackFor = Exception.class)
     public void rebuildDate(LocalDate date) {
-        if (date == null || date.isBefore(properties.getGoLiveDate())) {
+        if (date == null || date.isBefore(properties.getGoLiveLocalDate())) {
             throw new ServiceException("禁止重算模块上线日期之前的数据");
         }
-        List<AnalysisOrderFact> facts = factService.listByBusinessDate(date);
-        List<AnalysisRefundFact> refunds = refundService.list(new LambdaQueryWrapper<AnalysisRefundFact>()
-                .eq(AnalysisRefundFact::getRefundDate, date));
+        List<AnalysisOrderFact> facts = factMapper.selectByBusinessDate(date);
+        List<AnalysisRefundFact> refunds = refundMapper.selectByRefundDate(date);
         List<AnalysisCostConfig> configs = loadConfigs(date);
+        configs.addAll(loadRebateConfigs(date));
         Map<String, MetricAccumulator> groups = buildFactGroups(facts);
         applyRefunds(groups, refunds);
         applyConfigs(groups, configs);
-        remove(new LambdaQueryWrapper<AnalysisDailyMetric>()
-                .eq(AnalysisDailyMetric::getMetricDate, date));
+        baseMapper.deleteByMetricDate(date);
         List<AnalysisDailyMetric> metrics = groups.values().stream()
                 .map(value -> value.toMetric(date))
                 .collect(Collectors.toList());
@@ -72,48 +84,42 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
     /**
      * 查询经营看板数据。
      *
-     * @param query 查询条件
+     * @param metrics 已按条件查询的指标快照
      * @return 看板数据
      */
-    public AnalysisDashboardBO dashboard(AnalysisQuery query) {
-        List<AnalysisDailyMetric> metrics = listMetrics(query);
-        AnalysisDashboardBO result = new AnalysisDashboardBO();
+    public AnalysisDashboardBO dashboard(List<AnalysisDailyMetric> metrics) {
         MetricAccumulator summary = new MetricAccumulator();
         for (AnalysisDailyMetric metric : metrics) {
             summary.add(metric);
-            result.getRows().add(toRow(metric));
         }
-        result.setSummary(summary.toBO());
-        result.setFactCount(summary.factCount);
-        result.setIncompleteCount(summary.incompleteCount);
-        result.setCompletenessRate(calculateCompleteness(summary.factCount, summary.incompleteCount));
-        result.setMetricTree(buildMetricTree(result.getSummary()));
-        return result;
-    }
-
-    private List<AnalysisDailyMetric> listMetrics(AnalysisQuery query) {
-        LambdaQueryWrapper<AnalysisDailyMetric> wrapper = new LambdaQueryWrapper<>();
-        wrapper.ge(query.getStartDate() != null, AnalysisDailyMetric::getMetricDate, query.getStartDate())
-                .le(query.getEndDate() != null, AnalysisDailyMetric::getMetricDate, query.getEndDate())
-                .eq(query.getSubjectName() != null, AnalysisDailyMetric::getSubjectName, query.getSubjectName())
-                .eq(query.getPlatform() != null, AnalysisDailyMetric::getPlatform, query.getPlatform())
-                .eq(query.getShopName() != null, AnalysisDailyMetric::getShopName, query.getShopName())
-                .eq(query.getBrand() != null, AnalysisDailyMetric::getBrand, query.getBrand())
-                .eq(query.getCategory() != null, AnalysisDailyMetric::getCategory, query.getCategory())
-                .eq(query.getGoodsNo() != null, AnalysisDailyMetric::getGoodsNo, query.getGoodsNo())
-                .eq(query.getOrderType() != null, AnalysisDailyMetric::getOrderType, query.getOrderType())
-                .eq(query.getCalcStatus() != null, AnalysisDailyMetric::getCalcStatus, query.getCalcStatus())
-                .orderByAsc(AnalysisDailyMetric::getMetricDate);
-        return list(wrapper);
+        AnalysisDashboardBO.MetricBO summaryBO = summary.toBO();
+        List<AnalysisDashboardBO.DimensionMetricBO> rows = metrics.stream()
+                .map(AnalysisMetricConvert.INSTANCE::toDimensionBO)
+                .collect(Collectors.toList());
+        return AnalysisMetricConvert.INSTANCE.toDashboard(summaryBO, rows, buildMetricTree(summaryBO),
+                summary.factCount, summary.incompleteCount,
+                calculateCompleteness(summary.factCount, summary.incompleteCount));
     }
 
     private List<AnalysisCostConfig> loadConfigs(LocalDate date) {
         String month = date.toString().substring(0, 7);
-        return configService.list(new LambdaQueryWrapper<AnalysisCostConfig>()
-                .and(wrapper -> wrapper.eq(AnalysisCostConfig::getBusinessDate, date)
-                        .or().eq(AnalysisCostConfig::getMonthValue, month)
-                        .or().and(value -> value.le(AnalysisCostConfig::getStartDate, date)
-                                .ge(AnalysisCostConfig::getEndDate, date))));
+        return configMapper.selectEffectiveByDate(date, month);
+    }
+
+    private List<AnalysisCostConfig> loadRebateConfigs(LocalDate date) {
+        List<AnalysisCostConfig> result = new ArrayList<>();
+        for (AnalysisRebateActivity domain : rebateActivityMapper.selectAllOrdered()) {
+            List<AnalysisRebateDetail> details = rebateDetailMapper.selectByActivityId(domain.getId());
+            AnalysisRebateBO activity = AnalysisConvert.INSTANCE.toBO(domain, details);
+            if (activity.getStartTime().toLocalDate().isAfter(date)
+                    || activity.getEndTime().toLocalDate().isBefore(date)) {
+                continue;
+            }
+            for (AnalysisRebateBO.DetailBO detail : activity.getDetails()) {
+                result.add(AnalysisMetricConvert.INSTANCE.toRebateConfig(activity, detail));
+            }
+        }
+        return result;
     }
 
     private Map<String, MetricAccumulator> buildFactGroups(List<AnalysisOrderFact> facts) {
@@ -131,7 +137,7 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
             if (source == null) {
                 refund.setMatchStatus(AnalysisConstants.STATUS_INCOMPLETE);
                 refund.setExceptionReason("未匹配到上线后的订单商品行");
-                refundService.updateById(refund);
+                refundMapper.updateById(refund);
                 continue;
             }
             MetricAccumulator accumulator = groups.computeIfAbsent(dimensionKey(source),
@@ -139,16 +145,12 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
             accumulator.applyRefund(refund, source);
             refund.setMatchStatus(AnalysisConstants.STATUS_COMPLETE);
             refund.setExceptionReason(null);
-            refundService.updateById(refund);
+            refundMapper.updateById(refund);
         }
     }
 
     private AnalysisOrderFact findRefundSource(AnalysisRefundFact refund) {
-        return factService.getOne(new LambdaQueryWrapper<AnalysisOrderFact>()
-                .eq(AnalysisOrderFact::getOriginalOrderNo, refund.getOriginalOrderNo())
-                .eq(refund.getGoodsNo() != null, AnalysisOrderFact::getGoodsNo, refund.getGoodsNo())
-                .orderByDesc(AnalysisOrderFact::getBusinessDate)
-                .last("limit 1"));
+        return factMapper.selectRefundSource(refund.getOriginalOrderNo(), refund.getGoodsNo());
     }
 
     private void applyConfigs(Map<String, MetricAccumulator> groups, List<AnalysisCostConfig> configs) {
@@ -156,12 +158,13 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
             List<MetricAccumulator> matched = groups.values().stream()
                     .filter(group -> group.matches(config))
                     .collect(Collectors.toList());
-            if (matched.isEmpty() || config.getAmount() == null) {
+            if (matched.isEmpty() || (config.getAmount() == null && config.getCoefficient() == null)) {
                 continue;
             }
-            BigDecimal allocated = config.getAmount().divide(BigDecimal.valueOf(matched.size()), 4, RoundingMode.HALF_UP);
+            BigDecimal allocated = config.getAmount() == null ? BigDecimal.ZERO
+                    : config.getAmount().divide(BigDecimal.valueOf(matched.size()), 4, RoundingMode.HALF_UP);
             for (MetricAccumulator group : matched) {
-                group.applyConfig(config.getConfigType(), allocated);
+                group.applyConfig(config, allocated);
             }
         }
     }
@@ -169,22 +172,6 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
     private String dimensionKey(AnalysisOrderFact fact) {
         return String.join("|", safe(fact.getSubjectName()), safe(fact.getPlatform()), safe(fact.getShopName()),
                 safe(fact.getBrand()), safe(fact.getCategory()), safe(fact.getGoodsNo()), safe(fact.getOrderType()));
-    }
-
-    private AnalysisDashboardBO.DimensionMetricBO toRow(AnalysisDailyMetric metric) {
-        AnalysisDashboardBO.DimensionMetricBO row = new AnalysisDashboardBO.DimensionMetricBO();
-        MetricAccumulator.copyMetric(row, metric);
-        row.setMetricDate(metric.getMetricDate());
-        row.setSubjectName(metric.getSubjectName());
-        row.setPlatform(metric.getPlatform());
-        row.setShopName(metric.getShopName());
-        row.setBrand(metric.getBrand());
-        row.setCategory(metric.getCategory());
-        row.setGoodsNo(metric.getGoodsNo());
-        row.setOrderType(metric.getOrderType());
-        row.setFactCount(metric.getFactCount());
-        row.setIncompleteCount(metric.getIncompleteCount());
-        return row;
     }
 
     private List<AnalysisDashboardBO.MetricNodeBO> buildMetricTree(AnalysisDashboardBO.MetricBO metric) {
@@ -200,12 +187,7 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
     }
 
     private AnalysisDashboardBO.MetricNodeBO node(String key, String name, BigDecimal value) {
-        AnalysisDashboardBO.MetricNodeBO node = new AnalysisDashboardBO.MetricNodeBO();
-        node.setKey(key);
-        node.setName(name);
-        node.setValue(value);
-        node.setCalcStatus(value == null ? AnalysisConstants.STATUS_INCOMPLETE : AnalysisConstants.STATUS_COMPLETE);
-        return node;
+        return AnalysisMetricConvert.INSTANCE.toMetricNode(key, name, value);
     }
 
     private BigDecimal calculateCompleteness(int total, int incomplete) {
@@ -334,8 +316,18 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
                     && matchesValue(config.getCategory(), category);
         }
 
-        private void applyConfig(String type, BigDecimal amount) {
-            if ("CASHBACK".equals(type) || "PROMOTION".equals(type)) {
+        private void applyConfig(AnalysisCostConfig config, BigDecimal amount) {
+            String type = config.getConfigType();
+            if ("REBATE".equals(type)) {
+                goodsIncentive = goodsIncentive.add(amount);
+                if (config.getCoefficient() != null) {
+                    BigDecimal revenue = goodsIncome.add(platformSubsidy).add(governmentSubsidy);
+                    goodsIncentive = goodsIncentive.add(revenue.multiply(config.getCoefficient()));
+                }
+            } else if ("FIXED_COEFFICIENT".equals(type) && config.getCoefficient() != null) {
+                BigDecimal revenue = goodsIncome.add(platformSubsidy).add(governmentSubsidy);
+                platformFee = platformFee.add(revenue.multiply(config.getCoefficient()));
+            } else if ("CASHBACK".equals(type) || "PROMOTION".equals(type)) {
                 marketingFee = marketingFee.add(amount);
             } else if ("PENALTY".equals(type)) {
                 penaltyFee = penaltyFee.add(amount);
@@ -349,20 +341,10 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
         }
 
         private AnalysisDailyMetric toMetric(LocalDate date) {
-            AnalysisDailyMetric metric = new AnalysisDailyMetric();
-            metric.setMetricDate(date);
-            metric.setSubjectName(subjectName);
-            metric.setPlatform(platform);
-            metric.setShopName(shopName);
-            metric.setBrand(brand);
-            metric.setCategory(category);
-            metric.setGoodsNo(goodsNo);
-            metric.setOrderType(orderType);
-            fillMetric(metric);
-            return metric;
+            return AnalysisMetricConvert.INSTANCE.toDomain(calculate(date));
         }
 
-        private void fillMetric(AnalysisDailyMetric metric) {
+        private AnalysisMetricCalculation calculate(LocalDate date) {
             BigDecimal revenue = goodsIncome.add(platformSubsidy).add(governmentSubsidy);
             BigDecimal gross = incompleteCount == 0 ? revenue.subtract(goodsCost).add(goodsIncentive) : null;
             BigDecimal fulfillment = gross == null ? null : gross.subtract(platformFee).subtract(logisticsFee)
@@ -371,80 +353,26 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
                     .subtract(directLaborCost).subtract(departmentDirectCost).add(otherAdjustment);
             BigDecimal operating = department == null ? null : department.subtract(indirectLaborCost)
                     .subtract(allocatedIndirectCost);
-            setAmounts(metric, revenue, gross, fulfillment, department, operating);
-        }
-
-        private void setAmounts(AnalysisDailyMetric metric, BigDecimal revenue, BigDecimal gross,
-                                BigDecimal fulfillment, BigDecimal department, BigDecimal operating) {
-            metric.setSalesQuantity(quantity);
-            metric.setGoodsIncome(goodsIncome);
-            metric.setPlatformSubsidy(platformSubsidy);
-            metric.setGovernmentSubsidy(governmentSubsidy);
-            metric.setSalesRevenue(revenue);
-            metric.setGoodsCost(incompleteCount == 0 ? goodsCost : null);
-            metric.setGoodsIncentive(goodsIncentive);
-            metric.setGoodsGrossProfit(gross);
-            metric.setPlatformFee(platformFee);
-            metric.setLogisticsFee(logisticsFee);
-            metric.setMarketingFee(marketingFee);
-            metric.setImpairmentFee(impairmentFee);
-            metric.setPenaltyFee(penaltyFee);
-            metric.setTaxFee(taxFee);
-            metric.setFulfillmentGrossProfit(fulfillment);
-            metric.setCapitalCost(capitalCost);
-            metric.setDirectLaborCost(directLaborCost);
-            metric.setDepartmentDirectCost(departmentDirectCost);
-            metric.setOtherAdjustment(otherAdjustment);
-            metric.setDepartmentProfit(department);
-            metric.setIndirectLaborCost(indirectLaborCost);
-            metric.setAllocatedIndirectCost(allocatedIndirectCost);
-            metric.setOperatingProfit(operating);
-            metric.setFactCount(factCount);
-            metric.setIncompleteCount(incompleteCount);
-            metric.setCalcStatus(incompleteCount == 0 ? AnalysisConstants.STATUS_COMPLETE : AnalysisConstants.STATUS_INCOMPLETE);
+            return AnalysisMetricCalculation.builder()
+                    .metricDate(date).subjectName(subjectName).platform(platform).shopName(shopName)
+                    .brand(brand).category(category).goodsNo(goodsNo).orderType(orderType)
+                    .salesQuantity(quantity).goodsIncome(goodsIncome).platformSubsidy(platformSubsidy)
+                    .governmentSubsidy(governmentSubsidy).salesRevenue(revenue)
+                    .goodsCost(incompleteCount == 0 ? goodsCost : null).goodsIncentive(goodsIncentive)
+                    .goodsGrossProfit(gross).platformFee(platformFee).logisticsFee(logisticsFee)
+                    .marketingFee(marketingFee).impairmentFee(impairmentFee).penaltyFee(penaltyFee)
+                    .taxFee(taxFee).fulfillmentGrossProfit(fulfillment).capitalCost(capitalCost)
+                    .directLaborCost(directLaborCost).departmentDirectCost(departmentDirectCost)
+                    .otherAdjustment(otherAdjustment).departmentProfit(department)
+                    .indirectLaborCost(indirectLaborCost).allocatedIndirectCost(allocatedIndirectCost)
+                    .operatingProfit(operating).factCount(factCount).incompleteCount(incompleteCount)
+                    .calcStatus(incompleteCount == 0 ? AnalysisConstants.STATUS_COMPLETE
+                            : AnalysisConstants.STATUS_INCOMPLETE)
+                    .build();
         }
 
         private AnalysisDashboardBO.MetricBO toBO() {
-            AnalysisDailyMetric metric = new AnalysisDailyMetric();
-            fillMetric(metric);
-            AnalysisDashboardBO.MetricBO result = new AnalysisDashboardBO.MetricBO();
-            copyMetric(result, metric);
-            return result;
-        }
-
-        private static void copyMetric(AnalysisDashboardBO.MetricBO target, AnalysisDailyMetric source) {
-            target.setSalesQuantity(source.getSalesQuantity());
-            target.setGoodsIncome(source.getGoodsIncome());
-            target.setPlatformSubsidy(source.getPlatformSubsidy());
-            target.setGovernmentSubsidy(source.getGovernmentSubsidy());
-            target.setSalesRevenue(source.getSalesRevenue());
-            target.setGoodsCost(source.getGoodsCost());
-            target.setGoodsIncentive(source.getGoodsIncentive());
-            target.setGoodsGrossProfit(source.getGoodsGrossProfit());
-            target.setGoodsGrossMargin(margin(source.getGoodsGrossProfit(), source.getSalesRevenue()));
-            target.setPlatformFee(source.getPlatformFee());
-            target.setLogisticsFee(source.getLogisticsFee());
-            target.setMarketingFee(source.getMarketingFee());
-            target.setImpairmentFee(source.getImpairmentFee());
-            target.setPenaltyFee(source.getPenaltyFee());
-            target.setTaxFee(source.getTaxFee());
-            target.setFulfillmentGrossProfit(source.getFulfillmentGrossProfit());
-            target.setCapitalCost(source.getCapitalCost());
-            target.setDirectLaborCost(source.getDirectLaborCost());
-            target.setDepartmentDirectCost(source.getDepartmentDirectCost());
-            target.setOtherAdjustment(source.getOtherAdjustment());
-            target.setDepartmentProfit(source.getDepartmentProfit());
-            target.setIndirectLaborCost(source.getIndirectLaborCost());
-            target.setAllocatedIndirectCost(source.getAllocatedIndirectCost());
-            target.setOperatingProfit(source.getOperatingProfit());
-            target.setCalcStatus(source.getCalcStatus());
-        }
-
-        private static BigDecimal margin(BigDecimal profit, BigDecimal revenue) {
-            if (profit == null || revenue == null || revenue.signum() == 0) {
-                return null;
-            }
-            return profit.multiply(HUNDRED).divide(revenue, 2, RoundingMode.HALF_UP);
+            return AnalysisMetricConvert.INSTANCE.toMetricBO(calculate(null));
         }
 
         private static boolean matchesValue(String configured, String actual) {
