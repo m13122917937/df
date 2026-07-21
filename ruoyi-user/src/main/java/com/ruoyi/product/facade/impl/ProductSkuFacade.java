@@ -1,7 +1,6 @@
 package com.ruoyi.product.facade.impl;
 
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.SortBy;
 import com.ruoyi.common.model.page.PageBO;
@@ -15,8 +14,8 @@ import com.ruoyi.product.model.bo.ProductSkuBO;
 import com.ruoyi.product.model.param.ProductSkuParam;
 import com.ruoyi.product.model.query.ProductSkuQuery;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
@@ -29,14 +28,14 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ProductSkuFacade implements IProductSkuFacade {
 
-    @Autowired
-    private ProductSkuService productSkuService;
+    private final ProductSkuService productSkuService;
 
     @Override
     public List<ProductSkuBO> list(ProductSkuQuery query, SortBy sort) {
-        return ProductSkuCov.INSTANCE.listToBO(productSkuService.list(DynamicCondition.toWrapper(query,sort)));
+        return ProductSkuCov.INSTANCE.listToBO(productSkuService.list(DynamicCondition.toWrapper(query, sort)));
     }
 
     @Override
@@ -53,8 +52,7 @@ public class ProductSkuFacade implements IProductSkuFacade {
 
     @Override
     public boolean update(ProductSkuParam param, ProductSkuQuery query) {
-        ProductSku queryDomain = ProductSkuCov.INSTANCE.queryToDomain(query);
-        return productSkuService.update(ProductSkuCov.INSTANCE.paramToDomain(param), new QueryWrapper<>(queryDomain));
+        return productSkuService.update(ProductSkuCov.INSTANCE.paramToDomain(param), DynamicCondition.toWrapper(query));
     }
 
     @Override

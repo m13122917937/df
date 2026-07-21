@@ -5,12 +5,14 @@ import com.ruoyi.analysis.convert.AnalysisSyncConvert;
 import com.ruoyi.analysis.domain.AnalysisDailyMetric;
 import com.ruoyi.analysis.domain.AnalysisOrderFact;
 import com.ruoyi.analysis.model.bo.AnalysisDashboardBO;
+import com.ruoyi.analysis.model.bo.AnalysisRebateBO;
 import com.ruoyi.analysis.model.source.AnalysisMetricCalculation;
 import com.ruoyi.analysis.model.source.AnalysisOrderFactSource;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,6 +47,7 @@ class AnalysisMapStructConvertTest {
         AnalysisMetricCalculation source = AnalysisMetricCalculation.builder()
                 .metricDate(LocalDate.of(2026, 7, 18)).platform("PDD")
                 .salesRevenue(new BigDecimal("200")).goodsGrossProfit(new BigDecimal("40"))
+                .directHeadcount(new BigDecimal("3"))
                 .factCount(2).incompleteCount(0).calcStatus("COMPLETE").build();
 
         AnalysisDailyMetric metric = AnalysisMetricConvert.INSTANCE.toDomain(source);
@@ -53,6 +56,25 @@ class AnalysisMapStructConvertTest {
         assertEquals("PDD", metric.getPlatform());
         assertEquals(new BigDecimal("200"), metric.getSalesRevenue());
         assertEquals(new BigDecimal("20.00"), summary.getGoodsGrossMargin());
+        assertEquals(new BigDecimal("3"), metric.getDirectHeadcount());
         assertEquals("COMPLETE", summary.getCalcStatus());
+    }
+
+    /**
+     * 验证返利活动的核算有效期会保留到统一配置对象。
+     */
+    @Test
+    void shouldKeepRebateEffectiveDateRange() {
+        AnalysisRebateBO activity = new AnalysisRebateBO();
+        activity.setStartTime(LocalDateTime.of(2026, 7, 1, 0, 0));
+        activity.setEndTime(LocalDateTime.of(2026, 7, 31, 23, 59));
+        AnalysisRebateBO.DetailBO detail = new AnalysisRebateBO.DetailBO();
+        detail.setGoodsNo("SKU-1");
+        detail.setAmount(new BigDecimal("100"));
+
+        assertEquals(LocalDate.of(2026, 7, 1), AnalysisMetricConvert.INSTANCE
+                .toRebateConfig(activity, detail).getStartDate());
+        assertEquals(LocalDate.of(2026, 7, 31), AnalysisMetricConvert.INSTANCE
+                .toRebateConfig(activity, detail).getEndDate());
     }
 }

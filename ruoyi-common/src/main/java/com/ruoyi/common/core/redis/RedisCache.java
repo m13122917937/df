@@ -112,6 +112,18 @@ public class RedisCache {
     }
 
     /**
+     * 原子获取并删除缓存对象。
+     *
+     * @param key 缓存键
+     * @param <T> 对象类型
+     * @return 原缓存值，不存在时返回 null
+     */
+    public <T> T getAndDeleteCacheObject(final String key) {
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        return bucket.getAndDelete();
+    }
+
+    /**
      * SETNX 原子操作 - 只有当 key 不存在时才设置值，key 存在则不操作
      *
      * @param key   Redis键

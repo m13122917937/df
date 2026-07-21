@@ -19,6 +19,25 @@ export function login(username, password, code, uuid) {
   });
 }
 
+// 获取企业微信扫码授权地址
+export function getWeComLoginQr() {
+  return request({
+    url: "/wecom/login/qr",
+    headers: { isToken: false },
+    method: "get",
+  });
+}
+
+// 兑换企业微信扫码登录票据
+export function exchangeWeComLoginTicket(ticket) {
+  return request({
+    url: "/wecom/login/exchange",
+    headers: { isToken: false },
+    method: "get",
+    params: { ticket },
+  });
+}
+
 // 注册方法
 export function register(data) {
   return request({

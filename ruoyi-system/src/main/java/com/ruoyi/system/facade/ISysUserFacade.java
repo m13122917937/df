@@ -1,5 +1,7 @@
 package com.ruoyi.system.facade;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -43,6 +45,22 @@ public interface ISysUserFacade {
      * @return 用户对象信息
      */
     public SysUser selectUserByUserName(String userName);
+
+    /**
+     * 按动态条件查询单个系统用户。
+     *
+     * @param wrapper 动态查询条件
+     * @return 系统用户，不存在时返回 null
+     */
+    SysUser selectOne(Wrapper<SysUser> wrapper);
+
+    /**
+     * 按动态条件查询系统用户列表。
+     *
+     * @param wrapper 动态查询条件
+     * @return 系统用户列表
+     */
+    List<SysUser> selectList(Wrapper<SysUser> wrapper);
 
     /**
      * 通过用户ID查询用户

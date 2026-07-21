@@ -90,8 +90,14 @@ public class ProductSkuQuery {
     @QueryField(operator = DynamicCondition.Operator.LIMIT)
     private Integer limit;
 
-    @QueryField(operator = DynamicCondition.Operator.GROUP, field = "sku_code")
-    private String group;
+    @QueryField(operator = DynamicCondition.Operator.GROUP, field = "brand")
+    private String brandGroup;
+
+    @QueryField(operator = DynamicCondition.Operator.GROUP, field = "category")
+    private String categoryGroup;
+
+    @QueryField(operator = DynamicCondition.Operator.GROUP, field = "product_name")
+    private String productNameGroup;
 
 
 

@@ -3,25 +3,23 @@ package com.ruoyi.capital.service;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.capital.convert.CompanyCapitalLogCov;
 import com.ruoyi.capital.domain.CompanyCapital;
 import com.ruoyi.capital.domain.CompanyCapitalLog;
-import com.ruoyi.capital.mapper.CompanyCapitalLogMapper;
 import com.ruoyi.capital.mapper.CompanyCapitalMapper;
 import com.ruoyi.capital.model.consts.CompanyCapitalConsts;
 import com.ruoyi.capital.model.param.CompanyCapitalLogParam;
+import com.ruoyi.capital.model.query.CompanyCapitalQuery;
 import com.ruoyi.capital.model.query.CompanyCapitalLogQuery;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.Arith;
 import com.ruoyi.framework.mybatis.DynamicCondition;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -34,9 +32,9 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CompanyCapitalService extends ServiceImpl<CompanyCapitalMapper, CompanyCapital> {
-    @Autowired
-    private CompanyCapitalLogMapper companyCapitalLogMapper;
+    private final CompanyCapitalLogService companyCapitalLogService;
 
     /**
      * 修改企业可用资金并记录流水。
@@ -49,7 +47,7 @@ public class CompanyCapitalService extends ServiceImpl<CompanyCapitalMapper, Com
         logParam.setCapitalId(capital.getId()).setCompanyId(capital.getCompanyId()).setCreateTime(DateUtil.date());
         logParam.setSubtotal(Arith.add(logParam.getSubtotal(), logParam.getAddAmount()))
                 .setAvailableAmount(Arith.add(capital.getAvailableAmount(), logParam.getSubtotal()));
-        if (companyCapitalLogMapper.insert(CompanyCapitalLogCov.INSTANCE.toDomain(logParam)) <= 0) {
+        if (!companyCapitalLogService.save(CompanyCapitalLogCov.INSTANCE.toDomain(logParam))) {
             return;
         }
         updateAmount(capital, logParam.getAddAmount());
@@ -75,7 +73,7 @@ public class CompanyCapitalService extends ServiceImpl<CompanyCapitalMapper, Com
                 .setSubtotal(Objects.requireNonNullElse(logParam.getSubtotal(), BigDecimal.ZERO));
         capitalLog.setAvailableAmount(Arith.add(capital.getAvailableAmount(),
                 Arith.add(logParam.getAddAmount(), logParam.getOutAmount())));
-        companyCapitalLogMapper.insert(capitalLog);
+        companyCapitalLogService.save(capitalLog);
         if (!updateFrozenAmount(capital, Arith.add(logParam.getAddAmount(), logParam.getOutAmount()))) {
             throw new ServiceException("修改资金账号失败", HttpStatus.CAPITAL_WARN);
         }
@@ -115,7 +113,7 @@ public class CompanyCapitalService extends ServiceImpl<CompanyCapitalMapper, Com
     private CompanyCapitalLog findCapitalLog(Long capitalId, CompanyCapitalLogParam logParam) {
         CompanyCapitalLogQuery query = new CompanyCapitalLogQuery().setCapitalId(capitalId)
                 .setOrderNo(logParam.getOrderNo()).setType(logParam.getType()).setTradeId(logParam.getTradeId());
-        return companyCapitalLogMapper.selectOne(DynamicCondition.toWrapper(query));
+        return companyCapitalLogService.getOne(DynamicCondition.toWrapper(query));
     }
 
     private boolean isRepeatedAmount(CompanyCapitalLog capitalLog, CompanyCapitalLogParam logParam) {
@@ -131,8 +129,8 @@ public class CompanyCapitalService extends ServiceImpl<CompanyCapitalMapper, Com
                 .setAvailableAmount(Arith.add(capital.getAvailableAmount(), capitalLog.getAddAmount()))
                 .setUpdateTime(DateUtil.date())
                 .setSubtotal(Arith.add(capitalLog.getAddAmount(), capitalLog.getOutAmount()));
-        companyCapitalLogMapper.update(capitalLog,
-                new LambdaQueryWrapper<CompanyCapitalLog>().eq(CompanyCapitalLog::getId, capitalLog.getId()));
+        companyCapitalLogService.update(capitalLog,
+                DynamicCondition.toWrapper(new CompanyCapitalLogQuery().setId(capitalLog.getId())));
     }
 
     /**
@@ -142,7 +140,8 @@ public class CompanyCapitalService extends ServiceImpl<CompanyCapitalMapper, Com
      * @param companyId   企业ID
      */
     public CompanyCapital queryOrInit(Integer serviceType, Long companyId) {
-        CompanyCapital companyCapital = this.getOne(new QueryWrapper<>(new CompanyCapital().setCompanyId(companyId).setServiceType(serviceType)));
+        CompanyCapitalQuery query = new CompanyCapitalQuery().setCompanyId(companyId).setServiceType(serviceType);
+        CompanyCapital companyCapital = getOne(DynamicCondition.toWrapper(query));
         if (Objects.isNull(companyCapital)) {
             // 初始化资金账号
             companyCapital = this.initCompanyCapital(serviceType, companyId, BigDecimal.ZERO);

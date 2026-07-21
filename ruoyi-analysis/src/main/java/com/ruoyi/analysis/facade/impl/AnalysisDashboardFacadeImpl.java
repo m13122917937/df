@@ -33,9 +33,31 @@ public class AnalysisDashboardFacadeImpl implements AnalysisDashboardFacade {
      */
     @Override
     public AnalysisDashboardBO dashboard(AnalysisQuery query) {
-        List<AnalysisDailyMetric> metrics = metricService.list(DynamicCondition.toWrapper(
-                AnalysisQueryConvert.INSTANCE.toMetricQuery(query), SortBy.of("+metric_date")));
-        return metricService.dashboard(metrics);
+        return metricService.dashboard(listMetrics(query));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AnalysisDashboardBO performanceRollup(AnalysisQuery query) {
+        return metricService.performanceRollup(listMetrics(query));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AnalysisDashboardBO channelProduction(AnalysisQuery query) {
+        return metricService.channelProduction(listMetrics(query));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AnalysisDashboardBO humanEfficiency(AnalysisQuery query) {
+        return metricService.humanEfficiency(listMetrics(query));
     }
 
     /**
@@ -58,5 +80,10 @@ public class AnalysisDashboardFacadeImpl implements AnalysisDashboardFacade {
         List<AnalysisOrderFact> facts = factService.list(DynamicCondition.toWrapper(
                 query, SortBy.of("-business_date,-id")));
         return AnalysisConvert.INSTANCE.toFactBOList(facts);
+    }
+
+    private List<AnalysisDailyMetric> listMetrics(AnalysisQuery query) {
+        return metricService.list(DynamicCondition.toWrapper(
+                AnalysisQueryConvert.INSTANCE.toMetricQuery(query), SortBy.of("+metric_date")));
     }
 }

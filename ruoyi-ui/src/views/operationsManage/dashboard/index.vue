@@ -53,6 +53,8 @@
         <el-table-column prop="category" label="品类" width="110" />
         <el-table-column prop="goodsNo" label="货品编码" min-width="130" show-overflow-tooltip />
         <el-table-column prop="salesQuantity" label="销量" width="90" align="right" />
+        <el-table-column v-if="apiType === 'humanEfficiency'" prop="directHeadcount" label="直接人数" width="100" align="right" />
+        <el-table-column v-if="apiType === 'humanEfficiency'" prop="indirectHeadcount" label="间接人数" width="100" align="right" />
         <el-table-column label="销售收入" width="120" align="right">
           <template slot-scope="scope">{{ money(scope.row.salesRevenue) }}</template>
         </el-table-column>
@@ -69,6 +71,7 @@
           <template slot-scope="scope">{{ money(scope.row.operatingProfit) }}</template>
         </el-table-column>
         <el-table-column prop="incompleteCount" label="缺失数" width="90" align="right" />
+        <el-table-column v-if="isQuality" prop="missingReason" label="待核算原因" min-width="180" show-overflow-tooltip />
       </el-table>
       <el-pagination
         v-if="visibleRows.length > pageSize"
@@ -134,9 +137,6 @@ export default {
     isQuality() { return this.apiType === 'dataQuality' },
     visibleRows() {
       if (this.isQuality) return this.rows.filter(item => Number(item.incompleteCount || 0) > 0)
-      if (this.apiType === 'performanceRollup') return this.groupRows(['subjectName'])
-      if (this.apiType === 'channelProduction') return this.groupRows(['brand', 'category', 'platform', 'shopName'])
-      if (this.apiType === 'humanEfficiency') return this.groupRows(['metricDate', 'subjectName'])
       return this.rows
     },
     pagedRows() {
@@ -233,23 +233,6 @@ export default {
         salesRevenue: Number(item.paymentAmount || 0) + subsidy,
         incompleteCount: item.calcStatus === 'COMPLETE' ? 0 : 1
       })
-    },
-    groupRows(dimensions) {
-      const amountKeys = ['salesQuantity', 'salesRevenue', 'goodsCost', 'goodsGrossProfit', 'fulfillmentGrossProfit', 'operatingProfit', 'factCount', 'incompleteCount']
-      const groups = {}
-      this.rows.forEach(row => {
-        const key = dimensions.map(name => row[name] || '').join('|')
-        if (!groups[key]) {
-          groups[key] = Object.assign({}, row)
-          amountKeys.forEach(name => { groups[key][name] = row[name] == null ? null : Number(row[name]) })
-        } else {
-          amountKeys.forEach(name => {
-            if (groups[key][name] == null || row[name] == null) groups[key][name] = null
-            else groups[key][name] += Number(row[name] || 0)
-          })
-        }
-      })
-      return Object.values(groups)
     },
     formatDate(date) {
       const year = date.getFullYear()

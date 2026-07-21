@@ -655,6 +655,10 @@ aside {
 
     .el-dropdown-menu__item--divided {
       border-top-color: #262930 !important;
+
+      &::before {
+        background-color: #1A1D27 !important;
+      }
     }
   }
 
@@ -1179,6 +1183,21 @@ aside {
 //main-container全局样式
 .app-container {
   padding: var(--page-padding);
+}
+
+/* 路由加载与全局加载统一使用当前主题主色。 */
+#nprogress .bar {
+  background: var(--primary-color, #1677ff) !important;
+  height: 3px;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px var(--primary-color, #1677ff), 0 0 5px var(--primary-color, #1677ff);
+}
+
+.el-loading-spinner .el-icon-loading,
+.el-loading-spinner .path {
+  color: var(--primary-color, #1677ff);
 }
 
 .components-container {

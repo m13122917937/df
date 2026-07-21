@@ -16,24 +16,24 @@ import java.util.List;
  */
 public interface IMemberFacade {
 
-
+    /** @return 会员列表 */
     List<MemberBO> queryList(MemberQuery memberQuery);
 
-
+    /** @return 会员详情 */
     MemberBO queryOne(MemberQuery memberQuery);
 
-
+    /** @return 已创建会员 */
     MemberBO addMemberAndCompany(MemberParam memberParam);
 
-
+    /** @return 企业成员分页列表 */
     PageBO<MemberBO> memberList(MemberQuery memberQuery, PageParamV2 pageParamV2);
 
-
+    /** 绑定会员与企业。 */
     void addMemberCompany(Long memberId, Long companyId, String name, Integer owner);
 
-
+    /** @return 企业成员分页列表 */
     PageBO<MemberBO> pageCompanyMember(MemberQuery memberQuery, PageParamV2 pageParamV2);
 
-
+    /** @return 当前用户是否为企业主账号 */
     boolean companyMasterUser(Long companyId, Long currentUserId);
 }

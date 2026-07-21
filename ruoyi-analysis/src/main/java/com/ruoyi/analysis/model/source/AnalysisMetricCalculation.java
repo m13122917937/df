@@ -37,10 +37,12 @@ public class AnalysisMetricCalculation {
     BigDecimal fulfillmentGrossProfit;
     BigDecimal capitalCost;
     BigDecimal directLaborCost;
+    BigDecimal directHeadcount;
     BigDecimal departmentDirectCost;
     BigDecimal otherAdjustment;
     BigDecimal departmentProfit;
     BigDecimal indirectLaborCost;
+    BigDecimal indirectHeadcount;
     BigDecimal allocatedIndirectCost;
     BigDecimal operatingProfit;
     Integer factCount;

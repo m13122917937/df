@@ -1,6 +1,5 @@
 package com.ruoyi.user.facade.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.PageUtils;
@@ -11,6 +10,8 @@ import com.ruoyi.user.service.AuthInfoService;
 import com.ruoyi.user.model.bo.AuthInfoBO;
 import com.ruoyi.user.model.param.AuthInfoParam;
 import com.ruoyi.user.model.query.AuthInfoQuery;
+import com.ruoyi.framework.mybatis.DynamicCondition;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,29 +26,26 @@ import java.util.List;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthInfoFacade implements IAuthInfoFacade {
 
-    @Autowired
-    AuthInfoService authInfoService;
+    private final AuthInfoService authInfoService;
 
     @Override
     public List<AuthInfoBO> queryList(AuthInfoQuery authInfoQuery) {
-        AuthInfo authInfo = AuthInfoConvert.INSTANCE.queryToDomain(authInfoQuery);
-        List<AuthInfo> list = authInfoService.list(new QueryWrapper<>(authInfo));
+        List<AuthInfo> list = authInfoService.list(DynamicCondition.toWrapper(authInfoQuery));
         return AuthInfoConvert.INSTANCE.domainToBoList(list);
     }
 
     @Override
     public AuthInfoBO queryOne(AuthInfoQuery authInfoQuery) {
-        AuthInfo authInfo = AuthInfoConvert.INSTANCE.queryToDomain(authInfoQuery);
-        return AuthInfoConvert.INSTANCE.domainToBo(authInfoService.getOne(new QueryWrapper<>(authInfo)));
+        return AuthInfoConvert.INSTANCE.domainToBo(authInfoService.getOne(DynamicCondition.toWrapper(authInfoQuery)));
     }
 
     @Override
     public PageBO<AuthInfoBO> pageQuery(AuthInfoQuery authInfoQuery, PageParamV2 pageParamV2) {
         PageUtils.startPage(pageParamV2);
-        AuthInfo authInfo = AuthInfoConvert.INSTANCE.queryToDomain(authInfoQuery);
-        List<AuthInfo> list = authInfoService.list(new QueryWrapper<>(authInfo));
+        List<AuthInfo> list = authInfoService.list(DynamicCondition.toWrapper(authInfoQuery));
         return PageUtils.fromList(list, AuthInfoConvert.INSTANCE::domainToBoList);
     }
 

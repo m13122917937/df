@@ -58,9 +58,6 @@ spring:
       database: 0
       # 密码
       password: rN8_iR44
-#mybatis-plus:
-#    configuration:
-#        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 wechat:
   mp:
     useRedis: true
@@ -69,6 +66,13 @@ wechat:
         secret: 8d0f2f5ce562a5e420f5ebec4b7a03ce
         token: oiXr3GV0RYUl2FYVsI4U8k2KhI
         aesKey: oiXr3GV0RYUl2FYVsI4U8k2KhISQWJK40a4YQ6huCc6
+  wecom:
+    # 企业微信通讯录应用配置
+    corpId: ${WECOM_CORP_ID:}
+    contactSecret: ${WECOM_CONTACT_SECRET:}
+    agentId: ${WECOM_AGENT_ID:}
+    loginRedirectUri: ${WECOM_LOGIN_REDIRECT_URI:https://admin.wujievip.cn/wecom/login/callback}
+    loginPageUri: ${WECOM_LOGIN_PAGE_URI:https://admin.wujievip.cn/#/login}
 fy:
   oss:
     aliyunDomain: https://static.wujievip.cn
@@ -92,15 +96,6 @@ fy:
   pdd:
     clientId: 3a86a9f9b2f644c6ac6306ee6475680e
     clientSecret: be1d12163b765a78535439f0c5621c4aca46061a
-  # 淘宝开放平台
-  taobao:
-    enabled: true
-    serverUrl: https://eco.taobao.com/router/rest
-    appKey: 26133373
-    appSecret: m018of43ealk0g758h4cbfimei3hnh0e
-    connectTimeout: 10000
-    readTimeout: 15000
-
 esign:
   host: https://smlopenapi.esign.cn
   appId: 7439107862

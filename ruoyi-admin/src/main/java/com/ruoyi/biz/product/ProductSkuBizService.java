@@ -60,7 +60,9 @@ public class ProductSkuBizService {
      * @return
      */
     public List<String> listProductName(String brand, String productName) {
-        List<ProductSkuBO> list = productSkuFacade.list(new ProductSkuQuery().setBrand(brand).setProductNameLike(productName).setLimit(50).setGroup("product_name"), null);
+        ProductSkuQuery query = new ProductSkuQuery().setBrand(brand).setProductNameLike(productName)
+                .setLimit(50).setProductNameGroup("product_name");
+        List<ProductSkuBO> list = productSkuFacade.list(query, null);
         if(CollectionUtil.isEmpty( list)){
             return Collections.EMPTY_LIST;
         }
@@ -69,7 +71,8 @@ public class ProductSkuBizService {
 
 
     public List<String> listBrand() {
-        List<ProductSkuBO> list = productSkuFacade.list(new ProductSkuQuery().setLimit(50).setGroup("brand"), null);
+        List<ProductSkuBO> list = productSkuFacade.list(
+                new ProductSkuQuery().setLimit(50).setBrandGroup("brand"), null);
         if (CollectionUtil.isEmpty(list)) {
             return Collections.EMPTY_LIST;
         }

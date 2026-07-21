@@ -109,7 +109,7 @@ public class SecurityConfig {
             .authorizeHttpRequests((requests) -> {
                 permitAllUrl.getUrls().forEach(url -> requests.antMatchers(url).permitAll());
                 // 对于登录login 注册register 验证码captchaImage 允许匿名访问
-                requests.antMatchers("/login", "/wx/token/callBack" , "/open/order/**" , "/company/auth/**", "/apply/imei/query", "/apply/imei/platform").permitAll()
+                requests.antMatchers("/login", "/wecom/login/**", "/wx/token/callBack" , "/open/order/**" , "/company/auth/**", "/apply/imei/query", "/apply/imei/platform").permitAll()
                     // 静态资源，可匿名访问
                     .antMatchers("/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/profile/**").permitAll()
                     .antMatchers("/doc.html", "/swagger-resources", "/webjars/**", "/*/api-docs*", "/login" ).permitAll()

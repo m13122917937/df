@@ -49,6 +49,8 @@ public interface AnalysisMetricConvert {
     @Mapping(target = "goodsNo", source = "detail.goodsNo")
     @Mapping(target = "amount", source = "detail.amount")
     @Mapping(target = "coefficient", source = "detail.pointRate")
+    @Mapping(target = "startDate", expression = "java(activity.getStartTime().toLocalDate())")
+    @Mapping(target = "endDate", expression = "java(activity.getEndTime().toLocalDate())")
     AnalysisCostConfig toRebateConfig(AnalysisRebateBO activity, AnalysisRebateBO.DetailBO detail);
 
     @AfterMapping

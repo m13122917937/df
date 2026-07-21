@@ -203,6 +203,7 @@ public class AnalysisSyncService {
         BigDecimal goodsAmount = lineWeight(goods);
         BigDecimal cost = goods.getAssessmentCost() == null ? null : goods.getAssessmentCost().multiply(quantity);
         BigDecimal subsidy = zero(goods.getGoodsPlatDiscountFee()).add(zero(goods.getShareOrderPlatDiscountFee()));
+        String missingReason = missingReason(trade, goods, cost);
         AnalysisOrderFactSource source = AnalysisOrderFactSource.builder()
                 .factKey(trade.getTradeNo() + ":" + lineKey).jkyTradeNo(trade.getTradeNo())
                 .jkyOrderNo(trade.getOrderNo()).originalOrderNo(firstNotBlank(trade.getOnlineTradeNo(),
@@ -224,10 +225,28 @@ public class AnalysisSyncService {
                 .orderStatus(String.valueOf(trade.getTradeStatus()))
                 .orderType(Objects.equals(goods.getIsGift(), 1) ? "GIFT" : "NORMAL")
                 .giftFlag(zeroInt(goods.getIsGift()))
-                .calcStatus(cost == null ? AnalysisConstants.STATUS_INCOMPLETE : AnalysisConstants.STATUS_COMPLETE)
-                .missingReason(cost == null ? "吉客云未返回商品评估成本" : null)
+                .calcStatus(missingReason == null ? AnalysisConstants.STATUS_COMPLETE : AnalysisConstants.STATUS_INCOMPLETE)
+                .missingReason(missingReason)
                 .rawHash(SecureUtil.sha256(JacksonUtil.toJson(trade) + "#" + index)).build();
         return AnalysisSyncConvert.INSTANCE.toDomain(source);
+    }
+
+    private String missingReason(OrderQueryRep.OrderTradeRep trade, OrderQueryRep.OrderGoodsDetailRep goods,
+                                 BigDecimal cost) {
+        List<String> reasons = new ArrayList<>();
+        if (StrUtil.isBlank(trade.getCompanyName())) {
+            reasons.add("未匹配经营主体");
+        }
+        if (StrUtil.isBlank(trade.getShopName())) {
+            reasons.add("未匹配店铺");
+        }
+        if (StrUtil.isBlank(firstNotBlank(goods.getGoodsNo(), goods.getOuterId()))) {
+            reasons.add("未匹配 SKU");
+        }
+        if (cost == null) {
+            reasons.add("吉客云未返回商品评估成本");
+        }
+        return reasons.isEmpty() ? null : String.join("；", reasons);
     }
 
     private List<RefundQueryRep.TradeAfterOnlineWrapper> loadRefunds(LocalDate date) {

@@ -3,6 +3,7 @@ package com.ruoyi.biz.analysis;
 import com.alibaba.excel.EasyExcel;
 import com.ruoyi.analysis.facade.AnalysisConfigFacade;
 import com.ruoyi.analysis.model.bo.AnalysisCostConfigBO;
+import com.ruoyi.analysis.model.bo.AnalysisImportLogBO;
 import com.ruoyi.analysis.model.param.AnalysisCostConfigParam;
 import com.ruoyi.analysis.model.query.AnalysisQuery;
 import com.ruoyi.common.exception.ServiceException;
@@ -18,6 +19,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * 经营核算配置业务编排。
@@ -86,16 +88,28 @@ public class AnalysisConfigBizService {
             List<AnalysisConfigExcelVO> rows = (List<AnalysisConfigExcelVO>) (List<?>) EasyExcel
                     .read(file.getInputStream(), AnalysisConfigExcelVO.class, null).sheet().doReadSync();
             List<AnalysisCostConfigParam> params = new ArrayList<>();
-            for (AnalysisConfigExcelVO row : rows) {
+            List<String> errors = new ArrayList<>();
+            for (int index = 0; index < rows.size(); index++) {
+                AnalysisConfigExcelVO row = rows.get(index);
                 AnalysisCostConfigParam param = AnalysisConfigWebConvert.INSTANCE.toParam(row);
                 param.setConfigType(configType);
                 param.setOperatorId(operatorId);
-                validateRow(param, params.size() + 2);
-                params.add(param);
+                if (isValidRow(param, index + 2, errors)) {
+                    params.add(param);
+                }
             }
-            return configFacade.importConfigs(params, overwrite);
+            String validationMessage = invalidRowsMessage(errors);
+            if (validationMessage != null) {
+                configFacade.recordImportFailure(configType, file.getOriginalFilename(), overwrite,
+                        rows.size(), validationMessage, operatorId);
+                throw new ServiceException(validationMessage);
+            }
+            return configFacade.importConfigs(params, overwrite, file.getOriginalFilename(), operatorId);
         } catch (IOException exception) {
-            throw new ServiceException("读取 Excel 失败：" + exception.getMessage());
+            String errorMessage = "读取 Excel 失败：" + exception.getMessage();
+            configFacade.recordImportFailure(configType, file.getOriginalFilename(), overwrite, 0,
+                    errorMessage, operatorId);
+            throw new ServiceException(errorMessage);
         }
     }
 
@@ -107,6 +121,37 @@ public class AnalysisConfigBizService {
         if (param.getAmount() == null && param.getCoefficient() == null) {
             throw new ServiceException("第" + rowNumber + "行金额和系数不能同时为空");
         }
+    }
+
+    /**
+     * 查询最近的配置导入记录。
+     *
+     * @param limit 最大条数
+     * @return 导入记录
+     */
+    public List<AnalysisImportLogBO> importLogs(int limit) {
+        return configFacade.importLogs(limit);
+    }
+
+    private boolean isValidRow(AnalysisCostConfigParam param, int rowNumber, List<String> errors) {
+        try {
+            validateRow(param, rowNumber);
+            return true;
+        } catch (ServiceException exception) {
+            errors.add(exception.getMessage());
+            return false;
+        }
+    }
+
+    private String invalidRowsMessage(List<String> errors) {
+        if (errors.isEmpty()) {
+            return null;
+        }
+        StringJoiner joiner = new StringJoiner("；");
+        for (String error : errors) {
+            joiner.add(error);
+        }
+        return "导入校验失败：" + joiner;
     }
 
     private void prepareResponse(HttpServletResponse response, String fileName) throws IOException {

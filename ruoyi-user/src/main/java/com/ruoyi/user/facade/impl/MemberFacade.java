@@ -1,7 +1,6 @@
 package com.ruoyi.user.facade.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.PageUtils;
@@ -19,40 +18,36 @@ import com.ruoyi.user.model.param.MemberParam;
 import com.ruoyi.user.model.query.MemberCompanyQuery;
 import com.ruoyi.user.model.query.MemberQuery;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class MemberFacade implements IMemberFacade {
 
-
-    @Autowired
-    MemberService memberService;
-
-    @Autowired
-    MemberCompanyService memberCompanyService;
+    private final MemberService memberService;
+    private final MemberCompanyService memberCompanyService;
 
 
     @Override
     public List<MemberBO> queryList(final MemberQuery memberQuery) {
 
-        Member member = MemberCov.INSTANCE.queryToBo(memberQuery);
-        List<Member> list = memberService.list(new QueryWrapper<>(member));
+        List<Member> list = memberService.list(DynamicCondition.toWrapper(memberQuery));
         return MemberCov.INSTANCE.domainToBoList(list);
     }
 
     @Override
     public MemberBO queryOne(final MemberQuery memberQuery) {
-        return MemberCov.INSTANCE.domainToBo(memberService.getOne(new QueryWrapper<>(MemberCov.INSTANCE.queryToBo(memberQuery))));
+        return MemberCov.INSTANCE.domainToBo(memberService.getOne(DynamicCondition.toWrapper(memberQuery)));
     }
 
     @Override
     public MemberBO addMemberAndCompany(final MemberParam memberParam) {
-        Member member = MemberCov.INSTANCE.paramToBo(memberParam);
+        Member member = MemberCov.INSTANCE.paramToDomain(memberParam);
         Member saved = memberService.addMemberAndCompany(member, memberParam.getCompanyId(), memberParam.getOwner());
         return MemberCov.INSTANCE.domainToBo(saved);
     }
@@ -82,19 +77,28 @@ public class MemberFacade implements IMemberFacade {
         Set<Long> userIdSet = memberCompanyList.stream().map(MemberCompany::getUserId).collect(Collectors.toSet());
         List<Member> memberList = memberService.list(DynamicCondition.toWrapper(new MemberQuery().setUserIdSet(new ArrayList<>(userIdSet))));
         Map<Long, Member> memberMap = memberList.stream().collect(Collectors.toMap(Member::getUserId, u -> u));
-        List<MemberBO> memberBOList = new ArrayList<>();
-        for (MemberCompany memberCompany : memberCompanyList) {
-            MemberBO memberBO = MemberCov.INSTANCE.domainToBo(memberMap.get(memberCompany.getUserId()));
-            memberBO.setOwner(memberCompany.getOwner());
-            memberBOList.add(memberBO);
-        }
-        return PageUtils.fromList(memberCompanyList, memberCompanies -> memberBOList);
+        List<MemberBO> memberBOList = memberCompanyList.stream()
+                .map(memberCompany -> toMemberBO(memberCompany, memberMap))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return PageUtils.fromList(memberBOList, members -> members);
     }
 
     @Override
     public boolean companyMasterUser(Long companyId, Long currentUserId) {
         long count = memberCompanyService.count(DynamicCondition.toWrapper(new MemberCompanyQuery().setCompanyId(companyId).setUserId(currentUserId).setOwner(MemberEnum.UserOwner.MASTER.getValue())));
         return count > 0;
+    }
+
+    private MemberBO toMemberBO(MemberCompany memberCompany, Map<Long, Member> memberMap) {
+        Member member = memberMap.get(memberCompany.getUserId());
+        if (member == null) {
+            log.warn("会员企业关系存在无效会员，userId={}", memberCompany.getUserId());
+            return null;
+        }
+        MemberBO memberBO = MemberCov.INSTANCE.domainToBo(member);
+        memberBO.setOwner(memberCompany.getOwner());
+        return memberBO;
     }
 
 }

@@ -16,8 +16,8 @@ import com.ruoyi.user.model.param.CompanyBankParam;
 import com.ruoyi.user.convert.CompanyBankCov;
 import com.ruoyi.user.service.CompanyBankService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
@@ -30,15 +30,15 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CompanyBankFacade implements ICompanyBankFacade {
 
-    @Autowired
-    private CompanyBankService companyBankService;
+    private final CompanyBankService companyBankService;
 
     @Override
     public List<CompanyBankBO> list(CompanyBankQuery query, SortBy sort) {
 
-        return CompanyBankCov.INSTANCE.listToBO(companyBankService.list(DynamicCondition.toWrapper(query)));
+        return CompanyBankCov.INSTANCE.listToBO(companyBankService.list(DynamicCondition.toWrapper(query, sort)));
     }
 
 

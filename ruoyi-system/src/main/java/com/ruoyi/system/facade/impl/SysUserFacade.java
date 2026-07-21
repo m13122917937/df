@@ -33,6 +33,7 @@ import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.facade.ISysConfigFacade;
 import com.ruoyi.system.facade.ISysDeptFacade;
 import com.ruoyi.system.facade.ISysUserFacade;
+import com.ruoyi.system.service.SysUserReadService;
 
 /**
  * 用户 业务层处理
@@ -45,6 +46,10 @@ public class SysUserFacade implements ISysUserFacade {
 
     @Autowired
     private SysUserMapper userMapper;
+
+    @Autowired
+    private SysUserReadService sysUserReadService;
+
 
     @Autowired
     private SysRoleMapper roleMapper;
@@ -112,6 +117,18 @@ public class SysUserFacade implements ISysUserFacade {
     @Override
     public SysUser selectUserByUserName(String userName) {
         return userMapper.selectUserByUserName(userName);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public SysUser selectOne(com.baomidou.mybatisplus.core.conditions.Wrapper<SysUser> wrapper) {
+        return sysUserReadService.selectOne(wrapper);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<SysUser> selectList(com.baomidou.mybatisplus.core.conditions.Wrapper<SysUser> wrapper) {
+        return sysUserReadService.selectList(wrapper);
     }
 
     /**

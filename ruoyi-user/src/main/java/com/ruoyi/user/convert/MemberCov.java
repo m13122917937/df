@@ -18,11 +18,11 @@ public interface MemberCov {
 
     List<MemberBO> domainToBoList(List<Member> list);
 
-    Member queryToBo(MemberQuery memberQuery);
+    Member queryToDomain(MemberQuery memberQuery);
 
     MemberBO domainToBo(Member member);
 
-    Member paramToBo(MemberParam memberParam);
+    Member paramToDomain(MemberParam memberParam);
 
     List<MemberBO> dtoToBO(List<CompanyUserDTO> companyUserDTOS);
 

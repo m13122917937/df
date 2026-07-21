@@ -15,10 +15,17 @@ public final class AnalysisConstants {
     public static final String STATUS_RUNNING = "RUNNING";
     public static final String STATUS_FAILED = "FAILED";
     public static final String SYNC_DAILY = "DAILY";
+    public static final String COST_SCOPE_DIRECT = "DIRECT";
+    public static final String COST_SCOPE_INDIRECT = "INDIRECT";
+    public static final String COST_SCOPE_DEPARTMENT = "DEPARTMENT";
+    public static final String EXTRA_COST_SCOPE = "costScope";
+    public static final String EXTRA_ANNUAL_RATE = "annualRate";
+    public static final String EXTRA_HEADCOUNT = "headcount";
 
     public static final Set<String> CONFIG_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             "REBATE", "FIXED_COEFFICIENT", "CASHBACK", "PENALTY", "PROMOTION", "MARGIN",
-            "COLLECTION_DAYS", "INTERNAL_COST", "WAREHOUSE_COST", "SHOP_WHITELIST")));
+            "COLLECTION_DAYS", "INTERNAL_COST", "WAREHOUSE_COST", "SHOP_WHITELIST", "PLATFORM_FEE",
+            "LOGISTICS", "IMPAIRMENT", "TAX", "OTHER_ADJUSTMENT")));
 
     private AnalysisConstants() {
     }

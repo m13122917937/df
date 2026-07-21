@@ -18,12 +18,16 @@ import java.util.List;
  */
 public interface ICompanyFacade {
 
+    /** @return 企业列表 */
     List<CompanyBO> list(CompanyQuery query);
 
+    /** @return 企业分页列表 */
     PageBO<CompanyBO> listPage(final CompanyQuery query, final PageParamV2 pageParam);
 
+    /** @return 企业详情 */
     CompanyBO queryOne(CompanyQuery query);
 
+    /** @return 已创建企业 */
     CompanyBO add(CompanyParam companyParam);
 
     /**
@@ -34,10 +38,13 @@ public interface ICompanyFacade {
      */
     List<CompanyBO> queryList(long userId);
 
+    /** 移除用户与企业的关系。 */
     void removeUserCompany(Long companyId, Long userId);
 
+    /** 更新企业信息。 */
     void update(CompanyParam companyParam, CompanyQuery companyQuery);
 
+    /** 更新用户在企业内的权限信息。 */
     void update(MemberCompanyParam memberCompanyParam, MemberCompanyQuery userCompanyQuery);
 
 

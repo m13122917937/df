@@ -11,9 +11,9 @@ import com.ruoyi.user.mapper.MemberMapper;
 import com.ruoyi.user.model.consts.MemberEnum;
 import com.ruoyi.user.model.query.MemberCompanyQuery;
 import com.ruoyi.user.model.query.MemberQuery;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,11 +25,10 @@ import java.util.Objects;
  * @date 2025-09-06
  */
 @Service
+@RequiredArgsConstructor
 public class MemberService  extends ServiceImpl<MemberMapper, Member> {
-    @Autowired
-    private MemberMapper memberMapper;
-    @Autowired
-    private MemberCompanyMapper memberCompanyMapper;
+    private final MemberMapper memberMapper;
+    private final MemberCompanyMapper memberCompanyMapper;
 
     /**
      * 新增会员并绑定企业。
@@ -61,7 +60,7 @@ public class MemberService  extends ServiceImpl<MemberMapper, Member> {
     public void addMemberCompany(Long memberId, Long companyId, String name, Integer owner) {
         long count = memberCompanyMapper.selectCount(DynamicCondition.toWrapper(
                 new MemberCompanyQuery().setUserId(memberId).setCompanyId(companyId)));
-        if (count > 1) {
+        if (count > 0) {
             return;
         }
         Integer accountOwner = Objects.requireNonNullElse(owner, MemberEnum.UserOwner.PEOPLE.getValue());

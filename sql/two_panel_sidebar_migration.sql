@@ -39,7 +39,7 @@ SET @mod4 = (SELECT menu_id FROM (SELECT menu_id FROM sys_menu WHERE menu_name='
 INSERT IGNORE INTO sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
 VALUES
 ('订单管理', @mod2, 1, '/orders',     '', 1, 0, 'M', '0', '0', '', 'list',    'admin', NOW(), '', NULL, ''),
-('售后管理', @mod2, 2, '/aftersales', '', 1, 0, 'M', '0', '0', '', 'service', 'admin', NOW(), '', NULL, ''),
+('售后订单', @mod2, 2, '/afterOrders', '', 1, 0, 'M', '0', '0', '', 'service', 'admin', NOW(), '', NULL, ''),
 ('财务管理', @mod2, 3, '/finance',    '', 1, 0, 'M', '0', '0', '', 'money',   'admin', NOW(), '', NULL, ''),
 ('仓库管理', @mod2, 4, '/warehouse',  '', 1, 0, 'M', '0', '0', '', 'nested',  'admin', NOW(), '', NULL, '');
 
@@ -56,7 +56,7 @@ VALUES
 -- Step 5: 获取二级分类 ID
 -- ============================================================
 SET @cat_order   = (SELECT menu_id FROM (SELECT menu_id FROM sys_menu WHERE menu_name='订单管理' AND parent_id=@mod2 LIMIT 1) t);
-SET @cat_after   = (SELECT menu_id FROM (SELECT menu_id FROM sys_menu WHERE menu_name='售后管理' AND parent_id=@mod2 LIMIT 1) t);
+SET @cat_after   = (SELECT menu_id FROM (SELECT menu_id FROM sys_menu WHERE menu_name='售后订单' AND parent_id=@mod2 LIMIT 1) t);
 SET @cat_finance = (SELECT menu_id FROM (SELECT menu_id FROM sys_menu WHERE menu_name='财务管理' AND parent_id=@mod2 LIMIT 1) t);
 SET @cat_wh      = (SELECT menu_id FROM (SELECT menu_id FROM sys_menu WHERE menu_name='仓库管理' AND parent_id=@mod2 LIMIT 1) t);
 
@@ -86,9 +86,9 @@ SET @cat_sysdev     = (SELECT menu_id FROM (SELECT menu_id FROM sys_menu WHERE m
 UPDATE sys_menu SET parent_id=@cat_order, update_time=NOW()
 WHERE parent_id=0 AND menu_name IN ('代发订单','入仓订单','销售订单','拣货入仓','全部订单','集采','商品管理','产品映射');
 
--- --- 售后相关 → 供应链-售后管理 ---
+-- --- 售后相关 → 供应链-售后订单 ---
 UPDATE sys_menu SET parent_id=@cat_after, update_time=NOW()
-WHERE parent_id=0 AND menu_name IN ('扣罚列表','销售退货','售后管理');
+WHERE parent_id=0 AND menu_name IN ('扣罚订单','扣罚费用','扣罚列表','销售退货','售后管理');
 
 -- --- 财务相关 → 供应链-财务管理 ---
 UPDATE sys_menu SET parent_id=@cat_finance, update_time=NOW()

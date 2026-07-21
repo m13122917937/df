@@ -3,7 +3,6 @@ package com.ruoyi.user.service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.user.domain.Company;
 import com.ruoyi.user.mapper.CompanyMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,7 +13,4 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CompanyService  extends ServiceImpl<CompanyMapper, Company> {
-    @Autowired
-    private CompanyMapper companyMapper;
-
 }

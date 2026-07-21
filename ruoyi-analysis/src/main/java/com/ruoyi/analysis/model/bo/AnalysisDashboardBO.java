@@ -42,10 +42,12 @@ public class AnalysisDashboardBO {
         private BigDecimal fulfillmentGrossProfit;
         private BigDecimal capitalCost = BigDecimal.ZERO;
         private BigDecimal directLaborCost = BigDecimal.ZERO;
+        private BigDecimal directHeadcount = BigDecimal.ZERO;
         private BigDecimal departmentDirectCost = BigDecimal.ZERO;
         private BigDecimal otherAdjustment = BigDecimal.ZERO;
         private BigDecimal departmentProfit;
         private BigDecimal indirectLaborCost = BigDecimal.ZERO;
+        private BigDecimal indirectHeadcount = BigDecimal.ZERO;
         private BigDecimal allocatedIndirectCost = BigDecimal.ZERO;
         private BigDecimal operatingProfit;
         private String calcStatus = "COMPLETE";

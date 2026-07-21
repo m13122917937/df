@@ -192,6 +192,8 @@ adm/
 
 ### 依赖与构建规则
 
+0. 本项目所有 Maven 命令必须显式使用项目配置：`mvn -s D:\work\jie\adm\setting.xml ...`；禁止使用用户目录下的默认 Maven 配置。
+   `setting.xml` 已将本地仓库固定为 `D:\software\maven-rep`，不得改用 `C:\Users\...\.m2\repository`，也不得在命令中覆盖 `maven.repo.local`。
 1. 新增依赖前必须确认现有依赖无法满足需求，并检查版本兼容、许可证、漏洞及传递依赖。
 2. 删除依赖前必须结合源码引用、插件使用、反射加载、运行时配置和 `dependency:tree` 核实，不得只依据静态分析结论。
 3. 禁止在父 POM 或模块 POM 中永久配置 `skipTests=true`；临时跳过测试只能由执行命令显式指定并在交付说明中披露。

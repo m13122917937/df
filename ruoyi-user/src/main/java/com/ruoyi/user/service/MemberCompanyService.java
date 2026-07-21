@@ -6,7 +6,6 @@ import com.ruoyi.framework.mybatis.DynamicCondition;
 import com.ruoyi.user.domain.MemberCompany;
 import com.ruoyi.user.mapper.MemberCompanyMapper;
 import com.ruoyi.user.model.query.MemberCompanyQuery;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,12 +18,15 @@ import java.util.List;
  */
 @Service
 public class MemberCompanyService extends ServiceImpl<MemberCompanyMapper, MemberCompany> {
-    @Autowired
-    private MemberCompanyMapper memberCompanyMapper;
-
+    /**
+     * 按用户查询企业关系。
+     *
+     * @param userId 用户标识
+     * @return 企业关系列表
+     */
     public List<MemberCompany> list(Long userId) {
         Wrapper<MemberCompany> wrapper = DynamicCondition.toWrapper(new MemberCompanyQuery().setUserId(userId));
-        return this.list(wrapper);
+        return list(wrapper);
     }
 
 }

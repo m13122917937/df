@@ -28,6 +28,36 @@ public class AnalysisDashboardBizService {
     }
 
     /**
+     * 查询绩效汇总。
+     *
+     * @param query 查询条件
+     * @return 绩效汇总看板
+     */
+    public AnalysisDashboardBO performanceRollup(AnalysisQuery query) {
+        return dashboardFacade.performanceRollup(query);
+    }
+
+    /**
+     * 查询产渠分析。
+     *
+     * @param query 查询条件
+     * @return 产渠分析看板
+     */
+    public AnalysisDashboardBO channelProduction(AnalysisQuery query) {
+        return dashboardFacade.channelProduction(query);
+    }
+
+    /**
+     * 查询人效分析。
+     *
+     * @param query 查询条件
+     * @return 人效分析看板
+     */
+    public AnalysisDashboardBO humanEfficiency(AnalysisQuery query) {
+        return dashboardFacade.humanEfficiency(query);
+    }
+
+    /**
      * 查询订单穿透明细。
      *
      * @param query 查询条件

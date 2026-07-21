@@ -38,7 +38,7 @@ public class AnalysisDashboardController extends BaseController {
     @GetMapping("/performanceRollup")
     public AjaxResult performanceRollup(AnalysisQueryRequest request) {
         AnalysisDashboardVO result = AnalysisWebConvert.INSTANCE.toDashboardVO(
-                dashboardBizService.dashboard(AnalysisWebConvert.INSTANCE.toQuery(request)));
+                dashboardBizService.performanceRollup(AnalysisWebConvert.INSTANCE.toQuery(request)));
         return AjaxResult.success(result);
     }
 
@@ -48,7 +48,7 @@ public class AnalysisDashboardController extends BaseController {
     @GetMapping("/channelProduction")
     public AjaxResult channelProduction(AnalysisQueryRequest request) {
         AnalysisDashboardVO result = AnalysisWebConvert.INSTANCE.toDashboardVO(
-                dashboardBizService.dashboard(AnalysisWebConvert.INSTANCE.toQuery(request)));
+                dashboardBizService.channelProduction(AnalysisWebConvert.INSTANCE.toQuery(request)));
         return AjaxResult.success(result);
     }
 
@@ -58,7 +58,7 @@ public class AnalysisDashboardController extends BaseController {
     @GetMapping("/humanEfficiency")
     public AjaxResult humanEfficiency(AnalysisQueryRequest request) {
         AnalysisDashboardVO result = AnalysisWebConvert.INSTANCE.toDashboardVO(
-                dashboardBizService.dashboard(AnalysisWebConvert.INSTANCE.toQuery(request)));
+                dashboardBizService.humanEfficiency(AnalysisWebConvert.INSTANCE.toQuery(request)));
         return AjaxResult.success(result);
     }
 
@@ -89,4 +89,5 @@ public class AnalysisDashboardController extends BaseController {
         return AjaxResult.success(AnalysisWebConvert.INSTANCE.toOrderFactVOList(
                 dashboardBizService.dataQuality(AnalysisWebConvert.INSTANCE.toQuery(request))));
     }
+
 }

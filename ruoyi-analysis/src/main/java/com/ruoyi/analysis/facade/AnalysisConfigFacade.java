@@ -1,6 +1,7 @@
 package com.ruoyi.analysis.facade;
 
 import com.ruoyi.analysis.model.bo.AnalysisCostConfigBO;
+import com.ruoyi.analysis.model.bo.AnalysisImportLogBO;
 import com.ruoyi.analysis.model.param.AnalysisCostConfigParam;
 import com.ruoyi.analysis.model.query.AnalysisQuery;
 
@@ -41,5 +42,26 @@ public interface AnalysisConfigFacade {
      * @param overwrite 是否覆盖
      * @return 保存数量
      */
-    int importConfigs(List<AnalysisCostConfigParam> params, boolean overwrite);
+    int importConfigs(List<AnalysisCostConfigParam> params, boolean overwrite, String fileName, Long operatorId);
+
+    /**
+     * 记录文件解析或字段校验失败的导入审计记录。
+     *
+     * @param configType 配置类型
+     * @param fileName 文件名
+     * @param overwrite 是否覆盖
+     * @param totalCount 总行数
+     * @param errorMessage 错误信息
+     * @param operatorId 操作人主键
+     */
+    void recordImportFailure(String configType, String fileName, boolean overwrite, int totalCount,
+                             String errorMessage, Long operatorId);
+
+    /**
+     * 查询最近核算配置导入审计记录。
+     *
+     * @param limit 最大条数
+     * @return 导入审计记录
+     */
+    List<AnalysisImportLogBO> importLogs(int limit);
 }

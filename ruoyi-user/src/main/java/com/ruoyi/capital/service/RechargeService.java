@@ -3,7 +3,6 @@ package com.ruoyi.capital.service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.capital.domain.Recharge;
 import com.ruoyi.capital.mapper.RechargeMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,7 +13,4 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RechargeService extends ServiceImpl<RechargeMapper, Recharge> {
-    @Autowired
-    private RechargeMapper rechargeMapper;
-
 }

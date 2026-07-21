@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -15,6 +16,9 @@ public class CompanyQuery {
     private String companyNameLike;
 
     private Long id;
+
+    @QueryField(operator = DynamicCondition.Operator.IN, field = "id")
+    private List<Long> idSet;
 
     private String companyName;
 

@@ -89,4 +89,17 @@ public class AnalysisConfigController extends BaseController {
                                   @RequestParam("file") MultipartFile file) {
         return AjaxResult.success(configBizService.importExcel(configType, overwrite, file, getUserId()));
     }
+
+    /**
+     * 查询最近的配置导入审计记录。
+     *
+     * @param limit 最大返回条数
+     * @return 导入审计记录
+     */
+    @GetMapping("/import/logs")
+    @PreAuthorize("@ss.hasPermi('analysis:config:import')")
+    public AjaxResult importLogs(@RequestParam(defaultValue = "50") int limit) {
+        return AjaxResult.success(AnalysisWebConvert.INSTANCE.toImportLogVOList(
+                configBizService.importLogs(limit)));
+    }
 }

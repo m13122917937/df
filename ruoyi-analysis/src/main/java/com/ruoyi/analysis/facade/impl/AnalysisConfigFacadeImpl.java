@@ -5,9 +5,11 @@ import com.ruoyi.analysis.convert.AnalysisQueryConvert;
 import com.ruoyi.analysis.domain.AnalysisCostConfig;
 import com.ruoyi.analysis.facade.AnalysisConfigFacade;
 import com.ruoyi.analysis.model.bo.AnalysisCostConfigBO;
+import com.ruoyi.analysis.model.bo.AnalysisImportLogBO;
 import com.ruoyi.analysis.model.param.AnalysisCostConfigParam;
 import com.ruoyi.analysis.model.query.AnalysisQuery;
 import com.ruoyi.analysis.service.AnalysisCostConfigService;
+import com.ruoyi.analysis.service.AnalysisImportLogService;
 import com.ruoyi.common.model.SortBy;
 import com.ruoyi.framework.mybatis.DynamicCondition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ import java.util.List;
 public class AnalysisConfigFacadeImpl implements AnalysisConfigFacade {
     @Autowired
     private AnalysisCostConfigService configService;
+    @Autowired
+    private AnalysisImportLogService importLogService;
 
     /**
      * {@inheritDoc}
@@ -53,7 +57,33 @@ public class AnalysisConfigFacadeImpl implements AnalysisConfigFacade {
      * {@inheritDoc}
      */
     @Override
-    public int importConfigs(List<AnalysisCostConfigParam> params, boolean overwrite) {
-        return configService.importConfigs(params, overwrite);
+    public int importConfigs(List<AnalysisCostConfigParam> params, boolean overwrite, String fileName, Long operatorId) {
+        String configType = params.isEmpty() ? "UNKNOWN" : params.get(0).getConfigType();
+        try {
+            int successCount = configService.importConfigs(params, overwrite);
+            importLogService.record(configType, fileName, overwrite, params.size(), successCount, null, operatorId);
+            return successCount;
+        } catch (RuntimeException exception) {
+            importLogService.record(configType, fileName, overwrite, params.size(), 0,
+                    exception.getMessage(), operatorId);
+            throw exception;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void recordImportFailure(String configType, String fileName, boolean overwrite, int totalCount,
+                                    String errorMessage, Long operatorId) {
+        importLogService.record(configType, fileName, overwrite, totalCount, 0, errorMessage, operatorId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<AnalysisImportLogBO> importLogs(int limit) {
+        return importLogService.listRecent(limit);
     }
 }

@@ -93,13 +93,8 @@
             <artifactId>spring-boot-starter-esign</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.ruoyi</groupId>
-            <artifactId>spring-boot-starter-taobao</artifactId>
-        </dependency>
-        <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-http</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -170,7 +165,6 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <!-- 打包时包含 system scope 的本地 jar（如 lib/taobao-sdk-java-auto） -->
                     <includeSystemScope>true</includeSystemScope>
                 </configuration>
                 <executions>

@@ -18,6 +18,11 @@
         where business_date = #{businessDate}
     </select>
 
+    <select id="selectByBusinessDateRange" resultType="com.ruoyi.analysis.domain.AnalysisOrderFact">
+        <include refid="baseSelect"/>
+        where business_date between #{startDate} and #{endDate}
+    </select>
+
     <select id="selectRefundSource" resultType="com.ruoyi.analysis.domain.AnalysisOrderFact">
         <include refid="baseSelect"/>
         where original_order_no = #{originalOrderNo}

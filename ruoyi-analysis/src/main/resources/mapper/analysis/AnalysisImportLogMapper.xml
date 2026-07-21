@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.analysis.mapper.AnalysisImportLogMapper">
+
+    <select id="selectRecent" resultType="com.ruoyi.analysis.domain.AnalysisImportLog">
+        select * from ana_import_log
+        order by id desc
+        limit #{limit}
+    </select>
+</mapper>

@@ -2,7 +2,6 @@ package com.ruoyi.user.facade.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
@@ -19,8 +18,8 @@ import com.ruoyi.user.model.param.CompanyParam;
 import com.ruoyi.user.model.param.MemberCompanyParam;
 import com.ruoyi.user.model.query.CompanyQuery;
 import com.ruoyi.user.model.query.MemberCompanyQuery;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
@@ -28,13 +27,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CompanyFacade implements ICompanyFacade {
 
-    @Autowired
-    CompanyService companyService;
-
-    @Autowired
-    MemberCompanyService memberCompanyService;
+    private final CompanyService companyService;
+    private final MemberCompanyService memberCompanyService;
 
 
     @Override
@@ -62,7 +59,8 @@ public class CompanyFacade implements ICompanyFacade {
     @Override
     public CompanyBO add(final CompanyParam companyParam) {
         Company company = CompanyCov.INSTANCE.toDomain(companyParam);
-        Company one = companyService.getOne(new LambdaQueryWrapper<Company>().eq(Company::getCompanyName, companyParam.getCompanyName()));
+        Company one = companyService.getOne(DynamicCondition.toWrapper(
+                new CompanyQuery().setCompanyName(companyParam.getCompanyName())));
         if (Objects.nonNull(one)) {
             throw new ServiceException("公司已存在");
         }
@@ -82,7 +80,8 @@ public class CompanyFacade implements ICompanyFacade {
             return List.of();
         }
         List<Long> companyIds = list.stream().map(MemberCompany::getCompanyId).collect(Collectors.toList());
-        List<Company> companyList = companyService.list(new LambdaQueryWrapper<Company>().in(Company::getId, companyIds));
+        List<Company> companyList = companyService.list(DynamicCondition.toWrapper(
+                new CompanyQuery().setIdSet(companyIds)));
         List<CompanyBO> boList = CompanyCov.INSTANCE.toBOList(companyList);
         for (CompanyBO companyBO : boList) {
             companyBO.setOwner(list.stream().filter(userCompany -> userCompany.getCompanyId().equals(companyBO.getId())).findFirst().get().getOwner());
@@ -92,7 +91,8 @@ public class CompanyFacade implements ICompanyFacade {
 
     @Override
     public void removeUserCompany(Long companyId, Long userId) {
-        memberCompanyService.remove(new LambdaQueryWrapper<MemberCompany>().eq(MemberCompany::getCompanyId, companyId).eq(MemberCompany::getUserId, userId));
+        MemberCompanyQuery query = new MemberCompanyQuery().setCompanyId(companyId).setUserId(userId);
+        memberCompanyService.remove(DynamicCondition.toWrapper(query));
     }
 
     @Override

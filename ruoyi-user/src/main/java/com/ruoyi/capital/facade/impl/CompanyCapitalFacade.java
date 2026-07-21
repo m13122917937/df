@@ -16,20 +16,17 @@ import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.PageUtils;
 import com.ruoyi.framework.mybatis.DynamicCondition;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class CompanyCapitalFacade implements ICompanyCapitalFacade {
 
-    @Autowired
-    CompanyCapitalService companyCapitalService;
-
-
-    @Autowired
-    CompanyCapitalLogService companyCapitalLogService;
+    private final CompanyCapitalService companyCapitalService;
+    private final CompanyCapitalLogService companyCapitalLogService;
 
 
     @Override
