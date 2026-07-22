@@ -312,7 +312,7 @@ $ease: cubic-bezier(0.16, 1, 0.3, 1);
   flex: 0 0 48%;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   padding: 60px 0;
 }
 
