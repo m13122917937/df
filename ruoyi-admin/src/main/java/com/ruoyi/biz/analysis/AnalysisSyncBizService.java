@@ -1,3 +1,5 @@
+package com.ruoyi.biz.analysis;
+
 import com.ruoyi.analysis.facade.AnalysisSyncFacade;
 import com.ruoyi.analysis.model.bo.AnalysisSyncBO;
 import org.springframework.beans.factory.annotation.Autowired;
