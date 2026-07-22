@@ -370,6 +370,7 @@ public class WarehousingOrderBizService {
     private void createJkyStockIn(OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser, String warehouseNo, Integer quantity, List<String> snList, String remark) {
         try {
             StockCreateAndStockInParam param = builderJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, warehouseNo, quantity, snList, remark);
+            log.info("订单号：{}，拣货入仓触发吉客云入库(admin:warehousing)", orderBO.getOrderCode());
             JkyResponse<StockCreateAndStockInRep> response = jkyTemplate.createAndStockIn(param);
             if (response == null || !Objects.equals(response.getCode(), 200)) {
                 throw new ServiceException(StrUtil.blankToDefault(response == null ? null : response.getMsg(), "吉客云创建库存并入库失败"));

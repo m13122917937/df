@@ -123,6 +123,7 @@ public class ErrorOrderBizService {
                 new OrderQuery().setOrderCode(orderCode));
 
         RouteSubscribeBO routeSubscribeBO = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setOrderCode(orderCode));
+        log.info("订单号：{}，异常订单转当日发货触发吉客云入库(admin:deliveryIngToToday)", orderCode);
         jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
     }
 

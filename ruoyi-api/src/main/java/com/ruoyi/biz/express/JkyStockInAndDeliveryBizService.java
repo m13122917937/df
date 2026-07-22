@@ -107,6 +107,7 @@ public class JkyStockInAndDeliveryBizService {
 
         // 1. 创建库存并入库
         StockCreateAndStockInParam stockInParam = builderJkyStockIn(orderBO, tradeOrderBO, orderBO.getQuantity(), imeiList);
+        log.info("订单号：{}，开始调用吉客云入库(api模块)", orderBO.getOrderCode());
         jkyTemplate.createAndStockIn(stockInParam);
         // 2. 验货
         InspectParam inspectParam = builderJkyInspect(orderBO, imeiList);

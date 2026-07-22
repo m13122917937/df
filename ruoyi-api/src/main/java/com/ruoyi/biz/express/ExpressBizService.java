@@ -161,6 +161,7 @@ public class ExpressBizService {
                     .setOrderCode(orderBO.getOrderCode())
                     .setLogisticsNo(expressOrderForm.getTrackingNumber())
                     .setLogisticsCode(expressOrderForm.getTrackingCompanyCode());
+            log.info("订单号：{}，填写物流单号触发吉客云入库(api:saveExpress)", orderBO.getOrderCode());
             jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
         }
         // 更新订单发货时间,和子状态

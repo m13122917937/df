@@ -175,6 +175,7 @@ public class ImeiBizService {
                 orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()).setUpdateTime(DateUtil.date()),
                         new OrderQuery().setOrderCode(form.getOrderCode()));
 
+                log.info("订单号：{}，平台校验正常触发吉客云入库(admin:updatePlatformImei)", orderBO.getOrderCode());
                 jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
             } else {
                 orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_EXPRESS.getCode()).setUpdateTime(DateUtil.date()),

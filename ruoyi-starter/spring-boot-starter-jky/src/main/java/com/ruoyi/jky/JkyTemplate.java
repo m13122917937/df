@@ -161,6 +161,10 @@ public class JkyTemplate {
         if (isDisabled(JkyApiMethod.STOCK_CREATE_AND_STOCK_IN)) {
             return new JkyResponse<>();
         }
+        log.info("调用吉客云入库，relDataId={}, vendCode={}, inWarehouseCode={}, skuCount={}",
+                param.getRelDataId(), param.getVendCode(), param.getInWarehouseCode(),
+                param.getStockInDetailViews() != null && !param.getStockInDetailViews().isEmpty()
+                        ? param.getStockInDetailViews().get(0).getSkuCount() : null);
         return execute(JkyApiMethod.STOCK_CREATE_AND_STOCK_IN, BIZ_CONTENT, param,
                 new TypeReference<JkyResponse<StockCreateAndStockInRep>>() {
                 });

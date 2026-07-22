@@ -3,6 +3,7 @@ package com.ruoyi.biz.mq;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.IdUtil;
 import com.aliyun.openservices.ons.api.Action;
 import com.aliyun.openservices.ons.api.ConsumeContext;
 import com.aliyun.openservices.ons.api.Message;
@@ -33,6 +34,7 @@ import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.TradeOrderQuery;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,20 +57,25 @@ public class SubscribeListener implements MessageListener {
     @Override
     @Transactional
     public Action consume(Message message, ConsumeContext context) {
-        long routeSubscribeId = Convert.bytesToLong(message.getBody());
-        //
-        log.info("订阅到消息:{}", routeSubscribeId);
-        RouteSubscribeBO routeSubscribeBO = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setId(routeSubscribeId));
-        if (Objects.isNull(routeSubscribeBO)) {
-            log.error("物流订阅记录不存在，id:{}", routeSubscribeId);
+        MDC.put("traceId", IdUtil.fastSimpleUUID());
+        try {
+            long routeSubscribeId = Convert.bytesToLong(message.getBody());
+            //
+            log.info("订阅到消息:{}", routeSubscribeId);
+            RouteSubscribeBO routeSubscribeBO = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setId(routeSubscribeId));
+            if (Objects.isNull(routeSubscribeBO)) {
+                log.error("物流订阅记录不存在，id:{}", routeSubscribeId);
+                return Action.CommitMessage;
+            }
+            // 订阅物流信息
+            SubscribeExpressCode subscribeExpressCode = expressClient.subscribeExpress(new SubscribeExpressParam().setExpressNo(routeSubscribeBO.getLogisticsNo())
+                    .setExpressCode(routeSubscribeBO.getLogisticsCode()).setOrderId(routeSubscribeBO.getOrderCode()).setCellphone(routeSubscribeBO.getPhone())
+                    .setExpressCallBackUrl(String.format(WebConstants.EXPRESS_NOTIFY_URL, ruoYiConfig.getHost())));
+            log.info("订单号：{}，订阅物流信息结果:{}", routeSubscribeBO.getOrderCode(), subscribeExpressCode);
             return Action.CommitMessage;
+        } finally {
+            MDC.remove("traceId");
         }
-        // 订阅物流信息
-        SubscribeExpressCode subscribeExpressCode = expressClient.subscribeExpress(new SubscribeExpressParam().setExpressNo(routeSubscribeBO.getLogisticsNo())
-                .setExpressCode(routeSubscribeBO.getLogisticsCode()).setOrderId(routeSubscribeBO.getOrderCode()).setCellphone(routeSubscribeBO.getPhone())
-                .setExpressCallBackUrl(String.format(WebConstants.EXPRESS_NOTIFY_URL, ruoYiConfig.getHost())));
-        log.info("订单号：{}，订阅物流信息结果:{}", routeSubscribeBO.getOrderCode(), subscribeExpressCode);
-        return Action.CommitMessage;
     }
 
 

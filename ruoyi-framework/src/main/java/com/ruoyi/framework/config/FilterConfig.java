@@ -3,6 +3,7 @@ package com.ruoyi.framework.config;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.filter.RefererFilter;
 import com.ruoyi.common.filter.RepeatableFilter;
+import com.ruoyi.common.filter.TraceIdFilter;
 import com.ruoyi.common.filter.XssFilter;
 import com.ruoyi.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,17 @@ public class FilterConfig {
 
     @Value("${referer.allowed-domains}")
     private String allowedDomains;
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Bean
+    public FilterRegistrationBean traceIdFilterRegistration() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(new TraceIdFilter());
+        registration.addUrlPatterns("/*");
+        registration.setName("traceIdFilter");
+        registration.setOrder(FilterRegistrationBean.HIGHEST_PRECEDENCE);
+        return registration;
+    }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean

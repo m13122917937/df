@@ -82,6 +82,7 @@ public class ImeiBizService {
         Integer activated = result.getActivated();
         if (Objects.equals(activated, ImeiConsts.Activated.SUCCESS.getCode())) {
             orderFacade.update(new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES.getCode()), new OrderQuery().setOrderCode(orderBO.getOrderCode()));
+            log.info("订单号：{}, 串码验证通过, 调用吉客云入库(api:verifyImei)", orderBO.getOrderCode());
             jkyBizService.createJkyStockIn(orderBO);
         }
         return ImeiConvert.INSTANCE.listvo(list);

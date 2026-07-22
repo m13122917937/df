@@ -69,6 +69,7 @@ public class ExcelPlateformReadListener implements ReadListener<ExcelPlatformVO>
                 orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_END.getCode()),
                         new OrderQuery().setOrderCode(excelPlatformVO.getOrderCode()));
 
+                log.info("订单号：{}，Excel导入平台校验触发吉客云入库(admin:excelImport)", orderBO.getOrderCode());
                 jkyStockInAndDeliveryBizService.createJkyStockIn(orderBO, routeSubscribeBO);
             } else {
                 log.info("待填写物流单号：{}", orderBO.getOrderCode());
