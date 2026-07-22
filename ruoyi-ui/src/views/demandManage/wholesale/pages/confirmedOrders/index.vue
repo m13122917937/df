@@ -117,14 +117,14 @@
             </el-table-column>
 
             <!-- 物流信息 -->
-             <el-table-column prop="trackingCompany" label="物流信息" width="240" align="center">
+             <el-table-column prop="trackingNumber" label="物流信息" width="240" align="center">
               <template slot="header">
                 <FilterHeader label="物流信息" :value="columnSearch.trackingNumber || []" :options="colFilterOptions.trackingNumber || []" @update:value="columnSearch.trackingNumber = $event" />
               </template>
               <template slot-scope="scope">
                 <TrackingInfo
-                  :company="scope.row.trackingCompany"
                   :number="scope.row.trackingNumber"
+                  :show-company="false"
                   :data="scope.row"
                   @click="openLogisticsDialog(scope.row)"
                 />
