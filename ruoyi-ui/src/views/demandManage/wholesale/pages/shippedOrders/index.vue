@@ -84,12 +84,29 @@
                 />
               </template>
             </el-table-column>
+            <!-- 单号：(订单编码) + (原始订单号) -->
             <el-table-column
               label="单号"
               prop="orderCode"
               min-width="300"
               fixed="left"
             >
+              <template slot-scope="scope">
+                <div class="order-numbers">
+                  <div class="order-number-item">内部单号:
+                    {{ scope.row.orderCode || "-" }}
+                    <i v-if="scope.row.orderCode"
+                       class="el-icon-copy-document copy-icon"
+                       @click="copyText(scope.row.orderCode)"></i>
+                  </div>
+                  <div class="order-number-item"> 商家单号:
+                    {{ scope.row.originalOrderId || "-" }}
+                    <i v-if="scope.row.originalOrderId"
+                       class="el-icon-copy-document copy-icon"
+                       @click="copyText(scope.row.originalOrderId)"></i>
+                  </div>
+                </div>
+              </template>
             </el-table-column>
 
             <!-- 最晚发货时间 -->
