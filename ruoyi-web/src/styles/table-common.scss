@@ -1,8 +1,10 @@
+$apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
 // 订单详情样式
 .order-detail {
   padding: 10px;
   padding-bottom: 0;
-  background: #f5f7fa;
+  background: var(--bg-page, #F2F2F7);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -15,9 +17,9 @@
     align-items: center;
     margin-bottom: 10px;
     padding: 6px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1677FF 0%, #5856D6 100%);
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(37,99,255,0.25);
     color: white;
 
     .header-left {
@@ -40,7 +42,7 @@
           padding: 4px 12px;
           border-radius: 6px;
           font-size: 14px;
-          color: #e74c3c;
+          color: #FF3B30;
           font-weight: 500;
         }
       }
@@ -52,8 +54,6 @@
       }
     }
 
-
-
     .header-actions {
       display: flex;
       gap: 12px;
@@ -63,12 +63,16 @@
         font-size: 14px;
         font-weight: 500;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(37,99,255,0.25);
+        transition: all 200ms $apple-ease;
 
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 4px 16px rgba(37,99,255,0.35);
+        }
+
+        &:active {
+          transform: scale(0.97);
         }
       }
     }
@@ -80,7 +84,7 @@
     gap: 16px;
     flex: 1;
     min-height: 0; // 确保flex子元素可以收缩
-   
+
     .filter-panels {
       display: flex;
       gap: 12px;
@@ -99,9 +103,9 @@
       display: flex;
       flex-direction: column;
       flex: 1;
-      background: #fff;
+      background: var(--bg-card, #FFFFFF);
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(8, 6, 6, 0.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
       overflow: auto;
       position: relative;
       -webkit-overflow-scrolling: touch;
@@ -109,39 +113,39 @@
       // 表格样式
       .order-table {
         flex: 1;
-        background: #fff;
+        background: var(--bg-card, #FFFFFF);
         border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
         overflow: auto;
         min-width: 100%;
         // Element UI表格样式覆盖
         ::v-deep .el-table__header {
-          background: #fafbfc;
+          background: #F9F9F9;
 
           th {
-            background: #fafbfc !important;
-            color: #2c3e50;
-            font-weight: 600;
-            border-bottom: 2px solid #e4e7ed;
+            background: #F9F9F9 !important;
+            color: var(--text-secondary, rgba(60,60,67,0.60));
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-light, rgba(60,60,67,0.12));
           }
         }
 
         ::v-deep .el-table__body {
           tr {
-            transition: all 0.3s ease;
+            transition: background 200ms $apple-ease;
 
             &:hover {
-              background: #f0f9ff !important;
+              background: rgba(37,99,255,0.03) !important;
             }
           }
 
           td {
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-light, rgba(60,60,67,0.12));
           }
         }
 
         ::v-deep .el-table--striped .el-table__body tr.el-table__row--striped td {
-          background: #fafbfc;
+          background: rgba(0,0,0,0.015);
         }
       }
 
@@ -149,37 +153,42 @@
       .pagination-wrapper {
         padding: 10px 24px;
         text-align: right;
-        background: #fafbfc;
-        border-top: 1px solid #e4e7ed;
+        background: var(--bg-card, #FFFFFF);
+        border-top: 1px solid var(--border-light, rgba(60,60,67,0.12));
 
         .custom-pagination {
           ::v-deep .el-pagination {
             justify-content: center;
 
             .el-pager li {
-              border-radius: 6px;
+              border-radius: 100px;
               margin: 0 2px;
-              transition: all 0.3s ease;
+              min-width: 32px;
+              height: 32px;
+              line-height: 32px;
+              transition: all 150ms $apple-ease;
 
               &:hover {
-                background: #409eff;
-                color: white;
+                background: rgba(37,99,255,0.08);
+                color: #1677FF;
               }
 
               &.active {
-                background: #409eff;
+                background: #1677FF;
                 color: white;
               }
             }
 
             .btn-prev,
             .btn-next {
-              border-radius: 6px;
-              transition: all 0.3s ease;
+              border-radius: 100px;
+              min-width: 32px;
+              height: 32px;
+              transition: all 150ms $apple-ease;
 
               &:hover {
-                background: #409eff;
-                color: white;
+                background: rgba(37,99,255,0.08);
+                color: #1677FF;
               }
             }
           }
@@ -192,7 +201,7 @@
       }
 
       &::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.2);
+        background: rgba(0, 0, 0, 0.15);
         border-radius: 4px;
       }
 
@@ -206,21 +215,21 @@
 // 动画效果
 @keyframes warning-pulse {
   0% {
-    background: rgba(245, 8, 8, 0.15);
-    border-color: rgba(245, 8, 8, 0.3);
-    box-shadow: 0 0 0 0 rgba(245, 8, 8, 0.4);
+    background: rgba(255,59,48,0.15);
+    border-color: rgba(255,59,48,0.3);
+    box-shadow: 0 0 0 0 rgba(255,59,48,0.4);
   }
 
   50% {
-    background: rgba(245, 8, 8, 0.25);
-    border-color: rgba(245, 8, 8, 0.5);
-    box-shadow: 0 0 0 4px rgba(245, 8, 8, 0.1);
+    background: rgba(255,59,48,0.25);
+    border-color: rgba(255,59,48,0.5);
+    box-shadow: 0 0 0 4px rgba(255,59,48,0.1);
   }
 
   100% {
-    background: rgba(245, 8, 8, 0.15);
-    border-color: rgba(245, 8, 8, 0.3);
-    box-shadow: 0 0 0 0 rgba(245, 8, 8, 0.4);
+    background: rgba(255,59,48,0.15);
+    border-color: rgba(255,59,48,0.3);
+    box-shadow: 0 0 0 0 rgba(255,59,48,0.4);
   }
 }
 
@@ -240,5 +249,21 @@
 
   60% {
     transform: translateY(-2px);
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .order-table ::v-deep .el-table__body tr {
+    transition: none !important;
+  }
+  .action-btn {
+    transition: none !important;
+    &:hover {
+      transform: none !important;
+    }
+  }
+  .page-header .header-actions .action-btn {
+    transition: none !important;
   }
 }

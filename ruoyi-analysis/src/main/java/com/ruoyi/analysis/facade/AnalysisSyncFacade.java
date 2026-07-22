@@ -26,14 +26,6 @@ public interface AnalysisSyncFacade {
     void rebuild(LocalDate date);
 
     /**
-     * 查询最近同步日志。
-     *
-     * @param limit 最大条数
-     * @return 同步日志
-     */
-    List<AnalysisSyncBO> logs(int limit);
-
-    /**
      * 执行定时同步，优先处理最近失败日期，否则同步昨日。
      */
     void syncScheduled();

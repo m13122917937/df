@@ -1236,7 +1236,7 @@ export default {
       gap: 4px;
 
       .confirmed-text {
-        color: #67c23a;
+        color: #34C759;
         font-weight: 500;
       }
       .system-confirmed-text {
@@ -1244,7 +1244,7 @@ export default {
         font-weight: 500;
       }
       .abnormal-text {
-        color: #f56c6c;
+        color: #FF3B30;
         font-weight: 500;
       }
     }

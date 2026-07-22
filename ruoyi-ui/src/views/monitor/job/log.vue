@@ -107,7 +107,8 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="jobLogList" @selection-change="handleSelectionChange">
+    <el-table ref="jobLogTable" v-loading="loading" :data="jobLogList" :height="tableHeight"
+      @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="日志编号" width="80" align="center" prop="jobLogId" />
       <el-table-column label="任务名称" align="center" prop="jobName" :show-overflow-tooltip="true" />
@@ -206,6 +207,7 @@ export default {
       total: 0,
       // 调度日志表格数据
       jobLogList: [],
+      tableHeight: 260,
       // 是否显示弹出层
       open: false,
       // 日期范围
@@ -234,6 +236,18 @@ export default {
       this.getList()
     }
   },
+  mounted() {
+    window.addEventListener("resize", this.updateTableHeight)
+    this.$nextTick(this.updateTableHeight)
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.updateTableHeight)
+  },
+  watch: {
+    showSearch() {
+      this.$nextTick(this.updateTableHeight)
+    }
+  },
   methods: {
     /** 查询调度日志列表 */
     getList() {
@@ -242,8 +256,22 @@ export default {
           this.jobLogList = response.rows
           this.total = response.total
           this.loading = false
+          this.$nextTick(this.updateTableHeight)
         }
       )
+    },
+    /** 根据当前可视区域计算表格高度。 */
+    updateTableHeight() {
+      if (!this.$refs.jobLogTable) {
+        return
+      }
+      const tableRect = this.$refs.jobLogTable.$el.getBoundingClientRect()
+      const pagination = this.$el.querySelector(".pagination-container")
+      const paginationRect = pagination && this.total > 0 ? pagination.getBoundingClientRect() : null
+      const paginationGap = paginationRect ? Math.max(0, paginationRect.top - tableRect.bottom) : 0
+      const paginationHeight = paginationRect ? paginationRect.height : 0
+      const availableHeight = window.innerHeight - tableRect.top - paginationGap - paginationHeight - 24
+      this.tableHeight = Math.max(240, Math.floor(availableHeight))
     },
     // 返回按钮
     handleClose() {

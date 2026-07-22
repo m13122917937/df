@@ -1,104 +1,105 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="20">
-      <splitpanes :horizontal="this.$store.getters.device === 'mobile'" class="default-theme">
-        <!--部门数据-->
-        <pane size="16">
-          <el-col>
-            <div class="head-container">
-              <el-input v-model="deptName" placeholder="请输入部门名称" clearable size="small" prefix-icon="el-icon-search" style="margin-bottom: 20px" />
-            </div>
-            <div class="head-container">
-              <el-tree :data="deptOptions" :props="defaultProps" :expand-on-click-node="false" :filter-node-method="filterNode" ref="tree" node-key="id" default-expand-all highlight-current @node-click="handleNodeClick" />
-            </div>
-          </el-col>
-        </pane>
-        <!--用户数据-->
-        <pane size="84">
-          <el-col>
-            <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <div class="page-body">
+      <!-- 部门树：固定宽度 220px -->
+      <aside class="dept-sidebar">
+        <div class="head-container">
+          <el-input v-model="deptName" placeholder="请输入部门名称" clearable size="small" prefix-icon="el-icon-search" />
+        </div>
+        <div class="head-container" style="flex: 1; overflow-y: auto;">
+          <el-tree :data="deptOptions" :props="defaultProps" :expand-on-click-node="false" :filter-node-method="filterNode" ref="tree" node-key="id" default-expand-all highlight-current @node-click="handleNodeClick" />
+        </div>
+      </aside>
+
+      <!-- 主内容区：flex: 1 自动填满 -->
+      <main class="main-content">
+        <!-- 搜索筛选 -->
+        <el-form class="search-form" :model="queryParams" ref="queryForm" size="small" v-show="showSearch" label-width="80px">
+          <el-row :gutter="16">
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
               <el-form-item label="用户名称" prop="userName">
-                <el-input v-model="queryParams.userName" placeholder="请输入用户名称" clearable style="width: 240px" @keyup.enter.native="handleQuery" />
+                <el-input v-model="queryParams.userName" placeholder="请输入用户名称" clearable @keyup.enter.native="handleQuery" />
               </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
               <el-form-item label="手机号码" prop="phonenumber">
-                <el-input v-model="queryParams.phonenumber" placeholder="请输入手机号码" clearable style="width: 240px" @keyup.enter.native="handleQuery" />
+                <el-input v-model="queryParams.phonenumber" placeholder="请输入手机号码" clearable @keyup.enter.native="handleQuery" />
               </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
               <el-form-item label="状态" prop="status">
-                <el-select v-model="queryParams.status" placeholder="用户状态" clearable style="width: 240px">
+                <el-select v-model="queryParams.status" placeholder="用户状态" clearable style="width: 100%">
                   <el-option v-for="dict in dict.type.sys_normal_disable" :key="dict.value" :label="dict.label" :value="dict.value" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="创建时间">
-                <el-date-picker v-model="dateRange" style="width: 240px" value-format="yyyy-MM-dd" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="8" :lg="6">
+              <el-form-item label="创建时间" prop="dateRange">
+                <el-date-picker v-model="dateRange" style="width: 100%" value-format="yyyy-MM-dd" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" />
               </el-form-item>
-              <el-form-item>
-                <el-button
-                  type="primary"
-                  icon="el-icon-search"
-                  size="mini"
-                  v-throttle-click="600"
-                  @click="handleQuery"
-                >搜索</el-button>
-                <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-              </el-form-item>
-            </el-form>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24" style="text-align: right">
+              <el-button type="primary" icon="el-icon-search" size="mini" v-throttle-click="600" @click="handleQuery">搜索</el-button>
+              <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+              <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns" />
+            </el-col>
+          </el-row>
+        </el-form>
 
-            <el-row :gutter="10" class="mb8">
-              <el-col :span="1.5">
-                <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['system:user:add']">新增</el-button>
-              </el-col>
-              <el-col :span="1.5">
-                <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate" v-hasPermi="['system:user:edit']">修改</el-button>
-              </el-col>
-              <el-col :span="1.5">
-                <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete" v-hasPermi="['system:user:remove']">删除</el-button>
-              </el-col>
-              <el-col :span="1.5">
-                <el-button type="info" plain icon="el-icon-upload2" size="mini" @click="handleImport" v-hasPermi="['system:user:import']">导入</el-button>
-              </el-col>
-              <el-col :span="1.5">
-                <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport" v-hasPermi="['system:user:export']">导出</el-button>
-              </el-col>
-              <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
-            </el-row>
+        <!-- 操作工具栏 -->
+        <el-row class="toolbar-row">
+          <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['system:user:add']">新增</el-button>
+          <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate" v-hasPermi="['system:user:edit']">修改</el-button>
+          <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete" v-hasPermi="['system:user:remove']">删除</el-button>
+          <el-button type="info" plain icon="el-icon-upload2" size="mini" @click="handleImport" v-hasPermi="['system:user:import']">导入</el-button>
+          <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport" v-hasPermi="['system:user:export']">导出</el-button>
+        </el-row>
 
-            <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-              <el-table-column type="selection" width="50" align="center" />
-              <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="columns.userId.visible" />
-              <el-table-column label="用户名称" align="center" key="userName" prop="userName" v-if="columns.userName.visible" :show-overflow-tooltip="true" />
-              <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" v-if="columns.nickName.visible" :show-overflow-tooltip="true" />
-              <el-table-column label="部门" align="center" key="deptName" prop="dept.deptName" v-if="columns.deptName.visible" :show-overflow-tooltip="true" />
-              <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber" v-if="columns.phonenumber.visible" width="120" />
-              <el-table-column label="状态" align="center" key="status" v-if="columns.status.visible">
-                <template slot-scope="scope">
-                  <el-switch v-model="scope.row.status" active-value="0" inactive-value="1" @change="handleStatusChange(scope.row)"></el-switch>
-                </template>
-              </el-table-column>
-              <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns.createTime.visible" width="160">
-                <template slot-scope="scope">
-                  <span>{{ parseTime(scope.row.createTime) }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" align="center" width="160" class-name="small-padding fixed-width">
-                <template slot-scope="scope" v-if="scope.row.userId !== 1">
-                  <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:user:edit']">修改</el-button>
-                  <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['system:user:remove']">删除</el-button>
-                  <el-dropdown size="mini" @command="(command) => handleCommand(command, scope.row)" v-hasPermi="['system:user:resetPwd', 'system:user:edit']">
-                    <el-button size="mini" type="text" icon="el-icon-d-arrow-right">更多</el-button>
-                    <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item command="handleResetPwd" icon="el-icon-key" v-hasPermi="['system:user:resetPwd']">重置密码</el-dropdown-item>
-                      <el-dropdown-item command="handleAuthRole" icon="el-icon-circle-check" v-hasPermi="['system:user:edit']">分配角色</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </el-dropdown>
-                </template>
-              </el-table-column>
-            </el-table>
+        <!-- 表格区域：自适应填满剩余高度 -->
+        <div class="table-container">
+          <el-table ref="userTable" v-loading="loading" :data="userList" :height="tableHeight" @selection-change="handleSelectionChange" header-cell-class-name="table-header-cell">
+            <el-table-column type="selection" width="50" align="center" />
+            <el-table-column label="用户编号" align="center" key="userId" prop="userId" width="100" v-if="columns.userId.visible" show-overflow-tooltip />
+            <el-table-column label="用户名称" align="center" key="userName" prop="userName" width="120" v-if="columns.userName.visible" show-overflow-tooltip />
+            <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" width="100" v-if="columns.nickName.visible" show-overflow-tooltip />
+            <el-table-column label="部门" align="center" key="deptName" prop="dept.deptName" width="120" v-if="columns.deptName.visible" show-overflow-tooltip />
+            <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber" width="140" v-if="columns.phonenumber.visible" />
+            <el-table-column label="状态" align="center" key="status" width="100" v-if="columns.status.visible">
+              <template slot-scope="scope">
+                <el-tag :type="scope.row.status === '0' ? 'success' : 'info'" size="small" effect="plain">
+                  {{ scope.row.status === '0' ? '启用' : '禁用' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns.createTime.visible" width="170">
+              <template slot-scope="scope">
+                <span>{{ parseTime(scope.row.createTime) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+              <template slot-scope="scope" v-if="scope.row.userId !== 1">
+                <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:user:edit']">编辑</el-button>
+                <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" style="color: #f56c6c" v-hasPermi="['system:user:remove']">删除</el-button>
+                <el-dropdown size="mini" @command="(command) => handleCommand(command, scope.row)" v-hasPermi="['system:user:resetPwd', 'system:user:edit']">
+                  <el-button size="mini" type="text" icon="el-icon-d-arrow-right">更多</el-button>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="handleResetPwd" icon="el-icon-key" v-hasPermi="['system:user:resetPwd']">重置密码</el-dropdown-item>
+                    <el-dropdown-item command="handleAuthRole" icon="el-icon-circle-check" v-hasPermi="['system:user:edit']">分配角色</el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
 
-            <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
-          </el-col>
-        </pane>
-      </splitpanes>
-    </el-row>
+        <!-- 分页：靠右对齐 -->
+        <div class="pagination-bar" v-show="total > 0">
+          <pagination :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+        </div>
+      </main>
+    </div>
 
     <!-- 添加或修改用户配置对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
@@ -211,13 +212,11 @@ import { listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUs
 import { getToken } from "@/utils/auth"
 import Treeselect from "@riophae/vue-treeselect"
 import "@riophae/vue-treeselect/dist/vue-treeselect.css"
-import { Splitpanes, Pane } from "splitpanes"
-import "splitpanes/dist/splitpanes.css"
 
 export default {
   name: "User",
   dicts: ['sys_normal_disable', 'sys_user_sex'],
-  components: { Treeselect, Splitpanes, Pane },
+  components: { Treeselect },
   data() {
     return {
       // 遮罩层
@@ -232,6 +231,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
+      // 表格高度：让表格填满剩余空间，表头固定、内容滚动
+      tableHeight: 400,
       // 用户表格数据
       userList: null,
       // 弹出层标题
@@ -333,7 +334,19 @@ export default {
     // 根据名称筛选部门树
     deptName(val) {
       this.$refs.tree.filter(val)
+    },
+    // 搜索条件展开/收起时重新计算表格高度
+    showSearch() {
+      this.$nextTick(this.calcTableHeight)
     }
+  },
+  mounted() {
+    this.calcTableHeight()
+    this.__resizeHandler = () => this.calcTableHeight()
+    window.addEventListener('resize', this.__resizeHandler)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.__resizeHandler)
   },
   created() {
     this.getList()
@@ -350,10 +363,21 @@ export default {
           this.userList = response.rows
           this.total = response.total
           this.loading = false
+          this.$nextTick(this.calcTableHeight)
         }
       )
     },
-    /** 查询部门下拉树结构 */
+    /** 计算表格高度：读取 .table-container 实际渲染高度，el-table 据此设置内部滚动 */
+    calcTableHeight() {
+      this.$nextTick(() => {
+        const container = this.$el.querySelector('.table-container')
+        if (!container) return
+        const h = container.clientHeight
+        if (h > 50) {
+          this.tableHeight = Math.floor(h)
+        }
+      })
+    },
     getDeptTree() {
       deptTreeSelect().then(response => {
         this.deptOptions = response.data
@@ -593,60 +617,70 @@ export default {
     color: var(--adm-text-primary);
   }
 
-  .el-row {
+  .page-body {
+    display: flex;
     flex: 1;
+    min-height: 0;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .dept-sidebar {
+    flex: 0 0 220px;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-
-    .splitpanes {
-      flex: 1;
-      min-height: 0;
-    }
-
-    .splitpanes__pane {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .el-col {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
+    gap: 8px;
   }
 
-  .el-form--inline {
-    background: var(--bg-card);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 8px;
-  }
-
-  .el-table {
+  .main-content {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
-  :deep(.pagination-container) {
+  .search-form {
     background: var(--bg-card);
     border-radius: 8px;
-    padding: 12px 16px;
-    margin-top: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
     flex-shrink: 0;
   }
 
-  .mb8 {
-    flex-direction: row;
+  .toolbar-row {
+    margin-bottom: 8px;
+    flex-shrink: 0;
+    display: flex;
+    gap: 8px;
     flex-wrap: wrap;
-
-    .el-col {
-      height: auto;
-      display: inline;
-    }
   }
 
-  .splitpanes__splitter {
-    background: var(--border-tags);
+  .table-container {
+    flex: 1;
+    overflow: hidden;
+    background: var(--bg-card);
+    border-radius: 8px;
+  }
+
+  .el-table {
+    width: 100%;
+  }
+
+  .pagination-bar {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+
+  :deep(.table-header-cell) {
+    background-color: #f5f7fa !important;
+    font-weight: 700 !important;
   }
 }
 </style>

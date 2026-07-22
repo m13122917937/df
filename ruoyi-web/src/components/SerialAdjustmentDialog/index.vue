@@ -266,7 +266,7 @@ export default {
             transition: all 0.3s ease;
 
             &:focus {
-              border-color: #f56c6c;
+              border-color: #FF3B30;
               box-shadow: 0 0 0 2px rgba(245, 108, 108, 0.2);
             }
           }
@@ -298,7 +298,7 @@ export default {
     justify-content: right;
     padding-right: 60px;
     margin: 20px 0;
-    color: #409EFF;
+    color: #1677FF;
     font-size: 24px;
     opacity: 0.7;
   }
@@ -309,7 +309,7 @@ export default {
     background: rgba(245, 108, 108, 0.1);
     border: 1px solid rgba(245, 108, 108, 0.3);
     border-radius: 6px;
-    color: #f56c6c;
+    color: #FF3B30;
     font-size: 13px;
     line-height: 1.5;
   }
@@ -331,8 +331,8 @@ export default {
     }
 
     &.el-button--danger {
-      background: #f56c6c;
-      border-color: #f56c6c;
+      background: #FF3B30;
+      border-color: #FF3B30;
 
       &:hover {
         background: #f78989;

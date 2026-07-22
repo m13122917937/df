@@ -32,9 +32,18 @@ export function getWeComLoginQr() {
 export function exchangeWeComLoginTicket(ticket) {
   return request({
     url: "/wecom/login/exchange",
-    headers: { isToken: false },
+    headers: { isToken: false, wecomLoginTicket: true },
     method: "get",
     params: { ticket },
+  });
+}
+
+export function getWeComPrivateAuthorizationStatus(session) {
+  return request({
+    url: "/wecom/login/private-status",
+    headers: { isToken: false },
+    method: "get",
+    params: { session },
   });
 }
 

@@ -147,10 +147,6 @@ public class AnalysisCostConfigService extends ServiceImpl<AnalysisCostConfigMap
                 && param.getAmount() == null && param.getCoefficient() == null) {
             throw new ServiceException("成本系数至少填写固定金额或系数");
         }
-        if ("REBATE".equals(param.getConfigType())
-                && param.getAmount() == null && param.getCoefficient() == null) {
-            throw new ServiceException("返利与价保至少填写金额或点位");
-        }
     }
 
     private void validateEffectiveDate(AnalysisCostConfigParam param) {

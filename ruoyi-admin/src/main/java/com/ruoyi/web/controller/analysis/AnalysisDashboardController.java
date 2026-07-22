@@ -73,15 +73,6 @@ public class AnalysisDashboardController extends BaseController {
     }
 
     /**
-     * 订单穿透明细。
-     */
-    @GetMapping("/orderDetails")
-    public AjaxResult orderDetails(AnalysisQueryRequest request) {
-        return AjaxResult.success(AnalysisWebConvert.INSTANCE.toOrderFactVOList(
-                dashboardBizService.orderDetails(AnalysisWebConvert.INSTANCE.toQuery(request))));
-    }
-
-    /**
      * 数据质量明细。
      */
     @GetMapping("/dataQuality")

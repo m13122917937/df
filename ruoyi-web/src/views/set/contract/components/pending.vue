@@ -36,7 +36,7 @@
             <el-button type="text" size="small" @click="handlePreview(scope.row)">
               预览
             </el-button>
-            <el-button type="text" size="small" style="color: #67c23a" @click="handleSign(scope.row)">
+            <el-button type="text" size="small" style="color: #34C759" @click="handleSign(scope.row)">
               去签署
             </el-button>
           </template>

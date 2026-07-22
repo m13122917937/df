@@ -90,8 +90,8 @@
       word-break: break-word;
       background-color: var(--bg-table-header);
       color: var(--adm-text-secondary);
-      height: 40px;
-      font-size: 13px;
+      height: 44px;
+      font-size: 12px;
     }
   }
 
@@ -123,7 +123,7 @@
   margin-top: 5px;
   border: 1px solid var(--adm-border);
   background: var(--bg-card) none;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 @media (max-width: 768px) {
@@ -269,7 +269,7 @@
 .sortable-ghost {
   opacity: .8;
   color: #fff !important;
-  background: #5B7CFA !important;
+  background: var(--primary-color) !important;
 }
 
 .top-right-btn {

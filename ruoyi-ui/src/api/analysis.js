@@ -89,22 +89,3 @@ export function rebuildAnalysis(date) {
     params: { date }
   })
 }
-
-export function getAnalysisSyncLogs() {
-  return request({
-    url: '/analysis/sync/logs',
-    method: 'get'
-  })
-}
-
-export function getAnalysisRebateList() {
-  return request({ url: '/analysis/rebate/list', method: 'get' })
-}
-
-export function saveAnalysisRebate(data) {
-  return request({ url: '/analysis/rebate/save', method: 'post', data })
-}
-
-export function deleteAnalysisRebate(id) {
-  return request({ url: `/analysis/rebate/${id}`, method: 'delete' })
-}

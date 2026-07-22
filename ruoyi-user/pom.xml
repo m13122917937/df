@@ -45,6 +45,11 @@
             <groupId>com.github.binarywang</groupId>
             <artifactId>weixin-java-cp</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.0</version>
+        </dependency>
 
     </dependencies>
 

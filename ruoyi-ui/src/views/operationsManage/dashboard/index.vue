@@ -125,7 +125,6 @@ export default {
         channelProduction: 'channelProduction',
         humanEfficiency: 'humanEfficiency',
         metricTree: 'metricTree',
-        orderDetails: 'orderDetails',
         dataQuality: 'dataQuality'
       }
       const key = Object.keys(mapping).find(item => path.indexOf(item) !== -1)

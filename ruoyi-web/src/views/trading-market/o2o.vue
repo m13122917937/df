@@ -408,25 +408,25 @@ export default {
 
       this.$alert(
         `<div style="text-align: left; line-height: 1.8; width: 100%;">
-          <div style="font-size: 18px; font-weight: 700; color: #e6a23c; margin-bottom: 20px; text-align: center; padding-bottom: 12px; border-bottom: 2px solid #fbe6cd;">📢 無界电商平台重要公告</div>
+          <div style="font-size: 18px; font-weight: 700; color: #FF9500; margin-bottom: 20px; text-align: center; padding-bottom: 12px; border-bottom: 2px solid #fbe6cd;">📢 無界电商平台重要公告</div>
 
           <div style="margin-bottom: 16px;">
-            <div style="font-weight: 600; color: #f56c6c; margin-bottom: 8px; font-size: 15px;">🔴 合规经营提醒</div>
-            <div style="color: #606266; font-size: 14px; background: #fef0f0; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #f56c6c;">
+            <div style="font-weight: 600; color: #FF3B30; margin-bottom: 8px; font-size: 15px;">🔴 合规经营提醒</div>
+            <div style="color: #606266; font-size: 14px; background: #fef0f0; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #FF3B30;">
               尊敬的供应商，为维护平台健康运营环境，严禁将已通过国家补贴渠道销售或备案的商品再次供应至本平台。如违反本规定，由此产生的一切法律后果及经济损失均由贵方自行承担。请您务必遵守相关法律法规，合规经营。
             </div>
           </div>
 
           <div style="margin-bottom: 16px;">
-            <div style="font-weight: 600; color: #67c23a; margin-bottom: 8px; font-size: 15px;">🟢 串码及时回传</div>
-            <div style="color: #606266; font-size: 14px; background: #f0f9eb; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #67c23a;">
+            <div style="font-weight: 600; color: #34C759; margin-bottom: 8px; font-size: 15px;">🟢 串码及时回传</div>
+            <div style="color: #606266; font-size: 14px; background: #f0f9eb; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #34C759;">
               请您在订单发货后及时回传相关串码信息。串码的及时性将直接影响您的回款效率，为保障您的资金周转顺畅，建议您在发货后 24 小时内完成串码上传操作。
             </div>
           </div>
 
           <div style="margin-bottom: 16px;">
-            <div style="font-weight: 600; color: #409eff; margin-bottom: 8px; font-size: 15px;">🔵 异常订单处理</div>
-            <div style="color: #606266; font-size: 14px; background: #ecf5ff; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #409eff;">
+            <div style="font-weight: 600; color: #1677FF; margin-bottom: 8px; font-size: 15px;">🔵 异常订单处理</div>
+            <div style="color: #606266; font-size: 14px; background: rgba(37,99,255,0.04); padding: 10px 14px; border-radius: 6px; border-left: 4px solid #1677FF;">
               请您每日关注平台的异常订单，并及时进行处理。异常订单包括但不限于：订单取消、地址变更、商品破损、客户投诉等情况。逾期未处理的异常订单可能会影响您的回款时效和店铺评级，请您务必重视。
             </div>
           </div>
@@ -959,7 +959,7 @@ export default {
 <style lang="scss" scoped>
 .o2o-page {
   height: 100vh;
-  background: radial-gradient(1200px 600px at 80% -10%, #ecf5ff 0%, rgba(236,245,255,0) 60%),
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(37,99,255,0.04) 0%, rgba(236,245,255,0) 60%),
               linear-gradient(180deg, #f9fbff 0%, #f7f8fa 100%);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   position: relative;
@@ -980,7 +980,7 @@ export default {
   right: -120px;
   width: 360px;
   height: 360px;
-  background: radial-gradient(closest-side, rgba(64,158,255,0.35), rgba(64,158,255,0));
+  background: radial-gradient(closest-side, rgba(37,99,255,0.15), rgba(37,99,255,0));
 }
 
 .o2o-page::after {
@@ -988,7 +988,7 @@ export default {
   left: -120px;
   width: 420px;
   height: 420px;
-  background: radial-gradient(closest-side, rgba(170,130,255,0.28), rgba(170,130,255,0));
+  background: radial-gradient(closest-side, rgba(88,86,214,0.12), rgba(88,86,214,0));
 }
 
 // 去除水印，保持与订单管理页面一致
@@ -1011,7 +1011,7 @@ export default {
     font-weight: 600;
     color: #303133;
     .el-icon-s-goods {
-      background: linear-gradient(135deg, #66b1ff, #409eff);
+      background: linear-gradient(135deg, #3395FF, #1677FF);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -1066,7 +1066,7 @@ export default {
       }
 
       &.active {
-        background: #409EFF;
+        background: #1677FF;
         color: #fff;
 
         .tab-badge {
@@ -1079,7 +1079,7 @@ export default {
         font-size: 11px;
         padding: 2px 6px;
         border-radius: 8px;
-        background: #409EFF;
+        background: #1677FF;
         color: #fff;
         font-weight: 600;
         min-width: 20px;
@@ -1113,11 +1113,11 @@ export default {
 
         &:hover {
           background: #f7f8fa;
-          color: #409EFF;
+          color: #1677FF;
         }
 
         &.active {
-          background: #409EFF;
+          background: #1677FF;
           color: #fff;
         }
       }
@@ -1137,7 +1137,7 @@ export default {
   border-right: 1px solid #e1e5e9;
   padding: 20px;
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.1);
-  height: calc(100vh - 48px);
+  height: calc(100vh - 64px);
 
     .filter-title {
       display: flex;
@@ -1159,7 +1159,7 @@ export default {
       overflow-y: scroll;
       /* 精致滚动条美化，仅作用于收货地点区域 */
       scrollbar-width: thin;
-      scrollbar-color: #1890ff transparent;
+      scrollbar-color: #1677FF transparent;
       &::-webkit-scrollbar {
         width: 10px;
         height: 10px;
@@ -1170,7 +1170,7 @@ export default {
       }
       &::-webkit-scrollbar-thumb {
         border-radius: 10px;
-        background: #1890ff;
+        background: #1677FF;
         border: 2px solid transparent;
         background-clip: padding-box;
         box-shadow: inset 0 0 0 1px rgba(24,144,255,0.25);
@@ -1247,7 +1247,7 @@ export default {
                   flex-direction: column;
                   justify-content: flex-end;
                   width: 20px;
-                  color: #409EFF !important;
+                  color: #1677FF !important;
                   font-size: 20px;
                 }
               }
@@ -1274,12 +1274,12 @@ export default {
 
         .node-label {
           font-weight: bold;
-          color: #409EFF !important;
+          color: #1677FF !important;
         }
 
         .node-count {
           font-weight: bold;
-          color: #409EFF !important;
+          color: #1677FF !important;
         }
 
       }
@@ -1339,14 +1339,14 @@ export default {
     max-width: none;
 
     &:hover {
-      border-color: #409EFF;
-      color: #409EFF;
+      border-color: #1677FF;
+      color: #1677FF;
       box-shadow: 0 6px 16px rgba(64, 158, 255, 0.12);
       transform: translateY(-1px);
     }
 
     &.active {
-      background: linear-gradient(135deg, #66b1ff, #409eff);
+      background: linear-gradient(135deg, #3395FF, #1677FF);
       color: #fff;
       border-color: transparent;
       box-shadow: 0 12px 28px rgba(64, 158, 255, 0.24);
@@ -1365,7 +1365,7 @@ export default {
       color: #909399;
     }
 
-    &:hover .brand-icon { color: #409EFF; }
+    &:hover .brand-icon { color: #1677FF; }
     &.active .brand-icon,
     &.active .brand-count { color: #ffffff; }
   }
@@ -1388,7 +1388,7 @@ export default {
         transition: all 0.3s;
 
         &:focus {
-          border-color: #409EFF;
+          border-color: #1677FF;
           box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.12);
         }
       }
@@ -1471,15 +1471,15 @@ export default {
   background: #fff;
 
   &:hover {
-    border-color: #409EFF;
+    border-color: #1677FF;
     background: #f5f9ff;
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(64,158,255,0.12);
   }
 
   &.selected {
-    border-color: #409EFF;
-    background: #409EFF;
+    border-color: #1677FF;
+    background: #1677FF;
     color: #fff;
     box-shadow: 0 6px 16px rgba(64,158,255,0.18);
 
@@ -1507,7 +1507,7 @@ export default {
   }
 
   .selection-icon {
-    color: #409EFF;
+    color: #1677FF;
     font-size: 14px;
     margin-left: 8px;
   }
@@ -1543,7 +1543,7 @@ export default {
   }
 
   .el-tree-node.is-current>.el-tree-node__content {
-    background: #409EFF;
+    background: #1677FF;
     color: #fff;
 
     .node-label,
@@ -1576,12 +1576,12 @@ export default {
   border-bottom: 1px solid #e9ecef;
 
   .back-btn {
-    color: #409EFF;
+    color: #1677FF;
     font-size: 14px;
     padding: 0;
 
     &:hover {
-      color: #66b1ff;
+      color: #3395FF;
     }
 
     i {
@@ -1632,7 +1632,7 @@ export default {
 
     .ticket-icon {
       font-size: 12px;
-      color: #409EFF;
+      color: #1677FF;
       font-weight: bold;
       width: 24px;
       height: 24px;
@@ -1642,7 +1642,7 @@ export default {
       border-radius: 50%;
       border: 1px solid transparent;
       background: linear-gradient(#fff, #fff) padding-box,
-                  linear-gradient(135deg, #66b1ff, #7c4dff) border-box;
+                  linear-gradient(135deg, #3395FF, #5856D6) border-box;
       margin-right: 8px;
       cursor: pointer;
     }
@@ -1668,16 +1668,16 @@ export default {
         }
 
         &.last-price {
-          color: #409EFF;
+          color: #1677FF;
           font-weight: 500;
           background: #f5f9ff;
-          border-color: #409EFF;
+          border-color: #1677FF;
         }
 
       }
       .price-item-active{
-        background: linear-gradient(135deg, #66b1ff, #409eff);
-        border: 1px solid #409EFF;
+        background: linear-gradient(135deg, #3395FF, #1677FF);
+        border: 1px solid #1677FF;
         color: #fff;
         box-shadow: 0 12px 28px rgba(64, 158, 255, 0.26);
         animation: glowPulse 1.8s ease-in-out infinite alternate;
@@ -1690,7 +1690,7 @@ export default {
 
   .countdown-info {
       font-size: 11px;
-      color: #e6a23c;
+      color: #FF9500;
       background: #fdf6ec;
       padding: 2px 6px;
       border-radius: 3px;
@@ -1726,11 +1726,11 @@ export default {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 1px solid #409EFF;
+    border: 1px solid #1677FF;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #409EFF;
+    color: #1677FF;
     font-weight: 600;
     background: #fff;
     box-shadow: 0 2px 6px rgba(64,158,255,0.08);
@@ -1834,7 +1834,7 @@ export default {
     right: -60px;
     width: 180px;
     height: 180px;
-    background: radial-gradient(closest-side, rgba(64,158,255,0.14), rgba(64,158,255,0));
+    background: radial-gradient(closest-side, rgba(37,99,255,0.06), rgba(37,99,255,0));
     filter: blur(30px);
     pointer-events: none;
   }
@@ -1846,7 +1846,7 @@ export default {
     left: -60px;
     width: 220px;
     height: 220px;
-    background: radial-gradient(closest-side, rgba(124,77,255,0.10), rgba(124,77,255,0));
+    background: radial-gradient(closest-side, rgba(88,86,214,0.05), rgba(88,86,214,0));
     filter: blur(30px);
     pointer-events: none;
   }
@@ -1903,7 +1903,7 @@ export default {
     right: 0;
     top: 0;
     height: 3px;
-    background: linear-gradient(90deg, #66b1ff, #7c4dff, #66b1ff);
+    background: linear-gradient(90deg, #3395FF, #5856D6, #3395FF);
     background-size: 200% 100%;
     animation: barMove 6s linear infinite;
     opacity: .55;
@@ -1911,13 +1911,13 @@ export default {
   }
 
   &:hover {
-    border-color: #409EFF;
+    border-color: #1677FF;
     box-shadow: 0 16px 36px rgba(64, 158, 255, 0.18);
     transform: translateY(-2px);
   }
 
   &.selected {
-    border-color: #409EFF;
+    border-color: #1677FF;
     background: #f5f9ff;
     box-shadow: 0 20px 44px rgba(64, 158, 255, 0.22), inset 0 0 0 1px rgba(64,158,255,0.25);
   }
@@ -1939,7 +1939,7 @@ export default {
     align-items: center;
     .ticket-icon {
       font-size: 12px;
-      color: #409EFF;
+      color: #1677FF;
       font-weight: bold;
       width: 24px;
       height: 24px;
@@ -1947,7 +1947,7 @@ export default {
       justify-content: center;
       align-items: center;
       border-radius: 50%;
-      border: 1px solid #409EFF;
+      border: 1px solid #1677FF;
     }
   }
 }
@@ -1971,7 +1971,7 @@ export default {
 
     .location-icon {
       font-size: 12px;
-      color: #409EFF;
+      color: #1677FF;
       margin-right: 4px;
     }
 

@@ -25,10 +25,10 @@ export default {
   name: 'ContractManagement',
   data() {
     return {
-      activeMenu: 'sign-info',
+      activeMenu: 'sign',
       menuList: [
         {
-          key: 'sign-info',
+          key: 'sign',
           title: '签署信息',
           icon: 'el-icon-document'
         },
@@ -57,13 +57,13 @@ export default {
       if (routePath.includes('signed')) {
         this.activeMenu = 'signed'
       } else {
-        this.activeMenu = 'sign-info'
+        this.activeMenu = 'sign'
       }
     },
     handleMenuSelect(key) {
       this.activeMenu = key
       const routeMap = {
-        'sign-info': '/monery/contract/sign-info',
+        'sign': '/monery/contract/sign',
         'signed': '/monery/contract/signed'
       }
       const targetRoute = routeMap[key]
@@ -84,21 +84,25 @@ export default {
   .contract-sidebar {
     width: 200px;
     background: #fff;
-    border-right: 1px solid #e4e7ed;
-    padding: 16px 0;
+    border-right: 1px solid #E5E6EB;
+    padding: 8px 0;
     overflow-y: auto;
 
     .menu-item {
       display: flex;
       align-items: center;
-      padding: 12px 20px;
+      padding: 10px 20px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      color: #606266;
+      transition: all 0.2s ease;
+      color: #4E5969;
+      font-size: 14px;
+      border-right: 2px solid transparent;
 
       .menu-icon {
         margin-right: 8px;
         font-size: 16px;
+        color: #86909C;
+        transition: color 0.2s ease;
       }
 
       .menu-title {
@@ -106,15 +110,23 @@ export default {
       }
 
       &:hover {
-        background: #f5f7fa;
-        color: #409eff;
+        background: rgba(22, 119, 255, 0.06);
+        color: #1677FF;
+
+        .menu-icon {
+          color: #1677FF;
+        }
       }
 
       &.active {
-        background: #ecf5ff;
-        color: #409eff;
-        border-right: 3px solid #409eff;
+        background: rgba(22, 119, 255, 0.06);
+        color: #1677FF;
+        border-right: 2px solid #1677FF;
         font-weight: 500;
+
+        .menu-icon {
+          color: #1677FF;
+        }
       }
     }
   }

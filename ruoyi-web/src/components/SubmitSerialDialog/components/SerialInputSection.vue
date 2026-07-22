@@ -416,12 +416,12 @@ export default {
 
           &.valid {
             background: rgba(103, 194, 58, 0.1);
-            color: #67c23a;
+            color: #34C759;
           }
 
           &.invalid {
             background: rgba(245, 108, 108, 0.1);
-            color: #f56c6c;
+            color: #FF3B30;
           }
 
           &.empty {
@@ -431,7 +431,7 @@ export default {
 
           &.duplicate {
             background: rgba(230, 162, 60, 0.1);
-            color: #e6a23c;
+            color: #FF9500;
           }
         }
       }
@@ -447,17 +447,17 @@ export default {
 
         &.success {
           background: rgba(103, 194, 58, 0.1);
-          color: #67c23a;
+          color: #34C759;
         }
 
         &.error {
           background: rgba(245, 108, 108, 0.1);
-          color: #f56c6c;
+          color: #FF3B30;
         }
 
         &.warning {
           background: rgba(230, 162, 60, 0.1);
-          color: #e6a23c;
+          color: #FF9500;
         }
 
         i {
@@ -610,7 +610,7 @@ export default {
           height: 36px;
 
           &:focus {
-            border-color: #409EFF;
+            border-color: #1677FF;
             box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
           }
 
@@ -631,22 +631,22 @@ export default {
           font-weight: bold;
 
           &.success {
-            color: #67c23a;
+            color: #34C759;
           }
 
           &.error {
-            color: #f56c6c;
+            color: #FF3B30;
           }
 
           &.warning {
-            color: #e6a23c;
+            color: #FF9500;
           }
         }
       }
 
       .serial-error-message {
         margin-left: 12px;
-        color: #f56c6c;
+        color: #FF3B30;
         font-size: 14px;
         font-weight: 500;
       }
@@ -657,11 +657,11 @@ export default {
         font-weight: 500;
 
         &.success {
-          color: #67c23a;
+          color: #34C759;
         }
 
         &.error {
-          color: #f56c6c;
+          color: #FF3B30;
         }
       }
     }

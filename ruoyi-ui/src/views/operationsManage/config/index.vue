@@ -8,7 +8,7 @@
           <p class="guide-text">{{ formGuide }}</p>
         </div>
         <div class="header-actions">
-          <template v-if="!isMargin && !isCollectionCycle">
+          <template v-if="!isMargin && !isCollectionCycle && !isWarehouseCostPage">
             <el-button icon="el-icon-download" @click="downloadTemplate">下载模板</el-button>
             <el-upload action="#" :show-file-list="false" :http-request="importFile" accept=".xlsx,.xls">
               <el-button icon="el-icon-upload2">导入</el-button>
@@ -85,7 +85,7 @@
       />
     </section>
 
-    <el-dialog :title="`${form.id ? '编辑' : '新增'}${pageTitle}`" :visible.sync="dialogVisible" :width="isSimpleStoreConfig ? '620px' : '720px'" :class="{ 'simple-config-dialog': isSimpleStoreConfig }" append-to-body>
+    <el-dialog :title="`${form.id ? '编辑' : '新增'}${pageTitle}`" :visible.sync="dialogVisible" :width="isSimpleStoreConfig ? '620px' : isWarehouseCostPage ? '800px' : '720px'" :class="{ 'simple-config-dialog': isSimpleStoreConfig, 'warehouse-cost-dialog': isWarehouseCostPage }" append-to-body>
       <el-form ref="form" :model="form" :rules="formRules" :label-width="isSimpleStoreConfig ? '160px' : '100px'">
         <el-row :gutter="16">
           <template v-if="isMargin">
@@ -435,6 +435,10 @@ export default {
 .simple-config-dialog .el-select,
 .simple-config-dialog .el-input-number { width: 100%; }
 .simple-config-dialog .el-input-number ::v-deep .el-input { width: 100%; }
+.simple-config-dialog .el-input-number ::v-deep .el-input__inner { padding-left: 8px; padding-right: 8px; }
+.warehouse-cost-dialog .el-input-number,
+.warehouse-cost-dialog .el-date-picker { width: 100%; }
+.warehouse-cost-dialog .el-input-number ::v-deep .el-input { width: 100%; }
 .danger { color: #f56c6c; }
 .field-unit { margin-left: 8px; color: var(--nl-color-tip); }
 .el-pagination { margin-top: 16px; text-align: right; }

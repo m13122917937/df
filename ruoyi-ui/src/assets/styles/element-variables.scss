@@ -4,20 +4,28 @@
 **/
 
 /* theme color */
-$--color-primary: #5B7CFA;
+$--color-primary: #007AFF;
 $--color-success: #34C759;
-$--color-warning: #FFB340;
-$--color-danger: #FF5E57;
-// $--color-info: #1E1E1E;
+$--color-warning: #FF9500;
+$--color-danger: #FF3B30;
 
-$--button-font-weight: 400;
+$--button-font-weight: 500;
 
-// $--color-text-regular: #1f2d3d;
+$--border-color-light: #E5E5EA;
+$--border-color-lighter: #F2F2F7;
 
-$--border-color-light: #dfe4ed;
-$--border-color-lighter: #e6ebf5;
+$--table-border: 1px solid #F2F2F7;
 
-$--table-border: 1px solid #dfe6ec;
+/* Apple Design - larger inputs & pill tags */
+$--input-height: 40px;
+$--input-medium-height: 40px;
+$--input-small-height: 34px;
+$--input-mini-height: 30px;
+$--input-border-radius: 10px;
+$--tag-border-radius: 100px;
+
+$--table-header-background-color: #F9F9FB;
+$--table-row-hover-background-color: #F5F5FA;
 
 /* icon font path, required */
 $--font-path: '~element-ui/lib/theme-chalk/fonts';

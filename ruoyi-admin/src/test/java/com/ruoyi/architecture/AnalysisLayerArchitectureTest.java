@@ -2,15 +2,12 @@ package com.ruoyi.architecture;
 
 import com.ruoyi.analysis.facade.impl.AnalysisConfigFacadeImpl;
 import com.ruoyi.analysis.facade.impl.AnalysisDashboardFacadeImpl;
-import com.ruoyi.analysis.facade.impl.AnalysisRebateFacadeImpl;
 import com.ruoyi.analysis.facade.impl.AnalysisSyncFacadeImpl;
 import com.ruoyi.biz.analysis.AnalysisConfigBizService;
 import com.ruoyi.biz.analysis.AnalysisDashboardBizService;
-import com.ruoyi.biz.analysis.AnalysisRebateBizService;
 import com.ruoyi.biz.analysis.AnalysisSyncBizService;
 import com.ruoyi.web.controller.analysis.AnalysisConfigController;
 import com.ruoyi.web.controller.analysis.AnalysisDashboardController;
-import com.ruoyi.web.controller.analysis.AnalysisRebateController;
 import com.ruoyi.web.controller.analysis.AnalysisSyncController;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,15 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AnalysisLayerArchitectureTest {
     private static final Class<?>[] CONTROLLERS = {
             AnalysisConfigController.class, AnalysisDashboardController.class,
-            AnalysisRebateController.class, AnalysisSyncController.class
+            AnalysisSyncController.class
     };
     private static final Class<?>[] BIZ_SERVICES = {
             AnalysisConfigBizService.class, AnalysisDashboardBizService.class,
-            AnalysisRebateBizService.class, AnalysisSyncBizService.class
+            AnalysisSyncBizService.class
     };
     private static final Class<?>[] FACADES = {
             AnalysisConfigFacadeImpl.class, AnalysisDashboardFacadeImpl.class,
-            AnalysisRebateFacadeImpl.class, AnalysisSyncFacadeImpl.class
+            AnalysisSyncFacadeImpl.class
     };
 
     @Test

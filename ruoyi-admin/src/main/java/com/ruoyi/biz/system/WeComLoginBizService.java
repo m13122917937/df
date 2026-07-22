@@ -1,8 +1,12 @@
 package com.ruoyi.biz.system;
 
 import com.ruoyi.user.facade.IWeComLoginFacade;
+import com.ruoyi.user.model.bo.WeComPrivateAuthorizationBO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /** 企业微信登录业务编排。 */
 @Component
@@ -48,5 +52,21 @@ public class WeComLoginBizService {
      */
     public String buildLoginPageUrl(String message) {
         return weComLoginFacade.buildLoginPageUrl(message);
+    }
+
+    public void writePrivateAuthorizationQr(String sessionId, OutputStream outputStream) throws IOException {
+        weComLoginFacade.writePrivateAuthorizationQr(sessionId, outputStream);
+    }
+
+    public void completePrivateAuthorization(String code, String sessionId) {
+        weComLoginFacade.completePrivateAuthorization(code, sessionId);
+    }
+
+    public WeComPrivateAuthorizationBO getPrivateAuthorizationStatus(String sessionId) {
+        return weComLoginFacade.getPrivateAuthorizationStatus(sessionId);
+    }
+
+    public boolean isPrivateAuthorizationState(String state) {
+        return weComLoginFacade.isPrivateAuthorizationState(state);
     }
 }

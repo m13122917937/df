@@ -18,6 +18,7 @@ public interface WeComUserConvert {
      * @param source 企业微信成员
      * @return 企业微信成员资料
      */
+    @Mapping(target = "wecomUserId", source = "userId")
     @Mapping(target = "mobile", source = "mobile")
     WeComUserProfileBO toProfile(WxCpUser source);
 

@@ -1,31 +1,65 @@
 /**
-* I think element-ui's default theme color is too light for long-term use.
-* So I modified the default color and you can modify it to your liking.
-**/
+* Element UI theme overrides with Apple Design colors
+* This file is compiled via SCSS and replaces the prebuilt theme-chalk CSS
+*/
 
-/* theme color */
-$--color-primary: #1890ff;
-$--color-success: #13ce66;
-$--color-warning: #ffba00;
-$--color-danger: #ff4949;
-// $--color-info: #1E1E1E;
+/* Apple Design Colors */
+$--color-primary: #2563FF;
+$--color-success: #34C759;
+$--color-warning: #FF9500;
+$--color-danger: #FF3B30;
+$--color-info: #8E8E93;
 
-$--button-font-weight: 400;
+$--color-text-primary: #000000;
+$--color-text-regular: rgba(0,0,0,0.85);
+$--color-text-secondary: rgba(0,0,0,0.55);
+$--color-text-placeholder: rgba(0,0,0,0.30);
 
-// $--color-text-regular: #1f2d3d;
+$--border-color-base: rgba(60,60,67,0.18);
+$--border-color-light: rgba(60,60,67,0.12);
+$--border-color-lighter: rgba(60,60,67,0.06);
+$--border-color-extra-light: rgba(60,60,67,0.04);
 
-$--border-color-light: #dfe4ed;
-$--border-color-lighter: #e6ebf5;
+$--border-radius-base: 8px;
+$--border-radius-small: 6px;
 
-$--table-border: 1px solid #dfe6ec;
+/* Button */
+$--button-font-weight: 500;
+$--button-padding-vertical: 10px;
+$--button-padding-horizontal: 20px;
 
-/* icon font path, required */
+/* Input */
+$--input-height: 40px;
+$--input-border-radius: 8px;
+
+/* Tag */
+$--tag-border-radius: 100px;
+
+/* Table */
+$--table-border: 1px solid rgba(60,60,67,0.12);
+$--table-header-background-color: #F9F9F9;
+
+/* Dialog */
+$--dialog-border-radius: 14px;
+
+/* Card */
+$--card-border-radius: 10px;
+
+/* Menu */
+$--menu-item-hover-fill: rgba(37,99,255,0.06);
+
+/* Popover */
+$--popover-border-radius: 10px;
+
+/* Tooltip */
+$--tooltip-border-radius: 6px;
+
+/* Icon font path, required */
 $--font-path: "~element-ui/lib/theme-chalk/fonts";
 
 @import "~element-ui/packages/theme-chalk/src/index";
 
 // the :export directive is the magic sauce for webpack
-// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
 :export {
   theme: $--color-primary;
 }

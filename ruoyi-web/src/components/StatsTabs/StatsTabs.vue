@@ -61,48 +61,60 @@ export default {
   <style lang="scss" scoped>
   .stats-tabs {
     background: #fff;
-    border-bottom: 1px solid #e6e6e6;
-    padding: 10px 20px;
+    border-bottom: 1px solid #E5E6EB;
+    padding: 0 24px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    height: 48px;
 
     .stats-items {
       display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+      height: 100%;
 
       .stats-item {
+        position: relative;
         cursor: pointer;
-        text-align: center;
-        padding: 10px 15px;
-        border-radius: 4px;
-        min-width: 80px;
-         border-bottom: 6px solid transparent;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        color: #4E5969;
+        font-size: 16px;
+        transition: color 0.2s ease, background 0.2s ease;
 
         &:hover {
-          background: #f5f5f5;
+          background: rgba(22, 119, 255, 0.06);
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 20px;
+          right: 20px;
+          height: 2px;
+          background: #1677FF;
+          border-radius: 1px 1px 0 0;
+          transform: scaleX(0);
+          transition: transform 0.2s ease;
         }
 
         &.active {
-          background: #e3f2fd;
-          color: #1976d2;
-          border-bottom: 6px solid #1976d2;
+          color: #1677FF;
 
           .stats-title {
-            color: #1976d2;
-            font-weight: bold;
+            color: #1677FF;
           }
 
-          .stats-count {
-            color: #1976d2;
-            font-weight: bold;
+          &::after {
+            transform: scaleX(1);
           }
         }
 
         .stats-title {
-          font-size: 14px;
-          color: #333;
+          font-size: 16px;
+          color: inherit;
+          white-space: nowrap;
         }
 
         .stats-count {

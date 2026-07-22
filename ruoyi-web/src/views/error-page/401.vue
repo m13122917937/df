@@ -14,7 +14,7 @@
         <ul class="list-unstyled">
           <li>或者你可以去:</li>
           <li class="link-type">
-            <router-link to="/o2o">
+            <router-link to="/df">
               回首页
             </router-link>
           </li>
@@ -64,7 +64,7 @@ export default {
     max-width: 100%;
     margin: 100px auto;
     .pan-back-btn {
-      background: #008489;
+      background: #1677FF;
       color: #fff;
       border: none!important;
     }
@@ -88,7 +88,7 @@ export default {
         padding-bottom: 5px;
       }
       a {
-        color: #008489;
+        color: #1677FF;
         text-decoration: none;
         &:hover {
           text-decoration: underline;

@@ -1,82 +1,71 @@
 <template>
   <div class="navbar">
-    <!-- Logo区域 -->
-    <!-- <div class="logo-container">
-      <span class="logo-text">风扬管理系统</span>
-    </div> -->
-
-    <!-- 主导航菜单 -->
-    <div class="main-nav">
-      <el-menu
-        mode="horizontal"
-        background-color="#f8f9fa"
-        text-color="#495057"
-        active-text-color="#007bff"
-        class="main-nav-menu"
-        :default-active="activeMenu"
-        @select="handleMenuSelect"
-      >
-        <el-menu-item index="/o2o">
-          <i class="el-icon-house" />
-          <span>交易市场</span>
-        </el-menu-item>
-        <el-menu-item index="/order/pending">
-          <i class="el-icon-document" />
-          <span>订单管理</span>
-          <!-- <el-tag
-            type="danger"
-            size="mini"
-            style="margin-left: 5px"
-          >特处理2</el-tag> -->
-        </el-menu-item>
-        <!-- 暂时隐藏财务管理模块 -->
-        <!-- <el-menu-item index="/finance/index">
-          <i class="el-icon-money"></i>
-          <span>财务管理</span>
-        </el-menu-item> -->
-        <el-menu-item v-permission="['admin']" index="/monery/earnest">
-          <i class="el-icon-money" />
-          <span>财务管理</span>
-          <!-- <el-tag
-            type="danger"
-            size="mini"
-            style="margin-left: 5px"
-          >特处理111万</el-tag> -->
-        </el-menu-item>
-        <el-menu-item v-permission="['admin']" index="/set/user">
-          <i class="el-icon-setting" />
-          <span>基础配置</span>
-        </el-menu-item>
-        <el-menu-item index="/rules">
-          <i class="el-icon-warning" />
-          <span>平台规则</span>
-        </el-menu-item>
-      </el-menu>
+    <!-- Logo 区域 -->
+    <div class="logo-section">
+      <div class="logo-wrapper">
+        <img class="logo-icon" src="@/assets/logo.png" alt="無界电商">
+        <span class="system-name">無界电商</span>
+      </div>
+      <div class="logo-divider" />
     </div>
 
-    <!-- 右侧用户菜单 -->
-    <div class="right-menu">
-      <!-- 企业切换下拉菜单 -->
+    <!-- 主导航 -->
+    <nav class="main-navigation">
+      <div
+        :class="['nav-item', { 'is-active': activeMenu === '/df' }]"
+        @click="handleMenuSelect('/df')"
+      >
+        <i class="el-icon-house" />
+        <span class="nav-text">交易市场</span>
+        <div class="nav-underline" />
+      </div>
+      <div
+        :class="['nav-item', { 'is-active': activeMenu === '/order/send' }]"
+        @click="handleMenuSelect('/order/send')"
+      >
+        <i class="el-icon-document" />
+        <span class="nav-text">订单管理</span>
+        <div class="nav-underline" />
+      </div>
+      <div
+        v-permission="['admin']"
+        :class="['nav-item', { 'is-active': activeMenu === '/monery/earnest' }]"
+        @click="handleMenuSelect('/monery/earnest')"
+      >
+        <i class="el-icon-money" />
+        <span class="nav-text">财务管理</span>
+        <div class="nav-underline" />
+      </div>
+      <div
+        v-permission="['admin']"
+        :class="['nav-item', { 'is-active': activeMenu === '/set/user' }]"
+        @click="handleMenuSelect('/set/user')"
+      >
+        <i class="el-icon-setting" />
+        <span class="nav-text">基础配置</span>
+        <div class="nav-underline" />
+      </div>
+    </nav>
+
+    <!-- 右侧用户区域 -->
+    <div class="user-actions">
+      <!-- 企业信息 -->
       <el-dropdown
-        v-if="hasMultipleCompanies"
-        class="company-switcher right-menu-item hover-effect"
+        class="company-dropdown"
         trigger="click"
         @command="changeCompany"
       >
-        <div class="company-switcher-wrapper">
-          <i class="el-icon-switch-button" />
-          <span>{{ currentCompany.companyName }}</span>
-          <i class="el-icon-caret-bottom" />
+        <div class="company-trigger">
+          <i class="el-icon-office-building" />
+          <span class="company-name-text">{{ (currentCompany || {}).companyName || '企业信息' }}</span>
+          <i class="el-icon-arrow-down" />
         </div>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item
             v-for="company in companyVOList"
             :key="company.id"
             :command="company.id"
-            :class="{
-              'is-current':
-                company.id === (currentCompany && currentCompany.id),
-            }"
+            :class="{ 'is-current': company.id === (currentCompany && currentCompany.id) }"
           >
             <i class="el-icon-office-building" />
             {{ company.companyName }}
@@ -88,12 +77,16 @@
         </el-dropdown-menu>
       </el-dropdown>
 
-      <!-- 退出登录按钮 -->
-      <div
-        class="logout-btn right-menu-item hover-effect"
-        @click="handleLogout"
-      >
-        <i class="el-icon-switch-button logout-icon" />
+      <!-- 消息通知 -->
+      <div class="notification-btn">
+        <el-badge :value="unreadCount" :hidden="unreadCount === 0">
+          <i class="el-icon-bell" />
+        </el-badge>
+      </div>
+
+      <!-- 退出登录 -->
+      <div class="logout-btn" @click="handleLogout">
+        <i class="el-icon-switch-button" />
         <span>退出登录</span>
       </div>
     </div>
@@ -105,6 +98,11 @@ import { mapGetters } from 'vuex'
 import { changeCompany } from '@/api/login'
 
 export default {
+  data() {
+    return {
+      unreadCount: 0
+    }
+  },
   computed: {
     ...mapGetters(['sidebar', 'avatar', 'device']),
     ...mapGetters('user', [
@@ -115,21 +113,18 @@ export default {
     ]),
     activeMenu() {
       const route = this.$route
-      // 根据当前路由确定激活的菜单项
       if (route.path.startsWith('/order')) {
-        return '/order/pending'
+        return '/order/send'
       } else if (route.path.startsWith('/monery')) {
         return '/monery/earnest'
       } else if (route.path.startsWith('/set')) {
         return '/set/user'
       } else if (route.path.startsWith('/finance')) {
         return '/finance/index'
-      } else if (route.path.startsWith('/rules')) {
-        return '/rules'
       } else if (route.path.startsWith('/trading-market')) {
-        return '/o2o'
+        return '/df'
       } else {
-        return '/o2o'
+        return '/df'
       }
     }
   },
@@ -140,13 +135,12 @@ export default {
     changeCompany(companyId) {
       changeCompany(companyId)
         .then((res) => {
-          console.log('data', res)
           const { data = '' } = res || {}
           this.$store.dispatch('user/setAccessToken', data)
           this.$store
             .dispatch('user/getInfo')
             .then(() => {
-              this.$router.push({ path: '/o2o' })
+              this.$router.push({ path: '/df' })
             })
             .catch(() => {
               this.$message.error('获取用户信息失败，请重试')
@@ -156,7 +150,6 @@ export default {
           this.$message.error('登录失败，请重试')
         })
     },
-    // 处理退出登录
     handleLogout() {
       this.$confirm('确定要退出登录吗？', '提示', {
         confirmButtonText: '确定',
@@ -172,8 +165,6 @@ export default {
         })
     },
     handleMenuSelect(index) {
-      // 处理菜单选择事件，进行路由跳转
-      console.log('Menu selected:', index)
       if (index && index !== this.$route.path) {
         this.$router.push(index)
       }
@@ -184,253 +175,237 @@ export default {
 
 <style lang="scss" scoped>
 .navbar {
-  height: 48px;
-  overflow: hidden;
-  position: relative;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 64px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  border-bottom: 1px solid #dee2e6;
+  padding: 0 24px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E6EB;
+  user-select: none;
 
-  .logo-container {
+  // Logo区域
+  .logo-section {
     display: flex;
     align-items: center;
-    margin-right: 24px;
+    height: 64px;
+    flex-shrink: 0;
 
-    .logo-placeholder {
-      width: 32px;
-      height: 32px;
-      margin-right: 8px;
-      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-      border-radius: 6px;
+    .logo-wrapper {
       display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+      gap: 12px;
 
-      i {
-        font-size: 16px;
-        color: #fff;
-      }
-    }
-
-    .logo-text {
-      font-size: 16px;
-      font-weight: bold;
-      color: #495057;
-    }
-
-    .current-company {
-      display: flex;
-      align-items: center;
-      margin-left: 16px;
-      padding: 4px 10px;
-      background: rgba(0, 123, 255, 0.1);
-      border-radius: 4px;
-      border: 1px solid rgba(0, 123, 255, 0.2);
-
-      i {
-        font-size: 12px;
-        color: #007bff;
-        margin-right: 4px;
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+        flex-shrink: 0;
       }
 
-      .company-name {
-        font-size: 12px;
-        color: #007bff;
-        font-weight: 500;
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
+      .system-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1D2129;
         white-space: nowrap;
       }
     }
+
+    .logo-divider {
+      width: 1px;
+      height: 24px;
+      background: #E5E6EB;
+      margin-left: 24px;
+    }
   }
 
-  .main-nav {
+  // 主导航
+  .main-navigation {
     flex: 1;
+    display: flex;
+    align-items: center;
+    height: 64px;
 
-    .main-nav-menu {
-      border: none;
-      background: transparent !important;
+    .nav-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 64px;
+      padding: 0 24px;
+      cursor: pointer;
+      gap: 6px;
+      color: #4E5969;
+      font-size: 17px;
+      transition: color 0.2s ease, background 0.2s ease;
 
-      .el-menu-item {
-        height: 40px;
-        line-height: 40px;
-        border: none !important;
-        color: #495057 !important;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border-radius: 4px;
-        margin: 0 2px;
-        padding: 0 12px;
-        font-size: 14px;
+      &:hover {
+        background: rgba(22, 119, 255, 0.06);
+      }
 
-        &:hover {
-          background: rgba(0, 123, 255, 0.1) !important;
-          color: #007bff !important;
-          transform: translateY(-1px);
+      i {
+        font-size: 16px;
+        transition: color 0.2s ease;
+        color: #86909C;
+      }
+
+      .nav-text {
+        white-space: nowrap;
+      }
+
+      .nav-underline {
+        position: absolute;
+        bottom: 0;
+        left: 24px;
+        right: 24px;
+        height: 2px;
+        background: #1677FF;
+        border-radius: 1px 1px 0 0;
+        transform: scaleX(0);
+        transition: transform 0.2s ease;
+      }
+
+      &.is-active {
+        color: #1677FF;
+
+        i {
+          color: #1677FF;
         }
 
-        &.is-active {
-          background: rgba(0, 123, 255, 0.15) !important;
-          color: #007bff !important;
-          font-weight: 600;
-          box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+        .nav-underline {
+          transform: scaleX(1);
+        }
+      }
+    }
+  }
+
+  // 右侧用户区域
+  .user-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+
+    .company-dropdown {
+      cursor: pointer;
+
+      .company-trigger {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: background 0.2s ease;
+
+        &:hover {
+          background: #E8F3FF;
         }
 
         i {
-          margin-right: 4px;
-          transition: color 0.3s ease;
+          font-size: 16px;
+          color: #4E5969;
+
+          &.el-icon-arrow-down {
+            font-size: 12px;
+            color: #86909C;
+          }
+        }
+
+        .company-name-text {
           font-size: 14px;
-        }
-      }
-    }
-  }
-
-  .hamburger-container {
-    line-height: 48px;
-    height: 100%;
-    float: left;
-    cursor: pointer;
-    transition: background 0.3s;
-    -webkit-tap-highlight-color: transparent;
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.025);
-    }
-  }
-
-  .errLog-container {
-    display: inline-block;
-    vertical-align: top;
-  }
-
-  .right-menu {
-    height: 100%;
-    line-height: 48px;
-    // width: 400px;
-    display: flex;
-    justify-self: flex-end;
-    align-items: center;
-    &:focus {
-      outline: none;
-    }
-
-    .right-menu-item {
-      display: flex;
-      align-items: center;
-      padding: 0 6px;
-      font-size: 16px;
-      color: #495057;
-
-      &.hover-effect {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border-radius: 6px;
-
-        &:hover {
-          background: rgba(0, 123, 255, 0.1);
-          color: #007bff;
+          color: #4E5969;
+          max-width: 200px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
     }
 
-    .company-switcher {
-      margin-right: 8px;
+    .notification-btn {
       display: flex;
       align-items: center;
+      justify-content: center;
+      width: 32px;
       height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
 
-      .company-switcher-wrapper {
-        display: flex;
-        align-items: center;
-        padding: 6px 10px;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-        height: 32px;
-        line-height: 1;
+      &:hover {
+        background: #E8F3FF;
+      }
 
-        i:first-child {
-          margin-right: 4px;
-          font-size: 12px;
-        }
-
-        span {
-          font-size: 12px;
-          margin-right: 4px;
-        }
-
-        .el-icon-caret-bottom {
-          font-size: 10px;
-        }
+      i {
+        font-size: 18px;
+        color: #4E5969;
       }
     }
 
     .logout-btn {
-      margin-left: 8px;
-      padding: 6px 12px;
-      background: linear-gradient(135deg, #66b1ff 0%, #409eff 100%);
-      color: #fff !important;
-      border-radius: 6px;
-      font-weight: 500;
-      box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
-      transition: all 0.3s ease;
-      cursor: pointer;
       display: flex;
       align-items: center;
+      justify-content: center;
       height: 32px;
-      line-height: 1;
+      padding: 0 14px;
+      border: 1px solid #1677FF;
+      border-radius: 6px;
+      color: #1677FF;
+      font-size: 14px;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      margin-left: 8px;
 
       &:hover {
-        background: linear-gradient(
-          135deg,
-          #409eff 0%,
-          #1890ff 100%
-        ) !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(64, 158, 255, 0.4);
+        background: #E8F3FF;
       }
 
-      &:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
-      }
-
-      .logout-icon {
-        margin-right: 4px;
+      i {
         font-size: 14px;
-        font-weight: 600;
+        line-height: 1;
       }
+    }
+  }
+}
 
-      span {
-        font-size: 12px;
+// 响应式
+@media (max-width: 1366px) {
+  .navbar {
+    padding: 0 16px;
+
+    .main-navigation .nav-item {
+      padding: 0 16px;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .navbar {
+    .main-navigation .nav-item {
+      padding: 0 12px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 12px;
+
+    .main-navigation .nav-item {
+      padding: 0 8px;
+
+      .nav-text {
+        display: none;
       }
     }
 
-    .avatar-container {
-      margin-right: 0;
+    .user-actions {
+      .company-name-text {
+        display: none;
+      }
 
-      .avatar-wrapper {
-        margin-top: 4px;
-        position: relative;
-
-        .user-avatar {
-          cursor: pointer;
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
-        }
-
-        .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -16px;
-          top: 20px;
-          font-size: 10px;
-        }
+      .logout-btn span {
+        display: none;
       }
     }
   }
@@ -438,36 +413,45 @@ export default {
 
 // 企业切换下拉菜单样式
 ::v-deep .el-dropdown-menu {
+  background: #FFFFFF;
+  border: 1px solid #E5E6EB;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.04);
+
   .el-dropdown-menu__item {
     display: flex;
     align-items: center;
-    padding: 8px 16px;
-    transition: all 0.3s ease;
+    padding: 8px 12px;
+    transition: background 0.15s ease;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #4E5969;
 
     i:first-child {
       margin-right: 8px;
       font-size: 14px;
-      color: #666;
+      color: #86909C;
     }
 
     i:last-child {
       margin-left: auto;
       font-size: 12px;
-      color: #007bff;
+      color: #1677FF;
     }
 
     &.is-current {
-      background: rgba(0, 123, 255, 0.1);
-      color: #007bff;
+      background: #E8F3FF;
+      color: #1677FF;
       font-weight: 500;
 
       i:first-child {
-        color: #007bff;
+        color: #1677FF;
       }
     }
 
     &:hover {
-      background: rgba(0, 123, 255, 0.05);
+      background: #F5F5F5;
     }
   }
 }
@@ -476,69 +460,75 @@ export default {
 ::v-deep .logout-confirm-dialog {
   .el-message-box {
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 16px 32px rgba(0, 0, 0, 0.08);
   }
 
   .el-message-box__header {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    background: #1677FF;
     color: #fff;
     padding: 20px 24px;
     border-radius: 12px 12px 0 0;
-    margin: -20px -20px 20px -20px;
+    margin: -16px -16px 16px -16px;
 
     .el-message-box__title {
       color: #fff;
       font-weight: 600;
     }
 
-    .el-message-box__headerbtn {
-      .el-message-box__close {
-        color: #fff;
+    .el-message-box__headerbtn .el-message-box__close {
+      color: #fff;
 
-        &:hover {
-          color: rgba(255, 255, 255, 0.8);
-        }
+      &:hover {
+        color: rgba(255, 255, 255, 0.8);
       }
     }
   }
 
   .el-message-box__content {
-    padding: 0 24px 20px 24px;
+    padding: 0 24px 16px 24px;
 
     .el-message-box__message {
-      color: #606266;
-      font-size: 16px;
+      color: #1D2129;
+      font-size: 15px;
       line-height: 1.6;
     }
   }
 
   .el-message-box__btns {
-    padding: 0 24px 24px 24px;
+    padding: 0 24px 20px 24px;
 
     .el-button {
-      border-radius: 8px;
-      padding: 10px 24px;
+      border-radius: 6px;
+      padding: 8px 20px;
       font-weight: 500;
 
       &.el-button--primary {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        background: #1677FF;
         border: none;
 
         &:hover {
-          background: linear-gradient(135deg, #ff5252 0%, #e53935 100%);
+          background: #4096FF;
         }
       }
 
       &.el-button--default {
-        border: 1px solid #dcdfe6;
-        color: #606266;
+        border: 1px solid #E5E6EB;
+        color: #4E5969;
 
         &:hover {
-          background: #f5f7fa;
-          border-color: #c0c4cc;
+          background: #F5F5F5;
+          border-color: #E5E6EB;
         }
       }
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar .nav-item,
+  .navbar .nav-underline,
+  .navbar .logout-btn {
+    transition: none !important;
   }
 }
 </style>

@@ -43,7 +43,7 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/o2o',
+    redirect: '/df',
     name: 'TradingMarket',
     meta: {
       owner: [0, 1], // 0: 管理员, 1: 非管理员都可以访问
@@ -52,7 +52,7 @@ export const constantRoutes = [
     },
     children: [
       {
-        path: 'o2o',
+        path: 'df',
         component: () => import('@/views/trading-market/o2o'),
         name: 'O2O',
         meta: {
@@ -60,16 +60,6 @@ export const constantRoutes = [
           owner: [0, 1] // 0: 管理员, 1: 非管理员都可以访问
         }
       },
-      {
-        path: 'rules',
-        component: () => import('@/views/rules/index'),
-        name: 'Rules',
-        hidden: true,
-        meta: {
-          title: '规则管理',
-          owner: [0, 1] // 0: 管理员, 1: 非管理员都可以访问
-        }
-      }
     ]
   }
 ]

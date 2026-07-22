@@ -273,8 +273,8 @@ export default {
       font-size: 14px;
 
       &.active {
-        color: #1890ff;
-        border-bottom: 2px solid #1890ff;
+        color: #1677FF;
+        border-bottom: 2px solid #1677FF;
       }
     }
   }
@@ -368,7 +368,7 @@ export default {
   margin: 0;
 
   .notice-text {
-    color: #fa8c16;
+    color: #FF9500;
     font-size: 12px;
     line-height: 1.5;
   }
@@ -386,7 +386,7 @@ export default {
     width: 40px;
     height: 40px;
     border: 3px solid #f3f3f3;
-    border-top: 3px solid #1890ff;
+    border-top: 3px solid #1677FF;
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }

@@ -5,7 +5,7 @@ import Layout from '@/layout'
 const orderRouter = {
   path: '/order',
   component: Layout,
-  redirect: '/order/pending',
+  redirect: '/order/send',
   meta: {
     owner: [0, 1], // 0: 非主账号, 1: 主账号都可以访问
     title: '订单管理',
@@ -21,7 +21,7 @@ const orderRouter = {
       },
       children: [
         {
-          path: 'pending',
+          path: 'send',
           component: () => import('@/views/order/pending'),
           name: 'PendingOrder',
           meta: {
@@ -30,7 +30,7 @@ const orderRouter = {
           }
         },
         {
-          path: 'today-shipped',
+          path: 'today',
           component: () => import('@/views/order/today-shipped'),
           name: 'TodayShippedOrder',
           meta: {
@@ -48,7 +48,7 @@ const orderRouter = {
           }
         },
         {
-          path: 'exception',
+          path: 'error',
           component: () => import('@/views/order/exception'),
           name: 'ExceptionOrder',
           meta: {
@@ -57,7 +57,7 @@ const orderRouter = {
           }
         },
         {
-          path: 'refund',
+          path: 'return',
           component: () => import('@/views/order/refund'),
           name: 'RefundOrder',
           meta: {
@@ -66,7 +66,7 @@ const orderRouter = {
           }
         },
         {
-          path: 'collected',
+          path: 'received',
           component: () => import('@/views/order/collected'),
           name: 'CollectedOrder',
           meta: {
@@ -75,7 +75,7 @@ const orderRouter = {
           }
         },
         {
-          path: 'after-sales',
+          path: 'aftersale',
           component: () => import('@/views/order/after-sales'),
           name: 'AfterSalesOrder',
           meta: {

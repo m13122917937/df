@@ -115,13 +115,13 @@ export default {
 
       &:hover {
         background: #f5f7fa;
-        color: #409eff;
+        color: #1677FF;
       }
 
       &.active {
         background: #ecf5ff;
-        color: #409eff;
-        border-right: 3px solid #409eff;
+        color: #1677FF;
+        border-right: 3px solid #1677FF;
         font-weight: 500;
       }
     }

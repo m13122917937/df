@@ -25,6 +25,8 @@ export default {
   height: 56px;
   flex-shrink: 0;
   border-bottom: 1px solid var(--border-sidebar);
+  backdrop-filter: var(--blur-sidebar);
+  -webkit-backdrop-filter: var(--blur-sidebar);
 }
 
 .logo-nav-area {

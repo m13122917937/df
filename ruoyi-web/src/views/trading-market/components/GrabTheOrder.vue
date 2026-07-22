@@ -313,7 +313,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$system-color: #1890ff;
+$system-color: #1677FF;
 $system-color-light: #e6f4ff;
 $system-color-ghost: #f0f7ff;
 
@@ -416,7 +416,7 @@ $system-color-ghost: #f0f7ff;
 
             .notice-number {
               &.warning-text {
-                color: #f56c6c;
+                color: #FF3B30;
                 font-weight: 600;
               }
                 color: $system-color;
@@ -427,7 +427,7 @@ $system-color-ghost: #f0f7ff;
 
             .notice-text {
               &.warning-text {
-                color: #f56c6c;
+                color: #FF3B30;
                 font-weight: 600;
               }
                 color: #495057;

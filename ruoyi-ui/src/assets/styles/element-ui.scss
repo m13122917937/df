@@ -90,3 +90,30 @@
   .el-submenu__icon-arrow {
   display: none;
 }
+
+/* Apple Design - Button press (respond on pointer-down) */
+.el-button:active {
+  transform: scale(0.97);
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Apple Design - Card hover lift */
+.el-card {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.el-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--adm-shadow-hover);
+}
+
+/* Apple Design - Input focus glow */
+.el-input__inner:focus,
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+}
+
+/* Apple Design - Dialog base radius */
+.el-dialog {
+  border-radius: var(--adm-radius-card);
+}

@@ -5,21 +5,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.ruoyi.analysis.constant.AnalysisConstants;
 import com.ruoyi.analysis.config.AnalysisProperties;
 import com.ruoyi.analysis.convert.AnalysisMetricConvert;
-import com.ruoyi.analysis.convert.AnalysisConvert;
 import com.ruoyi.analysis.domain.AnalysisCostConfig;
 import com.ruoyi.analysis.domain.AnalysisDailyMetric;
 import com.ruoyi.analysis.domain.AnalysisOrderFact;
-import com.ruoyi.analysis.domain.AnalysisRebateActivity;
-import com.ruoyi.analysis.domain.AnalysisRebateDetail;
 import com.ruoyi.analysis.domain.AnalysisRefundFact;
 import com.ruoyi.analysis.mapper.AnalysisCostConfigMapper;
 import com.ruoyi.analysis.mapper.AnalysisDailyMetricMapper;
 import com.ruoyi.analysis.mapper.AnalysisOrderFactMapper;
-import com.ruoyi.analysis.mapper.AnalysisRebateActivityMapper;
-import com.ruoyi.analysis.mapper.AnalysisRebateDetailMapper;
 import com.ruoyi.analysis.mapper.AnalysisRefundFactMapper;
 import com.ruoyi.analysis.model.bo.AnalysisDashboardBO;
-import com.ruoyi.analysis.model.bo.AnalysisRebateBO;
 import com.ruoyi.analysis.model.source.AnalysisMetricCalculation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,10 +46,6 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
     @Autowired
     private AnalysisCostConfigMapper configMapper;
     @Autowired
-    private AnalysisRebateActivityMapper rebateActivityMapper;
-    @Autowired
-    private AnalysisRebateDetailMapper rebateDetailMapper;
-    @Autowired
     private AnalysisProperties properties;
 
     /**
@@ -71,7 +61,6 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
         List<AnalysisOrderFact> facts = factMapper.selectByBusinessDate(date);
         List<AnalysisRefundFact> refunds = refundMapper.selectByRefundDate(date);
         List<AnalysisCostConfig> configs = loadConfigs(date);
-        configs.addAll(loadRebateConfigs(date));
         Map<String, MetricAccumulator> groups = buildFactGroups(facts);
         applyRefunds(groups, refunds);
         applyConfigs(groups, configs, facts, date);
@@ -148,22 +137,6 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
         }
         return groups.values().stream().map(MetricAccumulator::toAggregateMetric)
                 .collect(Collectors.toList());
-    }
-
-    private List<AnalysisCostConfig> loadRebateConfigs(LocalDate date) {
-        List<AnalysisCostConfig> result = new ArrayList<>();
-        for (AnalysisRebateActivity domain : rebateActivityMapper.selectAllOrdered()) {
-            List<AnalysisRebateDetail> details = rebateDetailMapper.selectByActivityId(domain.getId());
-            AnalysisRebateBO activity = AnalysisConvert.INSTANCE.toBO(domain, details);
-            if (activity.getStartTime().toLocalDate().isAfter(date)
-                    || activity.getEndTime().toLocalDate().isBefore(date)) {
-                continue;
-            }
-            for (AnalysisRebateBO.DetailBO detail : activity.getDetails()) {
-                result.add(AnalysisMetricConvert.INSTANCE.toRebateConfig(activity, detail));
-            }
-        }
-        return result;
     }
 
     private Map<String, MetricAccumulator> buildFactGroups(List<AnalysisOrderFact> facts) {
@@ -483,12 +456,7 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
         private void applyConfig(AnalysisCostConfig config, BigDecimal amount, BigDecimal coefficientBase,
                                  String costScope, BigDecimal annualRate, BigDecimal headcount) {
             String type = config.getConfigType();
-            if ("REBATE".equals(type)) {
-                goodsIncentive = goodsIncentive.add(amount);
-                if (config.getCoefficient() != null) {
-                    goodsIncentive = goodsIncentive.add(coefficientBase.multiply(config.getCoefficient()));
-                }
-            } else if ("FIXED_COEFFICIENT".equals(type) && config.getCoefficient() != null) {
+            if ("FIXED_COEFFICIENT".equals(type) && config.getCoefficient() != null) {
                 platformFee = platformFee.add(amount).add(coefficientBase.multiply(config.getCoefficient()));
             } else if ("FIXED_COEFFICIENT".equals(type)) {
                 platformFee = platformFee.add(amount);

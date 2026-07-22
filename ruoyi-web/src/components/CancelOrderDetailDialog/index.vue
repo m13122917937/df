@@ -187,7 +187,7 @@ export default {
         display: flex;
         align-items: center;
         gap: 6px;
-        &.danger { color: #f56c6c; }
+        &.danger { color: #FF3B30; }
       }
 
       .remark-content {

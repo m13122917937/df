@@ -25,7 +25,7 @@
     background: var(--adm-text-tertiary);
     border-radius: 4px;
     border: 1px solid var(--bg-hover);
-    transition: background 0.2s ease;
+    transition: background 200ms var(--ease-apple);
   }
 
   &::-webkit-scrollbar-thumb:hover {

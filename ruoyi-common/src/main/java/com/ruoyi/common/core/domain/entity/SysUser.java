@@ -1,6 +1,7 @@
 package com.ruoyi.common.core.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.xss.Xss;
@@ -95,26 +96,31 @@ public class SysUser extends BaseEntity {
     /**
      * 部门对象
      */
+    @TableField(exist = false)
     private SysDept dept;
 
     /**
      * 角色对象
      */
+    @TableField(exist = false)
     private List<SysRole> roles;
 
     /**
      * 角色组
      */
+    @TableField(exist = false)
     private Long[] roleIds;
 
     /**
      * 岗位组
      */
+    @TableField(exist = false)
     private Long[] postIds;
 
     /**
      * 角色ID
      */
+    @TableField(exist = false)
     private Long roleId;
 
     public SysUser() {

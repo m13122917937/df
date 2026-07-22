@@ -68,24 +68,24 @@ export function getPrimaryVariants(hex) {
  */
 const THEME_COLOR_PAIRS = {
   light: {
-    '#1677FF': '#60A5FA', // 蓝 → 柔蓝
-    '#409EFF': '#79BBFF', // 天蓝 → 亮天蓝
-    '#13C2C2': '#5CDBD8', // 青 → 柔青
-    '#52C41A': '#85D65A', // 绿 → 亮草绿
-    '#FA8C16': '#FFB340', // 橙 → 琥珀
-    '#722ED1': '#B37FEB', // 紫 → 淡紫
-    '#F5222D': '#FF6B6B', // 红 → 珊瑚
-    '#4B5563': '#94A3B8', // 灰 → 浅灰
+    '#007AFF': '#0A84FF', // 蓝 → 暗蓝
+    '#34C759': '#30D158', // 绿 → 暗绿
+    '#FF9500': '#FF9F0A', // 橙 → 暗橙
+    '#FF3B30': '#FF453A', // 红 → 暗红
+    '#AF52DE': '#BF5AF2', // 紫 → 暗紫
+    '#5AC8FA': '#64D2FF', // 青 → 暗青
+    '#FF2D55': '#FF375F', // 粉 → 暗粉
+    '#8E8E93': '#98989D', // 灰 → 暗灰
   },
   dark: {
-    '#60A5FA': '#1677FF',
-    '#79BBFF': '#409EFF',
-    '#5CDBD8': '#13C2C2',
-    '#85D65A': '#52C41A',
-    '#FFB340': '#FA8C16',
-    '#B37FEB': '#722ED1',
-    '#FF6B6B': '#F5222D',
-    '#94A3B8': '#4B5563',
+    '#0A84FF': '#007AFF',
+    '#30D158': '#34C759',
+    '#FF9F0A': '#FF9500',
+    '#FF453A': '#FF3B30',
+    '#BF5AF2': '#AF52DE',
+    '#64D2FF': '#5AC8FA',
+    '#FF375F': '#FF2D55',
+    '#98989D': '#8E8E93',
   }
 }
 
@@ -97,7 +97,7 @@ const THEME_COLOR_PAIRS = {
  * @returns {string} 配对色
  */
 export function getThemePairedColor(currentColor, fromMode, toMode) {
-  const color = currentColor && currentColor.startsWith('#') ? currentColor.toUpperCase() : '#1677FF'
+  const color = currentColor && currentColor.startsWith('#') ? currentColor.toUpperCase() : '#007AFF'
   const upperColor = color.toUpperCase()
   // 1. 精确匹配预设表
   const pair = THEME_COLOR_PAIRS[fromMode]?.[upperColor]

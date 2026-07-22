@@ -9,7 +9,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+  font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', sans-serif);
+  letter-spacing: -0.01em;
+  background: var(--bg-page, #F2F2F7);
+  color: var(--text-primary, #000000);
 }
 
 label {
@@ -96,24 +99,24 @@ div:focus {
 }
 
 aside {
-  background: #eef1f6;
+  background: rgba(37,99,255,0.04);
   padding: 8px 24px;
   margin-bottom: 20px;
-  border-radius: 2px;
+  border-radius: 10px;
   display: block;
   line-height: 32px;
   font-size: 16px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  color: #2c3e50;
+  font-family: inherit;
+  color: var(--text-primary, #000000);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
   a {
-    color: #337ab7;
+    color: var(--color-primary, #1677FF);
     cursor: pointer;
 
     &:hover {
-      color: rgb(32, 160, 255);
+      color: var(--color-primary-hover, #3395FF);
     }
   }
 }
@@ -143,8 +146,8 @@ aside {
   width: 100%;
   text-align: right;
   padding-right: 20px;
-  transition: 600ms ease position;
-  background: linear-gradient(90deg, rgba(32, 182, 249, 1) 0%, rgba(32, 182, 249, 1) 0%, rgba(33, 120, 241, 1) 100%, rgba(33, 120, 241, 1) 100%);
+  transition: 250ms cubic-bezier(0.16, 1, 0.3, 1) position;
+  background: linear-gradient(90deg, #1677FF 0%, #5856D6 100%);
 
   .subtitle {
     font-size: 20px;
@@ -152,21 +155,21 @@ aside {
   }
 
   &.draft {
-    background: #d0d0d0;
+    background: #C7C7CC;
   }
 
   &.deleted {
-    background: #d0d0d0;
+    background: #C7C7CC;
   }
 }
 
 .link-type,
 .link-type:focus {
-  color: #337ab7;
+  color: var(--color-primary, #1677FF);
   cursor: pointer;
 
   &:hover {
-    color: rgb(32, 160, 255);
+    color: var(--color-primary-hover, #3395FF);
   }
 }
 
@@ -187,4 +190,13 @@ aside {
 
 .multiselect--active {
   z-index: 1000 !important;
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

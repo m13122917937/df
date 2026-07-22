@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.analysis.mapper.AnalysisRebateActivityMapper">
-
-    <select id="selectAllOrdered" resultType="com.ruoyi.analysis.domain.AnalysisRebateActivity">
-        select * from ana_rebate_activity order by start_time desc, id desc
-    </select>
-</mapper>

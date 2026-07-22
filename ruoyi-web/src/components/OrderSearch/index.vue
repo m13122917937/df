@@ -3,10 +3,10 @@
   <div class="order-search">
     <div class="search-form">
       <div class="search-item">
-        <label class="search-label">业务类型：</label>
+        <label class="search-label">业务类型</label>
         <el-select
           v-model="searchForm.orderType"
-          placeholder="请选择业务类型"
+          placeholder="请选择"
           clearable
           size="small"
         >
@@ -15,7 +15,7 @@
         </el-select>
       </div>
       <div class="search-item">
-        <label class="search-label">订单号：</label>
+        <label class="search-label">订单号</label>
         <el-input
           v-model.trim="searchForm.orderCode"
           placeholder="请输入订单编号"
@@ -25,7 +25,7 @@
         />
       </div>
       <div class="search-item">
-        <label class="search-label">商品名：</label>
+        <label class="search-label">商品名</label>
         <el-input
           v-model.trim="searchForm.productName"
           placeholder="请输入商品名称"
@@ -35,7 +35,7 @@
         />
       </div>
       <div class="search-item">
-        <label class="search-label">SKU：</label>
+        <label class="search-label">SKU</label>
         <el-input
           v-model.trim="searchForm.skuName"
           placeholder="请输入SKU名称"
@@ -149,110 +149,48 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// 订单搜索样式
 .order-search {
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
+  background: transparent;
 
   .search-form {
     display: flex;
-    gap: 16px;
-    align-items: flex-end;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
 
     .search-item {
       display: flex;
       align-items: center;
+      flex-shrink: 0;
 
       .search-label {
-        font-size: 14px;
-        font-weight: 500;
-        color: #606266;
-        width: 70px;
-        text-align: right;
+        font-size: 13px;
+        color: #6E6E73;
+        white-space: nowrap;
         flex-shrink: 0;
+        margin-right: 8px;
+
+        &::after {
+          content: '：';
+        }
       }
 
       .el-input {
-        width: 220px;
+        width: 200px;
+        margin-right: 12px;
       }
 
       .el-select {
-        width: 130px;
+        width: 120px;
+        margin-right: 12px;
       }
     }
 
     .search-actions {
       display: flex;
       gap: 8px;
-      align-items: center;
-
-      .el-button {
-        border-radius: 6px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-
-        &.el-button--primary {
-          background: linear-gradient(135deg, #409EFF 0%, #66b1ff 100%);
-          border: none;
-          box-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
-
-          &:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(64, 158, 255, 0.4);
-          }
-        }
-
-        &:not(.el-button--primary) {
-          border: 1px solid #dcdfe6;
-          color: #606266;
-
-          &:hover {
-            color: #409EFF;
-            border-color: #409EFF;
-            background: rgba(64, 158, 255, 0.05);
-          }
-        }
-      }
-    }
-  }
-}
-
-// 响应式设计
-@media (max-width: 1200px) {
-  .order-search .search-form {
-    flex-direction: column;
-    align-items: stretch;
-
-    .search-item {
-      min-width: auto;
-    }
-
-    .search-actions {
-      margin-top: 12px;
-      justify-content: center;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .order-search {
-    padding: 12px;
-
-    .search-form {
-      gap: 12px;
-
-      .search-actions {
-        flex-direction: column;
-        gap: 8px;
-
-        .el-button {
-          width: 100%;
-        }
-      }
+      flex-shrink: 0;
+      margin-left: 4px;
     }
   }
 }

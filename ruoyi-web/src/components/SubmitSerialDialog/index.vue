@@ -2166,7 +2166,7 @@ export default {
     gap: 4px;
     margin-top: 4px;
     font-size: 12px;
-    color: #f56c6c;
+    color: #FF3B30;
 
     i {
       font-size: 12px;

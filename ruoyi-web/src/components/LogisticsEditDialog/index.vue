@@ -483,7 +483,7 @@ export default {
 <style scoped lang="scss">
 .logistics-edit-form {
   .form-error {
-    color: #f56c6c;
+    color: #FF3B30;
     font-size: 12px;
     margin-top: 4px;
   }

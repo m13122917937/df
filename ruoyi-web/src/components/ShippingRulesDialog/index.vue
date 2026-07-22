@@ -94,7 +94,7 @@ export default {
     border-radius: 4px;
     padding: 12px 16px;
     margin-bottom: 20px;
-    color: #f56c6c;
+    color: #FF3B30;
     display: flex;
     align-items: center;
     font-weight: 500;

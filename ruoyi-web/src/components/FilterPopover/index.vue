@@ -207,7 +207,7 @@ export default {
   }
 
   &:hover {
-    color: #409EFF;
+    color: #1677FF;
 
     .filter-icon {
       opacity: 1;

@@ -158,7 +158,7 @@ export default {
 
           .phone-number {
             font-weight: 600;
-            color: #409EFF;
+            color: #1677FF;
             font-size: 15px;
             background: rgba(64, 158, 255, 0.1);
             padding: 4px 8px;
@@ -207,7 +207,7 @@ export default {
           background: #fdf6ec;
           border: 1px solid #f5dab1;
           border-radius: 4px;
-          color: #e6a23c;
+          color: #FF9500;
 
           .el-icon-warning {
             font-size: 16px;

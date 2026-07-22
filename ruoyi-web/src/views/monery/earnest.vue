@@ -1066,7 +1066,7 @@ export default {
       .amount {
         font-size: 24px;
         font-weight: 600;
-        color: #f56c6c;
+        color: #FF3B30;
       }
     }
 
@@ -1077,7 +1077,7 @@ export default {
       background: #f0f9ff;
       border: 1px solid #b3d8ff;
       border-radius: 4px;
-      color: #409eff;
+      color: #1677FF;
 
       i {
         margin-right: 8px;
@@ -1119,13 +1119,13 @@ export default {
         width: 200px;
         height: 200px;
         margin: 0 auto;
-        border: 2px dashed #409eff;
+        border: 2px dashed #1677FF;
         border-radius: 4px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        color: #409eff;
+        color: #1677FF;
         background: rgba(64, 158, 255, 0.05);
 
         .el-icon-loading {
@@ -1173,7 +1173,7 @@ export default {
             font-size: 12px;
 
             &:hover {
-              color: #409eff;
+              color: #1677FF;
             }
           }
         }
@@ -1187,13 +1187,13 @@ export default {
         width: 200px;
         height: 200px;
         margin: 0 auto;
-        border: 2px dashed #f56c6c;
+        border: 2px dashed #FF3B30;
         border-radius: 4px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        color: #f56c6c;
+        color: #FF3B30;
         background: rgba(245, 108, 108, 0.05);
 
         i {
@@ -1252,7 +1252,7 @@ export default {
       font-weight: 600;
 
       &.active {
-        background: #409eff;
+        background: #1677FF;
         color: #fff;
       }
     }

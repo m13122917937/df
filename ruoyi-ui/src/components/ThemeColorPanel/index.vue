@@ -91,16 +91,16 @@
 <script>
 import { applyPrimaryColor, toggleThemeWithAnimation, getThemePairedColor } from '@/utils/theme-color'
 
-const DEFAULT_COLOR = '#1677FF'
+const DEFAULT_COLOR = '#007AFF'
 const PRESET_COLORS = [
-  '#1677FF',
-  '#409EFF',
-  '#13C2C2',
-  '#52C41A',
-  '#FA8C16',
-  '#722ED1',
-  '#F5222D',
-  '#4B5563'
+  '#007AFF',
+  '#34C759',
+  '#FF9500',
+  '#FF3B30',
+  '#AF52DE',
+  '#5AC8FA',
+  '#FF2D55',
+  '#8E8E93'
 ]
 
 export default {
@@ -240,7 +240,7 @@ export default {
   background: transparent;
   color: var(--menu-text);
   cursor: pointer;
-  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 180ms var(--ease-apple);
   position: relative;
 
   &:hover {
@@ -266,6 +266,8 @@ export default {
   right: 0;
   width: 240px;
   background: var(--contextmenu-bg);
+  backdrop-filter: var(--blur-popup);
+  -webkit-backdrop-filter: var(--blur-popup);
   border: 1px solid var(--adm-border);
   border-radius: 12px;
   box-shadow: var(--shadow-popup);
@@ -304,7 +306,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 150ms ease, box-shadow 150ms ease;
+  transition: transform 150ms var(--ease-apple), box-shadow 150ms var(--ease-apple);
   position: relative;
   border: 2px solid transparent;
 

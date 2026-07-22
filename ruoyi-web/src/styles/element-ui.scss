@@ -1,10 +1,14 @@
-// cover some element-ui styles
+// Apple Design overrides for Element UI
 
+$apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+/* Breadcrumb */
 .el-breadcrumb__inner,
 .el-breadcrumb__inner a {
   font-weight: 400 !important;
 }
 
+/* Upload */
 .el-upload {
   input[type="file"] {
     display: none !important;
@@ -52,6 +56,8 @@
   left: 0;
   position: relative;
   margin: 0 auto;
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-lg, 0 2px 8px rgba(0,0,0,0.06), 0 16px 32px rgba(0,0,0,0.08));
 }
 
 // refine element ui upload
@@ -71,6 +77,26 @@
   a {
     display: block
   }
+  border: 1px solid var(--border-light, #EBEDF0);
+  border-radius: var(--radius-md, 10px);
+  box-shadow: var(--shadow-lg, 0 4px 16px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.04));
+  padding: 6px;
+  background: var(--bg-dropdown, #FFFFFF);
+
+  .el-dropdown-menu__item {
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    transition: background 150ms $apple-ease;
+
+    &:not(.is-disabled):hover {
+      background-color: rgba(37,99,255,0.06);
+    }
+  }
+
+  .popper__arrow {
+    display: none;
+  }
 }
 
 // fix date-picker ui bug in filter-item
@@ -81,4 +107,147 @@
 // to fix el-date-picker css style
 .el-range-separator {
   box-sizing: content-box;
+}
+
+// Apple-style button click feedback
+.el-button {
+  transition: all 200ms $apple-ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &.el-button--text {
+    &:active {
+      transform: none;
+    }
+  }
+}
+
+// Input focus ring
+.el-input__inner {
+  border-radius: var(--input-border-radius, 8px);
+  transition: box-shadow 200ms $apple-ease, border-color 200ms $apple-ease;
+
+  &:focus {
+    box-shadow: 0 0 0 3px var(--focus-ring-color, rgba(37,99,255,0.3));
+  }
+}
+
+// Card hover lift
+.el-card {
+  border-radius: var(--radius-card, 10px);
+  border: none;
+  box-shadow: var(--shadow-sm, 0 1px 0 rgba(0,0,0,0.04));
+  transition: transform 200ms $apple-ease, box-shadow 200ms $apple-ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04));
+  }
+}
+
+// Table header
+.el-table th.el-table__cell {
+  background-color: var(--el-table-header-bg, #F9F9F9) !important;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(60,60,67,0.60));
+  font-size: 13px;
+}
+
+.el-table__header-wrapper {
+  .el-table__header {
+    th.el-table__cell {
+      background-color: var(--el-table-header-bg, #F9F9F9) !important;
+    }
+  }
+}
+
+// Pagination
+.el-pagination {
+  .el-pager li {
+    border-radius: var(--radius-pill, 100px);
+    margin: 0 2px;
+    min-width: 32px;
+    height: 32px;
+    line-height: 32px;
+    transition: all 150ms $apple-ease;
+
+    &:hover {
+      color: var(--color-primary, #1677FF);
+    }
+
+    &.active {
+      background: var(--color-primary, #1677FF);
+      color: #fff;
+    }
+  }
+
+  .btn-prev,
+  .btn-next {
+    border-radius: var(--radius-pill, 100px);
+    min-width: 32px;
+    height: 32px;
+    transition: all 150ms $apple-ease;
+
+    &:hover {
+      color: var(--color-primary, #1677FF);
+    }
+  }
+}
+
+// Message box
+.el-message-box {
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-lg, 0 2px 8px rgba(0,0,0,0.06), 0 16px 32px rgba(0,0,0,0.08));
+}
+
+// Dialog header
+.el-dialog__header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--border-light, rgba(60,60,67,0.12));
+}
+
+.el-dialog__body {
+  padding: 20px 24px;
+}
+
+.el-dialog__footer {
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--border-light, rgba(60,60,67,0.12));
+}
+
+// Tooltip
+.el-tooltip__popper {
+  border-radius: 6px;
+}
+
+// Select
+.el-select-dropdown {
+  border: none;
+  border-radius: var(--radius-md, 10px);
+  box-shadow: var(--shadow-lg, 0 2px 8px rgba(0,0,0,0.06), 0 16px 32px rgba(0,0,0,0.08));
+  padding: 6px;
+
+  .el-select-dropdown__item {
+    border-radius: 6px;
+    padding: 8px 16px;
+  }
+}
+
+// Date picker
+.el-date-editor {
+  .el-input__inner {
+    border-radius: var(--input-border-radius, 8px);
+  }
+}
+
+// Table - Apple style zebra striping
+.el-table--striped .el-table__body tr.el-table__row--striped td {
+  background: rgba(0,0,0,0.015);
+}
+
+// Table row hover
+.el-table__body tr:hover > td {
+  background-color: rgba(37,99,255,0.03) !important;
 }

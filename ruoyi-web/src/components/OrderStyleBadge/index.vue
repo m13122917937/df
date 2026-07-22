@@ -34,11 +34,11 @@ export default {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid #409EFF;
+  border: 1px solid #1677FF;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #409EFF;
+  color: #1677FF;
   font-weight: 600;
   background: #fff;
   box-shadow: 0 2px 6px rgba(64,158,255,0.08);
@@ -57,7 +57,7 @@ export default {
 }
 .ticket-icon {
   font-size: 12px;
-  color: #409EFF;
+  color: #1677FF;
   font-weight: bold;
   width: 24px;
   height: 24px;
@@ -65,7 +65,7 @@ export default {
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  border: 1px solid #409EFF;
+  border: 1px solid #1677FF;
 }
 </style>
 

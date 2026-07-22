@@ -82,7 +82,7 @@ export default {
 
     i {
       margin-right: 8px;
-      color: #e74c3c;
+      color: #FF3B30;
     }
   }
 
@@ -100,7 +100,7 @@ export default {
         background: #e3f2fd;
 
         .el-checkbox {
-          color: #1976d2;
+          color: #1677FF;
         }
       }
 
@@ -113,15 +113,15 @@ export default {
         }
 
         ::v-deep .el-checkbox__input.is-checked .el-checkbox__inner {
-          background-color: #e74c3c;
-          border-color: #e74c3c;
+          background-color: #FF3B30;
+          border-color: #FF3B30;
         }
       }
     }
 
     .region-item:first-child {
       .el-checkbox ::v-deep .el-checkbox__label {
-        color: #e74c3c;
+        color: #FF3B30;
         font-weight: bold;
       }
     }

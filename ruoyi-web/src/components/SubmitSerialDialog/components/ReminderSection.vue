@@ -1,7 +1,7 @@
 <template>
   <div class="reminder-section">
     <div class="reminder-header">
-      <i class="el-icon-warning" style="color: #f56c6c; margin-right: 8px;" />
+      <i class="el-icon-warning" style="color: #FF3B30; margin-right: 8px;" />
       <span class="reminder-title">提醒:</span>
     </div>
     <div class="reminder-content">
@@ -112,7 +112,7 @@ export default {
       }
 
       &.critical {
-        border-left-color: #f56c6c;
+        border-left-color: #FF3B30;
         background: rgba(255, 245, 245, 0.9);
         box-shadow: 0 2px 8px rgba(245, 108, 108, 0.2);
       }
@@ -162,7 +162,7 @@ export default {
             transition: all 0.3s ease;
 
             &.critical-tag {
-              background: linear-gradient(135deg, #f56c6c 0%, #e74c3c 100%);
+              background: linear-gradient(135deg, #FF3B30 0%, #FF6259 100%);
               color: #fff;
               border: none;
               font-weight: 600;
@@ -183,7 +183,7 @@ export default {
           background: rgba(245, 108, 108, 0.1);
           border-radius: 6px;
           border: 1px solid rgba(245, 108, 108, 0.3);
-          color: #f56c6c;
+          color: #FF3B30;
           font-weight: 600;
           font-size: 13px;
           display: flex;
@@ -202,7 +202,7 @@ export default {
         font-size: 14px;
 
         .highlight-time {
-          color: #f56c6c;
+          color: #FF3B30;
           font-weight: 600;
           background: rgba(245, 108, 108, 0.1);
           padding: 2px 6px;
@@ -210,7 +210,7 @@ export default {
         }
 
         .highlight-penalty {
-          color: #e74c3c;
+          color: #FF6259;
           font-weight: 700;
           background: rgba(231, 76, 60, 0.1);
           padding: 2px 6px;

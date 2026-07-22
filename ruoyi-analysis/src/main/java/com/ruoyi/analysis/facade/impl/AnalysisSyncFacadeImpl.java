@@ -4,7 +4,6 @@ import com.ruoyi.analysis.facade.AnalysisSyncFacade;
 import com.ruoyi.analysis.model.bo.AnalysisSyncBO;
 import com.ruoyi.analysis.model.source.AnalysisSyncResult;
 import com.ruoyi.analysis.service.AnalysisMetricService;
-import com.ruoyi.analysis.service.AnalysisSyncLogService;
 import com.ruoyi.analysis.service.AnalysisSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,8 +20,6 @@ public class AnalysisSyncFacadeImpl implements AnalysisSyncFacade {
     private AnalysisSyncService syncService;
     @Autowired
     private AnalysisMetricService metricService;
-    @Autowired
-    private AnalysisSyncLogService logService;
 
     /**
      * {@inheritDoc}
@@ -48,16 +45,7 @@ public class AnalysisSyncFacadeImpl implements AnalysisSyncFacade {
      * {@inheritDoc}
      */
     @Override
-    public List<AnalysisSyncBO> logs(int limit) {
-        return logService.listRecent(limit);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void syncScheduled() {
-        LocalDate retryDate = logService.findPendingRetryDate();
-        sync(retryDate == null ? LocalDate.now().minusDays(1) : retryDate);
+        sync(LocalDate.now().minusDays(1));
     }
 }

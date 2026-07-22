@@ -164,6 +164,8 @@ export default {
   height: 56px;
   padding: 0 20px;
   background: var(--bg-navbar);
+  backdrop-filter: var(--blur-navbar);
+  -webkit-backdrop-filter: var(--blur-navbar);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'HarmonyOS Sans', 'PingFang SC', system-ui, sans-serif;
   position: relative;
   z-index: 10;
@@ -225,12 +227,17 @@ export default {
   background: transparent;
   color: var(--menu-text);
   cursor: pointer;
-  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 180ms var(--ease-apple);
   position: relative;
 
   &:hover {
     background: var(--menu-hover-bg);
     color: var(--menu-hover-text);
+  }
+
+  &:active {
+    transform: scale(0.94);
+    transition: transform 80ms ease;
   }
 }
 
@@ -278,7 +285,7 @@ export default {
   border-radius: 10px;
   cursor: pointer;
   color: var(--menu-text);
-  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 180ms var(--ease-apple);
 
   &:hover {
     background: var(--menu-hover-bg);
@@ -292,6 +299,8 @@ export default {
   box-shadow: var(--shadow-popup);
   padding: 4px;
   background: var(--contextmenu-bg);
+  backdrop-filter: var(--blur-popup);
+  -webkit-backdrop-filter: var(--blur-popup);
 
   .el-dropdown-menu__item {
     border-radius: 8px;
@@ -301,7 +310,7 @@ export default {
 
     &:hover {
       background: var(--contextmenu-hover);
-      color: #5B7CFA;
+      color: var(--primary-color);
     }
   }
 }

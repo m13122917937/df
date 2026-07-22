@@ -206,18 +206,18 @@ export default {
     padding: 20px;
     background: #f8f9fa;
     border-radius: 4px;
-    border-left: 4px solid #409eff;
+    border-left: 4px solid #1677FF;
 
     &:nth-child(2) {
-      border-left-color: #67c23a;
+      border-left-color: #34C759;
     }
 
     &:nth-child(3) {
-      border-left-color: #e6a23c;
+      border-left-color: #FF9500;
     }
 
     &:nth-child(4) {
-      border-left-color: #f56c6c;
+      border-left-color: #FF3B30;
     }
 
     .summary-number {

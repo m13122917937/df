@@ -198,7 +198,7 @@ export default {
 
 .filter-title i {
   margin-right: 6px;
-  color: #409eff;
+  color: #1677FF;
   font-size: 16px;
 }
 
@@ -221,12 +221,12 @@ export default {
 }
 
 .location-list::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #409eff, #66b1ff);
+  background: linear-gradient(135deg, #1677FF, #3395FF);
   border-radius: 2px;
 }
 
 .location-list::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #66b1ff, #409eff);
+  background: linear-gradient(135deg, #3395FF, #1677FF);
 }
 
 .location-item {
@@ -249,7 +249,7 @@ export default {
   top: 0;
   height: 100%;
   width: 2px;
-  background: #409eff;
+  background: #1677FF;
   transform: scaleY(0);
   transition: transform 0.3s ease;
 }
@@ -260,12 +260,12 @@ export default {
 
 .location-item:hover {
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  color: #409eff;
+  color: #1677FF;
   transform: translateX(3px);
 }
 
 .location-item.active {
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  background: linear-gradient(135deg, #1677FF 0%, #3395FF 100%);
   color: white;
   transform: translateX(3px);
   box-shadow: 0 2px 10px rgba(64, 158, 255, 0.3);

@@ -15,9 +15,9 @@
   // 圆角
   --mini-radius: 4px;
   --small-radius: 6px;
-  --radius: 10px;
-  --large-radius: 12px;
-  --max-radius: 20px;
+  --radius: 12px;
+  --large-radius: 14px;
+  --max-radius: 24px;
   // 顶部栏高度
   --top-bar-height: 38px;
   // 顶部布局高度 = 顶部栏 + 上下间距
@@ -31,34 +31,34 @@
   --max-space: 20px;
 
   // 页面布局规范：页面外边距、区块间距、卡片内边距统一使用这三个变量
-  --page-padding: 16px;
-  --page-section-gap: 12px;
-  --page-card-padding: 16px;
+  --page-padding: 20px;
+  --page-section-gap: 16px;
+  --page-card-padding: 20px;
 
   // 文本颜色
-  --nl-color-title: #000; // 强调文本颜色，如标题文本、数字。
-  --nl-color: #1f1f1f; // 默认的文本颜色符合W3C标准。
-  --nl-color-weak: #595959; // 第二级文本颜色一般用于不强调文本颜色的场景，如标签文本、菜单文本选择状态等。
-  --nl-color-tip: #8c8c8c; // 第三级文字颜色一般用于描述性文字，如表格补充说明文字、列表描述性文字等。
-  --nl-color-disable: #bebebe; // 第四级文本颜色是最浅的文本颜色，如表单输入提示文本、禁用颜色文本等。
+  --nl-color-title: #000000; // 强调文本颜色，如标题文本、数字。
+  --nl-color: #1D1D1F; // 默认的文本颜色符合W3C标准。
+  --nl-color-weak: #6E6E73; // 第二级文本颜色一般用于不强调文本颜色的场景，如标签文本、菜单文本选择状态等。
+  --nl-color-tip: #8E8E93; // 第三级文字颜色一般用于描述性文字，如表格补充说明文字、列表描述性文字等。
+  --nl-color-disable: #C7C7CC; // 第四级文本颜色是最浅的文本颜色，如表单输入提示文本、禁用颜色文本等。
 
   // 表格颜色
   --table-header-bg: #f0f6ff;
 
   // 主题色 - 背景
-  --bg-page: #F5F7FB;
+  --bg-page: #F2F2F7;
   --bg-card: #FFFFFF;
-  --bg-sidebar: #FFFFFF;
-  --bg-navbar: rgba(255,255,255,.82);
-  --bg-hover: #F8FAFC;
-  --bg-active: #EEF4FF;
+  --bg-sidebar: rgba(255,255,255,0.72);
+  --bg-navbar: rgba(255,255,255,0.72);
+  --bg-hover: #F2F2F7;
+  --bg-active: #E8F2FF;
   --bg-input: #FFFFFF;
-  --search-bg: #F1F4F9;
-  --search-hover-bg: #E9EDF4;
-  --bg-table-header: #f8f8f9;
+  --search-bg: #E5E5EA;
+  --search-hover-bg: #DCDCE0;
+  --bg-table-header: #F9F9FB;
 
   // 主题色 - 边框
-  --border-sidebar: #F1F5F9;
+  --border-sidebar: rgba(0,0,0,0.06);
   --border-tags: #EEF2F7;
 
   // 主题色 - 菜单
@@ -71,7 +71,7 @@
   // 主题色 - 双栏模块导航
   --sidebar-expanded-width: 260px;
   --module-nav-width: 80px;
-  --module-nav-bg: #F8FAFC;
+  --module-nav-bg: rgba(248,250,252,0.5);
   --module-nav-hover-bg: #EEF4FF;
   --module-nav-active-bg: var(--primary-color, #1677FF);
   --module-nav-active-text: #FFFFFF;
@@ -87,34 +87,47 @@
   --star-fav-rgb: 232, 163, 23;
 
   // 主题色 - 阴影 & 浮层
-  --shadow-card: 0 2px 8px rgba(0,0,0,0.04);
-  --shadow-popup: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-popup: 0 2px 8px rgba(0,0,0,0.06), 0 16px 32px rgba(0,0,0,0.1);
   --contextmenu-bg: #FFFFFF;
   --contextmenu-hover: #F8FAFC;
+
+  // Apple Design - Animation easing
+  --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-apple-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // Apple Design - Focus ring
+  --focus-ring-color: rgba(0,122,255,0.4);
+  --focus-ring-width: 3px;
+
+  // Apple Design - Backdrop blur
+  --blur-navbar: saturate(180%) blur(20px);
+  --blur-sidebar: saturate(180%) blur(10px);
+  --blur-popup: saturate(180%) blur(24px);
 }
 
 // 暗色主题
 [data-theme="dark"] {
-  --nl-color-title: #E2E8F0;
-  --nl-color: #CBD5E1;
-  --nl-color-weak: #94A3B8;
-  --nl-color-tip: #64748B;
-  --nl-color-disable: #4A5568;
-  --table-header-bg: #1E2430;
+  --nl-color-title: #F5F5F7;
+  --nl-color: #F5F5F7;
+  --nl-color-weak: #98989D;
+  --nl-color-tip: #6E6E73;
+  --nl-color-disable: #48484A;
+  --table-header-bg: #2C2C2E;
 
-  --bg-page: #0F1117;
-  --bg-card: #1A1D27;
-  --bg-sidebar: #1A1D27;
-  --bg-navbar: rgba(15,17,23,.85);
-  --bg-hover: #262930;
-  --bg-active: #1E293B;
-  --bg-input: #1A1D27;
-  --search-bg: #1E2430;
-  --search-hover-bg: #262930;
-  --bg-table-header: #1E2430;
+  --bg-page: #000000;
+  --bg-card: #1C1C1E;
+  --bg-sidebar: rgba(28,28,30,0.72);
+  --bg-navbar: rgba(28,28,30,0.72);
+  --bg-hover: #2C2C2E;
+  --bg-active: #3A3A3C;
+  --bg-input: #1C1C1E;
+  --search-bg: #2C2C2E;
+  --search-hover-bg: #3A3A3C;
+  --bg-table-header: #2C2C2E;
 
-  --border-sidebar: #262930;
-  --border-tags: #262930;
+  --border-sidebar: rgba(255,255,255,0.06);
+  --border-tags: #38383A;
 
   --menu-text: #94A3B8;
   --menu-hover-bg: #262930;
@@ -122,7 +135,7 @@
   --menu-active-text: var(--primary-color, #60A5FA);
   --menu-active-bg: #1E293B;
 
-  --module-nav-bg: #14161E;
+  --module-nav-bg: rgba(20,22,30,0.5);
   --module-nav-hover-bg: #262930;
   --module-nav-active-bg: var(--primary-color, #1677FF);
   --module-nav-active-text: #FFFFFF;
@@ -137,10 +150,15 @@
   --star-fav-color: #FFC940;
   --star-fav-rgb: 255, 201, 64;
 
-  --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
-  --shadow-popup: 0 8px 24px rgba(0,0,0,0.4);
-  --contextmenu-bg: #1A1D27;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-popup: 0 2px 8px rgba(0,0,0,0.6), 0 16px 32px rgba(0,0,0,0.4);
+  --contextmenu-bg: #1C1C1E;
   --contextmenu-hover: #262930;
+
+  --focus-ring-color: rgba(10,132,255,0.5);
+  --blur-navbar: saturate(180%) blur(20px);
+  --blur-sidebar: saturate(180%) blur(10px);
+  --blur-popup: saturate(180%) blur(24px);
 }
 
 $blue: #324157;
@@ -155,7 +173,7 @@ $deepGreen: #169bd5;
 
 // 默认菜单主题风格
 $base-menu-color: #1E293B;
-$base-menu-color-active: #5B7CFA;
+$base-menu-color-active: #007AFF;
 $base-menu-background: #fff;
 $base-logo-title-color: #ffffff;
 

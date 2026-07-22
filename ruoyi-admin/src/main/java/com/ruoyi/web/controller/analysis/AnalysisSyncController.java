@@ -7,7 +7,6 @@ import com.ruoyi.web.convert.analysis.AnalysisWebConvert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,14 +40,5 @@ public class AnalysisSyncController extends BaseController {
     public AjaxResult rebuild(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         syncBizService.rebuild(date);
         return AjaxResult.success();
-    }
-
-    /**
-     * 查询同步日志。
-     */
-    @GetMapping("/sync/logs")
-    @PreAuthorize("@ss.hasPermi('analysis:sync:logs')")
-    public AjaxResult logs(@RequestParam(defaultValue = "50") int limit) {
-        return AjaxResult.success(AnalysisWebConvert.INSTANCE.toSyncVOList(syncBizService.logs(limit)));
     }
 }

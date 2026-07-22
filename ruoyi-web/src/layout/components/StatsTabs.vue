@@ -87,16 +87,16 @@ export default {
 
       &.active {
         background: #e3f2fd;
-        color: #1976d2;
-        border-bottom: 6px solid #1976d2;
+        color: #1677FF;
+        border-bottom: 6px solid #1677FF;
 
         .stats-title {
-          color: #1976d2;
+          color: #1677FF;
           font-weight: bold;
         }
 
         .stats-count {
-          color: #1976d2;
+          color: #1677FF;
           font-weight: bold;
         }
       }

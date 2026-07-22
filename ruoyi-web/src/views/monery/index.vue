@@ -53,8 +53,8 @@ export default {
       // 根据标签键值跳转到对应的子路由
       const routeMap = {
         'earnest': '/monery/earnest',
-        'collection': '/monery/collection/payment-details',
-        'contract': '/monery/contract/sign-info'
+        'collection': '/monery/collection/payment',
+        'contract': '/monery/contract/sign'
       }
 
       const targetRoute = routeMap[tabKey]

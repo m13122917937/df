@@ -106,7 +106,9 @@ service.interceptors.response.use(
     ) {
       return res.data;
     }
-    if (code === 401) {
+    if (code === 401 && res.config.headers.wecomLoginTicket) {
+      return Promise.reject(new Error(res.data.msg || msg));
+    } else if (code === 401) {
       if (!isRelogin.show) {
         isRelogin.show = true;
         MessageBox.confirm(

@@ -1,9 +1,11 @@
-// global transition css
+// global transition css with Apple Easing
+
+$apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
 /* fade */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.28s;
+  transition: opacity 0.2s $apple-ease;
 }
 
 .fade-enter,
@@ -14,7 +16,7 @@
 /* fade-transform */
 .fade-transform-leave-active,
 .fade-transform-enter-active {
-  transition: all .5s;
+  transition: all 0.35s $apple-ease;
 }
 
 .fade-transform-enter {
@@ -27,10 +29,10 @@
   transform: translateX(30px);
 }
 
-/* breadcrumb transition */
+/* breadcrumb transition - mirrored enter/leave paths */
 .breadcrumb-enter-active,
 .breadcrumb-leave-active {
-  transition: all .5s;
+  transition: all 0.3s $apple-ease;
 }
 
 .breadcrumb-enter,
@@ -39,10 +41,23 @@
   transform: translateX(20px);
 }
 
-.breadcrumb-move {
-  transition: all .5s;
-}
-
 .breadcrumb-leave-active {
   position: absolute;
+}
+
+.breadcrumb-move {
+  transition: all 0.3s $apple-ease;
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active,
+  .fade-leave-active,
+  .fade-transform-leave-active,
+  .fade-transform-enter-active,
+  .breadcrumb-enter-active,
+  .breadcrumb-leave-active,
+  .breadcrumb-move {
+    transition: none !important;
+  }
 }

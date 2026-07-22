@@ -326,6 +326,8 @@ export default {
   height: 56px;
   width: 100%;
   background: var(--bg-navbar);
+  backdrop-filter: var(--blur-navbar);
+  -webkit-backdrop-filter: var(--blur-navbar);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'HarmonyOS Sans', 'PingFang SC', system-ui, sans-serif;
   display: flex;
   align-items: center;
@@ -349,7 +351,7 @@ export default {
       min-width: 110px;
       padding: 0 18px;
       border: 1.5px solid var(--border-tags);
-      border-radius: 12px;
+      border-radius: 14px;
       margin-right: 12px;
       cursor: pointer;
       color: var(--menu-text);
@@ -358,7 +360,7 @@ export default {
       background: transparent;
       text-decoration: none;
       user-select: none;
-      transition: color 150ms ease;
+      transition: color 150ms var(--ease-apple);
       flex-shrink: 0;
       white-space: nowrap;
 
@@ -380,7 +382,7 @@ export default {
         height: 18px;
         flex-shrink: 0;
         opacity: 0;
-        transition: opacity 150ms ease;
+        transition: opacity 150ms var(--ease-apple);
 
         &.is-favorite {
           opacity: 1;
@@ -410,7 +412,7 @@ export default {
         border-radius: 4px;
         opacity: 1;
         pointer-events: auto;
-        transition: opacity 150ms ease, background 150ms ease;
+        transition: opacity 150ms var(--ease-apple), background 150ms var(--ease-apple);
         color: var(--adm-text-tertiary);
         flex-shrink: 0;
         color: var(--star-fav-color);
@@ -432,11 +434,13 @@ export default {
   .contextmenu {
     margin: 0;
     background: var(--contextmenu-bg);
+    backdrop-filter: var(--blur-popup);
+    -webkit-backdrop-filter: var(--blur-popup);
     z-index: 3000;
     position: absolute;
     list-style-type: none;
     padding: 4px;
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 13px;
     font-weight: 500;
     color: var(--adm-text-primary);

@@ -27,7 +27,6 @@ class AnalysisDynamicConditionTest {
         query.setStartDate(LocalDate.of(2026, 7, 1));
         query.setEndDate(LocalDate.of(2026, 7, 18));
         query.setPlatform("PDD");
-        query.setConfigType("REBATE");
 
         Wrapper<AnalysisOrderFact> factWrapper = DynamicCondition.toWrapper(
                 AnalysisQueryConvert.INSTANCE.toFactQuery(query));

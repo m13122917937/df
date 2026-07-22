@@ -1,5 +1,10 @@
 package com.ruoyi.user.facade;
 
+import com.ruoyi.user.model.bo.WeComPrivateAuthorizationBO;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
 /** 企业微信登录领域接口。 */
 public interface IWeComLoginFacade {
     /**
@@ -33,4 +38,12 @@ public interface IWeComLoginFacade {
      * @return 前端登录页地址
      */
     String buildLoginPageUrl(String message);
+
+    void writePrivateAuthorizationQr(String sessionId, OutputStream outputStream) throws IOException;
+
+    void completePrivateAuthorization(String code, String sessionId);
+
+    WeComPrivateAuthorizationBO getPrivateAuthorizationStatus(String sessionId);
+
+    boolean isPrivateAuthorizationState(String state);
 }

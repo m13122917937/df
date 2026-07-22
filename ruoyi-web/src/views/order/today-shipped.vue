@@ -1,292 +1,91 @@
 <!--当日发货-->
 <template>
   <div class="order-detail today-shipped-order">
-    <!-- 页面头部操作区 -->
-    <div class="page-header">
-      <div class="header-left">
-        <div class="page-title">
-          <i class="el-icon-s-order" />
-          当日发货订单管理
-        </div>
-      </div>
-      <div class="header-actions">
-        <el-button
-          type="primary"
-          icon="el-icon-download"
-          class="action-btn"
-          @click="handleExport"
-        >
-          导出订单
-        </el-button>
-      </div>
-    </div>
-    <!-- 订单内容布局 -->
-    <div class="order-content-layout">
-      <!-- 筛选面板 -->
-      <div class="filter-panels">
-        <!-- 地区筛选 -->
-        <RegionSidebar
-          :status="currentStatus"
-          :current-value="selectedRegion"
-          :current-brand="selectedBrand"
-          @change="handleRegionChange"
-        />
-      </div>
-      <div class="order-table-container-wrapper">
-        <!-- 品牌筛选 -->
-        <BrandFilter
-          :status="currentStatus"
-          :current-brand="selectedBrand"
-          :province-id="selectedRegion"
-          @change="handleBrandChange"
-        />
-        <OrderSearch
-          :value="searchForm"
-          @search="handleSearch"
-          @reset="handleReset"
-        />
-        <!-- 订单表格 -->
-        <div class="order-table-container">
-          <el-table
-            ref="table"
-            v-loading="loading"
-            :data="orderList"
-            stripe
-            size="medium"
-            center
-            style="width: 100%"
-            :fit="true"
-            height="100%"
-            :header-cell-style="{
-              background: '#f7f8fa',
-              color: '#606266',
-              fontWeight: 600,
-            }"
-            :cell-style="{ padding: '8px 0' }"
-          >
-            <!-- 空数据状态 -->
-            <template slot="empty">
-              <EmptyState text="暂无待发货数据" />
-            </template>
-            <el-table-column prop="orderType" label="业务类型" width="80" fixed="left" align="center">
-              <template slot-scope="scope">
-                <el-tag :type="scope.row.orderType === 1 ? 'success' : 'warning'" size="mini">
-                  {{ scope.row.orderType === 1 ? '入仓' : '代发' }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="orderStyle" label="订单类型" width="90" fixed="left" align="center">
-              <template slot-scope="scope">
-                <OrderStyleBadge
-                  :order-style="scope.row.orderStyle"
-                />
-              </template>
-            </el-table-column>
-            <!-- 单号：(订单编码) + (原始订单号) -->
-            <el-table-column
-              label="单号"
-              prop="orderCode"
-              min-width="200"
-              fixed="left"
-              align="center"
-            >
-              <template slot-scope="scope">
-                <div class="order-numbers">
-                  <div class="order-number-item">
-                    {{
-                      scope.row.orderCode || "-"
-                    }}
-                    <i
-                      v-if="scope.row.orderCode"
-                      class="el-icon-copy-document copy-icon"
-                      @click="copyText(scope.row.orderCode)"
-                    />
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-            <!-- 主体名称 -->
-            <el-table-column
-              label="主体名称"
-              prop="payerName"
-              min-width="150"
-              fixed="left"
-              align="center"
-            >
-              <template slot-scope="scope">
-                {{ scope.row.payerName || "-" }}
-              </template>
-            </el-table-column>
-
-            <el-table-column prop="brand" label="品牌/品类" width="120" align="center">
-              <template slot-scope="scope">
-                <div class="order-productName">
-                  <div class="order-productName-line">
-                    <span v-if="scope.row.skuName" class="pn-model">{{
-                      scope.row.brand || "-"
-                    }}</span>
-                  </div>
-                  <div class="order-productName-line">
-                    <span v-if="scope.row.category" class="pn-model">{{
-                      scope.row.category
-                    }}</span>
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-            <!-- 产品型号 -->
-            <el-table-column
-              label="产品型号"
-              prop="productName"
-              min-width="200"
-              :show-overflow-tooltip="true"
-              align="center"
-            >
-              <template slot-scope="scope">
-                <div class="order-productName">
-                  <div class="order-productName-line">
-                    <span v-if="scope.row.skuName" class="pn-model">{{
-                      scope.row.productName || "-"
-                    }}</span>
-                  </div>
-                  <div class="order-productName-line">
-                    <span v-if="scope.row.skuName" class="pn-model">{{
-                      scope.row.skuName
-                    }}</span>
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column prop="quantity" label="数量" width="120" align="center" sortable>
-              <template slot-scope="scope">
-                {{ scope.row.quantity || 0 }}
-              </template>
-            </el-table-column>
-            <!-- 成交价格 -->
-            <el-table-column label="成交价" prop="tradePrice" min-width="120" align="center" />
-            <!-- 账期 -->
-            <el-table-column
-              label="账期"
-              prop="accountingPeriod"
-              min-width="130"
-              align="center"
-            >
-              <template slot-scope="scope">
-                <span>{{
-                  formatAccountingPeriod(scope.row.accountingPeriod)
-                }}</span>
-              </template>
-            </el-table-column>
-            <!-- 收货地（悬浮查看收件信息） -->
-            <el-table-column
-              label="收货地"
-              prop="address"
-              min-width="200"
-              :show-overflow-tooltip="true"
-              align="center"
-            >
-              <template slot-scope="scope">
-                <el-popover
-                  placement="top"
-                  trigger="hover"
-                  popper-class="addr-popover"
-                  :open-delay="150"
-                  :close-delay="100"
-                >
-                  <div class="addr-content">
-                    <div class="addr-line main">
-                      收件人: {{ scope.row.addressee || "无" }}
-                    </div>
-                    <div class="addr-line sub">
-                      电话: {{ scope.row.phone || "无" }}
-                    </div>
-                    <div class="addr-line sub">
-                      地址: {{ scope.row.receivingAddress || "无" }}
-                      <i
-                        v-if="scope.row.receivingAddress"
-                        class="el-icon-copy-document copy-icon"
-                        @click="copyText(`收件人:${scope.row.addressee};电话:${scope.row.phone};地址:${scope.row.receivingAddress}`)"
-                      />
-                    </div>
-                  </div>
-                  <span slot="reference">{{ scope.row.provinceName }} {{ scope.row.cityName }}</span>
-                </el-popover>
-              </template>
-            </el-table-column>
-            <el-table-column prop="sendTime" label="发货时间" width="200" align="center">
-              <template slot-scope="scope">
-                {{ scope.row.sendTime || '-' }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="tradeUserName" label="抢单人" width="120" align="center">
-              <template slot-scope="scope">
-                {{ scope.row.tradeUserName || '-' }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="trackingCompany" label="物流信息" width="240" align="center">
-              <template slot-scope="scope">
-                <TrackingInfo
-                  :company="scope.row.trackingCompany"
-                  :number="scope.row.trackingNumber"
-                  :data="scope.row"
-                  @click="handleLogisticsInfo"
-                />
-              </template>
-            </el-table-column>
-
-            <!-- 操作 -->
-            <el-table-column label="操作" width="160" fixed="right" align="center">
-              <template slot-scope="scope">
-                <div class="operation-buttons">
-                  <el-button v-if="scope.row.orderType !== 1" size="mini" type="primary" @click="handleImeiInfo(scope.row)">串码信息</el-button>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table>
-          <!-- 分页器 -->
-          <div class="pagination-wrapper">
-            <el-pagination
-              :current-page="pagination.current"
-              :page-sizes="[30, 50, 100]"
-              :page-size="pagination.size"
-              layout="total, sizes, prev, pager, next, jumper"
-              :total="pagination.total"
-              background
-              class="custom-pagination"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-            />
+    <div class="page-banner">
+      <div class="banner-inner">
+        <div class="banner-top">
+          <div class="banner-info">
+            <h2 class="banner-title"><i class="el-icon-s-order" />当日发货订单管理</h2>
+            <p class="banner-desc">管理当日发货订单，处理发货流程</p>
+          </div>
+          <div class="banner-actions">
+            <el-button class="banner-btn" icon="el-icon-download" @click="handleExport">导出订单</el-button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 提交串码弹窗 -->
-    <SubmitSerialDialog
-      :visible.sync="submitSerialDialogVisible"
-      :order-data="currentOrder"
-      @save="handleSaveSubmitSerial"
-      @cancel="handleCancelSubmitSerial"
-      @close="handleCancelSubmitSerial"
-    />
+    <div class="order-body">
+      <div class="filter-sidebar">
+        <div class="sidebar-header"><i class="el-icon-location-outline" />收货地点</div>
+        <RegionSidebar :status="currentStatus" :current-value="selectedRegion" :current-brand="selectedBrand" @change="handleRegionChange" />
+      </div>
+      <div class="order-main">
+        <div class="search-card">
+          <OrderSearch :value="searchForm" @search="handleSearch" @reset="handleReset" />
+        </div>
+        <div class="table-card">
+          <el-table ref="table" v-loading="loading" :data="orderList" stripe size="medium" style="width: 100%" :fit="true" height="100%">
+            <template slot="empty"><EmptyState text="暂无当日发货数据" /></template>
+            <el-table-column prop="orderType" label="业务类型" width="80" fixed="left" align="center">
+              <template slot-scope="scope"><el-tag :type="scope.row.orderType === 1 ? 'success' : 'warning'" size="mini">{{ scope.row.orderType === 1 ? '入仓' : '代发' }}</el-tag></template>
+            </el-table-column>
+            <el-table-column prop="orderStyle" label="订单类型" width="85" fixed="left" align="center">
+              <template slot-scope="scope"><OrderStyleBadge :order-style="scope.row.orderStyle" /></template>
+            </el-table-column>
+            <el-table-column label="单号" prop="orderCode" min-width="180" fixed="left" align="center">
+              <template slot-scope="scope">
+                <div class="order-numbers"><div class="order-number-item">{{ scope.row.orderCode || '-' }}<i v-if="scope.row.orderCode" class="el-icon-copy-document copy-icon" @click="copyText(scope.row.orderCode)" /></div></div>
+              </template>
+            </el-table-column>
+            <el-table-column label="主体名称" prop="payerName" min-width="140" align="center">
+              <template slot-scope="scope">{{ scope.row.payerName || '-' }}</template>
+            </el-table-column>
+            <el-table-column prop="brand" label="品牌/品类" width="110" align="center">
+              <template slot-scope="scope">
+                <div class="order-productName"><div class="order-productName-line"><span v-if="scope.row.skuName" class="pn-model">{{ scope.row.brand || '-' }}</span></div><div class="order-productName-line"><span v-if="scope.row.category" class="pn-model">{{ scope.row.category }}</span></div></div>
+              </template>
+            </el-table-column>
+            <el-table-column label="产品型号" prop="productName" min-width="180" :show-overflow-tooltip="true" align="center">
+              <template slot-scope="scope">
+                <div class="order-productName"><div class="order-productName-line"><span v-if="scope.row.skuName" class="pn-model">{{ scope.row.productName || '-' }}</span></div><div class="order-productName-line"><span v-if="scope.row.skuName" class="pn-model">{{ scope.row.skuName }}</span></div></div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="quantity" label="数量" width="100" align="center" sortable><template slot-scope="scope">{{ scope.row.quantity || 0 }}</template></el-table-column>
+            <el-table-column label="成交价" min-width="110" align="center"><template slot-scope="scope"><span class="price-text">{{ scope.row.tradePrice || '-' }}</span></template></el-table-column>
+            <el-table-column label="账期" prop="accountingPeriod" min-width="110" align="center"><template slot-scope="scope"><span>{{ formatAccountingPeriod(scope.row.accountingPeriod) }}</span></template></el-table-column>
+            <el-table-column label="收货地" prop="address" min-width="180" :show-overflow-tooltip="true" align="center">
+              <template slot-scope="scope">
+                <el-popover placement="top" trigger="hover" popper-class="addr-popover" :open-delay="150" :close-delay="100">
+                  <div class="addr-content"><div class="addr-line main">收件人: {{ scope.row.addressee || '无' }}</div><div class="addr-line sub">电话: {{ scope.row.phone || '无' }}</div><div class="addr-line sub">地址: {{ scope.row.receivingAddress || '无' }}<i v-if="scope.row.receivingAddress" class="el-icon-copy-document copy-icon" @click="copyText(`收件人:${scope.row.addressee};电话:${scope.row.phone};地址:${scope.row.receivingAddress}`)" /></div></div>
+                  <span slot="reference">{{ scope.row.provinceName }} {{ scope.row.cityName }}</span>
+                </el-popover>
+              </template>
+            </el-table-column>
+            <el-table-column prop="sendTime" label="发货时间" width="180" align="center"><template slot-scope="scope">{{ scope.row.sendTime || '-' }}</template></el-table-column>
+            <el-table-column prop="tradeUserName" label="抢单人" width="100" align="center"><template slot-scope="scope">{{ scope.row.tradeUserName || '-' }}</template></el-table-column>
+            <el-table-column prop="trackingCompany" label="物流信息" width="200" align="center">
+              <template slot-scope="scope"><TrackingInfo :company="scope.row.trackingCompany" :number="scope.row.trackingNumber" :data="scope.row" @click="handleLogisticsInfo" /></template>
+            </el-table-column>
+            <el-table-column label="操作" width="200" fixed="right" align="center">
+              <template slot-scope="scope">
+                <div class="operation-buttons">
+                  <el-button v-if="scope.row.orderType !== 1" size="small" class="op-btn" @click="handleSubmitSerial(scope.row)">提交串码</el-button>
+                  <el-button size="small" class="op-btn" @click="handleImeiInfo(scope.row)">串码信息</el-button>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div class="pagination-wrapper">
+            <el-pagination :current-page="pagination.current" :page-sizes="[30, 50, 100]" :page-size="pagination.size" layout="total, sizes, prev, pager, next, jumper" :total="pagination.total" background class="custom-pagination" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- 串码弹窗 -->
-    <ImeiDialog
-      :visible.sync="imeiDialogVisible"
-      :current-order="imeiDialogData"
-      @confirm="handleConfirmImei"
-      @cancel="handleCancelImei"
-      @close="handleCancelImei"
-    />
-
-    <!-- 物流弹窗 -->
-    <LogisticsDialog
-      :visible.sync="logisticsDialogVisible"
-      :current-order="logisticsDialogData"
-      @confirm="handleConfirmLogistics"
-      @cancel="handleCancelLogistics"
-      @close="handleCancelLogistics"
-    />
+    <SubmitSerialDialog :visible.sync="submitSerialDialogVisible" :order-data="currentOrder" @save="handleSaveSubmitSerial" @cancel="handleCancelSubmitSerial" @close="handleCancelSubmitSerial" />
+    <ImeiDialog :visible.sync="imeiDialogVisible" :current-order="imeiDialogData" @confirm="handleConfirmImei" @cancel="handleCancelImei" @close="handleCancelImei" />
+    <LogisticsDialog :visible.sync="logisticsDialogVisible" :current-order="logisticsDialogData" @confirm="handleConfirmLogistics" @cancel="handleCancelLogistics" @close="handleCancelLogistics" />
   </div>
 </template>
 
@@ -296,7 +95,6 @@ import EmptyState from '@/components/EmptyState'
 import ImeiDialog from '@/components/ImeiDialog'
 import LogisticsDialog from '@/components/LogisticsDialog'
 import RegionSidebar from '@/components/RegionSidebar'
-import BrandFilter from '@/components/brandFilter'
 import OrderSearch from '@/components/OrderSearch'
 import TrackingInfo from '@/components/TrackingInfo'
 import OrderStyleBadge from '@/components/OrderStyleBadge'
@@ -305,668 +103,85 @@ import { getDeliveryTimeText } from '@/utils/deliveryTime'
 
 export default {
   name: 'TodayOrder',
-  components: {
-    SubmitSerialDialog,
-    EmptyState,
-    ImeiDialog,
-    LogisticsDialog,
-    RegionSidebar,
-    BrandFilter,
-    OrderSearch,
-    TrackingInfo,
-    OrderStyleBadge
-  },
+  components: { SubmitSerialDialog, EmptyState, ImeiDialog, LogisticsDialog, RegionSidebar, OrderSearch, TrackingInfo, OrderStyleBadge },
   data() {
     return {
-      loading: false,
-      orderList: [],
-      selectedRegion: '',
-      selectedBrand: '',
-      currentStatus: 5, // 当日发货状态
-      // 搜索表单
-      searchForm: {
-        orderCode: '',
-        productName: '',
-        skuName: '',
-        orderType: ''
-      },
-      pagination: {
-        current: 1,
-        size: 30,
-        total: 0
-      },
-      // 提交串码弹窗相关数据
-      submitSerialDialogVisible: false,
-      currentOrder: {},
-      // 串码弹窗相关数据
-      imeiDialogVisible: false,
-      imeiDialogData: {},
-      // 物流弹窗相关数据
-      logisticsDialogVisible: false,
-      logisticsDialogData: {}
+      loading: false, orderList: [], selectedRegion: '', selectedBrand: '', currentStatus: 5,
+      searchForm: { orderCode: '', productName: '', skuName: '', orderType: '' },
+      pagination: { current: 1, size: 30, total: 0 },
+      submitSerialDialogVisible: false, currentOrder: {},
+      imeiDialogVisible: false, imeiDialogData: {},
+      logisticsDialogVisible: false, logisticsDialogData: {}
     }
   },
-  computed: {
-  },
-  mounted() {
-    this.fetchOrderList()
-  },
+  computed: {},
+  mounted() { this.fetchOrderList() },
   methods: {
-    // 发货时效显示方法
     getDeliveryTimeText,
-    handleRegionChange(region) {
-      console.log('区域切换:', region)
-      this.selectedRegion = region
-      this.pagination.current = 1
-      // 重新获取订单列表
-      this.fetchOrderList()
-    },
-    handleBrandChange(brand) {
-      console.log('品牌切换:', brand)
-      this.selectedBrand = brand
-      this.pagination.current = 1
-      // 重新获取订单列表
-      this.fetchOrderList()
-    },
-    // 搜索处理
-    handleSearch(searchData) {
-      this.searchForm = { ...searchData }
-      this.pagination.current = 1
-      this.fetchOrderList()
-    },
-    // 重置搜索
-    handleReset(searchData) {
-      this.searchForm = { ...searchData }
-      this.pagination.current = 1
-      this.fetchOrderList()
-    },
+    handleRegionChange(region) { this.selectedRegion = region; this.pagination.current = 1; this.fetchOrderList() },
+    handleSearch(searchData) { this.searchForm = { ...searchData }; this.pagination.current = 1; this.fetchOrderList() },
+    handleReset(searchData) { this.searchForm = { ...searchData }; this.pagination.current = 1; this.fetchOrderList() },
     async fetchOrderList() {
       this.loading = true
-      const params = {
-        province: this.selectedRegion,
-        brand: this.selectedBrand,
-        orderCode: this.searchForm.orderCode,
-        productName: this.searchForm.productName,
-        skuName: this.searchForm.skuName
-      }
-      if (this.searchForm.orderType) {
-        params.orderType = this.searchForm.orderType
-      }
-      const res = await getEndList(params, {
-        pageNum: this.pagination.current,
-        pageSize: this.pagination.size
-      })
-      if (res && res.code === 200) {
-        this.orderList = res.rows
-        this.pagination.total = res.total
-      } else {
-        this.$message.error(res?.msg || '获取订单列表失败')
-      }
+      const params = { province: this.selectedRegion, brand: this.selectedBrand, orderCode: this.searchForm.orderCode, productName: this.searchForm.productName, skuName: this.searchForm.skuName }
+      if (this.searchForm.orderType) params.orderType = this.searchForm.orderType
+      const res = await getEndList(params, { pageNum: this.pagination.current, pageSize: this.pagination.size })
+      if (res && res.code === 200) { this.orderList = res.rows; this.pagination.total = res.total } else { this.$message.error(res?.msg || '获取订单列表失败') }
       this.loading = false
     },
-    handleSizeChange(size) {
-      this.pagination.size = size
-      this.fetchOrderList()
-    },
-    handleCurrentChange(current) {
-      this.pagination.current = current
-      this.fetchOrderList()
-    },
-    handleGrab(row) {
-      this.$message.success(`抢单成功：${row.orderNo}`)
-    },
-    handleView(row) {
-      this.$message.info(`查看订单：${row.orderNo}`)
-    },
-    // 串码选项相关方法
-    getCodeOptionType(codeOptions) {
-      const typeMap = {
-        0: 'success', // 发货前提供串码
-        1: 'warning', // 发货后提供串码
-        2: 'info' // 不需要串码
-      }
-      return typeMap[codeOptions] || 'info'
-    },
-    getCodeOptionText(codeOptions) {
-      const textMap = {
-        0: '发货前提供',
-        1: '发货后提供',
-        2: '不需要'
-      }
-      return textMap[codeOptions] || '未知'
-    },
-    // 格式化账期
-    formatAccountingPeriod(val) {
-      const n = Number(val)
-      if (!isFinite(n) || n < 0) return '-'
-      return n === 0 ? '当天' : `T+${n}`
-    },
-    // 复制文本到剪贴板
+    handleSizeChange(size) { this.pagination.size = size; this.fetchOrderList() },
+    handleCurrentChange(current) { this.pagination.current = current; this.fetchOrderList() },
+    handleGrab(row) { this.$message.success(`抢单成功：${row.orderNo}`) },
+    handleView(row) { this.$message.info(`查看订单：${row.orderNo}`) },
+    getCodeOptionType(codeOptions) { return { 0: 'success', 1: 'warning', 2: 'info' }[codeOptions] || 'info' },
+    getCodeOptionText(codeOptions) { return { 0: '发货前提供', 1: '发货后提供', 2: '不需要' }[codeOptions] || '未知' },
+    formatAccountingPeriod(val) { const n = Number(val); if (!isFinite(n) || n < 0) return '-'; return n === 0 ? '当天' : `T+${n}` },
     copyText(text) {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(() => {
-          this.$message.success('复制成功')
-        }).catch(() => {
-          this.fallbackCopyText(text)
-        })
-      } else {
-        this.fallbackCopyText(text)
-      }
+      if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(() => this.$message.success('复制成功')).catch(() => this.fallbackCopyText(text)) } else { this.fallbackCopyText(text) }
     },
-    // 降级复制方法
     fallbackCopyText(text) {
-      const textArea = document.createElement('textarea')
-      textArea.value = text
-      textArea.style.position = 'fixed'
-      textArea.style.left = '-999999px'
-      textArea.style.top = '-999999px'
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
-      try {
-        document.execCommand('copy')
-        this.$message.success('复制成功')
-      } catch (err) {
-        this.$message.error('复制失败')
-      }
+      const textArea = document.createElement('textarea'); textArea.value = text; textArea.style.position = 'fixed'; textArea.style.left = '-999999px'; textArea.style.top = '-999999px'; document.body.appendChild(textArea); textArea.focus(); textArea.select()
+      try { document.execCommand('copy'); this.$message.success('复制成功') } catch (err) { this.$message.error('复制失败') }
       document.body.removeChild(textArea)
     },
-    // 标签筛选相关方法
-    handleTagFilterConfirm(selectedObjects) {
-      console.log('选中的标签:', selectedObjects)
-      this.$message.success('标签筛选已应用')
-    },
-    handleTagFilterCancel() {
-      console.log('取消标签筛选')
-    },
-    // 订单编号搜索相关方法
-    handleOrderNumberFilterConfirm(selectedObjects) {
-      console.log('选中的订单编号:', selectedObjects)
-      this.$message.success('订单编号搜索已应用')
-    },
-    handleOrderNumberFilterCancel() {
-      console.log('取消订单编号搜索')
-    },
-    // 发货时效筛选相关方法
-    handleShippingTimeFilterConfirm(selectedObjects) {
-      console.log('选中的发货时效:', selectedObjects)
-      this.$message.success('发货时效筛选已应用')
-    },
-    handleShippingTimeFilterCancel() {
-      console.log('取消发货时效筛选')
-    },
-    // 到货时效筛选相关方法
-    handleArrivalTimeFilterConfirm(selectedObjects) {
-      console.log('选中的到货时效:', selectedObjects)
-      this.$message.success('到货时效筛选已应用')
-    },
-    handleArrivalTimeFilterCancel() {
-      console.log('取消到货时效筛选')
-    },
-    // 产品型号筛选相关方法
-    handleProductFilterConfirm(selectedObjects) {
-      console.log('选中的产品型号:', selectedObjects)
-      this.$message.success('产品型号筛选已应用')
-    },
-    handleProductFilterCancel() {
-      console.log('取消产品型号筛选')
-    },
-    // 揽收状态筛选相关方法
-    handlePickupStatusFilterConfirm(selectedObjects) {
-      console.log('选中的揽收状态:', selectedObjects)
-      this.$message.success('揽收状态筛选已应用')
-    },
-    handlePickupStatusFilterCancel() {
-      console.log('取消揽收状态筛选')
-    },
-    // 操作按钮相关方法
-    handleSubmitSerial(row) {
-      console.log('提交串码:', row)
-      this.currentOrder = row
-      this.submitSerialDialogVisible = true
-    },
-    handleWarehouseDelivery(row) {
-      console.log('仓配代发:', row)
-      this.$message.success(`订单 ${row.orderNo} 已设置为仓配代发`)
-    },
-    // 提交串码相关方法
-    handleCancelSubmitSerial() {
-      this.submitSerialDialogVisible = false
-    },
-    handleSaveSubmitSerial(data) {
-      console.log('提交串码数据:', data)
-      this.$message.success('串码提交成功')
-      this.submitSerialDialogVisible = false
-    },
-    // 串码信息相关方法
-    handleImeiInfo(row) {
-      this.imeiDialogData = { ...row }
-      this.imeiDialogVisible = true
-    },
-    handleLogisticsInfo(row) {
-      this.logisticsDialogData = { ...row }
-      this.logisticsDialogVisible = true
-    },
-    handleConfirmImei() {
-      this.imeiDialogVisible = false
-    },
-    handleCancelImei() {
-      this.imeiDialogVisible = false
-    },
-    // 物流信息相关方法
-    handleConfirmLogistics() {
-      this.logisticsDialogVisible = false
-    },
-    handleCancelLogistics() {
-      this.logisticsDialogVisible = false
-    },
-    // 导出订单
+    handleSubmitSerial(row) { this.currentOrder = row; this.submitSerialDialogVisible = true },
+    handleCancelSubmitSerial() { this.submitSerialDialogVisible = false },
+    handleSaveSubmitSerial(data) { this.$message.success('串码提交成功'); this.submitSerialDialogVisible = false },
+    handleImeiInfo(row) { this.imeiDialogData = { ...row }; this.imeiDialogVisible = true },
+    handleConfirmImei() { this.imeiDialogVisible = false },
+    handleCancelImei() { this.imeiDialogVisible = false },
+    handleLogisticsInfo(row) { this.logisticsDialogData = { ...row }; this.logisticsDialogVisible = true },
+    handleConfirmLogistics() { this.logisticsDialogVisible = false },
+    handleCancelLogistics() { this.logisticsDialogVisible = false },
+    handleTagFilterConfirm() { this.$message.success('标签筛选已应用') },
+    handleTagFilterCancel() {},
+    handleOrderNumberFilterConfirm() { this.$message.success('订单编号搜索已应用') },
+    handleOrderNumberFilterCancel() {},
+    handleShippingTimeFilterConfirm() { this.$message.success('发货时效筛选已应用') },
+    handleShippingTimeFilterCancel() {},
+    handleArrivalTimeFilterConfirm() { this.$message.success('到货时效筛选已应用') },
+    handleArrivalTimeFilterCancel() {},
+    handleProductFilterConfirm() { this.$message.success('产品型号筛选已应用') },
+    handleProductFilterCancel() {},
+    handlePickupStatusFilterConfirm() { this.$message.success('揽收状态筛选已应用') },
+    handlePickupStatusFilterCancel() {},
     async handleExport() {
       try {
-        const exportData = {
-          province: this.selectedRegion,
-          brand: this.selectedBrand,
-          orderCode: this.searchForm.orderCode,
-          productName: this.searchForm.productName,
-          skuName: this.searchForm.skuName
-        }
-
-        const res = await exportEndOrder(exportData, {
-          pageNum: this.pagination.current,
-          pageSize: this.pagination.size
-        })
-
+        const exportData = { province: this.selectedRegion, brand: this.selectedBrand, orderCode: this.searchForm.orderCode, productName: this.searchForm.productName, skuName: this.searchForm.skuName }
+        const res = await exportEndOrder(exportData, { pageNum: this.pagination.current, pageSize: this.pagination.size })
         if (res) {
-          // 创建blob下载链接
-          const blob = new Blob([res], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          })
-          const url = window.URL.createObjectURL(blob)
-          const link = document.createElement('a')
-          link.href = url
+          const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+          const url = window.URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url
           link.download = `当日发货订单_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.xlsx`
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-          window.URL.revokeObjectURL(url)
-
+          document.body.appendChild(link); link.click(); document.body.removeChild(link); window.URL.revokeObjectURL(url)
           this.$message.success('导出成功')
-        } else {
-          this.$message.error('导出失败')
-        }
-      } catch (error) {
-        console.error('导出错误:', error)
-        this.$message.error('导出失败，请重试')
-      }
+        } else { this.$message.error('导出失败') }
+      } catch (error) { console.error('导出错误:', error); this.$message.error('导出失败，请重试') }
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-@import '@/styles/table-common.scss';
-
-// 筛选面板布局
-.filter-panels {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-/* 订单信息样式 */
-.order-numbers {
-  display: flex;
-  flex-direction: column;
-
-  .order-number-item {
-    padding: 0;
-    width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 12px;
-    line-height: 20px;
-  }
-}
-
-// 产品型号样式
-.order-productName {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
-}
-
-/* 操作按钮样式 */
-.operation-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
-  .el-button {
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    &.el-button--mini {
-      padding: 6px 12px;
-    font-size: 12px;
-    }
-  }
-}
-
-.order-productName-line {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 20px;
-}
-
-.order-sku-line {
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-  color: #909399;
-}
-
-/* 复制图标样式 */
-.copy-icon {
-  color: #409eff;
-  cursor: pointer;
-  font-size: 14px;
-  margin-left: 4px;
-  transition: color 0.3s;
-
-  &:hover {
-    color: #66b1ff;
-  }
-}
-
-/* 地址弹框样式 */
-:deep(.addr-popover) {
-  max-width: 520px;
-  padding: 12px;
-}
-
-.addr-content {
-  min-width: 200px;
-}
-
-.addr-line {
-  line-height: 22px;
-  margin-bottom: 4px;
-
-  &.main {
-    font-size: 14px;
-    color: #303133;
-    font-weight: 500;
-  }
-
-  &.sub {
-    font-size: 13px;
-    color: #606266;
-  }
-}
-.pending-order {
-  // 订单内容布局
-  .order-content-layout {
-    display: flex;
-    gap: 16px;
-    flex: 1;
-    min-height: 0; // 确保flex子元素可以收缩
-  }
-
-  .order-table-container {
-    flex: 1;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-
-  // 响应式布局
-  @media (max-width: 1200px) {
-    .order-content-layout {
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .order-table-container {
-      overflow-x: auto;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .page-header {
-      flex-direction: column;
-      gap: 16px;
-      text-align: center;
-
-      .header-actions {
-        justify-content: center;
-      }
-    }
-
-    .order-content-layout {
-      margin-bottom: 16px;
-    }
-
-    .pagination-wrapper {
-      padding: 16px 0;
-
-      .custom-pagination {
-        .el-pagination__sizes,
-        .el-pagination__jump {
-          display: none;
-        }
-      }
-    }
-  }
-
-  @media (max-width: 480px) {
-    .page-header {
-      padding: 16px;
-      margin-bottom: 16px;
-
-      .page-title {
-        font-size: 18px;
-      }
-
-      .page-subtitle {
-        font-size: 12px;
-      }
-    }
-
-    .operation-buttons {
-      flex-direction: column;
-      gap: 4px;
-
-      .el-button {
-        width: 100%;
-      }
-    }
-  }
-}
-
-// 弹窗样式优化
-::v-deep .el-dialog {
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-
-  .el-dialog__header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px 24px;
-    border-radius: 12px 12px 0 0;
-
-    .el-dialog__title {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .el-dialog__headerbtn {
-      top: 20px;
-      right: 24px;
-
-      .el-dialog__close {
-        color: white;
-        font-size: 20px;
-
-        &:hover {
-          color: #ffd700;
-        }
-      }
-    }
-  }
-
-  .el-dialog__body {
-    padding: 24px;
-  }
-
-  .el-dialog__footer {
-    padding: 20px 24px;
-    background: #fafbfc;
-    border-radius: 0 0 12px 12px;
-    border-top: 1px solid #e4e7ed;
-
-    .el-button {
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-
-      &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-    }
-  }
-}
-
-.operation-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-
-  .el-button {
-    border-radius: 6px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    &.el-button--mini {
-      padding: 6px 12px;
-    font-size: 12px;
-    }
-  }
-}
-
-.status-message {
-  color: #f56c6c;
-  font-size: 12px;
-  line-height: 1.4;
-  text-align: center;
-  padding: 8px 0;
-  background: rgba(245, 108, 108, 0.1);
-  border-radius: 4px;
-  border-left: 3px solid #f56c6c;
-  margin-top: 8px;
-}
-
-// 动画效果
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes shake {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(2px);
-  }
-}
-
-.status-text {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  color: #606266;
-
-  .status-icon {
-    font-size: 12px;
-    margin-left: 4px;
-    opacity: 0.7;
-    transition: all 0.3s ease;
-  }
-
-  &:hover {
-    color: #409EFF;
-
-    .status-icon {
-      opacity: 1;
-      transform: scale(1.1);
-    }
-  }
-}
-
-.status-tooltip-content {
-  p {
-    margin: 0 0 8px 0;
-    line-height: 1.5;
-    font-size: 13px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    strong {
-      color: #e6a23c;
-    }
-  }
-}
-</style>
-
-<style>
-/* 全局状态popover样式 */
-.status-popover {
-  background: #606266 !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3) !important;
-}
-
-.status-popover .el-popover__arrow {
-  border-top-color: #606266 !important;
-}
-
-.status-popover .status-tooltip-content {
-  color: #fff;
-}
-
-.status-popover .status-tooltip-content p strong {
-  color: #ffd700 !important;
-}
-
+<style lang="scss">
+@import '@/styles/order-modern.scss';
 </style>

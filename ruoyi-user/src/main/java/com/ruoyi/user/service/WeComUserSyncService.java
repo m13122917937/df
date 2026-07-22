@@ -4,7 +4,11 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.facade.ISysUserFacade;
+import com.ruoyi.system.facade.ISysRoleFacade;
+import com.ruoyi.system.facade.ISysMenuFacade;
 import com.ruoyi.user.convert.WeComUserConvert;
+import com.ruoyi.user.domain.WeComUserRelation;
+import com.ruoyi.user.facade.IWeComUserRelationFacade;
 import com.ruoyi.user.model.bo.WeComUserProfileBO;
 import com.ruoyi.user.model.query.WeComSysUserQuery;
 import com.ruoyi.framework.mybatis.DynamicCondition;
@@ -20,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** 企业微信通讯录用户同步领域服务。 */
+/**
+ * 企业微信通讯录用户同步领域服务。
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,13 +36,18 @@ public class WeComUserSyncService {
 
     private final WxCpService wxCpService;
     private final ISysUserFacade userFacade;
+    private final ISysRoleFacade roleFacade;
+    private final ISysMenuFacade menuFacade;
+    private final IWeComUserRelationFacade relationFacade;
 
-    /** 同步企业微信可见通讯录成员。 */
+    /**
+     * 同步企业微信可见通讯录成员。
+     */
     public void syncUsers() {
         try {
             Map<String, WeComUserProfileBO> members = loadMembers();
             if (members.isEmpty()) {
-                throw new IllegalStateException("企业微信未返回带手机号成员，取消停用操作");
+                throw new IllegalStateException("企业微信未返回成员，取消停用操作");
             }
             SyncResult result = synchronizeMembers(members);
             result.disabled = disableAbsentUsers(members.keySet());
@@ -60,12 +71,18 @@ public class WeComUserSyncService {
     private void appendDepartmentMembers(Long departmentId, Map<String, WeComUserProfileBO> members) throws Exception {
         List<WxCpUser> users = wxCpService.getUserService().listByDepartment(departmentId, false, 0);
         for (WxCpUser user : users) {
-            WeComUserProfileBO profile = WeComUserConvert.INSTANCE.toProfile(user);
-            if (StringUtils.isNotEmpty(profile.getMobile())) {
-                profile.setMobile(profile.getMobile().trim());
-                members.put(profile.getMobile(), profile);
-            }
+            WeComUserProfileBO profile = loadProfile(user.getUserId());
+            members.put(profile.getWecomUserId(), profile);
         }
+    }
+
+    private WeComUserProfileBO loadProfile(String wecomUserId) throws Exception {
+        WxCpUser detail = wxCpService.getUserService().getById(wecomUserId);
+        WeComUserProfileBO profile = WeComUserConvert.INSTANCE.toProfile(detail);
+        if (StringUtils.isNotEmpty(profile.getMobile())) {
+            profile.setMobile(profile.getMobile().trim());
+        }
+        return profile;
     }
 
     private SyncResult synchronizeMembers(Map<String, WeComUserProfileBO> members) {
@@ -77,33 +94,78 @@ public class WeComUserSyncService {
     }
 
     private void synchronizeMember(WeComUserProfileBO profile, SyncResult result) {
-        SysUser user = findUserByMobile(profile.getMobile());
+        WeComUserRelation relation = relationFacade.findByWeComUserId(profile.getWecomUserId());
+        SysUser user = findBoundOrMobileUser(relation, profile.getMobile());
         if (user == null) {
-            createUser(profile);
+            createAndBindUser(profile);
             result.created++;
-        } else if ("admin".equals(user.getUserName())) {
-            result.skipped++;
-        } else {
-            updateUser(user, profile, result);
+            return;
         }
+        if ("admin".equals(user.getUserName())) {
+            result.skipped++;
+            return;
+        }
+        ensureDefaultRole(user);
+        bindOrRefreshRelation(user, profile.getWecomUserId(), relation);
+        updateUser(user, profile, result);
     }
 
-    private SysUser findUserByMobile(String mobile) {
+    private SysUser findBoundOrMobileUser(WeComUserRelation relation, String mobile) {
+        if (relation != null) {
+            return userFacade.selectUserById(relation.getUserId());
+        }
+        if (StringUtils.isEmpty(mobile)) {
+            return null;
+        }
         return userFacade.selectOne(DynamicCondition.toWrapper(new WeComSysUserQuery().setPhonenumber(mobile)));
     }
 
-    private void createUser(WeComUserProfileBO profile) {
+    private void createAndBindUser(WeComUserProfileBO profile) {
         SysUser user = WeComUserConvert.INSTANCE.toSysUser(profile);
-        user.setUserName(profile.getMobile());
+        user.setUserName(resolveUserName(profile));
         user.setStatus("0");
         user.setRoleIds(new Long[]{DEFAULT_ROLE_ID});
         user.setPassword(SecurityUtils.encryptPassword(DEFAULT_PASSWORD));
         userFacade.insertUser(user);
+        relationFacade.bind(user.getUserId(), profile.getWecomUserId());
+    }
+
+    private void ensureDefaultRole(SysUser user) {
+        List<Long> roleIds = roleFacade.selectRoleListByUserId(user.getUserId());
+        if (roleIds.isEmpty()) {
+            userFacade.insertUserAuth(user.getUserId(), new Long[]{DEFAULT_ROLE_ID});
+            log.info("企业微信同步用户未分配角色，已补充分配默认角色，userId={}", user.getUserId());
+            return;
+        }
+        if (!roleIds.contains(DEFAULT_ROLE_ID) && menuFacade.selectMenuTreeByUserId(user.getUserId()).isEmpty()) {
+            Long[] mergedRoleIds = new Long[roleIds.size() + 1];
+            for (int index = 0; index < roleIds.size(); index++) {
+                mergedRoleIds[index] = roleIds.get(index);
+            }
+            mergedRoleIds[roleIds.size()] = DEFAULT_ROLE_ID;
+            userFacade.insertUserAuth(user.getUserId(), mergedRoleIds);
+            log.warn("企业微信同步用户角色无可路由菜单，已追加默认角色，userId={}", user.getUserId());
+        }
+    }
+
+    private String resolveUserName(WeComUserProfileBO profile) {
+        return StringUtils.isNotEmpty(profile.getMobile()) ? profile.getMobile() : profile.getWecomUserId();
+    }
+
+    private void bindOrRefreshRelation(SysUser user, String wecomUserId, WeComUserRelation relation) {
+        if (relation == null) {
+            relationFacade.bind(user.getUserId(), wecomUserId);
+            return;
+        }
+        relationFacade.touch(relation);
     }
 
     private void updateUser(SysUser user, WeComUserProfileBO profile, SyncResult result) {
         SysUser update = WeComUserConvert.INSTANCE.toSysUser(profile);
         update.setUserId(user.getUserId());
+        if (StringUtils.isEmpty(profile.getMobile())) {
+            update.setPhonenumber(user.getPhonenumber());
+        }
         userFacade.updateUserProfile(update);
         result.updated++;
         if (!"0".equals(user.getStatus())) {
@@ -113,11 +175,11 @@ public class WeComUserSyncService {
         }
     }
 
-    private int disableAbsentUsers(Set<String> activePhones) {
+    private int disableAbsentUsers(Set<String> activeWecomUserIds) {
         int disabled = 0;
-        for (SysUser user : userFacade.selectList(DynamicCondition.toWrapper(
-            new WeComSysUserQuery().setPhonenumberPresent(true)))) {
-            if (shouldDisable(user, activePhones)) {
+        for (WeComUserRelation relation : relationFacade.listAll()) {
+            SysUser user = userFacade.selectUserById(relation.getUserId());
+            if (shouldDisable(user, relation.getWecomUserId(), activeWecomUserIds)) {
                 user.setStatus("1");
                 userFacade.updateUserStatus(user);
                 disabled++;
@@ -126,9 +188,9 @@ public class WeComUserSyncService {
         return disabled;
     }
 
-    private boolean shouldDisable(SysUser user, Set<String> activePhones) {
-        return !"admin".equals(user.getUserName()) && StringUtils.isNotEmpty(user.getPhonenumber())
-            && !activePhones.contains(user.getPhonenumber().trim()) && !"1".equals(user.getStatus());
+    private boolean shouldDisable(SysUser user, String wecomUserId, Set<String> activeWecomUserIds) {
+        return user != null && !"admin".equals(user.getUserName()) && !"1".equals(user.getStatus())
+            && !activeWecomUserIds.contains(wecomUserId);
     }
 
     private static class SyncResult {

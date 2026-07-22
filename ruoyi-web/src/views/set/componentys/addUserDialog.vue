@@ -251,7 +251,7 @@ export default {
         font-size: 20px;
 
         &:hover {
-          color: #409eff;
+          color: #1677FF;
         }
       }
     }
@@ -320,7 +320,7 @@ export default {
 
           i {
             font-size: 24px;
-            color: #409eff;
+            color: #1677FF;
             animation: rotate 2s linear infinite;
           }
         }
@@ -371,7 +371,7 @@ export default {
             line-height: 32px;
 
             &:focus {
-              border-color: #409eff;
+              border-color: #1677FF;
             }
           }
         }
@@ -387,8 +387,8 @@ export default {
             }
 
             .el-radio__input.is-checked .el-radio__inner {
-              background-color: #409eff;
-              border-color: #409eff;
+              background-color: #1677FF;
+              border-color: #1677FF;
             }
           }
         }
@@ -414,12 +414,12 @@ export default {
       }
 
       &.el-button--primary {
-        background-color: #409eff;
-        border-color: #409eff;
+        background-color: #1677FF;
+        border-color: #1677FF;
 
         &:hover {
-          background-color: #66b1ff;
-          border-color: #66b1ff;
+          background-color: #3395FF;
+          border-color: #3395FF;
         }
       }
     }

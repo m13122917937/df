@@ -59,7 +59,7 @@
             <div class="switch-container">
               <el-switch
                 :value="scope.row.owner == 0"
-                active-color="#409eff"
+                active-color="#1677FF"
                 inactive-color="#dcdfe6"
                 @change="handleChangeOwner(scope.row)"
               />
@@ -72,7 +72,7 @@
             <el-button
               v-if="row.master !== 0"
               type="text"
-              style="color: #f56c6c;font-size: 12px; font-weight: 600;"
+              style="color: #FF3B30;font-size: 12px; font-weight: 600;"
               size="mini"
               @click="handleDelete(row)"
             >
@@ -378,7 +378,7 @@ export default {
     color: #4b5563;
 
     .highlight {
-      color: #f56c6c;
+      color: #FF3B30;
       font-weight: 600;
       margin: 0 6px;
     }

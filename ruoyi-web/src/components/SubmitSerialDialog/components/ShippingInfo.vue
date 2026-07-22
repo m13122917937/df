@@ -343,7 +343,7 @@ export default {
       height: 40px;
 
       &:focus {
-        border-color: #409EFF;
+        border-color: #1677FF;
         box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
       }
     }
@@ -366,7 +366,7 @@ export default {
         line-height: 40px;
 
         &:hover {
-          color: #409EFF;
+          color: #1677FF;
           transform: scale(1.1);
         }
       }
@@ -404,7 +404,7 @@ export default {
       }
 
       strong {
-        color: #409EFF;
+        color: #1677FF;
         font-weight: 600;
       }
     }

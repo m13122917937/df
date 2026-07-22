@@ -269,12 +269,12 @@ export default {
       background: #fff;
 
       // &:hover {
-      //   border-color: #409EFF;
+      //   border-color: #1677FF;
       //   background: rgba(64, 158, 255, 0.05);
       // }
 
       // &.active {
-      //   border-color: #f56c6c;
+      //   border-color: #FF3B30;
       //   background: rgba(245, 108, 108, 0.05);
       // }
 
@@ -285,13 +285,13 @@ export default {
         margin-top: 12px;
 
         .option-warning {
-          color: #f56c6c;
+          color: #FF3B30;
           font-size: 14px;
           font-weight: 500;
           background: rgba(245, 108, 108, 0.1);
           padding: 8px 12px;
           border-radius: 6px;
-          border-left: 3px solid #f56c6c;
+          border-left: 3px solid #FF3B30;
           word-wrap: break-word;
         }
 
@@ -302,7 +302,7 @@ export default {
           background: rgba(64, 158, 255, 0.05);
           padding: 12px;
           border-radius: 6px;
-          border-left: 3px solid #409EFF;
+          border-left: 3px solid #1677FF;
           word-wrap: break-word;
         }
       }
@@ -328,7 +328,7 @@ export default {
         transition: all 0.3s ease;
 
         &:focus {
-          border-color: #409EFF;
+          border-color: #1677FF;
           box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
         }
       }
@@ -351,7 +351,7 @@ export default {
       transition: all 0.3s ease;
 
       &:focus {
-        border-color: #409EFF;
+        border-color: #1677FF;
         box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
       }
     }
@@ -374,8 +374,8 @@ export default {
     }
 
     &.el-button--danger {
-      background: #f56c6c;
-      border-color: #f56c6c;
+      background: #FF3B30;
+      border-color: #FF3B30;
 
       &:hover {
         background: #f78989;
@@ -399,13 +399,13 @@ export default {
       height: 18px;
 
       &:hover {
-        border-color: #409EFF;
+        border-color: #1677FF;
       }
     }
 
     &.is-checked .el-radio__inner {
-      background-color: #f56c6c;
-      border-color: #f56c6c;
+      background-color: #FF3B30;
+      border-color: #FF3B30;
 
       &::after {
         background-color: #fff;

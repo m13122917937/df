@@ -64,14 +64,6 @@ public class AnalysisDashboardFacadeImpl implements AnalysisDashboardFacade {
      * {@inheritDoc}
      */
     @Override
-    public List<AnalysisOrderFactBO> orderDetails(AnalysisQuery query) {
-        return listFacts(AnalysisQueryConvert.INSTANCE.toFactQuery(query));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<AnalysisOrderFactBO> dataQuality(AnalysisQuery query) {
         return listFacts(AnalysisQueryConvert.INSTANCE.toIncompleteFactQuery(query));
     }

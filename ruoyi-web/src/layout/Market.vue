@@ -78,7 +78,7 @@ export default {
       .top-navbar {
         height: 60px;
         width: 100%;
-        box-shadow: 0 1px 4px rgba(0,21,41,.08);
+        box-shadow: 0 1px 0 rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
       }
 
       .main-container {
@@ -88,15 +88,15 @@ export default {
 
         .region-sidebar-container {
           flex-shrink: 0;
-          background: #fff;
-          border-right: 1px solid #e6e6e6;
+          background: var(--bg-card, #FFFFFF);
+          border-right: 1px solid var(--border-light, rgba(60,60,67,0.12));
         }
 
         .content-area {
           flex: 1;
           display: flex;
           flex-direction: column;
-          background: #f5f5f5;
+          background: var(--bg-page, #F2F2F7);
           overflow: auto;
           .main-content {
             flex: 1;
@@ -122,7 +122,7 @@ export default {
       right: 0;
       z-index: 9;
       width: calc(100% - #{$sideBarWidth});
-      transition: width 0.28s;
+      transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .hideSidebar .fixed-header {

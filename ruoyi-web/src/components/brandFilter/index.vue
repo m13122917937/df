@@ -184,12 +184,12 @@ export default {
 }
 
 .brand-btn.is-primary {
-  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
-  border-color: #409eff;
+  background: linear-gradient(135deg, #1677FF 0%, #3395FF 100%);
+  border-color: #1677FF;
   color: white;
 
   &:hover {
-    background: linear-gradient(135deg, #66b1ff 0%, #409eff 100%);
+    background: linear-gradient(135deg, #3395FF 0%, #1677FF 100%);
   }
 }
 

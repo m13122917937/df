@@ -6,13 +6,11 @@ import com.ruoyi.analysis.model.bo.AnalysisDashboardBO;
 import com.ruoyi.analysis.model.bo.AnalysisImportLogBO;
 import com.ruoyi.analysis.model.bo.AnalysisMarginConfigBO;
 import com.ruoyi.analysis.model.bo.AnalysisOrderFactBO;
-import com.ruoyi.analysis.model.bo.AnalysisRebateBO;
 import com.ruoyi.analysis.model.bo.AnalysisSyncBO;
 import com.ruoyi.analysis.model.bo.AnalysisWarehouseCostConfigBO;
 import com.ruoyi.analysis.model.param.AnalysisCostConfigParam;
 import com.ruoyi.analysis.model.param.AnalysisCollectionCycleConfigParam;
 import com.ruoyi.analysis.model.param.AnalysisMarginConfigParam;
-import com.ruoyi.analysis.model.param.AnalysisRebateParam;
 import com.ruoyi.analysis.model.param.AnalysisWarehouseCostConfigParam;
 import com.ruoyi.analysis.model.query.AnalysisQuery;
 import com.ruoyi.analysis.model.query.AnalysisCollectionCycleConfigQuery;
@@ -29,8 +27,6 @@ import com.ruoyi.web.vo.analysis.AnalysisMarginConfigSaveRequest;
 import com.ruoyi.web.vo.analysis.AnalysisMarginConfigVO;
 import com.ruoyi.web.vo.analysis.AnalysisOrderFactVO;
 import com.ruoyi.web.vo.analysis.AnalysisQueryRequest;
-import com.ruoyi.web.vo.analysis.AnalysisRebateSaveRequest;
-import com.ruoyi.web.vo.analysis.AnalysisRebateVO;
 import com.ruoyi.web.vo.analysis.AnalysisSyncVO;
 import com.ruoyi.web.vo.analysis.AnalysisWarehouseCostConfigSaveRequest;
 import com.ruoyi.web.vo.analysis.AnalysisWarehouseCostConfigVO;
@@ -68,10 +64,6 @@ public interface AnalysisWebConvert {
 
     List<AnalysisMarginConfigVO> toMarginConfigVOList(List<AnalysisMarginConfigBO> source);
 
-    AnalysisRebateParam toRebateParam(AnalysisRebateSaveRequest source);
-
-    AnalysisRebateParam.DetailParam toRebateDetailParam(AnalysisRebateSaveRequest.DetailRequest source);
-
     AnalysisDashboardVO toDashboardVO(AnalysisDashboardBO source);
 
     AnalysisDashboardVO.MetricVO toMetricVO(AnalysisDashboardBO.MetricBO source);
@@ -90,13 +82,7 @@ public interface AnalysisWebConvert {
 
     AnalysisSyncVO toSyncVO(AnalysisSyncBO source);
 
-    List<AnalysisSyncVO> toSyncVOList(List<AnalysisSyncBO> source);
-
     AnalysisImportLogVO toImportLogVO(AnalysisImportLogBO source);
 
     List<AnalysisImportLogVO> toImportLogVOList(List<AnalysisImportLogBO> source);
-
-    AnalysisRebateVO toRebateVO(AnalysisRebateBO source);
-
-    List<AnalysisRebateVO> toRebateVOList(List<AnalysisRebateBO> source);
 }

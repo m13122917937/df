@@ -25,15 +25,15 @@ export default {
   name: 'CollectionManagement',
   data() {
     return {
-      activeMenu: 'payment-details',
+      activeMenu: 'payment',
       menuList: [
         {
-          key: 'payment-details',
+          key: 'payment',
           title: '收款详情',
           icon: 'el-icon-document'
         },
         {
-          key: 'addAccount',
+          key: 'add-account',
           title: '收款账户',
           icon: 'el-icon-wallet'
         }
@@ -54,17 +54,17 @@ export default {
   methods: {
     setActiveMenuFromRoute() {
       const routePath = this.$route.path
-      if (routePath.includes('addAccount')) {
-        this.activeMenu = 'addAccount'
+      if (routePath.includes('add-account')) {
+        this.activeMenu = 'add-account'
       } else {
-        this.activeMenu = 'payment-details'
+        this.activeMenu = 'payment'
       }
     },
     handleMenuSelect(key) {
       this.activeMenu = key
       const routeMap = {
-        'payment-details': '/monery/collection/payment-details',
-        'addAccount': '/monery/collection/addAccount'
+        'payment': '/monery/collection/payment',
+        'add-account': '/monery/collection/add-account'
       }
       const targetRoute = routeMap[key]
       if (targetRoute && targetRoute !== this.$route.path) {
@@ -84,21 +84,25 @@ export default {
   .collection-sidebar {
     width: 200px;
     background: #fff;
-    border-right: 1px solid #e4e7ed;
-    padding: 16px 0;
+    border-right: 1px solid #E5E6EB;
+    padding: 8px 0;
     overflow-y: auto;
 
     .menu-item {
       display: flex;
       align-items: center;
-      padding: 12px 20px;
+      padding: 10px 20px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      color: #606266;
+      transition: all 0.2s ease;
+      color: #4E5969;
+      font-size: 14px;
+      border-right: 2px solid transparent;
 
       .menu-icon {
         margin-right: 8px;
         font-size: 16px;
+        color: #86909C;
+        transition: color 0.2s ease;
       }
 
       .menu-title {
@@ -106,15 +110,23 @@ export default {
       }
 
       &:hover {
-        background: #f5f7fa;
-        color: #409eff;
+        background: rgba(22, 119, 255, 0.06);
+        color: #1677FF;
+
+        .menu-icon {
+          color: #1677FF;
+        }
       }
 
       &.active {
-        background: #ecf5ff;
-        color: #409eff;
-        border-right: 3px solid #409eff;
+        background: rgba(22, 119, 255, 0.06);
+        color: #1677FF;
+        border-right: 2px solid #1677FF;
         font-weight: 500;
+
+        .menu-icon {
+          color: #1677FF;
+        }
       }
     }
   }

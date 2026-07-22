@@ -179,6 +179,8 @@ export default {
   display: flex;
   flex-direction: column;
   background: var(--bg-sidebar);
+  backdrop-filter: var(--blur-sidebar);
+  -webkit-backdrop-filter: var(--blur-sidebar);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -206,7 +208,7 @@ export default {
   color: var(--menu-text, #475569);
   font-size: 14px;
   font-weight: 500;
-  transition: color 180ms;
+  transition: color 180ms var(--ease-apple);
   user-select: none;
 
   &:hover {
@@ -216,7 +218,7 @@ export default {
 
 .biz-group-arrow {
   flex-shrink: 0;
-  transition: transform 200ms ease;
+  transition: transform 200ms var(--ease-apple);
   width: 16px;
   height: 16px;
 
@@ -246,15 +248,20 @@ export default {
   color: var(--menu-text, #475569);
   font-size: 14px;
   font-weight: 400;
-  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 180ms var(--ease-apple);
 
   &:hover {
     background: var(--menu-hover-bg, #F1F5F9);
     color: var(--menu-hover-text, #1E293B);
   }
 
+  &:active {
+    transform: scale(0.97);
+    transition: transform 100ms var(--ease-apple);
+  }
+
   &.active {
-    background: var(--primary-color, #1677FF);
+    background: var(--primary-color, #007AFF);
     color: #FFFFFF;
     font-weight: 500;
 

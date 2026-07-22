@@ -69,11 +69,11 @@ wechat:
         aesKey: oiXr3GV0RYUl2FYVsI4U8k2KhISQWJK40a4YQ6huCc6
   wecom:
     # 企业微信通讯录应用配置
-    corpId: ${WECOM_CORP_ID:}
-    contactSecret: ${WECOM_CONTACT_SECRET:}
-    agentId: ${WECOM_AGENT_ID:}
-    loginRedirectUri: ${WECOM_LOGIN_REDIRECT_URI:https://admin.wujievip.cn/wecom/login/callback}
-    loginPageUri: ${WECOM_LOGIN_PAGE_URI:https://admin.wujievip.cn/#/login}
+    corpId: wwe6753af50fc16736
+    contactSecret: -7v8k-4ww-YLtX1V6Wyy1sUaol4p5zplTrLcNytij2k
+    agentId: 1000004
+    loginRedirectUri: https://admin.wujievip.cn/wecom/login/callback
+    loginPageUri: https://adm.wujievip.cn/
 fy:
   oss:
     aliyunDomain: https://static.wujievip.cn

@@ -97,7 +97,8 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="jobList" @selection-change="handleSelectionChange">
+    <el-table ref="jobTable" v-loading="loading" :data="jobList" :height="tableHeight"
+      @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="任务编号" width="100" align="center" prop="jobId" />
       <el-table-column label="任务名称" align="center" prop="jobName" :show-overflow-tooltip="true" />
@@ -320,6 +321,7 @@ export default {
       total: 0,
       // 定时任务表格数据
       jobList: [],
+      tableHeight: 260,
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -357,6 +359,18 @@ export default {
   created() {
     this.getList()
   },
+  mounted() {
+    window.addEventListener("resize", this.updateTableHeight)
+    this.$nextTick(this.updateTableHeight)
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.updateTableHeight)
+  },
+  watch: {
+    showSearch() {
+      this.$nextTick(this.updateTableHeight)
+    }
+  },
   methods: {
     /** 查询定时任务列表 */
     getList() {
@@ -365,7 +379,21 @@ export default {
         this.jobList = response.rows
         this.total = response.total
         this.loading = false
+        this.$nextTick(this.updateTableHeight)
       })
+    },
+    /** 根据当前可视区域计算表格高度。 */
+    updateTableHeight() {
+      if (!this.$refs.jobTable) {
+        return
+      }
+      const tableRect = this.$refs.jobTable.$el.getBoundingClientRect()
+      const pagination = this.$el.querySelector(".pagination-container")
+      const paginationRect = pagination && this.total > 0 ? pagination.getBoundingClientRect() : null
+      const paginationGap = paginationRect ? Math.max(0, paginationRect.top - tableRect.bottom) : 0
+      const paginationHeight = paginationRect ? paginationRect.height : 0
+      const availableHeight = window.innerHeight - tableRect.top - paginationGap - paginationHeight - 24
+      this.tableHeight = Math.max(240, Math.floor(availableHeight))
     },
     // 任务组名字典翻译
     jobGroupFormat(row, column) {

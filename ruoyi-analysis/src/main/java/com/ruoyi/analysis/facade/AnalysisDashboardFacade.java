@@ -44,14 +44,6 @@ public interface AnalysisDashboardFacade {
     AnalysisDashboardBO humanEfficiency(AnalysisQuery query);
 
     /**
-     * 查询订单穿透明细。
-     *
-     * @param query 查询条件
-     * @return 订单事实业务对象
-     */
-    List<AnalysisOrderFactBO> orderDetails(AnalysisQuery query);
-
-    /**
      * 查询数据质量异常明细。
      *
      * @param query 查询条件

@@ -102,12 +102,14 @@ export default {
 .module-nav {
   width: var(--module-nav-width, 80px);
   background: var(--module-nav-bg);
+  backdrop-filter: var(--blur-sidebar);
+  -webkit-backdrop-filter: var(--blur-sidebar);
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
   border-right: 1px solid var(--border-sidebar);
-  transition: width 0.28s;
+  transition: width 300ms var(--ease-apple);
 }
 
 .module-nav-list {
@@ -129,12 +131,17 @@ export default {
   border-radius: 8px;
   cursor: pointer;
   color: var(--menu-text);
-  transition: all 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 180ms var(--ease-apple);
   gap: 4px;
 
   &:hover {
     background: var(--module-nav-hover-bg);
     color: var(--menu-hover-text);
+  }
+
+  &:active {
+    transform: scale(0.95);
+    transition: transform 100ms var(--ease-apple);
   }
 
   &.active {
@@ -178,12 +185,13 @@ export default {
 
   &:hover {
     background: var(--module-nav-hover-bg);
-    color: #5B7CFA;
+    color: var(--primary-color);
   }
 }
 
 .module-nav.collapsed {
   width: 80px;
+  transition-duration: 300ms;
 
   .module-text {
     display: none;

@@ -129,7 +129,7 @@ body, .orders-wrap, .wrap {
   td.el-table__cell {
     border-bottom: 1px solid var(--adm-border);
     padding: 0;
-    height: 64px;
+    height: 56px;
   }
 
   td.el-table__cell .cell {
@@ -147,10 +147,10 @@ body, .orders-wrap, .wrap {
   }
 
   .el-table__body tr.el-table__row--striped td {
-    background: var(--bg-hover);
+    background: rgba(0,0,0,0.015);
   }
   .el-table__body tr.el-table__row--striped:hover td {
-    background: var(--bg-active);
+    background: var(--bg-hover);
   }
 
   .el-table__fixed-right::before,
@@ -449,12 +449,12 @@ body, .orders-wrap, .wrap {
   border-radius: var(--adm-radius-sm);
   border: 1.5px solid var(--adm-border);
   transition: all var(--adm-transition);
-  height: 36px;
+  height: 40px;
   font-size: 13px;
   font-family: var(--adm-font);
   &:focus {
     border-color: var(--adm-primary);
-    box-shadow: 0 0 0 3px rgba(91,124,250,0.1);
+    box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
   }
 }
 
@@ -465,6 +465,10 @@ body, .orders-wrap, .wrap {
   font-weight: 500;
   transition: all var(--adm-transition);
   font-family: var(--adm-font);
+  &:active {
+    transform: scale(0.97);
+    transition: transform 80ms var(--ease-apple);
+  }
 }
 
 :deep(.el-button--primary) {
@@ -497,9 +501,10 @@ body, .orders-wrap, .wrap {
 /* ==================== Tag Styles ==================== */
 
 :deep(.el-tag) {
-  border-radius: var(--adm-radius-xs);
+  border-radius: 100px;
   font-weight: 500;
   font-family: var(--adm-font);
+  padding: 2px 14px;
 }
 
 :deep(.el-tag--warning) {

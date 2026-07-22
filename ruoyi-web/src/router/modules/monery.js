@@ -37,10 +37,10 @@ const moneryRouter = {
             title: '收款信息',
             owner: [1]
           },
-          redirect: '/monery/collection/payment-details',
+          redirect: '/monery/collection/payment',
           children: [
             {
-              path: 'payment-details',
+              path: 'payment',
               component: () => import('@/views/monery/payment-details'),
               name: 'PaymentDetails',
               meta: {
@@ -49,7 +49,7 @@ const moneryRouter = {
               }
             },
             {
-              path: 'addAccount',
+              path: 'add-account',
               component: () => import('@/views/monery/addAccount'),
               name: 'AddAccount',
               meta: {
@@ -67,10 +67,10 @@ const moneryRouter = {
             title: '合同',
             owner: [1]
           },
-          redirect: '/monery/contract/sign-info',
+          redirect: '/monery/contract/sign',
           children: [
             {
-              path: 'sign-info',
+              path: 'sign',
               component: () => import('@/views/monery/contract/components/sign-info'),
               name: 'SignInfo',
               meta: {

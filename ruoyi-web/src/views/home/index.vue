@@ -13,7 +13,7 @@
       <h3>快速导航</h3>
       <el-row :gutter="20">
         <el-col :span="6">
-          <div class="nav-card" @click="$router.push('/order/pending')">
+          <div class="nav-card" @click="$router.push('/order/send')">
             <div class="nav-icon">
               <i class="el-icon-shopping-cart-2" />
             </div>
@@ -22,7 +22,7 @@
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="nav-card" @click="$router.push('/finance/index')">
+          <div class="nav-card" @click="$router.push('/monery/earnest')">
             <div class="nav-icon">
               <i class="el-icon-coin" />
             </div>
@@ -31,7 +31,7 @@
           </div>
         </el-col>
         <el-col :span="6">
-          <div class="nav-card" @click="$router.push('/o2o')">
+          <div class="nav-card" @click="$router.push('/df')">
             <div class="nav-icon">
               <i class="el-icon-s-shop" />
             </div>
@@ -53,7 +53,7 @@ export default {
 <style lang="scss" scoped>
 .home-container {
   padding: 20px;
-  background: #f5f5f5;
+  background: var(--bg-page, #F2F2F7);
   min-height: 100vh;
 }
 
@@ -61,21 +61,22 @@ export default {
   margin-bottom: 30px;
 
   .welcome-card {
-    background: white;
+    background: var(--bg-card, #FFFFFF);
     padding: 30px;
-    border-radius: 8px;
+    border-radius: 14px;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
 
     h2 {
       margin: 0 0 10px 0;
-      color: #333;
+      color: var(--text-primary, #000000);
       font-size: 28px;
+      letter-spacing: -0.02em;
     }
 
     p {
       margin: 0;
-      color: #666;
+      color: var(--text-secondary, rgba(60,60,67,0.60));
       font-size: 16px;
     }
   }
@@ -83,41 +84,46 @@ export default {
 
 .quick-nav-section {
   h3 {
-    color: #333;
+    color: var(--text-primary, #000000);
     margin-bottom: 20px;
     font-size: 20px;
+    letter-spacing: -0.02em;
   }
 }
 
 .nav-card {
-  background: white;
+  background: var(--bg-card, #FFFFFF);
   padding: 24px;
-  border-radius: 8px;
+  border-radius: 10px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 16px 32px rgba(0,0,0,0.08);
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 
   .nav-icon {
     font-size: 36px;
-    color: #1890ff;
+    color: #1677FF;
     margin-bottom: 12px;
   }
 
   h4 {
     margin: 0 0 8px 0;
-    color: #333;
+    color: var(--text-primary, #000000);
     font-size: 16px;
   }
 
   p {
     margin: 0;
-    color: #666;
+    color: var(--text-secondary, rgba(60,60,67,0.60));
     font-size: 14px;
     line-height: 1.4;
   }

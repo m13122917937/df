@@ -34,19 +34,19 @@ export default {
   methods: {
     setActiveTabFromRoute() {
       const routePath = this.$route.path
-      if (routePath.includes('/pending')) {
+      if (routePath.includes('/send')) {
         this.activeTab = 'wait-send'
-      } else if (routePath.includes('/today-shipped')) {
+      } else if (routePath.includes('/today')) {
         this.activeTab = 'today-send'
       } else if (routePath.includes('/transit')) {
         this.activeTab = 'transit'
-      } else if (routePath.includes('/exception')) {
+      } else if (routePath.includes('/error')) {
         this.activeTab = 'exception'
-      } else if (routePath.includes('/refund')) {
+      } else if (routePath.includes('/return')) {
         this.activeTab = 'return'
-      } else if (routePath.includes('/collected')) {
+      } else if (routePath.includes('/received')) {
         this.activeTab = 'confirm'
-      } else if (routePath.includes('/after-sales')) {
+      } else if (routePath.includes('/aftersale')) {
         this.activeTab = 'sale-after'
       } else if (routePath.includes('/all')) {
         this.activeTab = 'all-orders'
@@ -55,13 +55,13 @@ export default {
     handleTabChange(tabKey) {
       // 根据标签键值跳转到对应的子路由
       const routeMap = {
-        'wait-send': '/order/pending',
-        'today-send': '/order/today-shipped',
+        'wait-send': '/order/send',
+        'today-send': '/order/today',
         'transit': '/order/transit',
-        'exception': '/order/exception',
-        'return': '/order/refund',
-        'confirm': '/order/collected',
-        'sale-after': '/order/after-sales',
+        'exception': '/order/error',
+        'return': '/order/return',
+        'confirm': '/order/received',
+        'sale-after': '/order/aftersale',
         'all-orders': '/order/all'
       }
 
@@ -85,7 +85,9 @@ export default {
     display: flex;
     flex-direction: column;
     flex: 1;
+    min-height: 0;
     overflow: hidden;
+    position: relative;
   }
 }
 </style>

@@ -183,7 +183,7 @@ export default {
   color: #c0c4cc;
   transition: color 0.3s;
   font-size: 14px;
-  color: #409eff;
+  color: #1677FF;
 
   &:hover {
     color: #0a76e2;

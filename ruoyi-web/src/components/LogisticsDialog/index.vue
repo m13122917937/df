@@ -203,7 +203,7 @@ export default {
   }
 
   .el-dialog__header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1677FF 0%, #5856D6 100%);
     color: white;
     border-radius: 12px 12px 0 0;
     padding: 10px 24px;
@@ -288,7 +288,7 @@ export default {
 
   i {
     margin-right: 8px;
-    color: #409eff;
+    color: #1677FF;
     font-size: 18px;
   }
 }
@@ -309,7 +309,7 @@ export default {
   }
 
   .value {
-    color: #409eff;
+    color: #1677FF;
     font-weight: 600;
     margin-right: 8px;
     font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
@@ -317,14 +317,14 @@ export default {
 
   .copy-icon {
     cursor: pointer;
-    color: #409eff;
+    color: #1677FF;
     transition: all 0.3s;
     font-size: 16px;
     padding: 4px;
     border-radius: 4px;
 
     &:hover {
-      background: #409eff;
+      background: #1677FF;
       color: white;
       transform: scale(1.1);
     }
@@ -339,7 +339,7 @@ export default {
 
     i {
       margin-right: 8px;
-      color: #67c23a;
+      color: #34C759;
       font-size: 16px;
     }
 
@@ -374,7 +374,7 @@ export default {
 
   i {
     margin-right: 8px;
-    color: #409eff;
+    color: #1677FF;
     font-size: 18px;
   }
 
@@ -417,7 +417,7 @@ export default {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(180deg, #409eff 0%, #e4e7ed 100%);
+    background: linear-gradient(180deg, #1677FF 0%, #e4e7ed 100%);
     border-radius: 1px;
   }
 }
@@ -436,7 +436,7 @@ export default {
   &.is-current {
     .timeline-content {
       background: linear-gradient(135deg, #f0f9ff 0%, #e1f5fe 100%);
-      border-color: #409eff;
+      border-color: #1677FF;
     }
   }
 }
@@ -462,13 +462,13 @@ export default {
     transition: all 0.3s ease;
 
     &.is-current {
-      background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
+      background: linear-gradient(135deg, #1677FF 0%, #34C759 100%);
       box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
       animation: pulse 2s infinite;
     }
 
     &.is-completed {
-      background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+      background: linear-gradient(135deg, #34C759 0%, #4ADE80 100%);
       box-shadow: 0 2px 8px rgba(103, 194, 58, 0.3);
     }
   }
@@ -539,7 +539,7 @@ export default {
   text-align: right;
 
   .close-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1677FF 0%, #5856D6 100%);
     border: none;
     color: white;
     padding: 10px 20px;

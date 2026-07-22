@@ -127,7 +127,7 @@
             <el-button
               type="text"
               size="small"
-              style="color: #67c23a"
+              style="color: #34C759"
               :disabled="scope.row.status !== 1"
               :loading="signLoadingId === scope.row.id"
               @click="handleSign(scope.row)"
@@ -454,21 +454,21 @@ export default {
         }
 
         .go-auth-link {
-          color: #409eff;
+          color: #1677FF;
           cursor: pointer;
           font-size: 14px;
           text-decoration: underline;
           margin-left: 8px;
 
           &:hover {
-            color: #66b1ff;
+            color: #3395FF;
           }
         }
 
         .status-count {
           font-size: 24px;
           font-weight: bold;
-          color: #409eff;
+          color: #1677FF;
         }
       }
     }

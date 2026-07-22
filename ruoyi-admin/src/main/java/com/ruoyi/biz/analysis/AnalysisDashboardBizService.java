@@ -58,16 +58,6 @@ public class AnalysisDashboardBizService {
     }
 
     /**
-     * 查询订单穿透明细。
-     *
-     * @param query 查询条件
-     * @return 订单商品行
-     */
-    public List<AnalysisOrderFactBO> orderDetails(AnalysisQuery query) {
-        return dashboardFacade.orderDetails(query);
-    }
-
-    /**
      * 查询缺失成本的数据质量明细。
      *
      * @param query 查询条件

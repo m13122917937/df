@@ -60,7 +60,7 @@ export default {
 
   .number {
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    color: #409eff;
+    color: #1677FF;
   }
 
   &:hover.tracking-info-clickable {

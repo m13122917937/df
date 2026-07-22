@@ -28,12 +28,17 @@ function getFavoriteTabs() {
   }
 }
 
+function isPlaceholderComponent(component) {
+  // Layout / ParentView / InnerLink 是占位组件，不是实际页面，跳过
+  return !component || component === Layout || (component.render && component.name === 'ParentView')
+}
+
 function findRoutePath(routes, predicate, basePath = '') {
   for (const route of routes) {
     if (route.path === '*' || route.path === '/404') continue
     const fullPath = joinRoutePath(basePath, route.path)
     if (!route.children || route.children.length === 0) {
-      if (route.component !== Layout && predicate(fullPath, route)) return fullPath
+      if (!isPlaceholderComponent(route.component) && predicate(fullPath, route)) return fullPath
     }
     const childPath = findRoutePath(route.children || [], predicate, fullPath)
     if (childPath) return childPath
@@ -61,20 +66,7 @@ const whiteList = ['/login', '/register']
 
 // 递归查找第一个叶子路由的完整路径
 function findFirstPath(routes) {
-  for (const route of routes) {
-    if (route.path === '*' || route.path === '/404') continue
-    if (!route.children || route.children.length === 0) {
-      // 跳过只有 Layout 组件的占位模块（如经营分析、工具箱），
-      // 返回有实际页面组件的叶子路由路径
-      if (route.component === Layout) continue
-      return route.path
-    }
-    const childPath = findFirstPath(route.children)
-    if (childPath) {
-      return route.path + '/' + childPath
-    }
-  }
-  return null
+  return findRoutePath(routes, () => true)
 }
 
 const isWhiteList = (path) => {
@@ -112,6 +104,12 @@ router.beforeEach((to, from, next) => {
           store.dispatch('GenerateRoutes').then(accessRoutes => {
             // 根据roles权限生成可访问的路由表
             router.addRoutes(accessRoutes) // 动态添加可访问路由表
+            const usableRoutes = accessRoutes.filter(r => r.path !== '*' && r.path !== '/404')
+            if (usableRoutes.length === 0) {
+              Message.error('当前账号未分配菜单权限，请联系管理员配置角色菜单')
+              next({ path: '/401', replace: true })
+              return
+            }
             // 根路径无对应路由，重定向到有权限的第一个菜单
             if (to.path === '/') {
               const defaultPath = resolveDefaultPath(accessRoutes)
@@ -129,6 +127,13 @@ router.beforeEach((to, from, next) => {
       } else if (to.path === '/') {
         // 角色已加载但目标是根路径（无对应路由），重定向到有权限的第一个菜单
         const routes = store.state.permission.addRoutes || []
+        const usableRoutes = routes.filter(r => r.path !== '*' && r.path !== '/404')
+        if (usableRoutes.length === 0) {
+          Message.error('当前账号未分配菜单权限，请联系管理员配置角色菜单')
+          next({ path: '/401', replace: true })
+          NProgress.done()
+          return
+        }
         const defaultPath = resolveDefaultPath(routes)
         next({ path: defaultPath || '/404', replace: true })
       } else {
@@ -141,7 +146,18 @@ router.beforeEach((to, from, next) => {
       // 在免登录白名单，直接进入
       next()
     } else {
-      next(`/login?redirect=${encodeURIComponent(to.fullPath)}`) // 否则全部重定向到登录页
+      const wecomTicket = to.query && to.query.wecomTicket
+      const wecomError = to.query && to.query.wecomError
+      const wecomBindSession = to.query && to.query.wecomBindSession
+      if (wecomTicket || wecomError || wecomBindSession) {
+        next({
+          path: '/login',
+          query: { wecomTicket, wecomError, wecomBindSession },
+          replace: true
+        })
+      } else {
+        next(`/login?redirect=${encodeURIComponent(to.fullPath)}`)
+      }
       NProgress.done()
     }
   }

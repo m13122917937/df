@@ -5,6 +5,7 @@ import lombok.Data;
 /** 企业微信成员资料。 */
 @Data
 public class WeComUserProfileBO {
+    private String wecomUserId;
     private String name;
     private String email;
     private String mobile;

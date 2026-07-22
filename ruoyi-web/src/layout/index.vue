@@ -78,14 +78,15 @@ export default {
     flex-direction: column;
 
     .top-navbar {
-      height: 48px;
+      height: 64px;
       width: 100%;
-      box-shadow: 0 1px 4px rgba(0,21,41,.08);
+      box-shadow: 0 1px 0 #E5E6EB;
     }
 
     .main-container {
       width: 100%;
-      height: calc(100vh - 48px);
+      height: calc(100vh - 64px);
+      background: var(--bg-page, #F2F2F7);
     }
   }
 
@@ -105,7 +106,7 @@ export default {
     right: 0;
     z-index: 9;
     width: calc(100% - #{$sideBarWidth});
-    transition: width 0.28s;
+    transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .hideSidebar .fixed-header {
