@@ -28,15 +28,26 @@
           <p>数据由吉客云每日定时同步维护，仅供业务查询使用。</p>
         </div>
       </div>
-      <el-table v-loading="loading" :data="channelList" border stripe>
-        <el-table-column prop="channelCode" label="渠道编码" min-width="130" show-overflow-tooltip />
-        <el-table-column prop="channelName" label="渠道名称" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="platformName" label="平台" min-width="130" show-overflow-tooltip />
-        <el-table-column prop="subjectName" label="经营主体" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="warehouseName" label="仓库" min-width="160" show-overflow-tooltip />
-        <el-table-column prop="contactName" label="联系人" min-width="100" show-overflow-tooltip />
-        <el-table-column prop="contactPhone" label="联系电话" min-width="130" show-overflow-tooltip />
-        <el-table-column prop="lastSyncTime" label="最后同步时间" min-width="180" />
+      <el-table ref="channelTable" v-loading="loading" :data="filteredChannelList" border stripe>
+        <el-table-column
+          v-for="column in visibleColumns"
+          :key="column.key"
+          :prop="column.key"
+          :label="column.label"
+          :min-width="column.minWidth"
+          :show-overflow-tooltip="column.showOverflowTooltip"
+        >
+          <template #header>
+            <div class="sales-channel-column-header">
+              <FilterHeader
+                :label="column.label"
+                :value="columnSearch[column.key]"
+                :options="colFilterOptions[column.key] || []"
+                @update:value="updateColumnFilter(column.key, $event)"
+              />
+            </div>
+          </template>
+        </el-table-column>
       </el-table>
       <pagination
         v-show="total > 0"
@@ -50,15 +61,38 @@
 </template>
 
 <script>
+import Sortable from 'sortablejs'
 import { getMasterSalesChannelList } from '@/api/master'
+import FilterHeader from '@/views/business/manage/components/FilterHeader.vue'
+
+const SALES_CHANNEL_COLUMNS = [
+  { key: 'channelCode', label: '渠道编码', minWidth: 130, showOverflowTooltip: true },
+  { key: 'channelName', label: '渠道名称', minWidth: 180, showOverflowTooltip: true },
+  { key: 'platformName', label: '平台', minWidth: 130, showOverflowTooltip: true },
+  { key: 'subjectName', label: '经营主体', minWidth: 200, showOverflowTooltip: true },
+  { key: 'warehouseName', label: '仓库', minWidth: 160, showOverflowTooltip: true },
+  { key: 'contactName', label: '联系人', minWidth: 100, showOverflowTooltip: true },
+  { key: 'contactPhone', label: '联系电话', minWidth: 130, showOverflowTooltip: true },
+  { key: 'lastSyncTime', label: '最后同步时间', minWidth: 180, showOverflowTooltip: false }
+]
+
+function createColumnSearch() {
+  return SALES_CHANNEL_COLUMNS.reduce((search, column) => {
+    search[column.key] = []
+    return search
+  }, {})
+}
 
 export default {
   name: 'MasterSalesChannel',
+  components: { FilterHeader },
   data() {
     return {
       loading: false,
       total: 0,
       channelList: [],
+      columnOrder: SALES_CHANNEL_COLUMNS.map(column => column.key),
+      columnSearch: createColumnSearch(),
       queryParams: {
         pageNum: 1,
         pageSize: 20,
@@ -71,6 +105,29 @@ export default {
   },
   created() {
     this.getList()
+  },
+  mounted() {
+    this.$nextTick(this.initColumnDrag)
+  },
+  beforeDestroy() {
+    this.destroyColumnDrag()
+  },
+  computed: {
+    visibleColumns() {
+      return this.columnOrder.map(key => SALES_CHANNEL_COLUMNS.find(column => column.key === key))
+    },
+    colFilterOptions() {
+      return SALES_CHANNEL_COLUMNS.reduce((options, column) => {
+        const values = this.channelList
+          .map(row => row[column.key])
+          .filter(value => value !== null && value !== undefined && value !== '')
+        options[column.key] = [...new Set(values)].map(value => ({ text: String(value), value }))
+        return options
+      }, {})
+    },
+    filteredChannelList() {
+      return this.channelList.filter(row => this.matchesColumnFilters(row))
+    }
   },
   methods: {
     getList() {
@@ -96,6 +153,46 @@ export default {
         subjectNameLike: ''
       }
       this.getList()
+    },
+    updateColumnFilter(key, values) {
+      this.$set(this.columnSearch, key, values)
+    },
+    matchesColumnFilters(row) {
+      return SALES_CHANNEL_COLUMNS.every(column => {
+        const values = this.columnSearch[column.key]
+        return !values.length || values.includes(row[column.key])
+      })
+    },
+    initColumnDrag() {
+      const table = this.$refs.channelTable
+      const headerRow = table && table.$el.querySelector('.el-table__header-wrapper tr')
+      if (!headerRow) {
+        return
+      }
+      this.destroyColumnDrag()
+      this.columnSortable = Sortable.create(headerRow, {
+        animation: 150,
+        fallbackTolerance: 6,
+        onEnd: ({ oldIndex, newIndex }) => this.moveColumn(oldIndex, newIndex)
+      })
+    },
+    destroyColumnDrag() {
+      if (this.columnSortable) {
+        this.columnSortable.destroy()
+        this.columnSortable = null
+      }
+    },
+    moveColumn(oldIndex, newIndex) {
+      if (oldIndex === newIndex || oldIndex === undefined || newIndex === undefined) {
+        return
+      }
+      const movedKey = this.columnOrder.splice(oldIndex, 1)[0]
+      this.columnOrder.splice(newIndex, 0, movedKey)
+      this.destroyColumnDrag()
+      this.$nextTick(() => {
+        this.$refs.channelTable.doLayout()
+        this.initColumnDrag()
+      })
     }
   }
 }
@@ -131,6 +228,17 @@ export default {
 .sales-channel-card-title h3,
 .sales-channel-card-title p {
   margin: 0;
+}
+
+.sales-channel-column-header {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.sales-channel-column-header :deep(.filter-header-trigger) {
+  min-width: 0;
+  flex: 1;
 }
 
 .sales-channel-card-title h3 {
