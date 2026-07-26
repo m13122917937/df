@@ -4,14 +4,14 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.ruoyi.bill.constant.BillConsts;
 import com.ruoyi.bill.constant.BillPayPlanConsts;
-import com.ruoyi.bill.constant.TransactionsConsts;
+import com.ruoyi.master.constant.MasterSubjectBankTransactionConsts;
 import com.ruoyi.bill.facade.IBillFacade;
 import com.ruoyi.bill.facade.IBillPayPlanFacade;
-import com.ruoyi.bill.facade.ITransactionsFacade;
+import com.ruoyi.master.facade.IMasterSubjectBankTransactionFacade;
 import com.ruoyi.bill.model.bo.BillPayPlanBO;
 import com.ruoyi.bill.model.param.BillParam;
 import com.ruoyi.bill.model.param.BillPayPlanParam;
-import com.ruoyi.bill.model.param.TransactionsParam;
+import com.ruoyi.master.model.param.MasterSubjectBankTransactionParam;
 import com.ruoyi.bill.model.query.BillPayPlanQuery;
 import com.ruoyi.bill.model.query.BillQuery;
 import com.ruoyi.common.exception.ServiceException;
@@ -64,9 +64,9 @@ public class PlanBizService {
                 , new BillQuery().setPayPlan(BillPayPlanConsts.PayPlan.PAYMENT.getCode()).setPlanId(planForm.getId()));
         // 添加资金流水记录
         if (Objects.equals(billPayPlanBO.getStatus(), BillPayPlanConsts.Status.WAIT_PAY.getCode())) {
-            TransactionsParam transactionsParam = TransactionsParam.builder().accountId(billPayPlanBO.getPayCompanyId()).updatedAt(DateUtil.date())
+            MasterSubjectBankTransactionParam transactionsParam = MasterSubjectBankTransactionParam.builder().accountId(billPayPlanBO.getPayCompanyId()).updatedAt(DateUtil.date())
                     .amount(billPayPlanBO.getPayAmount()).transactionDate(DateUtil.date()).counterparty(billPayPlanBO.getSupplierName())
-                    .createdAt(DateUtil.date()).category(TransactionsConsts.Category.EXPENSE.getCode()).subCategory(TransactionsConsts.SubCategory.OUT_PAY.getName())
+                    .createdAt(DateUtil.date()).category(MasterSubjectBankTransactionConsts.Category.EXPENSE.getCode()).subCategory(MasterSubjectBankTransactionConsts.SubCategory.OUT_PAY.getName())
                     .paymentMethod("转账").remark("货款").build();
             transactionsBizService.addTransactionAndUpdateBalance(transactionsParam, userId);
         }

@@ -16,6 +16,7 @@ import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.param.JkyStockInAndDeliveryParam;
 import com.ruoyi.jky.param.delivery.DeliveryOrderParam;
 import com.ruoyi.jky.param.delivery.SendDirectParam;
+import com.ruoyi.jky.param.company.CompanyQueryParam;
 import com.ruoyi.jky.param.fin.CreateCashOrCostRecPayBillParam;
 import com.ruoyi.jky.param.goods.GoodsListParam;
 import com.ruoyi.jky.param.inspect.InspectParam;
@@ -23,6 +24,7 @@ import com.ruoyi.jky.param.logistics.LogisticsUpdateParam;
 import com.ruoyi.jky.param.order.OrderQueryParam;
 import com.ruoyi.jky.param.reject.RejectParam;
 import com.ruoyi.jky.param.refund.RefundQueryParam;
+import com.ruoyi.jky.param.sales.SalesChannelQueryParam;
 import com.ruoyi.jky.param.sn.SnReportParam;
 import com.ruoyi.jky.param.stock.StockCreateAndStockInParam;
 import com.ruoyi.jky.param.vendor.VendorCreateParam;
@@ -31,12 +33,14 @@ import com.ruoyi.jky.param.warehouse.WarehouseListParam;
 import com.ruoyi.jky.properties.JkyProperties;
 import com.ruoyi.jky.rep.JkyStockInAndDeliveryRep;
 import com.ruoyi.jky.rep.delivery.DeliveryOrderRep;
+import com.ruoyi.jky.rep.company.CompanyQueryRep;
 import com.ruoyi.jky.rep.fin.CreateCashOrCostRecPayBillRep;
 import com.ruoyi.jky.rep.goods.GoodsListRep;
 import com.ruoyi.jky.rep.inspect.InspectRep;
 import com.ruoyi.jky.rep.logistics.LogisticsUpdateRep;
 import com.ruoyi.jky.rep.order.OrderQueryRep;
 import com.ruoyi.jky.rep.refund.RefundQueryRep;
+import com.ruoyi.jky.rep.sales.SalesChannelDataRep;
 import com.ruoyi.jky.rep.sn.SnReportRep;
 import com.ruoyi.jky.rep.stock.StockCreateAndStockInRep;
 import com.ruoyi.jky.rep.vendor.VendorCreateRep;
@@ -84,6 +88,35 @@ public class JkyTemplate {
         }
         return execute(JkyApiMethod.VENDOR_LIST, BIZ_CONTENT, param, new TypeReference<JkyResponse<VendorListRep>>() {
         });
+    }
+
+    /**
+     * 分页查询公司信息。
+     *
+     * @param param 分页请求参数
+     * @return 吉客云公司信息
+     */
+    public JkyResponse<List<CompanyQueryRep.CompanyInfoRep>> queryCompanies(final CompanyQueryParam param) {
+        if (isDisabled(JkyApiMethod.COMPANY_QUERY)) {
+            return new JkyResponse<>();
+        }
+        return execute(JkyApiMethod.COMPANY_QUERY, BIZ_CONTENT, param, new TypeReference<JkyResponse<List<CompanyQueryRep.CompanyInfoRep>>>() {
+        });
+    }
+
+    /**
+     * 分页查询销售渠道（店铺）信息。
+     *
+     * @param param 查询参数
+     * @return 销售渠道列表
+     */
+    public JkyResponse<SalesChannelDataRep> querySalesChannels(final SalesChannelQueryParam param) {
+        if (isDisabled(JkyApiMethod.SALES_GET)) {
+            return new JkyResponse<>();
+        }
+        return execute(JkyApiMethod.SALES_GET, BIZ_CONTENT, param,
+                new TypeReference<JkyResponse<SalesChannelDataRep>>() {
+                });
     }
 
     /**

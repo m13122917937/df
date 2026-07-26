@@ -1,4 +1,4 @@
-import moment from "moment"
+import dayjs from "dayjs"
 import { parseTime } from "./ruoyi"
 /**
  * 表格时间格式化
@@ -688,8 +688,8 @@ export function notNullArray(v) {
 //   function load() {
 //     updateLifinInfoApi(1).then(([res]) => {
 //       if (res) {
-//         let nextTime = moment(times + 1000 * 60 * 60 * 24).format("YYYY-MM-DD")
-//         localStorage.setItem('loginTagTime', moment(nextTime).valueOf())
+//         let nextTime = dayjs(times + 1000 * 60 * 60 * 24).format("YYYY-MM-DD")
+//         localStorage.setItem('loginTagTime', dayjs(nextTime).valueOf())
 //       }
 //     })
 //   }
@@ -876,10 +876,10 @@ export function generateDateRange(dateRange, startDateKey, endDateKey, config = 
 
   if (config.genHms) {
     if (notNull(options[startDateKey])) {
-      options[startDateKey] = moment(options[startDateKey]).format("YYYY-MM-DD HH:mm:ss")
+      options[startDateKey] = dayjs(options[startDateKey]).format("YYYY-MM-DD HH:mm:ss")
     }
     if (notNull(options[endDateKey])) {
-      options[endDateKey] = `${moment(options[endDateKey]).format("YYYY-MM-DD")} 23:59:59`
+      options[endDateKey] = `${dayjs(options[endDateKey]).format("YYYY-MM-DD")} 23:59:59`
     }
   }
 

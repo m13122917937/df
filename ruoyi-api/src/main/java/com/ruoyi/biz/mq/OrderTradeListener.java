@@ -83,7 +83,9 @@ public class OrderTradeListener implements MessageListener {
 
             // 更新交易订单状态
             boolean update = tradeOrderFacade.update(new TradeOrderParam().setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode()),
-                    new TradeOrderQuery().setOrderId(tradeOrderBO.getOrderId()).setStatus(TradeOrderConsts.TradeStatus.EXPIRED.getCode()));
+                    new TradeOrderQuery().setId(tradeOrderBO.getId())
+                            .setOrderId(tradeOrderBO.getOrderId())
+                            .setStatus(TradeOrderConsts.TradeStatus.EXPIRED.getCode()));
             if (!update) {
                 log.info("{},订单成交记录已经更新", tradeOrderBO.getOrderId());
                 return Action.CommitMessage;

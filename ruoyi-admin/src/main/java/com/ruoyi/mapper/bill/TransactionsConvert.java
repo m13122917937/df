@@ -1,7 +1,7 @@
 package com.ruoyi.mapper.bill;
 
-import com.ruoyi.bill.model.bo.TransactionsBO;
-import com.ruoyi.bill.model.param.TransactionsParam;
+import com.ruoyi.master.model.bo.MasterSubjectBankTransactionBO;
+import com.ruoyi.master.model.param.MasterSubjectBankTransactionParam;
 import com.ruoyi.web.form.bill.TransactionsForm;
 import com.ruoyi.web.vo.bill.TransactionsVO;
 import org.mapstruct.Mapper;
@@ -14,10 +14,10 @@ public interface TransactionsConvert {
 
     TransactionsConvert INSTANCE = Mappers.getMapper(TransactionsConvert.class);
 
-    List<TransactionsVO> toVOList(List<TransactionsBO> data);
+    List<TransactionsVO> toVOList(List<MasterSubjectBankTransactionBO> data);
 
-    TransactionsVO toVO(TransactionsBO data);
+    TransactionsVO toVO(MasterSubjectBankTransactionBO data);
 
-    TransactionsParam toParam(TransactionsForm transactionsForm);
+    MasterSubjectBankTransactionParam toParam(TransactionsForm transactionsForm);
 
 }

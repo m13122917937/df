@@ -54,7 +54,7 @@ public class JkyRefundSyncJob {
         boolean success = true;
         success = syncRefunds(startTime, endTime, count);
         if (success) {
-//            syncTimeUtil.saveSyncTime(AdminRedisKey.Jky.REFUND_LAST_SYNC_TIME, endTime);
+            syncTimeUtil.saveSyncTime(AdminRedisKey.Jky.REFUND_LAST_SYNC_TIME, endTime);
         }
         log.info("结束同步吉客云售后订单定时任务，售后单{}条，处理订单{}条，跳过{}条，成功状态{}", count.refundCount, count.orderCount, count.skipCount, success);
     }
@@ -89,8 +89,8 @@ public class JkyRefundSyncJob {
         param.setPageInfo(pageInfo);
         param.setIsQueryCount(false);
         param.setHasQueryHistory(0);
-        param.setCreateTimeBegin(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
-        param.setCreateTimeEnd(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
+        param.setGmtCreateBegin(DateUtil.format(startTime, DatePattern.NORM_DATETIME_PATTERN));
+        param.setGmtCreateEnd(DateUtil.format(endTime, DatePattern.NORM_DATETIME_PATTERN));
         return param;
     }
 

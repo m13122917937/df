@@ -5,7 +5,7 @@ import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.data.WriteCellData;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
-import com.ruoyi.bill.constant.TransactionsConsts;
+import com.ruoyi.master.constant.MasterSubjectBankTransactionConsts;
 
 public class CategoryConverter implements Converter<Integer> {
 
@@ -24,7 +24,7 @@ public class CategoryConverter implements Converter<Integer> {
             Integer value,
             ExcelContentProperty contentProperty,
             GlobalConfiguration globalConfiguration) {
-        String name = TransactionsConsts.Category.getName(value);
+        String name = MasterSubjectBankTransactionConsts.Category.getName(value);
         return new WriteCellData<>(name);
     }
 

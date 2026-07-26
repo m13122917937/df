@@ -190,6 +190,7 @@
       :is-edit="isEdit"
       :form-data="form"
       :company-options="payerOptions"
+      :subject-options="subjectOptions"
       @submit="handleSubmit"
     />
 
@@ -216,6 +217,7 @@ import TransactionDialog from './components/TransactionDialog.vue'
 import TransactionListDialog from './components/TransactionListDialog.vue'
 import EmptyState from "@/views/demandManage/wholesale/components/emptyState.vue"
 import { getPayerListApi, addPayerApi, updatePayerApi, getPayerAllListApi, addTransactionApi } from "@/api/monery"
+import { getSubjectOptionList } from "@/api/master"
 
 export default {
   name: 'MainConfiguration',
@@ -250,6 +252,7 @@ export default {
         actived: 0
       },
       payerOptions: [],
+      subjectOptions: [],
       defaultAccountId: null,
       transactionDialogVisible: false,
       transactionListVisible: false,
@@ -263,6 +266,7 @@ export default {
   created() {
     this.loadTableData()
     this.fetchAllPayers()
+    this.loadSubjectOptions()
   },
   methods: {
     // 搜索
@@ -385,6 +389,16 @@ export default {
         }
       } catch (error) {
         console.error('获取收款主体列表失败:', error)
+      }
+    },
+    async loadSubjectOptions() {
+      try {
+        const res = await getSubjectOptionList()
+        if (res.code === 200) {
+          this.subjectOptions = Array.isArray(res.rows) ? res.rows : []
+        }
+      } catch (error) {
+        console.error('获取经营主体列表失败:', error)
       }
     },
     /* 流水记录：新增弹框 */

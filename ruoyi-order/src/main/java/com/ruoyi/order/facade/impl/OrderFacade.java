@@ -16,12 +16,13 @@ import com.ruoyi.order.domain.Order;
 import com.ruoyi.order.domain.dto.*;
 import com.ruoyi.order.facade.IOrderFacade;
 import com.ruoyi.order.service.OrderService;
+import com.ruoyi.order.service.OrderSupplierPushService;
 import com.ruoyi.order.model.bo.*;
 import com.ruoyi.order.model.param.OrderParam;
+import com.ruoyi.order.model.param.SupplierPushParam;
 import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.OrderTabCountQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -33,11 +34,22 @@ import java.util.List;
  * @author ruoyi
  * @date 2025-09-09
  */
-@Service
+@Component
 public class OrderFacade implements IOrderFacade  {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
+    private final OrderSupplierPushService orderSupplierPushService;
+
+    /**
+     * 创建订单领域门面。
+     *
+     * @param orderService 订单服务
+     * @param orderSupplierPushService 定向推送事务服务
+     */
+    public OrderFacade(OrderService orderService, OrderSupplierPushService orderSupplierPushService) {
+        this.orderService = orderService;
+        this.orderSupplierPushService = orderSupplierPushService;
+    }
 
     @Override
     public List<OrderBO> list(OrderQuery query) {
@@ -158,5 +170,26 @@ public class OrderFacade implements IOrderFacade  {
 
     }
 
+    /**
+     * 批量定向推送供应商。
+     *
+     * @param param 推送参数
+     */
+    @Override
+    public void pushSupplierBatch(SupplierPushParam param) {
+        orderSupplierPushService.pushSupplierBatch(param);
+    }
+
+    /**
+     * 查询订单中已存在的店铺名称（去重）。
+     *
+     * @return 店铺名称集合
+     */
+    @Override
+    public List<String> listShopNames() {
+        QueryWrapper<Order> wrapper = new QueryWrapper<>();
+        wrapper.select("DISTINCT shop_name").isNotNull("shop_name").ne("shop_name", "");
+        return orderService.listObjs(wrapper, o -> String.valueOf(o));
+    }
 
 }

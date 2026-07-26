@@ -8,18 +8,15 @@ import com.ruoyi.bill.constant.BillPayPlanConsts;
 import com.ruoyi.bill.constant.DeductionConsts;
 import com.ruoyi.bill.facade.IBillFacade;
 import com.ruoyi.bill.facade.IDeductionFacade;
-import com.ruoyi.bill.facade.IPayerConfigFacade;
-import com.ruoyi.bill.facade.IPayerFacade;
+import com.ruoyi.master.facade.IMasterSubjectBankFacade;
 import com.ruoyi.bill.model.bo.BillBO;
 import com.ruoyi.bill.model.bo.DeductionBO;
-import com.ruoyi.bill.model.bo.PayerBO;
-import com.ruoyi.bill.model.bo.PayerConfigBO;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
 import com.ruoyi.bill.model.param.BillParam;
 import com.ruoyi.bill.model.param.DeductionParam;
 import com.ruoyi.bill.model.query.BillQuery;
 import com.ruoyi.bill.model.query.DeductionQuery;
-import com.ruoyi.bill.model.query.PayerConfigQuery;
-import com.ruoyi.bill.model.query.PayerQuery;
+import com.ruoyi.master.model.query.MasterSubjectBankQuery;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
@@ -75,10 +72,7 @@ public class DeductionBizService {
     ICompanyBankFacade companyBankFacade;
 
     @Autowired
-    IPayerConfigFacade payerConfigFacade;
-
-    @Autowired
-    IPayerFacade payerFacade;
+    IMasterSubjectBankFacade payerFacade;
 
     public PageBO<DeductionBO> listPage(DeductionQuery deductionQuery, PageParamV2 pageParamV2) {
 
@@ -117,14 +111,10 @@ public class DeductionBizService {
                 .payPlan(BillPayPlanConsts.PayPlan.NOT_PAYMENT.getCode()).status(BillConsts.BillPayStatus.NO_PAY_STATUS.getCode()).accounting(0)
                 .supplierId(tradeOrderBO.getTradeCompanyId()).supplierName(tradeOrderBO.getTradeNickName()).supplierBankId(companyBankBO != null ? companyBankBO.getId() : null).signedDate(DateUtil.date())
                 .createTime(DateUtil.date()).shipmentsDate(orderBO.getShipmentsTime()).settlementDate(DateUtil.offsetDay(DateUtil.date(), 1).toLocalDateTime().toLocalDate()).build();
-        PayerConfigBO payerConfigBO = payerConfigFacade.getOne(new PayerConfigQuery().setKeyWord(orderBO.getShopName()));
-        if (Objects.isNull(payerConfigBO)) {
-            payerConfigBO = payerConfigFacade.listPage(new PayerConfigQuery(), new PageParamV2()).getData().get(0);
-        }
-        //  设置付款主体
-        if (Objects.nonNull(payerConfigBO)) {
-            billParam.setPayCompanyId(payerConfigBO.getPayerId());
-            PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(payerConfigBO.getPayerId()));
+        //  设置付款主体（直接取订单 payer_id，即主体默认银行卡 id）
+        if (Objects.nonNull(orderBO.getPayerId())) {
+            billParam.setPayCompanyId(orderBO.getPayerId());
+            MasterSubjectBankBO payerBO = payerFacade.getOne(new MasterSubjectBankQuery().setId(orderBO.getPayerId()));
             if (Objects.nonNull(payerBO)) {
                 billParam.setPayCompanyName(payerBO.getPayName());
             }

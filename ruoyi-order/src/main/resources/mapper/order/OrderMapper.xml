@@ -38,6 +38,17 @@
         <result property="handleApply" column="handle_apply"/>
     </resultMap>
 
+    <select id="selectByOrderCodesForUpdate" resultMap="OrderResult">
+        select *
+        from o_order
+        where deleted = 0
+          and order_code in
+        <foreach collection="orderCodes" item="orderCode" open="(" separator="," close=")">
+            #{orderCode}
+        </foreach>
+        order by order_code
+        for update
+    </select>
 
     <select id="provinceCount" resultType="com.ruoyi.order.domain.dto.ProvinceCountDTO">
         select province, sum(quantity) as sum from o_order

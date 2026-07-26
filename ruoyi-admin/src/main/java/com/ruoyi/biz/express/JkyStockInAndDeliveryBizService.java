@@ -4,10 +4,10 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
-import com.ruoyi.bill.constant.PayerConsts;
-import com.ruoyi.bill.facade.IPayerFacade;
-import com.ruoyi.bill.model.bo.PayerBO;
-import com.ruoyi.bill.model.query.PayerQuery;
+import com.ruoyi.master.constant.MasterSubjectBankConsts;
+import com.ruoyi.master.facade.IMasterSubjectBankFacade;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
+import com.ruoyi.master.model.query.MasterSubjectBankQuery;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.JacksonUtil;
@@ -73,7 +73,7 @@ public class JkyStockInAndDeliveryBizService {
     private ICompanyFacade companyFacade;
 
     @Autowired
-    private IPayerFacade payerFacade;
+    private IMasterSubjectBankFacade payerFacade;
 
     @Autowired
     private IJkyLogisticsTaskFacade jkyLogisticsTaskFacade;
@@ -143,7 +143,7 @@ public class JkyStockInAndDeliveryBizService {
     private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, TradeOrderBO tradeOrderBO, Integer quantity, List<ImeiBO> imeiList) {
         ProductSkuBO productSkuBO = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(orderBO.getSkuCode()));
         Assert.notNull(productSkuBO, "吉客云入库商品不存在");
-        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(orderBO.getPayerId()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
+        MasterSubjectBankBO payerBO = payerFacade.getOne(new MasterSubjectBankQuery().setId(orderBO.getPayerId()).setActived(MasterSubjectBankConsts.Activated.ACTIVATED.getCode()));
         Assert.notNull(payerBO, "吉客云入库付款主体不存在或已弃用");
         Assert.notBlank(payerBO.getOutCode(), "吉客云入库付款主体吉客云编号不能为空");
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(tradeOrderBO.getTradeCompanyId()));

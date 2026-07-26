@@ -1,7 +1,6 @@
 package com.ruoyi.web.controller.bill;
 
 import com.ruoyi.bill.model.bo.DeductionBO;
-import com.ruoyi.bill.model.bo.TransactionsBO;
 import com.ruoyi.bill.model.query.DeductionQuery;
 import com.ruoyi.biz.bill.DeductionBizService;
 import com.ruoyi.common.core.controller.BaseController;

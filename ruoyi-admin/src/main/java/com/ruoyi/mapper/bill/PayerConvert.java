@@ -1,10 +1,8 @@
 package com.ruoyi.mapper.bill;
 
 
-import com.ruoyi.bill.model.bo.PayerBO;
-import com.ruoyi.bill.model.bo.PayerConfigBO;
-import com.ruoyi.bill.model.param.PayerConfigParam;
-import com.ruoyi.bill.model.param.PayerParam;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
+import com.ruoyi.master.model.param.MasterSubjectBankParam;
 import com.ruoyi.web.form.bill.PayerForm;
 import com.ruoyi.web.vo.bill.PayerVO;
 import org.mapstruct.Mapper;
@@ -19,10 +17,8 @@ public interface PayerConvert {
     PayerConvert INSTANCE = Mappers.getMapper(PayerConvert.class);
 
 
-    List<PayerVO> toVOList(List<PayerBO> data);
+    List<PayerVO> toVOList(List<MasterSubjectBankBO> data);
 
-    PayerParam toParam(PayerForm payerForm);
+    MasterSubjectBankParam toParam(PayerForm payerForm);
 
-
-    PayerConfigParam boToParam(PayerConfigBO payerConfigBO);
 }

@@ -90,7 +90,7 @@
             stripe
             center
             size="medium"
-            :data="filteredTableData"
+            :data="filteredDataList"
             style="width: 100%"
             @selection-change="handleSelectionChange"
             height="100%"
@@ -111,7 +111,7 @@
             >
               <!-- 表头 -->
               <template #header>
-                <FilterHeader v-if="isFilterable(item.prop)" :label="item.label" :value="columnSearch[getFilterProp(item.prop)] || []" :options="colFilterOptions[getFilterProp(item.prop)] || []" @update:value="columnSearch[getFilterProp(item.prop)] = $event" />
+                <FilterHeader v-if="isFilterable(item.prop)" :label="item.label" :value="columnSearch[getFilterProp(item.prop)] || []" :options="colFilterOptions[getFilterProp(item.prop)] || []" @update:value="onColumnFilter(getFilterProp(item.prop), $event)" />
                 <span v-else>{{ item.label }}</span>
               </template>
               <!-- 表身 -->

@@ -7,13 +7,14 @@ import com.ruoyi.bill.constant.BillConsts;
 import com.ruoyi.bill.constant.BillPayPlanConsts;
 import com.ruoyi.bill.facade.IBillFacade;
 import com.ruoyi.bill.facade.IBillPayPlanFacade;
-import com.ruoyi.bill.facade.IPayerFacade;
+import com.ruoyi.master.facade.IMasterSubjectBankFacade;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
 import com.ruoyi.bill.model.bo.*;
 import com.ruoyi.bill.model.param.BillParam;
 import com.ruoyi.bill.model.param.BillPayPlanParam;
 import com.ruoyi.bill.model.query.BillPayPlanQuery;
 import com.ruoyi.bill.model.query.BillQuery;
-import com.ruoyi.bill.model.query.PayerQuery;
+import com.ruoyi.master.model.query.MasterSubjectBankQuery;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
@@ -59,7 +60,7 @@ public class BillBizService {
     ICompanyFacade companyFacade;
 
     @Autowired
-    IPayerFacade payerFacade;
+    IMasterSubjectBankFacade payerFacade;
 
     @Autowired
     IBillFacade billFacade;
@@ -104,7 +105,7 @@ public class BillBizService {
         List<CompanyBankBO> list = companyBankFacade.list(new CompanyBankQuery().setCompanyIdSet(supplierIdSet).setDefaulted(CompanyBankConsts.Defaulted.YES.getValue()), null);
         Map<Long, CompanyBankBO> companyBankBOMap = list.stream().collect(Collectors.toMap(CompanyBankBO::getCompanyId, e -> e));
 
-        Map<Long, PayerBO> payerBOS = new HashMap<>();
+        Map<Long, MasterSubjectBankBO> payerBOS = new HashMap<>();
 
         for (BillSumVO billSumVO : billSumVOS) {
             List<BillPlanVO> billPlanVOS = BillConvert.INSTANCE.billPayPlantoVOList(billPlanMap.get(billSumVO.getSupplierId()));
@@ -112,7 +113,7 @@ public class BillBizService {
                 continue;
             }
             for (BillPlanVO billPlanVO : billPlanVOS) {
-                PayerBO payerBO = queryPayCompany(payerBOS, billPlanVO.getPayCompanyId());
+                MasterSubjectBankBO payerBO = queryPayCompany(payerBOS, billPlanVO.getPayCompanyId());
                 billPlanVO.setPayCompanyBank(payerBO.getBankName());
                 billPlanVO.setPayCompanyBankAccount(payerBO.getPayNo());
             }
@@ -126,8 +127,8 @@ public class BillBizService {
         return new PageBO<>(billSumVOS, paymentOperationsBOPageBO.getTotal());
     }
 
-    private PayerBO queryPayCompany(Map<Long, PayerBO> payerBOS, Long payCompanyId) {
-        PayerBO payerBO = payerBOS.getOrDefault(payCompanyId, payerFacade.getOne(new PayerQuery().setId(payCompanyId)));
+    private MasterSubjectBankBO queryPayCompany(Map<Long, MasterSubjectBankBO> payerBOS, Long payCompanyId) {
+        MasterSubjectBankBO payerBO = payerBOS.getOrDefault(payCompanyId, payerFacade.getOne(new MasterSubjectBankQuery().setId(payCompanyId)));
         payerBOS.put(payCompanyId, payerBO);
         return payerBO;
     }
@@ -169,7 +170,7 @@ public class BillBizService {
 
         //  设置付款主体
         billParam.setPayCompanyId(orderBO.getPayerId());
-        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(orderBO.getPayerId()));
+        MasterSubjectBankBO payerBO = payerFacade.getOne(new MasterSubjectBankQuery().setId(orderBO.getPayerId()));
         if (Objects.nonNull(payerBO)) {
             billParam.setPayCompanyName(payerBO.getPayName());
         }
@@ -293,9 +294,9 @@ public class BillBizService {
 
             CompanyBankBO companyBankBO = companyBankFacade.getOne(new CompanyBankQuery().setId(supplierBankId));
             // 设置付款账号
-            PayerQuery payerQuery = Objects.isNull(splitForm.getPayerId()) ? new PayerQuery().setId(payCompanySummaryVO.getPayCompanyId()) : new PayerQuery().setId(splitForm.getPayerId());
+            MasterSubjectBankQuery payerQuery = Objects.isNull(splitForm.getPayerId()) ? new MasterSubjectBankQuery().setId(payCompanySummaryVO.getPayCompanyId()) : new MasterSubjectBankQuery().setId(splitForm.getPayerId());
             Long payerId = Objects.isNull(splitForm.getPayerId()) ? payCompanySummaryVO.getPayCompanyId() : splitForm.getPayerId();
-            PayerBO payerBO = payerFacade.getOne(payerQuery);
+            MasterSubjectBankBO payerBO = payerFacade.getOne(payerQuery);
             // 保存计划
             BillPayPlanParam payPlanParam = new BillPayPlanParam().setSupplierId(list.get(0).getSupplierId()).setPayAmount(payCompanySummaryVO.getTotalBillingAmount())
                     .setPayCompanyId(payerId).setPayCompanyName(payCompanySummaryVO.getPayCompanyName()).setBillType(list.get(0).getBillType())

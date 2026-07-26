@@ -44,5 +44,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="hangMethod"    column="hang_method"    />
     </resultMap>
 
+    <update id="expireActiveByOrderCode">
+        update o_hanging_order
+        set status = #{failureStatus},
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        where order_id = #{orderCode}
+          and status = #{normalStatus}
+    </update>
 
 </mapper>

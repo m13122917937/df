@@ -6,18 +6,15 @@ import com.ruoyi.bill.constant.BillConsts;
 import com.ruoyi.bill.constant.BillPayPlanConsts;
 import com.ruoyi.bill.facade.IBillFacade;
 import com.ruoyi.bill.facade.IBillPayPlanFacade;
-import com.ruoyi.bill.facade.IPayerConfigFacade;
-import com.ruoyi.bill.facade.IPayerFacade;
+import com.ruoyi.master.facade.IMasterSubjectBankFacade;
 import com.ruoyi.bill.model.bo.BillBO;
 import com.ruoyi.bill.model.bo.BillPayPlanBO;
-import com.ruoyi.bill.model.bo.PayerBO;
-import com.ruoyi.bill.model.bo.PayerConfigBO;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
 import com.ruoyi.bill.model.param.BillParam;
 import com.ruoyi.bill.model.param.BillPayPlanParam;
 import com.ruoyi.bill.model.query.BillPayPlanQuery;
 import com.ruoyi.bill.model.query.BillQuery;
-import com.ruoyi.bill.model.query.PayerConfigQuery;
-import com.ruoyi.bill.model.query.PayerQuery;
+import com.ruoyi.master.model.query.MasterSubjectBankQuery;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.Arith;
@@ -68,10 +65,7 @@ public class BillBizService {
     ITradeOrderFacade tradeOrderFacade;
 
     @Autowired
-    IPayerConfigFacade payerConfigFacade;
-
-    @Autowired
-    IPayerFacade payerFacade;
+    IMasterSubjectBankFacade payerFacade;
 
     @Autowired
     ICompanyFacade companyFacade;
@@ -100,10 +94,6 @@ public class BillBizService {
             log.info("订单{}无成交订单", orderBO.getOrderCode());
             return;
         }
-        PayerConfigBO payerConfigBO = payerConfigFacade.getOne(new PayerConfigQuery().setKeyWord(orderBO.getShopName()));
-        if (Objects.isNull(payerConfigBO)) {
-            payerConfigBO = payerConfigFacade.listPage(new PayerConfigQuery(), new PageParamV2()).getData().get(0);
-        }
         CompanyBankBO companyBankBO = companyBankFacade.getOne(new CompanyBankQuery().setDefaulted(CompanyBankConsts.Defaulted.YES.getValue()).setCompanyId(tradeOrderBO.getTradeCompanyId()));
 
         // 计算结算时间
@@ -116,10 +106,10 @@ public class BillBizService {
                 .createTime(DateUtil.date()).shipmentsDate(orderBO.getShipmentsTime()).build();
         billParam.setSettlementDate(getSettlementDate(orderBO, hangingOrderBO, billParam));
 
-        //  设置付款主体
-        if (Objects.nonNull(payerConfigBO)) {
-            billParam.setPayCompanyId(payerConfigBO.getPayerId());
-            PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(payerConfigBO.getPayerId()));
+        //  设置付款主体（直接取订单 payer_id，即主体默认银行卡 id）
+        if (Objects.nonNull(orderBO.getPayerId())) {
+            billParam.setPayCompanyId(orderBO.getPayerId());
+            MasterSubjectBankBO payerBO = payerFacade.getOne(new MasterSubjectBankQuery().setId(orderBO.getPayerId()));
             if (Objects.nonNull(payerBO)) {
                 billParam.setPayCompanyName(payerBO.getPayName());
             }

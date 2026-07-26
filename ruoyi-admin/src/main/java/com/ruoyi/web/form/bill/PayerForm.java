@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * 付款账号维护对象 f_payer
+ * 主体银行卡维护对象 m_subject_bank
  *
  * @author ruoyi
  * @date 2025-11-07

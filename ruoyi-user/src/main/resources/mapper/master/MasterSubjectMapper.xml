@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.master.mapper.MasterSubjectMapper">
+
+    <insert id="upsertByJkySubjectId" parameterType="com.ruoyi.master.domain.MasterSubject">
+        INSERT INTO m_subject (
+            jky_subject_id, subject_code, subject_name, subject_short_name,
+            tax_identify_number, is_delete,
+            source_created_time, source_modified_time, last_sync_time,
+            created_time, updated_time
+        ) VALUES (
+            #{jkySubjectId}, #{subjectCode}, #{subjectName}, #{subjectShortName},
+            #{taxIdentifyNumber}, #{isDelete},
+            #{sourceCreatedTime}, #{sourceModifiedTime}, #{lastSyncTime},
+            #{createdTime}, #{updatedTime}
+        ) ON DUPLICATE KEY UPDATE
+            subject_code = VALUES(subject_code),
+            subject_name = VALUES(subject_name),
+            subject_short_name = VALUES(subject_short_name),
+            tax_identify_number = VALUES(tax_identify_number),
+            is_delete = VALUES(is_delete),
+            source_created_time = VALUES(source_created_time),
+            source_modified_time = VALUES(source_modified_time),
+            last_sync_time = VALUES(last_sync_time),
+            updated_time = VALUES(updated_time)
+    </insert>
+</mapper>

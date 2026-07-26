@@ -150,7 +150,7 @@ public class JkyOrderTest {
     @Test
     public void pullJkyOrders() {
         DateTime endTime = DateUtil.date();
-        DateTime startTime = DateUtil.offsetHour(endTime, -1);
+        DateTime startTime = DateUtil.offsetHour(endTime, -8);
 
         OrderQueryParam param = new OrderQueryParam();
         param.setFields("tradeNo,orderNo,shopName,companyName,warehouseName,lastShipTime,goodsDetail.goodsNo,goodsDetail.outerId,pickUpCode,expense.expenseFee,expense.expenseItemName,billDate,goodsPlatDiscountFee,goodsDetail.shareOrderDiscountFee,goodsDetail.shareOrderPlatDiscountFee,customizeGoodsColumn9,goodsDetail.goodsId,goodsDetail.sellCount,goodsDetail.needProcessCount,goodsDetail.baseUnitSellCount,goodsDetail.assessmentCost,goodsDetail.compassSourceContentTypem,shopId,warehouseId,scrollId");

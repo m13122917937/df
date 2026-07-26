@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * 资金流水明细对象 f_transactions
+ * 资金流水明细对象 m_subject_bank_transaction
  *
  * @author ruoyi
  * @date 2025-12-01

@@ -1,8 +1,8 @@
 import Vue from "vue"
-import moment from "moment"
+import dayjs from "dayjs"
 import { debounce } from "@/utils"
 const watermarkCreate = (el, binding) => {
-  const date = moment().format("YYYY/MM/DD")
+  const date = dayjs().format("YYYY/MM/DD")
   // binding.value结构为 { text: string | string[], font: string, textColor: string, zIndex: number }
   // text: 水印文字  font: 字体  textColor: 文字颜色 倍数
   let { text, font, textColor, zIndex, widthMultiple = 4, height = 54, showDate = true } = binding.value

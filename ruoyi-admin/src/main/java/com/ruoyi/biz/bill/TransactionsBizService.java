@@ -2,14 +2,14 @@ package com.ruoyi.biz.bill;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import com.ruoyi.bill.facade.IPayerFacade;
-import com.ruoyi.bill.facade.ITransactionsFacade;
-import com.ruoyi.bill.model.bo.PayerBO;
-import com.ruoyi.bill.model.bo.TransactionsBO;
-import com.ruoyi.bill.model.param.PayerParam;
-import com.ruoyi.bill.model.param.TransactionsParam;
-import com.ruoyi.bill.model.query.PayerQuery;
-import com.ruoyi.bill.model.query.TransactionsQuery;
+import com.ruoyi.master.facade.IMasterSubjectBankFacade;
+import com.ruoyi.master.facade.IMasterSubjectBankTransactionFacade;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
+import com.ruoyi.master.model.bo.MasterSubjectBankTransactionBO;
+import com.ruoyi.master.model.param.MasterSubjectBankParam;
+import com.ruoyi.master.model.param.MasterSubjectBankTransactionParam;
+import com.ruoyi.master.model.query.MasterSubjectBankQuery;
+import com.ruoyi.master.model.query.MasterSubjectBankTransactionQuery;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.SortBy;
@@ -35,10 +35,10 @@ import java.util.Objects;
 public class TransactionsBizService {
 
     @Autowired
-    private ITransactionsFacade transactionsFacade;
+    private IMasterSubjectBankTransactionFacade transactionsFacade;
 
     @Autowired
-    private IPayerFacade payerFacade;
+    private IMasterSubjectBankFacade payerFacade;
 
     private static final String ASC_CREATED_AT = "transaction_date desc";
     private static final int CATEGORY_INCOME = 0;
@@ -51,7 +51,7 @@ public class TransactionsBizService {
      * @param pageParam 分页参数
      * @return 流水分页结果
      */
-    public PageBO<TransactionsBO> listPage(TransactionsQuery query, PageParamV2 pageParam) {
+    public PageBO<MasterSubjectBankTransactionBO> listPage(MasterSubjectBankTransactionQuery query, PageParamV2 pageParam) {
         return transactionsFacade.listPage(query, pageParam);
     }
 
@@ -62,7 +62,7 @@ public class TransactionsBizService {
      * @param sortBy 排序条件
      * @return 流水列表
      */
-    public List<TransactionsBO> list(TransactionsQuery query, SortBy sortBy) {
+    public List<MasterSubjectBankTransactionBO> list(MasterSubjectBankTransactionQuery query, SortBy sortBy) {
         return transactionsFacade.list(query, sortBy);
     }
 
@@ -70,21 +70,21 @@ public class TransactionsBizService {
      * 添加流水记录并更新余额
      */
     @Transactional(rollbackFor = Exception.class)
-    public TransactionsBO addTransactionAndUpdateBalance(TransactionsParam param, Long loginUser) {
+    public MasterSubjectBankTransactionBO addTransactionAndUpdateBalance(MasterSubjectBankTransactionParam param, Long loginUser) {
         log.info("添加流水记录，账户ID: {}, 金额: {}, 类别: {}", param.getAccountId(), param.getAmount(), param.getCategory());
 
         validateTransactionParam(param);
-        TransactionsBO transactionsBO = new TransactionsBO().setTransactionDate(param.getTransactionDate()).setAccountId(param.getAccountId());
+        MasterSubjectBankTransactionBO transactionsBO = new MasterSubjectBankTransactionBO().setTransactionDate(param.getTransactionDate()).setAccountId(param.getAccountId());
         BigDecimal currentBalance = getBalanceBeforeTransaction(transactionsBO);
         BigDecimal newBalance = calculateNewBalance(currentBalance, param.getAmount(), param.getCategory());
         checkBalanceForExpense(param, newBalance, currentBalance);
 
         // 保存流水记录
         param.setBalanceAfter(newBalance).setCreatedAt(DateUtil.date()).setUpdatedAt(DateUtil.date());
-        TransactionsBO savedTransaction = transactionsFacade.save(param);
+        MasterSubjectBankTransactionBO savedTransaction = transactionsFacade.save(param);
 
         // 更新后续流水余额
-        List<TransactionsBO> subsequentTransactions = getSubsequentTransactions(transactionsBO);
+        List<MasterSubjectBankTransactionBO> subsequentTransactions = getSubsequentTransactions(transactionsBO);
         log.info("后续流水记录：{}", JacksonUtil.toJson(subsequentTransactions));
         newBalance = updateSubsequentTransactionsBalance(subsequentTransactions, newBalance, null);
 
@@ -105,11 +105,11 @@ public class TransactionsBizService {
     public void update(TransactionsForm transactionsForm, Long userId) {
         log.info("更新流水记录，ID: {}, 操作人: {}", transactionsForm.getId(), userId);
 
-        TransactionsBO originalTransaction = getTransactionOrThrow(transactionsForm.getId());
+        MasterSubjectBankTransactionBO originalTransaction = getTransactionOrThrow(transactionsForm.getId());
         boolean needRecalculate = isRecalculateNeeded(originalTransaction, transactionsForm);
 
         // 更新流水记录基本信息
-        TransactionsParam updateParam = buildUpdateParam(transactionsForm);
+        MasterSubjectBankTransactionParam updateParam = buildUpdateParam(transactionsForm);
         updateTransaction(updateParam, transactionsForm.getId());
 
         log.info("流水记录更新成功，ID: {}", transactionsForm.getId());
@@ -130,10 +130,10 @@ public class TransactionsBizService {
     public void del(Long id, Long userId) {
         log.info("删除流水记录，ID: {}, 操作人: {}", id, userId);
 
-        TransactionsBO deletedTransaction = getTransactionOrThrow(id);
+        MasterSubjectBankTransactionBO deletedTransaction = getTransactionOrThrow(id);
 
         // 删除流水记录
-        transactionsFacade.delete(new TransactionsQuery().setId(id));
+        transactionsFacade.delete(new MasterSubjectBankTransactionQuery().setId(id));
         log.info("流水记录删除成功，ID: {}", id);
 
         // 重新计算被删交易方的总额
@@ -150,7 +150,7 @@ public class TransactionsBizService {
     /**
      * 验证流水记录参数
      */
-    private void validateTransactionParam(TransactionsParam param) {
+    private void validateTransactionParam(MasterSubjectBankTransactionParam param) {
         if (param.getAccountId() == null) {
             throw new ServiceException("账户ID不能为空");
         }
@@ -186,7 +186,7 @@ public class TransactionsBizService {
     /**
      * 检查支出时余额是否充足
      */
-    private void checkBalanceForExpense(TransactionsParam param, BigDecimal newBalance, BigDecimal currentBalance) {
+    private void checkBalanceForExpense(MasterSubjectBankTransactionParam param, BigDecimal newBalance, BigDecimal currentBalance) {
         if (CATEGORY_EXPENSE == param.getCategory() && newBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new ServiceException("账户余额不足，当前余额: " + currentBalance + "，支出金额: " + param.getAmount());
         }
@@ -195,8 +195,8 @@ public class TransactionsBizService {
     /**
      * 获取账户信息，不存在则抛出异常
      */
-    private PayerBO getPayerOrThrow(Long accountId) {
-        PayerBO payer = payerFacade.getOne(new PayerQuery().setId(accountId));
+    private MasterSubjectBankBO getPayerOrThrow(Long accountId) {
+        MasterSubjectBankBO payer = payerFacade.getOne(new MasterSubjectBankQuery().setId(accountId));
         if (payer == null) {
             throw new ServiceException("银行卡账户不存在，ID: " + accountId);
         }
@@ -206,8 +206,8 @@ public class TransactionsBizService {
     /**
      * 获取流水记录，不存在则抛出异常
      */
-    private TransactionsBO getTransactionOrThrow(Long id) {
-        TransactionsBO transaction = transactionsFacade.getOne(new TransactionsQuery().setId(id));
+    private MasterSubjectBankTransactionBO getTransactionOrThrow(Long id) {
+        MasterSubjectBankTransactionBO transaction = transactionsFacade.getOne(new MasterSubjectBankTransactionQuery().setId(id));
         if (transaction == null) {
             throw new ServiceException("流水记录不存在，ID: " + id);
         }
@@ -225,12 +225,12 @@ public class TransactionsBizService {
      * 更新银行卡余额
      */
     private void updatePayerBalance(Long accountId, BigDecimal newBalance, Long loginUser) {
-        PayerParam updateParam = new PayerParam()
+        MasterSubjectBankParam updateParam = new MasterSubjectBankParam()
                 .setBalance(newBalance)
                 .setUpdateTime(DateUtil.date())
                 .setUpdateBy(loginUser);
 
-        boolean updated = payerFacade.update(updateParam, new PayerQuery().setId(accountId));
+        boolean updated = payerFacade.update(updateParam, new MasterSubjectBankQuery().setId(accountId));
         if (!updated) {
             throw new ServiceException("更新银行卡余额失败，账户ID: " + accountId);
         }
@@ -239,8 +239,8 @@ public class TransactionsBizService {
     /**
      * 更新流水记录
      */
-    private void updateTransaction(TransactionsParam updateParam, Long id) {
-        boolean updated = transactionsFacade.update(updateParam, new TransactionsQuery().setId(id));
+    private void updateTransaction(MasterSubjectBankTransactionParam updateParam, Long id) {
+        boolean updated = transactionsFacade.update(updateParam, new MasterSubjectBankTransactionQuery().setId(id));
         if (!updated) {
             throw new ServiceException("更新流水记录失败，ID: " + id);
         }
@@ -249,8 +249,8 @@ public class TransactionsBizService {
     /**
      * 构建更新参数
      */
-    private TransactionsParam buildUpdateParam(TransactionsForm form) {
-        return TransactionsParam.builder()
+    private MasterSubjectBankTransactionParam buildUpdateParam(TransactionsForm form) {
+        return MasterSubjectBankTransactionParam.builder()
                 .id(form.getId())
                 .transactionDate(form.getTransactionDate())
                 .category(form.getCategory())
@@ -266,7 +266,7 @@ public class TransactionsBizService {
     /**
      * 检查是否需要重新计算余额
      */
-    private boolean isRecalculateNeeded(TransactionsBO original, TransactionsForm updated) {
+    private boolean isRecalculateNeeded(MasterSubjectBankTransactionBO original, TransactionsForm updated) {
         return !original.getAmount().equals(updated.getAmount()) ||
                 !original.getCategory().equals(updated.getCategory()) ||
                 !original.getAccountId().equals(updated.getAccountId()) ||
@@ -276,8 +276,8 @@ public class TransactionsBizService {
     /**
      * 删除后重新计算后续流水余额
      */
-    private void recalculateSubsequentTransactionsAfterDelete(TransactionsBO deletedTransaction, Long userId) {
-        List<TransactionsBO> subsequentTransactions = getSubsequentTransactions(deletedTransaction);
+    private void recalculateSubsequentTransactionsAfterDelete(MasterSubjectBankTransactionBO deletedTransaction, Long userId) {
+        List<MasterSubjectBankTransactionBO> subsequentTransactions = getSubsequentTransactions(deletedTransaction);
 
         if (!subsequentTransactions.isEmpty()) {
             BigDecimal previousBalance = getBalanceBeforeExcludingDeleted(deletedTransaction);
@@ -292,10 +292,10 @@ public class TransactionsBizService {
     /**
      * 更新后重新计算余额
      */
-    private void recalculateBalancesAfterUpdate(TransactionsBO originalTransaction, TransactionsParam updatedParam, Long userId) {
+    private void recalculateBalancesAfterUpdate(MasterSubjectBankTransactionBO originalTransaction, MasterSubjectBankTransactionParam updatedParam, Long userId) {
         log.info("重新计算流水余额，从流水ID: {}", originalTransaction.getId());
 
-        TransactionsBO updatedTransaction = getTransactionOrThrow(updatedParam.getId());
+        MasterSubjectBankTransactionBO updatedTransaction = getTransactionOrThrow(updatedParam.getId());
         Long accountId = updatedTransaction.getAccountId();
         // 重置 originalTransaction 的值
         Date transactionDate = DateUtil.compare(originalTransaction.getTransactionDate(), updatedParam.getTransactionDate()) > 0 ? updatedParam.getTransactionDate() : originalTransaction.getTransactionDate();
@@ -309,7 +309,7 @@ public class TransactionsBizService {
         log.info("当前流水余额已更新，ID: {}, 新余额: {}", updatedTransaction.getId(), currentBalance);
 
         // 更新后续流水余额
-        List<TransactionsBO> subsequentTransactions = getSubsequentTransactions(originalTransaction);
+        List<MasterSubjectBankTransactionBO> subsequentTransactions = getSubsequentTransactions(originalTransaction);
         log.info("当前流水余额历史记录，update: {}", JacksonUtil.toJson(subsequentTransactions));
 
         currentBalance = updateSubsequentTransactionsBalance(subsequentTransactions, null, null);
@@ -322,21 +322,21 @@ public class TransactionsBizService {
     /**
      * 获取后续流水记录
      */
-    private List<TransactionsBO> getSubsequentTransactions(TransactionsBO transaction) {
-        return transactionsFacade.list(new TransactionsQuery().setAccountId(transaction.getAccountId()).setGtTransactionDate(transaction.getTransactionDate()), SortBy.of("transaction_date"));
+    private List<MasterSubjectBankTransactionBO> getSubsequentTransactions(MasterSubjectBankTransactionBO transaction) {
+        return transactionsFacade.list(new MasterSubjectBankTransactionQuery().setAccountId(transaction.getAccountId()).setGtTransactionDate(transaction.getTransactionDate()), SortBy.of("transaction_date"));
     }
 
     /**
      * 获取流水记录之前的余额
      */
-    private BigDecimal getBalanceBeforeTransaction(TransactionsBO transaction) {
-        List<TransactionsBO> previousTransactions = transactionsFacade.list(new TransactionsQuery().setLimit(1).setAccountId(transaction.getAccountId()).setLtTransactionDate(transaction.getTransactionDate()), SortBy.of(ASC_CREATED_AT));
+    private BigDecimal getBalanceBeforeTransaction(MasterSubjectBankTransactionBO transaction) {
+        List<MasterSubjectBankTransactionBO> previousTransactions = transactionsFacade.list(new MasterSubjectBankTransactionQuery().setLimit(1).setAccountId(transaction.getAccountId()).setLtTransactionDate(transaction.getTransactionDate()), SortBy.of(ASC_CREATED_AT));
         log.info("获取流水记录之前的余额:{}", JacksonUtil.toJson(previousTransactions));
 
         if (!previousTransactions.isEmpty()) {
             return previousTransactions.get(0).getBalanceAfter();
         } else {
-            PayerBO payer = getPayerOrThrow(transaction.getAccountId());
+            MasterSubjectBankBO payer = getPayerOrThrow(transaction.getAccountId());
             return getSafeBalance(payer.getBalance());
         }
     }
@@ -344,8 +344,8 @@ public class TransactionsBizService {
     /**
      * 获取删除流水之前的余额（排除被删除流水的影响）
      */
-    private BigDecimal getBalanceBeforeExcludingDeleted(TransactionsBO deletedTransaction) {
-        List<TransactionsBO> previousTransactions = transactionsFacade.list(new TransactionsQuery().setLimit(1).setAccountId(deletedTransaction.getAccountId()).setLtTransactionDate(deletedTransaction.getTransactionDate()), SortBy.of(ASC_CREATED_AT));
+    private BigDecimal getBalanceBeforeExcludingDeleted(MasterSubjectBankTransactionBO deletedTransaction) {
+        List<MasterSubjectBankTransactionBO> previousTransactions = transactionsFacade.list(new MasterSubjectBankTransactionQuery().setLimit(1).setAccountId(deletedTransaction.getAccountId()).setLtTransactionDate(deletedTransaction.getTransactionDate()), SortBy.of(ASC_CREATED_AT));
 
         if (!previousTransactions.isEmpty()) {
             log.info("获取删除流水之前的余额:{}", JacksonUtil.toJson(previousTransactions.get(0)));
@@ -360,14 +360,14 @@ public class TransactionsBizService {
      * 计算账户初始余额
      */
     private BigDecimal calculateInitialBalance(Long accountId) {
-        PayerBO payer = getPayerOrThrow(accountId);
+        MasterSubjectBankBO payer = getPayerOrThrow(accountId);
         BigDecimal currentBalance = getSafeBalance(payer.getBalance());
 
-        List<TransactionsBO> allTransactions = transactionsFacade.list(new TransactionsQuery().setAccountId(accountId), SortBy.of(ASC_CREATED_AT));
+        List<MasterSubjectBankTransactionBO> allTransactions = transactionsFacade.list(new MasterSubjectBankTransactionQuery().setAccountId(accountId), SortBy.of(ASC_CREATED_AT));
 
         // 反向计算初始余额
         BigDecimal initialBalance = currentBalance;
-        for (TransactionsBO transaction : allTransactions) {
+        for (MasterSubjectBankTransactionBO transaction : allTransactions) {
             initialBalance = reverseTransactionImpact(initialBalance, transaction.getAmount(), transaction.getCategory().intValue());
         }
 
@@ -377,10 +377,10 @@ public class TransactionsBizService {
     /**
      * 更新后续流水记录的余额
      */
-    private BigDecimal updateSubsequentTransactionsBalance(List<TransactionsBO> subsequentTransactions, BigDecimal startBalance, Long excludeId) {
+    private BigDecimal updateSubsequentTransactionsBalance(List<MasterSubjectBankTransactionBO> subsequentTransactions, BigDecimal startBalance, Long excludeId) {
         BigDecimal currentBalance = startBalance;
 
-        for (TransactionsBO transaction : subsequentTransactions) {
+        for (MasterSubjectBankTransactionBO transaction : subsequentTransactions) {
             if (excludeId != null && transaction.getId().equals(excludeId)) {
                 continue;
             }
@@ -402,18 +402,18 @@ public class TransactionsBizService {
      * 更新单条流水记录的余额
      */
     private void updateTransactionBalance(Long transactionId, BigDecimal balance) {
-        TransactionsParam updateParam = TransactionsParam.builder()
+        MasterSubjectBankTransactionParam updateParam = MasterSubjectBankTransactionParam.builder()
                 .balanceAfter(balance)
                 .updatedAt(DateUtil.date())
                 .build();
 
-        transactionsFacade.update(updateParam, new TransactionsQuery().setId(transactionId));
+        transactionsFacade.update(updateParam, new MasterSubjectBankTransactionQuery().setId(transactionId));
     }
 
     /**
      * 更新后重新计算交易方汇总总额
      */
-    private void recalculateCounterpartyTotalAfterUpdate(TransactionsBO original, TransactionsParam updated) {
+    private void recalculateCounterpartyTotalAfterUpdate(MasterSubjectBankTransactionBO original, MasterSubjectBankTransactionParam updated) {
         String oldCounterparty = original.getCounterparty();
         String newCounterparty = updated.getCounterparty();
         Long accountId = original.getAccountId();
@@ -434,13 +434,13 @@ public class TransactionsBizService {
      * 基于所有流水记录重新计算账户余额
      */
     private void recalculateAccountBalanceFromTransactions(Long accountId, Long userId) {
-        List<TransactionsBO> allTransactions = transactionsFacade.list(
-                new TransactionsQuery().setAccountId(accountId),
+        List<MasterSubjectBankTransactionBO> allTransactions = transactionsFacade.list(
+                new MasterSubjectBankTransactionQuery().setAccountId(accountId),
                 SortBy.of(ASC_CREATED_AT)
         );
 
         BigDecimal calculatedBalance = BigDecimal.ZERO;
-        for (TransactionsBO transaction : allTransactions) {
+        for (MasterSubjectBankTransactionBO transaction : allTransactions) {
             calculatedBalance = calculateNewBalance(calculatedBalance, transaction.getAmount(), transaction.getCategory().intValue());
         }
 

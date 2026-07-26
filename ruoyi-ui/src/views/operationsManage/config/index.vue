@@ -23,8 +23,8 @@
         <el-form-item v-if="!isMargin && !isCollectionCycle" label="日期">
           <el-date-picker v-model="dateRange" type="daterange" value-format="yyyy-MM-dd" start-placeholder="开始日期" end-placeholder="结束日期" />
         </el-form-item>
-        <el-form-item label="平台"><el-select v-if="isSimpleStoreConfig" v-model="query.platform" clearable filterable @change="query.shopName = ''"><el-option v-for="item in marginPlatformOptions" :key="item" :label="item" :value="item" /></el-select><el-input v-else v-model="query.platform" clearable /></el-form-item>
-        <el-form-item label="店铺"><el-select v-if="isSimpleStoreConfig" v-model="query.shopName" clearable filterable><el-option v-for="item in marginShopOptions" :key="item.id" :label="item.keyWord" :value="item.keyWord" /></el-select><el-input v-else v-model="query.shopName" clearable /></el-form-item>
+        <el-form-item label="平台"><el-input v-model="query.platform" clearable /></el-form-item>
+        <el-form-item label="店铺"><el-input v-model="query.shopName" clearable /></el-form-item>
         <el-form-item v-if="!isMargin && !isCollectionCycle" label="货品编码"><el-input v-model="query.goodsNo" clearable /></el-form-item>
         <el-form-item :class="{ 'simple-query-actions': isSimpleStoreConfig }">
           <el-button type="primary" icon="el-icon-search" @click="loadData">查询</el-button>
@@ -89,13 +89,13 @@
       <el-form ref="form" :model="form" :rules="formRules" :label-width="isSimpleStoreConfig ? '160px' : '100px'">
         <el-row :gutter="16">
           <template v-if="isMargin">
-            <el-col :span="24"><el-form-item label="平台" prop="platform"><el-select v-model="form.platform" filterable placeholder="请选择平台" @change="handleMarginPlatformChange"><el-option v-for="item in marginPlatformOptions" :key="item" :label="item" :value="item" /></el-select></el-form-item></el-col>
-            <el-col :span="24"><el-form-item label="店铺名称" prop="shopName"><el-select v-model="form.shopName" filterable placeholder="请选择店铺名称"><el-option v-for="item in marginShopOptions" :key="item.id" :label="item.keyWord" :value="item.keyWord" /></el-select></el-form-item></el-col>
+            <el-col :span="24"><el-form-item label="平台" prop="platform"><el-input v-model="form.platform" placeholder="请输入平台" /></el-form-item></el-col>
+            <el-col :span="24"><el-form-item label="店铺名称" prop="shopName"><el-input v-model="form.shopName" placeholder="请输入店铺名称" /></el-form-item></el-col>
             <el-col :span="24"><el-form-item label="保证金金额" prop="marginAmount"><el-input-number v-model="form.marginAmount" :min="0" :precision="2" :controls="false" /></el-form-item></el-col>
           </template>
           <template v-else-if="isCollectionCycle">
-            <el-col :span="24"><el-form-item label="平台" prop="platform"><el-select v-model="form.platform" filterable @change="handleMarginPlatformChange"><el-option v-for="item in marginPlatformOptions" :key="item" :label="item" :value="item" /></el-select></el-form-item></el-col>
-            <el-col :span="24"><el-form-item label="店铺名称" prop="shopName"><el-select v-model="form.shopName" filterable><el-option v-for="item in marginShopOptions" :key="item.id" :label="item.keyWord" :value="item.keyWord" /></el-select></el-form-item></el-col>
+            <el-col :span="24"><el-form-item label="平台" prop="platform"><el-input v-model="form.platform" placeholder="请输入平台" /></el-form-item></el-col>
+            <el-col :span="24"><el-form-item label="店铺名称" prop="shopName"><el-input v-model="form.shopName" placeholder="请输入店铺名称" /></el-form-item></el-col>
             <el-col :span="24"><el-form-item label="货款回款天数" prop="goodsCollectionDays"><el-input-number v-model="form.goodsCollectionDays" :min="0" :precision="0" :controls="false" /></el-form-item></el-col>
             <el-col :span="24"><el-form-item label="补贴款回款天数" prop="subsidyCollectionDays"><el-input-number v-model="form.subsidyCollectionDays" :min="0" :precision="0" :controls="false" /></el-form-item></el-col>
             <el-col :span="24"><el-form-item label="国补款回款天数" prop="nationalSubsidyCollectionDays"><el-input-number v-model="form.nationalSubsidyCollectionDays" :min="0" :precision="0" :controls="false" /></el-form-item></el-col>
@@ -156,7 +156,6 @@
 
 <script>
 import { deleteAnalysisConfig, deleteAnalysisMargin, getAnalysisCollectionCycleList, getAnalysisConfigList, getAnalysisImportLogs, getAnalysisMarginList, getAnalysisWarehouseCostList, importAnalysisConfig, saveAnalysisCollectionCycle, saveAnalysisConfig, saveAnalysisMargin, saveAnalysisWarehouseCost } from '@/api/analysis'
-import { getPayerConfigListApi } from '@/api/monery'
 
 export default {
   name: 'AnalysisConfig',
@@ -168,7 +167,6 @@ export default {
       importLogVisible: false,
       importLogLoading: false,
       importLogs: [],
-      payerShopConfigs: [],
       dateRange: [],
       query: { platform: '', shopName: '', goodsNo: '' },
       rows: [],
@@ -230,8 +228,6 @@ export default {
       }
       return guides[this.configType] || '可按平台、店铺、订单或货品限定适用范围；未填写的维度视为通用规则。'
     },
-    marginPlatformOptions() { return [...new Set(this.payerShopConfigs.map(item => item.platform).filter(Boolean))] },
-    marginShopOptions() { return this.payerShopConfigs.filter(item => !this.form.platform || item.platform === this.form.platform) },
     formRules() {
       if (this.isMargin) {
         return {
@@ -261,18 +257,8 @@ export default {
   },
   created() {
     this.loadData()
-    this.loadPayerShopConfigs()
   },
   methods: {
-    async loadPayerShopConfigs() {
-      try {
-        const response = await getPayerConfigListApi({ pageNum: 1, pageSize: 1000 })
-        this.payerShopConfigs = response.code === 200 ? (response.rows || []) : []
-      } catch (error) {
-        this.payerShopConfigs = []
-        this.$message.error('店铺配置加载失败')
-      }
-    },
     async loadData() {
       this.loading = true
       try {
@@ -411,9 +397,6 @@ export default {
       delete payload.costScope
       delete payload.headcount
       return payload
-    },
-    handleMarginPlatformChange() {
-      this.form.shopName = ''
     },
     money(value) { return value == null ? '-' : `¥${Number(value).toFixed(2)}` }
   }

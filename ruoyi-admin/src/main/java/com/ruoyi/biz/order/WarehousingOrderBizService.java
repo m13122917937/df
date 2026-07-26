@@ -8,10 +8,10 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import com.ruoyi.bill.constant.PayerConsts;
-import com.ruoyi.bill.facade.IPayerFacade;
-import com.ruoyi.bill.model.bo.PayerBO;
-import com.ruoyi.bill.model.query.PayerQuery;
+import com.ruoyi.master.constant.MasterSubjectBankConsts;
+import com.ruoyi.master.facade.IMasterSubjectBankFacade;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
+import com.ruoyi.master.model.query.MasterSubjectBankQuery;
 import com.ruoyi.biz.bill.BillBizService;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
@@ -113,7 +113,7 @@ public class WarehousingOrderBizService {
     JkyTemplate jkyTemplate;
 
     @Autowired
-    IPayerFacade payerFacade;
+    IMasterSubjectBankFacade payerFacade;
 
     protected Integer getOrderType() {
         return OrderConsts.OrderType.PROCUREMENT.getCode();
@@ -164,7 +164,7 @@ public class WarehousingOrderBizService {
 
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(warehousingSaveParam.getCompanyId()));
         Assert.notNull(companyBO, "企业不存在,请重新选择企业");
-        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(warehousingSaveParam.getPayerId()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
+        MasterSubjectBankBO payerBO = payerFacade.getOne(new MasterSubjectBankQuery().setId(warehousingSaveParam.getPayerId()).setActived(MasterSubjectBankConsts.Activated.ACTIVATED.getCode()));
         Assert.notNull(payerBO, "付款主体不存在或已弃用");
 
 
@@ -387,7 +387,7 @@ public class WarehousingOrderBizService {
     private StockCreateAndStockInParam builderJkyStockIn(OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser, String warehouseNo, Integer quantity, List<String> snList, String remark) {
         ProductSkuBO productSkuBO = productSkuFacade.getOne(new ProductSkuQuery().setSkuCode(orderBO.getSkuCode()));
         Assert.notNull(productSkuBO, "吉客云入库商品不存在");
-        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(orderBO.getPayerId()).setActived(PayerConsts.Activated.ACTIVATED.getCode()));
+        MasterSubjectBankBO payerBO = payerFacade.getOne(new MasterSubjectBankQuery().setId(orderBO.getPayerId()).setActived(MasterSubjectBankConsts.Activated.ACTIVATED.getCode()));
         Assert.notNull(payerBO, "吉客云入库付款主体不存在或已弃用");
         Assert.notBlank(payerBO.getOutCode(), "吉客云入库付款主体吉客云编号不能为空");
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(tradeOrderBO.getTradeCompanyId()));
@@ -485,7 +485,7 @@ public class WarehousingOrderBizService {
         }
         if (StrUtil.isBlank(row.getPayerName())) {
             errors.add("付款主体名称不能为空");
-        } else if (CollectionUtil.isEmpty(payerFacade.list(new PayerQuery().setPayName(row.getPayerName()).setActived(PayerConsts.Activated.ACTIVATED.getCode()), null))) {
+        } else if (CollectionUtil.isEmpty(payerFacade.list(new MasterSubjectBankQuery().setPayName(row.getPayerName()).setActived(MasterSubjectBankConsts.Activated.ACTIVATED.getCode()), null))) {
             errors.add("付款主体名称不存在或已弃用");
         }
         if (row.getQuantity() == null || row.getQuantity() <= 0) {
@@ -536,8 +536,8 @@ public class WarehousingOrderBizService {
      */
     private WarehousingSaveParam convertToSaveParam(WarehousingImportVO row) {
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setCompanyName(row.getCompanyName()));
-        List<PayerBO> payerList = payerFacade.list(new PayerQuery().setPayName(row.getPayerName()).setActived(PayerConsts.Activated.ACTIVATED.getCode()), null);
-        PayerBO payerBO = payerList.get(0);
+        List<MasterSubjectBankBO> payerList = payerFacade.list(new MasterSubjectBankQuery().setPayName(row.getPayerName()).setActived(MasterSubjectBankConsts.Activated.ACTIVATED.getCode()), null);
+        MasterSubjectBankBO payerBO = payerList.get(0);
         WarehousingSaveParam param = new WarehousingSaveParam();
         param.setSkuCode(row.getSkuCode());
         param.setQuantity(row.getQuantity());

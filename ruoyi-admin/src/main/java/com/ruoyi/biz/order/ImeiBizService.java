@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.StrUtil;
 import com.ruoyi.biz.express.JkyStockInAndDeliveryBizService;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.model.PageParamV2;
@@ -17,6 +18,7 @@ import com.ruoyi.order.facade.IHangingOrderFacade;
 import com.ruoyi.order.facade.IImeiFacade;
 import com.ruoyi.order.facade.IImeiSkuRelFacade;
 import com.ruoyi.order.facade.IOrderFacade;
+import com.ruoyi.order.facade.ITradeOrderFacade;
 import com.ruoyi.order.model.bo.*;
 import com.ruoyi.order.model.consts.HandingOrderConsts;
 import com.ruoyi.order.model.consts.ImeiConsts;
@@ -66,6 +68,9 @@ public class ImeiBizService {
 
     @Autowired
     JkyStockInAndDeliveryBizService jkyStockInAndDeliveryBizService;
+
+    @Autowired
+    ITradeOrderFacade tradeOrderFacade;
 
 
     public List<ImeiVO> list(final String orderCode) {
@@ -190,9 +195,13 @@ public class ImeiBizService {
     /**
      * 人工放行串码激活状态：将处于 NOT_EXITS（06api 查询失败）的串码改为 SUCCESS。
      * 仅允许该状态转换；其它失败状态（如型号不一致）不允许通过本接口放行。
+     * 放行成功后根据订单物流单号是否填写更新订单子状态：
+     * - 已填写物流单号 → subStatus=43 (EXPRESS_WAIT_SALES / 物流已填写平台二销验证中)
+     * - 未填写物流单号 → subStatus=42 (WAIT_SALES / 待填写物流信息和平台二销验证中)
      *
      * @param form 表单（订单号 + sn/imei）
      */
+    @Transactional
     public void manualPassActivated(ActivatedImeiForm form) {
         ImeiBO imeiBO = imeiFacade.getOne(new ImeiQuery()
                 .setOrderId(form.getOrderCode())
@@ -209,12 +218,26 @@ public class ImeiBizService {
                         .setActivated(ImeiConsts.Activated.NOT_EXITS.getCode()));
         Assert.isTrue(updated, "串码状态已被他人变更，请刷新后重试");
 
+        // 根据物流单号是否填写更新订单子状态
+        TradeOrderBO tradeOrder = tradeOrderFacade.getOne(new TradeOrderQuery().setOrderId(form.getOrderCode()));
+        boolean hasTracking = tradeOrder != null && StrUtil.isNotBlank(tradeOrder.getTrackingNumber());
+        if (hasTracking) {
+            orderFacade.update(
+                    new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.EXPRESS_WAIT_SALES.getCode()).setUpdateTime(DateUtil.date()),
+                    new OrderQuery().setOrderCode(form.getOrderCode()));
+        } else {
+            orderFacade.update(
+                    new OrderParam().setSubStatus(OrderConsts.OrderSubStatus.WAIT_SALES.getCode()).setUpdateTime(DateUtil.date()),
+                    new OrderQuery().setOrderCode(form.getOrderCode()));
+        }
+
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        log.warn("人工放行串码激活状态成功，operatorId={}, operatorName={}, orderCode={}, sn={}, imei={}, oldActivated={}, newActivated={}",
+        log.warn("人工放行串码激活状态成功，operatorId={}, operatorName={}, orderCode={}, sn={}, imei={}, oldActivated={}, newActivated={}, subStatus={}",
                 loginUser.getUserId(), loginUser.getUsername(),
                 form.getOrderCode(), form.getSn(), form.getImei(),
                 ImeiConsts.Activated.NOT_EXITS.getCode(),
-                ImeiConsts.Activated.SUCCESS.getCode());
+                ImeiConsts.Activated.SUCCESS.getCode(),
+                hasTracking ? OrderConsts.OrderSubStatus.EXPRESS_WAIT_SALES.getCode() : OrderConsts.OrderSubStatus.WAIT_SALES.getCode());
     }
 
 }

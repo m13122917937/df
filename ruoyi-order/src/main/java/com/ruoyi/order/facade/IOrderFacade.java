@@ -7,6 +7,7 @@ import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.order.domain.dto.OrderStatusDTO;
 import com.ruoyi.order.model.bo.*;
 import com.ruoyi.order.model.param.OrderParam;
+import com.ruoyi.order.model.param.SupplierPushParam;
 import com.ruoyi.order.model.query.OrderQuery;
 import com.ruoyi.order.model.query.OrderTabCountQuery;
 
@@ -60,5 +61,18 @@ public interface IOrderFacade {
 
     List<SkuBO> skuCount(OrderTabCountQuery orderTabCountQuery);
 
+    /**
+     * 批量定向推送供应商。
+     *
+     * @param param 推送参数
+     */
+    void pushSupplierBatch(SupplierPushParam param);
+
+    /**
+     * 查询订单中已存在的店铺名称（去重）。
+     *
+     * @return 店铺名称集合
+     */
+    List<String> listShopNames();
 
 }

@@ -10,7 +10,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="hangOrderId"    column="hang_order_id"    />
         <result property="tradePrice"    column="trade_price"    />
         <result property="tradeUserId"    column="trade_user_id"    />
+        <result property="tradeUserName"    column="trade_user_name"    />
+        <result property="tradeUserPhone"    column="trade_user_phone"    />
         <result property="tradeCompanyId"    column="trade_company_id"    />
+        <result property="tradeCompanyName"    column="trade_company_name"    />
+        <result property="tradeNickName"    column="trade_nick_name"    />
         <result property="accountingPeriod"    column="accounting_period"    />
         <result property="status"    column="status"    />
         <result property="createTime"    column="create_time"    />
@@ -26,6 +30,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="tradeIndex"    column="trade_index"    />
         <result property="electronicSheet"    column="electronic_sheet"    />
     </resultMap>
+
+    <select id="selectActiveByOrderCodesForUpdate" resultMap="TradeOrderResult">
+        select *
+        from o_trade_order
+        where status = #{status}
+          and order_id in
+        <foreach collection="orderCodes" item="orderCode" open="(" separator="," close=")">
+            #{orderCode}
+        </foreach>
+        order by order_id, id
+        for update
+    </select>
 
     <select id="tradePrice" resultType="com.ruoyi.order.domain.dto.TradePriceDTO">
         select

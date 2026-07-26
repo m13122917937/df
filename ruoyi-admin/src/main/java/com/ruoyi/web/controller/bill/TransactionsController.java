@@ -1,10 +1,10 @@
 package com.ruoyi.web.controller.bill;
 
 import com.alibaba.excel.EasyExcel;
-import com.ruoyi.bill.model.param.TransactionsParam;
+import com.ruoyi.master.model.param.MasterSubjectBankTransactionParam;
 import com.ruoyi.biz.bill.TransactionsBizService;
-import com.ruoyi.bill.model.bo.TransactionsBO;
-import com.ruoyi.bill.model.query.TransactionsQuery;
+import com.ruoyi.master.model.bo.MasterSubjectBankTransactionBO;
+import com.ruoyi.master.model.query.MasterSubjectBankTransactionQuery;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -41,10 +41,10 @@ public class TransactionsController extends BaseController {
     @PostMapping("/page/list")
     public TableDataInfo pageList(@RequestBody @Validated TransactionsQForm transactionsQForm) {
 
-        TransactionsQuery query = new TransactionsQuery().setAccountId(transactionsQForm.getAccountId()).setCounterpartyLike(transactionsQForm.getCounterpartyLike())
+        MasterSubjectBankTransactionQuery query = new MasterSubjectBankTransactionQuery().setAccountId(transactionsQForm.getAccountId()).setCounterpartyLike(transactionsQForm.getCounterpartyLike())
                 .setTransactionDateStart(transactionsQForm.getTransactionDateStart()).setTransactionDateEnd(transactionsQForm.getTransactionDateEnd());
 
-        PageBO<TransactionsBO> transactionsBOPageBO = transactionsBizService.listPage(
+        PageBO<MasterSubjectBankTransactionBO> transactionsBOPageBO = transactionsBizService.listPage(
                 query, startParamV2("transaction_date desc"));
         List<TransactionsVO> transactionsVOList = TransactionsConvert.INSTANCE.toVOList(transactionsBOPageBO.getData());
 
@@ -60,9 +60,9 @@ public class TransactionsController extends BaseController {
         HttpServletResponse response = ServletUtils.getResponse();
         ServletUtils.renderExcel(response, "资金流水");
 
-        TransactionsQuery query = new TransactionsQuery().setAccountId(transactionsQForm.getAccountId()).setCounterpartyLike(transactionsQForm.getCounterpartyLike())
+        MasterSubjectBankTransactionQuery query = new MasterSubjectBankTransactionQuery().setAccountId(transactionsQForm.getAccountId()).setCounterpartyLike(transactionsQForm.getCounterpartyLike())
                 .setTransactionDateStart(transactionsQForm.getTransactionDateStart()).setTransactionDateEnd(transactionsQForm.getTransactionDateEnd());
-        List<TransactionsBO> list = transactionsBizService.list(query, SortBy.of("transaction_date asc"));
+        List<MasterSubjectBankTransactionBO> list = transactionsBizService.list(query, SortBy.of("transaction_date asc"));
 
         List<TransactionsVO> transactionsVOList = TransactionsConvert.INSTANCE.toVOList(list);
         EasyExcel.write(response.getOutputStream(), TransactionsVO.class).sheet("sheet1").doWrite(transactionsVOList);
@@ -74,8 +74,8 @@ public class TransactionsController extends BaseController {
 
     @PostMapping("/save")
     public AjaxResult save(@Validated(value = AddGroup.class) @RequestBody TransactionsForm transactionsForm) {
-        TransactionsParam param = TransactionsConvert.INSTANCE.toParam(transactionsForm);
-        TransactionsBO savedTransaction = transactionsBizService.addTransactionAndUpdateBalance(param, getUserId());
+        MasterSubjectBankTransactionParam param = TransactionsConvert.INSTANCE.toParam(transactionsForm);
+        MasterSubjectBankTransactionBO savedTransaction = transactionsBizService.addTransactionAndUpdateBalance(param, getUserId());
         TransactionsVO resultVO = TransactionsConvert.INSTANCE.toVO(savedTransaction);
         return AjaxResult.success(resultVO);
     }

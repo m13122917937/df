@@ -388,7 +388,7 @@ export default {
       this.form = {
         orderCodeList: baseOrderCodes,
         price: null,
-        accountingPeriod: null,
+        accountingPeriod: 3,
         companyId: null,
         userId: null,
         deliveryTime: 0,

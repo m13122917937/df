@@ -157,45 +157,6 @@ export function getPayCompanyBankListApi(params) {
 }
 
 /**
- * @description: 获取付款配置列表
- * @param {*} params
- * @returns
- */
-export function getPayerConfigListApi(params) {
-  return request({
-    url: "/bill/payer/config/list",
-    method: "GET",
-    params,
-  });
-}
-
-/**
- * @description: 添加付款配置
- * @param {*} data
- * @returns
- */
-export function addPayerConfigApi(data) {
-  return request({
-    url: "/bill/payer/config/save",
-    method: "POST",
-    data,
-  });
-}
-
-/**
- * @description: 更新付款配置
- * @param {*} data
- * @returns
- */
-export function updatePayerConfigApi(data) {
-  return request({
-    url: "/bill/payer/config/update",
-    method: "POST",
-    data,
-  });
-}
-
-/**
  * @description: 查询企业列表
  * @param {*} data
  * @returns
@@ -271,19 +232,4 @@ export function getDeductionRevokeApi(id) {
     method: "get",
   });
 }
-
-/**
- * @description: 平台列表
- * @param {*} data
- * @returns
- */
-export function getPayerConfigPlatformListApi(data) {
-  return request({
-    url: `/bill/payer/config/platform`,
-    method: "POST",
-    data,
-  });
-}
-
-
 

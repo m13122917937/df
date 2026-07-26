@@ -35,6 +35,10 @@ import java.util.concurrent.TimeUnit;
 @Component("jkyLogisticsTaskJob")
 public class JkyLogisticsTaskJob {
 
+    private static final int MAX_RETRY_COUNT = 3;
+
+    private static final int[] RETRY_DELAY_MINUTES = {5, 10, 20};
+
     @Autowired
     private IJkyLogisticsTaskFacade jkyLogisticsTaskFacade;
 
@@ -84,12 +88,11 @@ public class JkyLogisticsTaskJob {
             List<LogisticsUpdateRep> dataList = JkyResponseUtil.getData(response);
             LogisticsUpdateRep first = CollectionUtil.isNotEmpty(dataList) ? dataList.get(0) : null;
 
-            if (first == null || !Boolean.TRUE.equals(first.getIsSuccess())) {
-                String errorMsg = first != null ? first.getError() : "响应数据为空";
+            if (!JkyResponseUtil.isSuccess(response) || first == null || !Boolean.TRUE.equals(first.getIsSuccess())) {
+                String errorMsg = first != null ? first.getError()
+                        : response != null && response.getMsg() != null ? response.getMsg() : "响应数据为空";
                 log.error("订单号：{}，吉客云物流更新失败：{}", task.getOrderCode(), errorMsg);
-                jkyLogisticsTaskFacade.update(
-                        new JkyLogisticsTaskParam().setStatus(2).setErrorMsg(errorMsg).setUpdateTime(DateUtil.date()).setRetryCount(task.getRetryCount() != null ? task.getRetryCount() + 1 : 1),
-                        new JkyLogisticsTaskQuery().setId(task.getId()));
+                scheduleRetry(task, errorMsg);
                 return;
             }
 
@@ -101,10 +104,31 @@ public class JkyLogisticsTaskJob {
             tryGenerateBill(task);
         } catch (Exception e) {
             log.error("订单号：{}，吉客云物流更新失败：{}", task.getOrderCode(), e.getMessage(), e);
-            jkyLogisticsTaskFacade.update(
-                    new JkyLogisticsTaskParam().setStatus(2).setErrorMsg(e.getMessage()).setRetryCount(task.getRetryCount() != null ? task.getRetryCount() + 1 : 1).setUpdateTime(DateUtil.date()),
-                    new JkyLogisticsTaskQuery().setId(task.getId()));
+            scheduleRetry(task, e.getMessage());
         }
+    }
+
+    private void scheduleRetry(JkyLogisticsTaskBO task, String errorMsg) {
+        int retryCount = task.getRetryCount() == null ? 0 : task.getRetryCount();
+        if (retryCount >= MAX_RETRY_COUNT) {
+            jkyLogisticsTaskFacade.update(
+                    new JkyLogisticsTaskParam().setStatus(2).setErrorMsg(errorMsg).setUpdateTime(DateUtil.date()),
+                    new JkyLogisticsTaskQuery().setId(task.getId()));
+            log.error("订单号：{}，吉客云物流更新已完成{}次重试，标记为最终失败", task.getOrderCode(), MAX_RETRY_COUNT);
+            return;
+        }
+
+        int nextRetryCount = retryCount + 1;
+        int delayMinutes = RETRY_DELAY_MINUTES[nextRetryCount - 1];
+        jkyLogisticsTaskFacade.update(
+                new JkyLogisticsTaskParam()
+                        .setStatus(0)
+                        .setErrorMsg(errorMsg)
+                        .setRetryCount(nextRetryCount)
+                        .setExecuteTime(DateUtil.offsetMinute(DateUtil.date(), delayMinutes))
+                        .setUpdateTime(DateUtil.date()),
+                new JkyLogisticsTaskQuery().setId(task.getId()));
+        log.warn("订单号：{}，吉客云物流更新失败，将在{}分钟后进行第{}次重试", task.getOrderCode(), delayMinutes, nextRetryCount);
     }
 
     /**

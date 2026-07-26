@@ -20,6 +20,14 @@ import java.util.List;
 @Mapper
 public interface OrderMapper extends BaseMapper<Order> {
 
+    /**
+     * 按订单编号锁定订单。
+     *
+     * @param orderCodes 订单编号
+     * @return 已锁定订单
+     */
+    List<Order> selectByOrderCodesForUpdate(@Param("orderCodes") List<String> orderCodes);
+
     List<ProvinceCountDTO> provinceCount(OrderQuery orderQuery);
 
     List<ProvinceCountDTO> customerProvinceCount(OrderQuery orderQuery);

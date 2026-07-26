@@ -6,12 +6,12 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.ruoyi.bill.facade.IPayerConfigFacade;
-import com.ruoyi.bill.facade.IPayerFacade;
-import com.ruoyi.bill.model.bo.PayerBO;
-import com.ruoyi.bill.model.bo.PayerConfigBO;
-import com.ruoyi.bill.model.query.PayerConfigQuery;
-import com.ruoyi.bill.model.query.PayerQuery;
+import com.ruoyi.master.facade.IMasterSubjectBankFacade;
+import com.ruoyi.master.facade.IMasterSubjectFacade;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
+import com.ruoyi.master.model.bo.MasterSubjectBO;
+import com.ruoyi.master.model.query.MasterSubjectBankQuery;
+import com.ruoyi.master.model.query.MasterSubjectQuery;
 import com.ruoyi.biz.address.SmartParse;
 import com.ruoyi.biz.address.domain.AddressInfo;
 
@@ -26,7 +26,6 @@ import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
-import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.weebhook.QWRobotUtil;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
@@ -50,6 +49,7 @@ import com.ruoyi.order.model.consts.TradeOrderConsts;
 import com.ruoyi.order.model.param.HangingOrderParam;
 import com.ruoyi.order.model.param.ImeiParam;
 import com.ruoyi.order.model.param.OrderParam;
+import com.ruoyi.order.model.param.SupplierPushParam;
 import com.ruoyi.order.model.param.TradeOrderParam;
 import com.ruoyi.order.model.query.HangingOrderQuery;
 import com.ruoyi.order.model.query.ImeiQuery;
@@ -71,69 +71,38 @@ import com.ruoyi.user.model.query.MemberQuery;
 import com.ruoyi.web.form.order.*;
 import com.ruoyi.web.form.rule.RuleForm;
 import com.ruoyi.web.vo.order.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ruoyi.consts.DictEnum.WEB_HOOK_FOLLOW_ORDER;
 
 @Slf4j
-@Service
+@Component
+@RequiredArgsConstructor
 public class OrderBizService {
 
-    @Autowired
-    SmartParse smartParse;
-
-    @Autowired
-    IOrderFacade orderFacade;
-
-    @Autowired
-    ITradeOrderFacade tradeOrderFacade;
-
-    @Autowired
-    IHangingOrderFacade hangingOrderFacade;
-
-    @Autowired
-    IDictDistrictBizService dictDistrictBizService;
-
-    @Autowired
-    RuleBizService ruleBizService;
-
-    @Autowired
-    ICompanyCapitalFacade companyCapitalFacade;
-
-    @Autowired
-    CompanyCapitalBizService companyCapitalBizService;
-
-    @Autowired
-    IProductSkuFacade productSkuFacade;
-
-    @Autowired
-    IRouteSubscribeFacade routeSubscribeFacade;
-
-    @Autowired
-    IImeiFacade imeiFacade;
-
-    @Autowired
-    ICompanyFacade companyFacade;
-
-    @Autowired
-    IPayerFacade payerFacade;
-
-    @Autowired
-    IMemberFacade memberFacade;
-
-    @Autowired
-    IPayerConfigFacade payerConfigFacade;
-
-    @Autowired
-    private JkyTemplate jkyTemplate;
+    private final SmartParse smartParse;
+    private final IOrderFacade orderFacade;
+    private final ITradeOrderFacade tradeOrderFacade;
+    private final IHangingOrderFacade hangingOrderFacade;
+    private final IDictDistrictBizService dictDistrictBizService;
+    private final RuleBizService ruleBizService;
+    private final ICompanyCapitalFacade companyCapitalFacade;
+    private final CompanyCapitalBizService companyCapitalBizService;
+    private final IProductSkuFacade productSkuFacade;
+    private final IRouteSubscribeFacade routeSubscribeFacade;
+    private final IImeiFacade imeiFacade;
+    private final ICompanyFacade companyFacade;
+    private final IMasterSubjectBankFacade payerFacade;
+    private final IMasterSubjectFacade masterSubjectFacade;
+    private final IMemberFacade memberFacade;
+    private final JkyTemplate jkyTemplate;
 
 
     public String sortField(Integer status) {
@@ -582,7 +551,7 @@ public class OrderBizService {
             } else {
                 param.setAddressStatus(OrderConsts.AddressStatus.NOT_SUPPLEMENTED.getCode());
             }
-            PayerBO payerBO = queryPayer(orderAddForm, param);
+            MasterSubjectBankBO payerBO = queryPayer(orderAddForm, param);
             if (Objects.isNull(payerBO)) {
                 return;
             }
@@ -607,23 +576,22 @@ public class OrderBizService {
 
     }
 
-    private PayerBO queryPayer(OrderAddForm orderAddForm, OrderParam param) {
-        if (StrUtil.isNotBlank(orderAddForm.getCompanyName())) {
-            PageBO<PayerBO> payerBOPageBO = payerFacade.listPage(new PayerQuery().setPayName(orderAddForm.getCompanyName()), new PageParamV2());
-            if (CollectionUtil.isEmpty(payerBOPageBO.getData())) {
-                log.error("订单企业付款主体不存在：{}", orderAddForm.getCompanyName());
-                return null;
-            }
-            return payerBOPageBO.getData().get(0);
-        }
-        PayerConfigBO payerConfigBO = payerConfigFacade.getOne(new PayerConfigQuery().setKeyWord(param.getShopName()));
-        if (Objects.isNull(payerConfigBO)) {
-            log.error("订单店铺不存在：{}", param.getShopName());
+    private MasterSubjectBankBO queryPayer(OrderAddForm orderAddForm, OrderParam param) {
+        if (StrUtil.isBlank(orderAddForm.getCompanyName())) {
+            log.error("订单企业名称为空，无法确定付款主体");
             return null;
         }
-        PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(payerConfigBO.getPayerId()));
-        if (Objects.isNull(payerBO)) {
-            log.info("订单付款人不存在：{}", payerConfigBO.getPayerId());
+        // companyName -> m_subject(subjectName) -> default_payer_id（主体默认银行卡）
+        MasterSubjectBO subject = masterSubjectFacade.getOne(
+                new MasterSubjectQuery().setSubjectName(orderAddForm.getCompanyName()));
+        if (subject == null || subject.getDefaultPayerId() == null) {
+            log.error("订单企业付款主体或默认银行卡不存在：{}", orderAddForm.getCompanyName());
+            return null;
+        }
+        MasterSubjectBankBO payerBO = payerFacade.getOne(
+                new MasterSubjectBankQuery().setId(subject.getDefaultPayerId()));
+        if (payerBO == null) {
+            log.info("订单付款银行卡不存在：{}", subject.getDefaultPayerId());
         }
         return payerBO;
     }
@@ -845,52 +813,15 @@ public class OrderBizService {
      *
      * @param waitPushForm
      */
-    @Transactional
     public void pushCompany(WaitPushForm waitPushForm, LoginUser loginUser) {
         MemberBO user = memberFacade.queryOne(new MemberQuery().setUserId(waitPushForm.getUserId()));
         Assert.notNull(user, "企业下不存在账号");
 
         CompanyBO companyBO = companyFacade.queryOne(new CompanyQuery().setId(waitPushForm.getCompanyId()));
         Assert.notNull(companyBO, "企业不存在,请重新选择企业");
-
-        //构建 挂单
-        HangingOrderParam hangingOrderParam = new HangingOrderParam().setPriceHighest(waitPushForm.getPrice()).setPriceHighestStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode());
-        hangingOrderParam.setPriceHign(Arith.sub(waitPushForm.getPrice(), new BigDecimal(10))).setPriceHignStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode());
-        hangingOrderParam.setPriceLow(Arith.sub(hangingOrderParam.getPriceHign(), new BigDecimal(10))).setPriceLowStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode());
-        hangingOrderParam.setPriceLowest(Arith.sub(hangingOrderParam.getPriceLow(), new BigDecimal(10))).setPriceLowestStatus(TradeOrderConsts.TradeStatus.CONFIRMED.getCode());
-        hangingOrderParam.setQuotationInterval(5L).setAccountingPeriod(waitPushForm.getAccountingPeriod()).setStatus(HandingOrderConsts.Status.NORMAL.getCode());
-        hangingOrderParam.setLastCompeteUser(waitPushForm.getUserId()).setLastCompeteCompany(companyBO.getId()).setLastCompeteTime(DateUtil.date()).setCreateBy(loginUser.getUserId());
-        hangingOrderParam.setCreateTime(DateUtil.date()).setUpdateTime(DateUtil.date()).setUpdateBy(loginUser.getUserId()).setIntervalSpread(new BigDecimal(10));
-        hangingOrderParam.setCodeOptions(HandingOrderConsts.CodeOptions.SEND_BEFORE_NEED.getCode()).setMerchantCompanyId(companyBO.getId());
-        hangingOrderParam.setDeliveryTime(waitPushForm.getDeliveryTime()).setDeliveryDeadline(DateUtil.offsetDay(DateUtil.endOfDay(DateUtil.date()), waitPushForm.getDeliveryTime()));
-
-        // 构建trade 对象
-        TradeOrderParam tradeOrderParam = new TradeOrderParam().setOrderType(OrderConsts.OrderType.O2O.getCode()).setTradeCompanyId(waitPushForm.getCompanyId());
-        tradeOrderParam.setTradeUserId(waitPushForm.getUserId()).setTradeUserPhone(user.getPhone()).setTradeUserName(user.getNickName()).setAccountingPeriod(waitPushForm.getAccountingPeriod());
-        tradeOrderParam.setTradeCompanyId(companyBO.getId()).setTradeNickName(companyBO.getNickName()).setStatus(TradeOrderConsts.TradeStatus.SUCCESS.getCode());
-        tradeOrderParam.setUpdateTime(DateUtil.date()).setUpdateBy(user.getUserId());
-        String skuCode = null;
-        for (String orderCode : waitPushForm.getOrderCodeList()) {
-            OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(orderCode));
-            skuCode = Objects.isNull(skuCode) ? orderBO.getSkuCode() : skuCode;
-            if (!Objects.equals(skuCode, orderBO.getSkuCode())) {
-                throw new ServiceException("请勿推送相同SKU的订单");
-            }
-            // 删除所有挂单
-            hangingOrderFacade.update(new HangingOrderParam().setStatus(HandingOrderConsts.Status.FAILURE.getCode()), new HangingOrderQuery().setOrderId(orderCode).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
-
-            // 创建 挂单
-            HangingOrderBO hangingOrderBO = hangingOrderFacade.save(hangingOrderParam.setOrderId(orderCode));
-
-            // 创建 trade order
-            tradeOrderParam.setOrderId(orderCode).setTradePrice(waitPushForm.getPrice()).setBrand(orderBO.getBrand()).setProductName(orderBO.getProductName());
-            tradeOrderParam.setSkuName(orderBO.getSkuName()).setSkuCode(orderBO.getSkuCode()).setProvince(orderBO.getProvince()).setQuantity(orderBO.getQuantity());
-            tradeOrderParam.setOrderType(orderBO.getOrderType()).setTradeIndex(4).setHangOrderId(hangingOrderBO.getId());
-            tradeOrderFacade.save(tradeOrderParam);
-
-            // 订单状态修改
-            orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.DELIVERY_ING.getCode()).setSubStatus(OrderConsts.OrderSubStatus.WAIT_IMEI.getCode()).setUpdateTime(DateUtil.date()), new OrderQuery().setOrderCode(orderCode));
-        }
+        SupplierPushParam param = OrderConvert.INSTANCE.toSupplierPushParam(
+                waitPushForm, user, companyBO, loginUser.getUserId());
+        orderFacade.pushSupplierBatch(param);
     }
 
     /**
@@ -1059,5 +990,3 @@ public class OrderBizService {
     }
 
 }
-
-

@@ -137,7 +137,8 @@ public class JacksonUtil {
         try {
             return getInstance().readValue(content, typeReference);
         } catch (IOException e) {
-            throw new UtilException("json异常");
+            String truncated = content != null && content.length() > 2000 ? content.substring(0, 2000) + "..." : content;
+            throw new UtilException("json异常: " + e.getMessage() + ", content: " + truncated);
         }
     }
 

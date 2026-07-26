@@ -11,26 +11,48 @@
       ref="form"
       label-width="120px"
     >
+      <el-form-item v-if="!isEdit" label="选择主体">
+        <el-select
+          v-model="selectedSubjectId"
+          filterable
+          clearable
+          placeholder="选择主体后自动带出名称/简称/吉客云编号"
+          style="width: 100%;"
+          @change="onSubjectChange"
+        >
+          <el-option
+            v-for="item in subjectOptions"
+            :key="item.id"
+            :label="item.subjectName"
+            :value="item.id"
+          >
+            <span>{{ item.subjectName }}</span>
+            <span style="float: right; color: #909399; font-size: 12px;">{{ item.subjectCode }}</span>
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="收款企业名称" prop="payName">
         <el-input
           v-model.trim="form.payName"
           placeholder="请输入收款企业名称"
-          :clearable="!isEdit"
-          :disabled="isEdit"
+          :clearable="canEditSubjectFields"
+          :disabled="isEdit || hasSelectedSubject"
         />
       </el-form-item>
       <el-form-item label="简称" prop="nickName">
         <el-input
           v-model.trim="form.nickName"
           placeholder="请输入简称"
-          clearable
+          :clearable="canEditSubjectFields"
+          :disabled="!isEdit && hasSelectedSubject"
         />
       </el-form-item>
       <el-form-item label="吉客云编号" prop="outCode">
         <el-input
           v-model.trim="form.outCode"
           placeholder="请输入吉客云编号"
-          clearable
+          :clearable="canEditSubjectFields"
+          :disabled="!isEdit && hasSelectedSubject"
         />
       </el-form-item>
       <el-form-item label="开户行全称" prop="bankName">
@@ -104,11 +126,16 @@ export default {
     companyOptions: {
       type: Array,
       default: () => []
+    },
+    subjectOptions: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
     return {
       dialogVisible: false,
+      selectedSubjectId: null,
       form: {
         payName: '',
         nickName: '',
@@ -143,10 +170,19 @@ export default {
       }
     }
   },
+  computed: {
+    hasSelectedSubject() {
+      return Boolean(this.selectedSubjectId)
+    },
+    canEditSubjectFields() {
+      return !this.isEdit && !this.hasSelectedSubject
+    }
+  },
   watch: {
     visible(val) {
       this.dialogVisible = val
       if (val) {
+        this.selectedSubjectId = null
         this.form = { ...this.formData }
       }
     },
@@ -168,6 +204,7 @@ export default {
       this.resetForm()
     },
     resetForm() {
+      this.selectedSubjectId = null
       this.form = {
         payName: '',
         nickName: '',
@@ -180,6 +217,28 @@ export default {
       if (this.$refs.form) {
         this.$refs.form.clearValidate()
       }
+    },
+    // 选择经营主体后自动带出企业名称、简称、吉客云编号
+    onSubjectChange(subjectId) {
+      if (!subjectId) {
+        this.fillSubjectFields()
+        return
+      }
+      const subject = this.subjectOptions.find(item => item.id === subjectId)
+      if (!subject) {
+        return
+      }
+      this.fillSubjectFields(subject)
+      this.$nextTick(() => {
+        if (this.$refs.form) {
+          this.$refs.form.clearValidate(['payName', 'nickName', 'outCode'])
+        }
+      })
+    },
+    fillSubjectFields(subject = {}) {
+      this.form.payName = subject.subjectName || ''
+      this.form.nickName = subject.subjectShortName || ''
+      this.form.outCode = subject.subjectCode || ''
     },
     formatCurrency(value) {
       if (value === undefined || value === null || value === '') return ''

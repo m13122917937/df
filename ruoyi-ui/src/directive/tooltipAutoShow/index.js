@@ -2,7 +2,25 @@
  * tooltip-auto-show tooltip不超长则不显示
  */
 import Vue from "vue"
-import { getStyle } from "element-ui/src/utils/dom"
+
+// 获取元素计算样式（替代 element-ui 内部导入）
+function getStyle(element, styleName) {
+  if (!element || !styleName) return null
+  const normalizedName = normalizeStyleName(styleName)
+  if (normalizedName === 'float') return element.style.cssFloat
+  try {
+    const computedStyle = document.defaultView.getComputedStyle(element, '') || {}
+    return element.style[normalizedName] || computedStyle[normalizedName] || ''
+  } catch (e) {
+    return element.style[normalizedName]
+  }
+}
+
+function normalizeStyleName(styleName) {
+  return styleName
+    .replace(/^-webkit-/, '')
+    .replace(/-(\w)/g, (_, character) => (character ? character.toUpperCase() : ''))
+}
 export default {
   inserted(el, binding, vnode) {
     el.__vueOverflowTooltipMouseenter__ = function () {

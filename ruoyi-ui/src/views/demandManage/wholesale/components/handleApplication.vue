@@ -82,7 +82,7 @@
 
         <div v-if="handleResult === 2" class="reject-reason">
           <el-input
-            v-model="refuseRemark	"
+            v-model="refuseRemark"
             type="textarea"
             :rows="3"
             placeholder="请输入拒绝原因"
@@ -180,7 +180,7 @@ export default {
     // 重置表单
     resetForm() {
       this.handleResult = null
-      this.refuseRemark	 = ''
+      this.refuseRemark = ''
     },
 
     // 获取状态样式类

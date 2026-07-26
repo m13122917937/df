@@ -5,13 +5,10 @@ import cn.hutool.core.util.StrUtil;
 import com.ruoyi.bill.constant.BillConsts;
 import com.ruoyi.bill.constant.BillPayPlanConsts;
 import com.ruoyi.bill.facade.IBillFacade;
-import com.ruoyi.bill.facade.IPayerConfigFacade;
-import com.ruoyi.bill.facade.IPayerFacade;
-import com.ruoyi.bill.model.bo.PayerBO;
-import com.ruoyi.bill.model.bo.PayerConfigBO;
+import com.ruoyi.master.facade.IMasterSubjectBankFacade;
+import com.ruoyi.master.model.bo.MasterSubjectBankBO;
 import com.ruoyi.bill.model.param.BillParam;
-import com.ruoyi.bill.model.query.PayerConfigQuery;
-import com.ruoyi.bill.model.query.PayerQuery;
+import com.ruoyi.master.model.query.MasterSubjectBankQuery;
 import com.ruoyi.common.core.domain.user.LoginUser;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
@@ -41,6 +38,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 销售退货业务逻辑
@@ -71,10 +69,7 @@ public class SalesReturnBizService {
     private ICompanyBankFacade companyBankFacade;
 
     @Autowired
-    private IPayerConfigFacade payerConfigFacade;
-
-    @Autowired
-    private IPayerFacade payerFacade;
+    private IMasterSubjectBankFacade payerFacade;
 
     /**
      * 分页查询销售退货列表
@@ -177,16 +172,16 @@ public class SalesReturnBizService {
                 .settlementDate(DateUtil.offsetDay(DateUtil.date(), 1).toLocalDateTime().toLocalDate())
                 .build();
 
-        // 设置付款主体
-        PayerConfigBO payerConfigBO = payerConfigFacade.getOne(new PayerConfigQuery().setKeyWord(""));
-        if (payerConfigBO == null) {
-            payerConfigBO = payerConfigFacade.listPage(new PayerConfigQuery(), new PageParamV2()).getData().get(0);
-        }
-        if (payerConfigBO != null) {
-            billParam.setPayCompanyId(payerConfigBO.getPayerId());
-            PayerBO payerBO = payerFacade.getOne(new PayerQuery().setId(payerConfigBO.getPayerId()));
-            if (payerBO != null) {
-                billParam.setPayCompanyName(payerBO.getPayName());
+        // 设置付款主体（取原单 payer_id，即主体默认银行卡 id）
+        List<OrderBO> originOrders = orderFacade.list(new OrderQuery().setOriginalOrderId(param.getOriginalOrderId()));
+        if (originOrders != null && !originOrders.isEmpty()) {
+            OrderBO originOrder = originOrders.get(0);
+            if (originOrder.getPayerId() != null) {
+                billParam.setPayCompanyId(originOrder.getPayerId());
+                MasterSubjectBankBO payerBO = payerFacade.getOne(new MasterSubjectBankQuery().setId(originOrder.getPayerId()));
+                if (payerBO != null) {
+                    billParam.setPayCompanyName(payerBO.getPayName());
+                }
             }
         }
 

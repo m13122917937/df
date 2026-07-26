@@ -48,7 +48,7 @@ public class HangingOrderFacade implements IHangingOrderFacade {
 
     @Override
     public boolean update(HangingOrderParam param, HangingOrderQuery query) {
-        param.setCreateTime(DateUtil.date());
+        param.setUpdateTime(DateUtil.date());
         Wrapper<HangingOrder> wrapper = DynamicCondition.toWrapper(query);
         return hangingOrderService.update(HangingOrderCov.INSTANCE.paramToDomain(param), wrapper);
     }

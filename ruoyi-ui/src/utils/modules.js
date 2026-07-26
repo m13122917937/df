@@ -1,10 +1,10 @@
-import moment from "moment"
+import dayjs from "dayjs"
 
 // 获取多少天后的方法 subtract
-export const getFutureDays = (day = 0, format = "YYYY-MM-DD") => moment().add(day, "days").format(format)
+export const getFutureDays = (day = 0, format = "YYYY-MM-DD") => dayjs().add(day, "day").format(format)
 
 // 获取多少天前的方法 以前天数
-export const getPreviousDays = (day = 0, format = "YYYY-MM-DD") => moment().subtract(day, "days").format(format)
+export const getPreviousDays = (day = 0, format = "YYYY-MM-DD") => dayjs().subtract(day, "day").format(format)
 
 // 获取状态label
 export const getDataLabel = (list, val) => (list || []).find(e => e.value == val)?.label || "-"
@@ -12,7 +12,7 @@ export const getDataLabel = (list, val) => (list || []).find(e => e.value == val
 // 获取两个时间相差天数
 
 export const differenceInDays = (date1, date2) => {
-  return moment(date2).diff(moment(date1), "days")
+  return dayjs(date2).diff(dayjs(date1), "day")
 }
 
 // 弹窗过高增加滚动
