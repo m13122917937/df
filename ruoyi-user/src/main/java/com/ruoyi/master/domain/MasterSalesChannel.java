@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -26,16 +27,7 @@ public class MasterSalesChannel {
     private String channelDepartmentName;
     private Long jkySubjectId;
     private String subjectName;
-    private String warehouseCode;
-    private String warehouseName;
-    private String contactName;
-    private String contactPhone;
-    private String email;
-    private String address;
-    private String countryName;
-    private String provinceName;
-    private String cityName;
-    private String townName;
+    private BigDecimal depositAmount;
     private String memo;
     private LocalDateTime lastSyncTime;
     private LocalDateTime createdTime;

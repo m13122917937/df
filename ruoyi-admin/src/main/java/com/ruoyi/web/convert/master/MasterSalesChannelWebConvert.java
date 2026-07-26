@@ -1,6 +1,8 @@
 package com.ruoyi.web.convert.master;
 
 import com.ruoyi.master.model.bo.MasterSalesChannelBO;
+import com.ruoyi.master.model.param.MasterSalesChannelDepositParam;
+import com.ruoyi.web.vo.master.MasterSalesChannelDepositRequest;
 import com.ruoyi.master.model.query.MasterSalesChannelQuery;
 import com.ruoyi.web.vo.master.MasterSalesChannelQueryRequest;
 import com.ruoyi.web.vo.master.MasterSalesChannelVO;
@@ -24,6 +26,14 @@ public interface MasterSalesChannelWebConvert {
      * @return 领域查询条件
      */
     MasterSalesChannelQuery toQuery(MasterSalesChannelQueryRequest source);
+
+    /**
+     * 转换销售渠道保证金维护请求。
+     *
+     * @param source Web 保证金维护请求
+     * @return 领域保证金维护参数
+     */
+    MasterSalesChannelDepositParam toDepositParam(MasterSalesChannelDepositRequest source);
 
     /**
      * 批量转换销售渠道响应。

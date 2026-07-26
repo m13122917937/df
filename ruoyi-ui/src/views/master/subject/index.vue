@@ -28,34 +28,39 @@
           <p>数据由吉客云定时同步维护，供供应链和经营分析统一使用。</p>
         </div>
       </div>
-      <el-table v-loading="loading" :data="subjectList" border stripe>
-        <el-table-column prop="subjectCode" label="主体编码" min-width="130" show-overflow-tooltip />
-        <el-table-column prop="subjectName" label="主体名称" min-width="220" show-overflow-tooltip />
-        <el-table-column prop="subjectShortName" label="主体简称" min-width="160" show-overflow-tooltip />
-        <el-table-column label="状态" width="110" align="center">
-          <template slot-scope="scope">
-            <el-tag :type="scope.row.isDelete === 1 ? 'danger' : 'success'" size="mini">
-              {{ scope.row.isDelete === 1 ? '已删除' : '正常' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="lastSyncTime" label="最后同步时间" min-width="180" />
-        <el-table-column label="操作" width="120" align="center" fixed="right">
-          <template slot-scope="scope">
-            <el-button
-              type="text"
-              icon="el-icon-bank-card"
-              @click="handleBankManage(scope.row)"
-              v-hasPermi="['master:subject:bank:list']"
-            >银行卡</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="subject-table-wrap">
+        <el-table v-loading="loading" :data="subjectList" height="100%" border stripe>
+          <el-table-column prop="subjectCode" label="主体编码" min-width="130" show-overflow-tooltip />
+          <el-table-column prop="subjectName" label="主体名称" min-width="220" show-overflow-tooltip />
+          <el-table-column prop="subjectShortName" label="主体简称" min-width="160" show-overflow-tooltip />
+          <el-table-column label="状态" width="110" align="center">
+            <template slot-scope="scope">
+              <el-tag :type="scope.row.isDelete === 1 ? 'danger' : 'success'" size="mini">
+                {{ scope.row.isDelete === 1 ? '已删除' : '正常' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="lastSyncTime" label="最后同步时间" min-width="180" />
+          <el-table-column label="操作" width="120" align="center" fixed="right">
+            <template slot-scope="scope">
+              <el-button
+                type="text"
+                icon="el-icon-bank-card"
+                @click="handleBankManage(scope.row)"
+                v-hasPermi="['master:subject:bank:list']"
+              >银行卡</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </section>
+
+    <section v-show="total > 0" class="subject-card subject-pagination-card">
       <pagination
-        v-show="total > 0"
         :total="total"
         :page.sync="queryParams.pageNum"
         :limit.sync="queryParams.pageSize"
+        :auto-scroll="false"
         @pagination="getList"
       />
     </section>
@@ -143,7 +148,10 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 100%;
+  height: calc(100vh - 112px);
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
   color: var(--nl-color);
 }
 
@@ -155,6 +163,39 @@ export default {
 
 .subject-filter-card :deep(.el-form-item) {
   margin-bottom: 0;
+}
+
+.subject-filter-card {
+  flex: 0 0 auto;
+}
+
+.subject-table-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.subject-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.subject-table-wrap :deep(.el-table) {
+  height: 100%;
+}
+
+.subject-pagination-card {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  padding: 12px 24px;
+}
+
+.subject-pagination-card :deep(.pagination-container) {
+  margin-top: 0;
 }
 
 .subject-filter-actions {

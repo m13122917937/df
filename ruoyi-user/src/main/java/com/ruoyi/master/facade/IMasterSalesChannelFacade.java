@@ -3,6 +3,7 @@ package com.ruoyi.master.facade;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.master.model.bo.MasterSalesChannelBO;
+import com.ruoyi.master.model.param.MasterSalesChannelDepositParam;
 import com.ruoyi.master.model.query.MasterSalesChannelQuery;
 
 /**
@@ -18,6 +19,13 @@ public interface IMasterSalesChannelFacade {
      * @return 销售渠道分页数据
      */
     PageBO<MasterSalesChannelBO> page(MasterSalesChannelQuery query, PageParamV2 pageParam);
+
+    /**
+     * 更新销售渠道保证金。
+     *
+     * @param param 保证金维护参数
+     */
+    void updateDeposit(MasterSalesChannelDepositParam param);
 
     /**
      * 同步吉客云销售渠道数据。

@@ -17,6 +17,7 @@ import com.ruoyi.master.convert.MasterSalesChannelConvert;
 import com.ruoyi.master.domain.MasterSalesChannel;
 import com.ruoyi.master.facade.IMasterSalesChannelFacade;
 import com.ruoyi.master.model.bo.MasterSalesChannelBO;
+import com.ruoyi.master.model.param.MasterSalesChannelDepositParam;
 import com.ruoyi.master.model.query.MasterSalesChannelQuery;
 import com.ruoyi.master.service.MasterSalesChannelService;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,12 @@ public class MasterSalesChannelFacade implements IMasterSalesChannelFacade {
         List<MasterSalesChannel> channels = masterSalesChannelService.list(
                 DynamicCondition.toWrapper(query, SortBy.of("-updated_time,-id")));
         return PageUtils.fromList(channels, MasterSalesChannelConvert.INSTANCE::toBOList);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void updateDeposit(final MasterSalesChannelDepositParam param) {
+        masterSalesChannelService.updateDeposit(param);
     }
 
     /** {@inheritDoc} */

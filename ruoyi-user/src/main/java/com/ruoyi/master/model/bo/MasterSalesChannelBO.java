@@ -2,6 +2,7 @@ package com.ruoyi.master.model.bo;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -19,12 +20,6 @@ public class MasterSalesChannelBO {
     private String platformName;
     private Long jkySubjectId;
     private String subjectName;
-    private String warehouseCode;
-    private String warehouseName;
-    private String contactName;
-    private String contactPhone;
-    private String address;
-    private String provinceName;
-    private String cityName;
+    private BigDecimal depositAmount;
     private LocalDateTime lastSyncTime;
 }

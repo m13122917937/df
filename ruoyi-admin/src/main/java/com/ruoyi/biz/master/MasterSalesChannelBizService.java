@@ -4,6 +4,7 @@ import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.master.facade.IMasterSalesChannelFacade;
 import com.ruoyi.master.model.bo.MasterSalesChannelBO;
+import com.ruoyi.master.model.param.MasterSalesChannelDepositParam;
 import com.ruoyi.master.model.query.MasterSalesChannelQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,5 +28,14 @@ public class MasterSalesChannelBizService {
     public PageBO<MasterSalesChannelBO> page(final MasterSalesChannelQuery query,
                                              final PageParamV2 pageParam) {
         return masterSalesChannelFacade.page(query, pageParam);
+    }
+
+    /**
+     * 更新销售渠道保证金。
+     *
+     * @param param 保证金维护参数
+     */
+    public void updateDeposit(final MasterSalesChannelDepositParam param) {
+        masterSalesChannelFacade.updateDeposit(param);
     }
 }

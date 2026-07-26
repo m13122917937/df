@@ -22,7 +22,6 @@ class MasterSalesChannelConvertTest {
         source.setChannelName("测试店铺");
         source.setOnlinePlatTypeName("拼多多");
         source.setCompanyName("测试主体");
-        source.setWarehouseName("测试仓库");
 
         MasterSalesChannel channel = MasterSalesChannelConvert.INSTANCE.toDomain(source);
 
@@ -30,6 +29,5 @@ class MasterSalesChannelConvertTest {
         assertEquals("SHOP-001", channel.getChannelCode());
         assertEquals("拼多多", channel.getPlatformName());
         assertEquals("测试主体", channel.getSubjectName());
-        assertEquals("测试仓库", channel.getWarehouseName());
     }
 }

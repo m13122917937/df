@@ -8,6 +8,7 @@ import com.ruoyi.jky.model.JkyResult;
 import com.ruoyi.jky.param.sales.SalesChannelQueryParam;
 import com.ruoyi.jky.rep.sales.SalesChannelDataRep;
 import com.ruoyi.master.facade.impl.MasterSalesChannelFacade;
+import com.ruoyi.master.model.param.MasterSalesChannelDepositParam;
 import com.ruoyi.master.service.MasterSalesChannelService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,9 @@ class MasterSalesChannelFacadeTest {
     @BeforeEach
     void setUp() {
         facade = new MasterSalesChannelFacade(masterSalesChannelService, jkyTemplate, redisCache);
+    }
+
+    private void mockSyncLock() {
         doAnswer(invocation -> {
             Runnable task = invocation.getArgument(4);
             task.run();
@@ -57,6 +61,7 @@ class MasterSalesChannelFacadeTest {
 
     @Test
     void shouldRunFullSyncWhenRedisCursorIsMissing() {
+        mockSyncLock();
         when(redisCache.<String>getCacheObject(anyString())).thenReturn(null);
         when(jkyTemplate.querySalesChannels(any(SalesChannelQueryParam.class))).thenReturn(successResponse());
 
@@ -70,6 +75,7 @@ class MasterSalesChannelFacadeTest {
 
     @Test
     void shouldUseRedisCursorWithFiveMinuteOverlap() {
+        mockSyncLock();
         when(redisCache.<String>getCacheObject(anyString())).thenReturn("2026-07-26 02:30:00");
         when(jkyTemplate.querySalesChannels(any(SalesChannelQueryParam.class))).thenReturn(successResponse());
 
@@ -83,12 +89,23 @@ class MasterSalesChannelFacadeTest {
 
     @Test
     void shouldNotAdvanceCursorWhenJkyRequestFails() {
+        mockSyncLock();
         when(redisCache.<String>getCacheObject(anyString())).thenReturn("2026-07-26 02:30:00");
         when(jkyTemplate.querySalesChannels(any(SalesChannelQueryParam.class))).thenReturn(new JkyResponse<>());
 
         assertThrows(ServiceException.class, () -> facade.syncSalesChannels());
 
         verify(redisCache, never()).setCacheObject(anyString(), anyString());
+    }
+
+    @Test
+    void shouldDelegateDepositUpdateToDomainService() {
+        MasterSalesChannelDepositParam param = new MasterSalesChannelDepositParam();
+        param.setId(1L);
+
+        facade.updateDeposit(param);
+
+        verify(masterSalesChannelService).updateDeposit(param);
     }
 
     private JkyResponse<SalesChannelDataRep> successResponse() {

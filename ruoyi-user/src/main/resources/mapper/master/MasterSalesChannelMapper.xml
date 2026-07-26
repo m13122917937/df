@@ -6,16 +6,12 @@
         INSERT INTO m_sales_channel (
             jky_channel_id, channel_code, channel_name, channel_type,
             platform_code, platform_name, channel_department_id, channel_department_name,
-            jky_subject_id, subject_name, warehouse_code, warehouse_name,
-            contact_name, contact_phone, email, address,
-            country_name, province_name, city_name, town_name, memo,
+            jky_subject_id, subject_name, memo,
             last_sync_time, created_time, updated_time
         ) VALUES (
             #{jkyChannelId}, #{channelCode}, #{channelName}, #{channelType},
             #{platformCode}, #{platformName}, #{channelDepartmentId}, #{channelDepartmentName},
-            #{jkySubjectId}, #{subjectName}, #{warehouseCode}, #{warehouseName},
-            #{contactName}, #{contactPhone}, #{email}, #{address},
-            #{countryName}, #{provinceName}, #{cityName}, #{townName}, #{memo},
+            #{jkySubjectId}, #{subjectName}, #{memo},
             #{lastSyncTime}, #{createdTime}, #{updatedTime}
         ) ON DUPLICATE KEY UPDATE
             channel_code = VALUES(channel_code),
@@ -27,18 +23,15 @@
             channel_department_name = VALUES(channel_department_name),
             jky_subject_id = VALUES(jky_subject_id),
             subject_name = VALUES(subject_name),
-            warehouse_code = VALUES(warehouse_code),
-            warehouse_name = VALUES(warehouse_name),
-            contact_name = VALUES(contact_name),
-            contact_phone = VALUES(contact_phone),
-            email = VALUES(email),
-            address = VALUES(address),
-            country_name = VALUES(country_name),
-            province_name = VALUES(province_name),
-            city_name = VALUES(city_name),
-            town_name = VALUES(town_name),
             memo = VALUES(memo),
             last_sync_time = VALUES(last_sync_time),
             updated_time = VALUES(updated_time)
     </insert>
+
+    <update id="updateDeposit">
+        UPDATE m_sales_channel
+        SET deposit_amount = #{depositAmount},
+            updated_time = NOW()
+        WHERE id = #{id}
+    </update>
 </mapper>
