@@ -1,6 +1,8 @@
 <template>
   <div class="app-container analysis-page">
-    <section class="analysis-card filter-card">
+    <operation-stats v-if="isOperationStats" />
+
+    <section v-if="!isOperationStats" class="analysis-card filter-card">
       <div class="section-title">{{ pageTitle }}</div>
       <el-form :inline="true" :model="query" size="small">
         <el-form-item label="经营日期">
@@ -26,7 +28,7 @@
       </el-form>
     </section>
 
-    <section class="metric-grid">
+    <section v-if="!isOperationStats" class="metric-grid">
       <article v-for="item in cards" :key="item.key" class="analysis-card metric-card">
         <span>{{ item.label }}</span>
         <strong :class="{ pending: item.pending }">{{ item.value }}</strong>
@@ -34,12 +36,12 @@
       </article>
     </section>
 
-    <section v-if="isQuality" class="analysis-card quality-summary">
+    <section v-if="!isOperationStats && isQuality" class="analysis-card quality-summary">
       <el-progress :percentage="completenessRate" :status="incompleteCount ? 'warning' : 'success'" />
       <div>事实记录 {{ factCount }} 条，缺失核算数据 {{ incompleteCount }} 条</div>
     </section>
 
-    <section class="analysis-card table-card">
+    <section v-if="!isOperationStats" class="analysis-card table-card">
       <div class="table-toolbar">
         <div class="section-title">{{ tableTitle }}</div>
         <span>共 {{ visibleRows.length }} 条</span>
@@ -82,26 +84,16 @@
       />
     </section>
 
-    <section v-if="metricTree.length" class="analysis-card metric-tree">
-      <div class="section-title">经营指标树</div>
-      <div class="tree-grid">
-        <div v-for="node in metricTree" :key="node.key" class="tree-node">
-          <span>{{ node.name }}</span>
-          <strong>{{ money(node.value) }}</strong>
-          <el-tag :type="node.calcStatus === 'COMPLETE' ? 'success' : 'warning'" size="mini">
-            {{ node.calcStatus === 'COMPLETE' ? '已核算' : '待核算' }}
-          </el-tag>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
 <script>
 import { getAnalysisDashboard, rebuildAnalysis, runAnalysisSync } from '@/api/analysis'
+import OperationStats from './components/OperationStats.vue'
 
 export default {
   name: 'AnalysisDashboard',
+  components: { OperationStats },
   data() {
     return {
       loading: false,
@@ -124,13 +116,13 @@ export default {
         performanceRollup: 'performanceRollup',
         channelProduction: 'channelProduction',
         humanEfficiency: 'humanEfficiency',
-        metricTree: 'metricTree',
         dataQuality: 'dataQuality'
       }
       const key = Object.keys(mapping).find(item => path.indexOf(item) !== -1)
       return key ? mapping[key] : 'operationStats'
     },
     pageTitle() { return this.$route.meta.title || '经营统计' },
+    isOperationStats() { return this.apiType === 'operationStats' },
     tableTitle() { return this.isQuality ? '数据质量异常明细' : `${this.pageTitle}明细` },
     showTaskActions() { return this.apiType === 'operationStats' },
     isQuality() { return this.apiType === 'dataQuality' },
@@ -157,9 +149,12 @@ export default {
     }
   },
   watch: {
-    '$route.fullPath'() { this.loadData() }
+    '$route.fullPath'() {
+      if (!this.isOperationStats) this.loadData()
+    }
   },
   created() {
+    if (this.isOperationStats) return
     const yesterday = new Date(Date.now() - 86400000)
     const end = this.formatDate(yesterday)
     const start = this.formatDate(new Date(yesterday.getTime() - 29 * 86400000))
@@ -177,13 +172,8 @@ export default {
         const response = await getAnalysisDashboard(this.apiType, params)
         const data = response.data || {}
         if (Array.isArray(data)) {
-          if (this.apiType === 'metricTree') {
-            this.metricTree = data
-            this.rows = []
-          } else {
-            this.rows = data.map(this.normalizeFactRow)
-            this.metricTree = []
-          }
+          this.rows = data.map(this.normalizeFactRow)
+          this.metricTree = []
           this.summary = {}
           this.factCount = data.length
           this.incompleteCount = this.rows.filter(item => item.incompleteCount > 0).length
@@ -246,7 +236,7 @@ export default {
 <style lang="scss" scoped>
 .analysis-page { color: var(--nl-color); background: var(--bg-page); min-height: 100%; }
 .analysis-card { background: var(--bg-card); border: 1px solid var(--border-tags); border-radius: var(--radius); box-shadow: var(--shadow-card); }
-.filter-card, .table-card, .metric-tree, .quality-summary { padding: var(--page-card-padding); margin-bottom: var(--page-section-gap); }
+.filter-card, .table-card, .quality-summary { padding: var(--page-card-padding); margin-bottom: var(--page-section-gap); }
 .section-title { color: var(--nl-color-title); font-size: 16px; font-weight: 600; margin-bottom: 16px; }
 .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--page-section-gap); margin-bottom: var(--page-section-gap); }
 .metric-card { padding: 18px; display: flex; flex-direction: column; gap: 8px; }

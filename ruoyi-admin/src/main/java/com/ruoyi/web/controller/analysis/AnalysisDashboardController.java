@@ -33,6 +33,17 @@ public class AnalysisDashboardController extends BaseController {
     }
 
     /**
+     * 查询经营统计基础数据筛选项。
+     *
+     * @return 平台、店铺、品牌与品类筛选项
+     */
+    @GetMapping("/filter-options")
+    public AjaxResult filterOptions() {
+        return AjaxResult.success(AnalysisWebConvert.INSTANCE.toDashboardFilterOptionsVO(
+                dashboardBizService.listFilterOptions()));
+    }
+
+    /**
      * 绩效汇总。
      */
     @GetMapping("/performanceRollup")
@@ -60,16 +71,6 @@ public class AnalysisDashboardController extends BaseController {
         AnalysisDashboardVO result = AnalysisWebConvert.INSTANCE.toDashboardVO(
                 dashboardBizService.humanEfficiency(AnalysisWebConvert.INSTANCE.toQuery(request)));
         return AjaxResult.success(result);
-    }
-
-    /**
-     * 指标树。
-     */
-    @GetMapping("/metricTree")
-    public AjaxResult metricTree(AnalysisQueryRequest request) {
-        AnalysisDashboardVO result = AnalysisWebConvert.INSTANCE.toDashboardVO(
-                dashboardBizService.dashboard(AnalysisWebConvert.INSTANCE.toQuery(request)));
-        return AjaxResult.success(result.getMetricTree());
     }
 
     /**

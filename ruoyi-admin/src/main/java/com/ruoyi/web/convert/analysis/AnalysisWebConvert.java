@@ -3,14 +3,19 @@ package com.ruoyi.web.convert.analysis;
 import com.ruoyi.analysis.model.bo.AnalysisCostConfigBO;
 import com.ruoyi.analysis.model.bo.AnalysisCollectionCycleConfigBO;
 import com.ruoyi.analysis.model.bo.AnalysisDashboardBO;
+import com.ruoyi.analysis.model.bo.AnalysisDashboardFilterOptionsBO;
 import com.ruoyi.analysis.model.bo.AnalysisImportLogBO;
 import com.ruoyi.analysis.model.bo.AnalysisMarginConfigBO;
 import com.ruoyi.analysis.model.bo.AnalysisOrderFactBO;
+import com.ruoyi.analysis.model.bo.AnalysisPlatformFeeRateBO;
 import com.ruoyi.analysis.model.bo.AnalysisSyncBO;
+import com.ruoyi.analysis.model.bo.AnalysisStoreOptionBO;
 import com.ruoyi.analysis.model.bo.AnalysisWarehouseCostConfigBO;
+import com.ruoyi.master.model.bo.MasterSalesChannelBO;
 import com.ruoyi.analysis.model.param.AnalysisCostConfigParam;
 import com.ruoyi.analysis.model.param.AnalysisCollectionCycleConfigParam;
 import com.ruoyi.analysis.model.param.AnalysisMarginConfigParam;
+import com.ruoyi.analysis.model.param.AnalysisPlatformFeeRateParam;
 import com.ruoyi.analysis.model.param.AnalysisWarehouseCostConfigParam;
 import com.ruoyi.analysis.model.query.AnalysisQuery;
 import com.ruoyi.analysis.model.query.AnalysisCollectionCycleConfigQuery;
@@ -21,16 +26,21 @@ import com.ruoyi.web.vo.analysis.AnalysisCollectionCycleConfigSaveRequest;
 import com.ruoyi.web.vo.analysis.AnalysisCollectionCycleConfigVO;
 import com.ruoyi.web.vo.analysis.AnalysisCostConfigVO;
 import com.ruoyi.web.vo.analysis.AnalysisDashboardVO;
+import com.ruoyi.web.vo.analysis.AnalysisDashboardFilterOptionsVO;
 import com.ruoyi.web.vo.analysis.AnalysisImportLogVO;
 import com.ruoyi.web.vo.analysis.AnalysisMarginConfigQueryRequest;
 import com.ruoyi.web.vo.analysis.AnalysisMarginConfigSaveRequest;
 import com.ruoyi.web.vo.analysis.AnalysisMarginConfigVO;
 import com.ruoyi.web.vo.analysis.AnalysisOrderFactVO;
+import com.ruoyi.web.vo.analysis.AnalysisPlatformFeeRateSaveRequest;
+import com.ruoyi.web.vo.analysis.AnalysisPlatformFeeRateVO;
 import com.ruoyi.web.vo.analysis.AnalysisQueryRequest;
 import com.ruoyi.web.vo.analysis.AnalysisSyncVO;
+import com.ruoyi.web.vo.analysis.AnalysisStoreOptionVO;
 import com.ruoyi.web.vo.analysis.AnalysisWarehouseCostConfigSaveRequest;
 import com.ruoyi.web.vo.analysis.AnalysisWarehouseCostConfigVO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -60,11 +70,27 @@ public interface AnalysisWebConvert {
 
     List<AnalysisWarehouseCostConfigVO> toWarehouseCostVOList(List<AnalysisWarehouseCostConfigBO> source);
 
+    AnalysisPlatformFeeRateParam toPlatformFeeRateParam(AnalysisPlatformFeeRateSaveRequest source);
+
+    AnalysisPlatformFeeRateVO toPlatformFeeRateVO(AnalysisPlatformFeeRateBO source);
+
+    List<AnalysisPlatformFeeRateVO> toPlatformFeeRateVOList(List<AnalysisPlatformFeeRateBO> source);
+
+    @Mapping(target = "channelId", source = "id")
+    @Mapping(target = "shopName", source = "channelName")
+    AnalysisStoreOptionVO toStoreOptionVO(MasterSalesChannelBO source);
+
+    List<AnalysisStoreOptionVO> toStoreOptionVOList(List<MasterSalesChannelBO> source);
+
     AnalysisMarginConfigVO toMarginConfigVO(AnalysisMarginConfigBO source);
 
     List<AnalysisMarginConfigVO> toMarginConfigVOList(List<AnalysisMarginConfigBO> source);
 
     AnalysisDashboardVO toDashboardVO(AnalysisDashboardBO source);
+
+    AnalysisDashboardFilterOptionsVO toDashboardFilterOptionsVO(AnalysisDashboardFilterOptionsBO source);
+
+    AnalysisStoreOptionVO toStoreOptionVO(AnalysisStoreOptionBO source);
 
     AnalysisDashboardVO.MetricVO toMetricVO(AnalysisDashboardBO.MetricBO source);
 
