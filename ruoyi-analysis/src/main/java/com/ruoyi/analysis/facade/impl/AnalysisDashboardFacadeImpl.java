@@ -48,22 +48,6 @@ public class AnalysisDashboardFacadeImpl implements AnalysisDashboardFacade {
      * {@inheritDoc}
      */
     @Override
-    public AnalysisDashboardBO channelProduction(AnalysisQuery query) {
-        return metricService.channelProduction(listMetrics(query));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AnalysisDashboardBO humanEfficiency(AnalysisQuery query) {
-        return metricService.humanEfficiency(listMetrics(query));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<AnalysisOrderFactBO> dataQuality(AnalysisQuery query) {
         return listFacts(AnalysisQueryConvert.INSTANCE.toIncompleteFactQuery(query));
     }

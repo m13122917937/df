@@ -45,7 +45,6 @@ class AnalysisMapStructConvertTest {
         AnalysisMetricCalculation source = AnalysisMetricCalculation.builder()
                 .metricDate(LocalDate.of(2026, 7, 18)).platform("PDD")
                 .salesRevenue(new BigDecimal("200")).goodsGrossProfit(new BigDecimal("40"))
-                .directHeadcount(new BigDecimal("3"))
                 .factCount(2).incompleteCount(0).calcStatus("COMPLETE").build();
 
         AnalysisDailyMetric metric = AnalysisMetricConvert.INSTANCE.toDomain(source);
@@ -54,7 +53,6 @@ class AnalysisMapStructConvertTest {
         assertEquals("PDD", metric.getPlatform());
         assertEquals(new BigDecimal("200"), metric.getSalesRevenue());
         assertEquals(new BigDecimal("20.00"), summary.getGoodsGrossMargin());
-        assertEquals(new BigDecimal("3"), metric.getDirectHeadcount());
         assertEquals("COMPLETE", summary.getCalcStatus());
     }
 

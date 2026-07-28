@@ -5,6 +5,7 @@ import com.ruoyi.analysis.domain.AnalysisCollectionCycleConfig;
 import com.ruoyi.analysis.domain.AnalysisImportLog;
 import com.ruoyi.analysis.domain.AnalysisMarginConfig;
 import com.ruoyi.analysis.domain.AnalysisOrderFact;
+import com.ruoyi.analysis.domain.AnalysisPlatformFeeRate;
 import com.ruoyi.analysis.domain.AnalysisSyncLog;
 import com.ruoyi.analysis.domain.AnalysisWarehouseCostConfig;
 import com.ruoyi.analysis.model.bo.AnalysisCostConfigBO;
@@ -12,11 +13,13 @@ import com.ruoyi.analysis.model.bo.AnalysisCollectionCycleConfigBO;
 import com.ruoyi.analysis.model.bo.AnalysisImportLogBO;
 import com.ruoyi.analysis.model.bo.AnalysisMarginConfigBO;
 import com.ruoyi.analysis.model.bo.AnalysisOrderFactBO;
+import com.ruoyi.analysis.model.bo.AnalysisPlatformFeeRateBO;
 import com.ruoyi.analysis.model.bo.AnalysisSyncBO;
 import com.ruoyi.analysis.model.bo.AnalysisWarehouseCostConfigBO;
 import com.ruoyi.analysis.model.param.AnalysisCostConfigParam;
 import com.ruoyi.analysis.model.param.AnalysisCollectionCycleConfigParam;
 import com.ruoyi.analysis.model.param.AnalysisMarginConfigParam;
+import com.ruoyi.analysis.model.param.AnalysisPlatformFeeRateParam;
 import com.ruoyi.analysis.model.param.AnalysisWarehouseCostConfigParam;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -58,6 +61,12 @@ public interface AnalysisConvert {
     AnalysisOrderFactBO toBO(AnalysisOrderFact domain);
 
     List<AnalysisOrderFactBO> toFactBOList(List<AnalysisOrderFact> domains);
+
+    AnalysisPlatformFeeRate toDomain(AnalysisPlatformFeeRateParam param);
+
+    AnalysisPlatformFeeRateBO toPlatformFeeRateBO(AnalysisPlatformFeeRate domain);
+
+    List<AnalysisPlatformFeeRateBO> toPlatformFeeRateBOList(List<AnalysisPlatformFeeRate> domains);
 
     AnalysisSyncBO toBO(AnalysisSyncLog domain);
 

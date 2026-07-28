@@ -54,9 +54,6 @@ public interface AnalysisConfigWebConvert {
         if (source.getCostScope() != null && !source.getCostScope().trim().isEmpty()) {
             extra.put("costScope", source.getCostScope().trim());
         }
-        if (source.getHeadcount() != null) {
-            extra.put("headcount", source.getHeadcount());
-        }
         target.setExtraData(extra.size() == 0 ? null : JacksonUtil.toJson(extra));
     }
 
@@ -77,9 +74,6 @@ public interface AnalysisConfigWebConvert {
         }
         if (extra.hasNonNull("costScope")) {
             target.setCostScope(extra.get("costScope").asText());
-        }
-        if (extra.hasNonNull("headcount")) {
-            target.setHeadcount(extra.get("headcount").decimalValue());
         }
     }
 }

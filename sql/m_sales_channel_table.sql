@@ -11,8 +11,6 @@ CREATE TABLE IF NOT EXISTS `m_sales_channel` (
     `channel_department_name` varchar(128) DEFAULT NULL COMMENT '渠道部门名称',
     `jky_subject_id` bigint DEFAULT NULL COMMENT '吉客云经营主体ID',
     `subject_name` varchar(255) DEFAULT NULL COMMENT '经营主体名称',
-    `deposit_amount` decimal(18,2) NOT NULL DEFAULT 0.00 COMMENT '保证金金额',
-    `memo` varchar(1000) DEFAULT NULL COMMENT '备注',
     `last_sync_time` datetime NOT NULL COMMENT '最后同步时间',
     `created_time` datetime NOT NULL COMMENT '创建时间',
     `updated_time` datetime NOT NULL COMMENT '更新时间',

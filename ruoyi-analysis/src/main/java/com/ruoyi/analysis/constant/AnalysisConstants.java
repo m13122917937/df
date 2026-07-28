@@ -20,11 +20,10 @@ public final class AnalysisConstants {
     public static final String COST_SCOPE_DEPARTMENT = "DEPARTMENT";
     public static final String EXTRA_COST_SCOPE = "costScope";
     public static final String EXTRA_ANNUAL_RATE = "annualRate";
-    public static final String EXTRA_HEADCOUNT = "headcount";
 
     public static final Set<String> CONFIG_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "FIXED_COEFFICIENT", "CASHBACK", "PENALTY", "PROMOTION", "MARGIN",
-            "COLLECTION_DAYS", "INTERNAL_COST", "WAREHOUSE_COST", "SHOP_WHITELIST", "PLATFORM_FEE",
+            "CASHBACK", "PENALTY", "PROMOTION", "MARGIN",
+            "COLLECTION_DAYS", "INTERNAL_COST", "WAREHOUSE_COST", "SHOP_WHITELIST",
             "LOGISTICS", "IMPAIRMENT", "TAX", "OTHER_ADJUSTMENT")));
 
     private AnalysisConstants() {

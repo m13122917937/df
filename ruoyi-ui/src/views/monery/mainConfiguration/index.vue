@@ -50,124 +50,82 @@
     <!-- 主体表格 -->
     <div class="table-section">
       <el-table
+        ref="mainConfigTable"
         :header-cell-style="{
           background: '#f7f8fa',
           color: '#606266',
           fontWeight: 600,
         }"
         :cell-style="{ padding: '8px 0' }"
-        :data="tableData"
+        :data="filteredTableData"
         v-loading="loading"
         border
         style="width: 100%"
         height="100%"
         stripe
       >
-      <template slot="empty">
+        <template slot="empty">
           <EmptyState text="暂无企业数据" />
         </template>
         <el-table-column
-          prop="payName"
-          label="收款企业名称"
-          min-width="250"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="nickName"
-          label="简称"
-          min-width="80"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="outCode"
-          label="吉客云编号"
-          min-width="120"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="bankName"
-          label="开户行全称"
-          min-width="200"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="payNo"
-          label="银行账号"
-          min-width="200"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="balance"
-          label="账户余额"
-          min-width="180"
+          v-for="column in visibleColumns"
+          :key="column.key"
+          :prop="column.isAction ? undefined : column.key"
+          :label="column.label"
+          :min-width="column.minWidth"
+          :show-overflow-tooltip="column.showOverflowTooltip"
+          :header-cell-class-name="column.isAction ? 'action-column-th' : ''"
         >
+          <template #header>
+            <div class="master-product-column-header">
+              <template v-if="column.isAction">{{ column.label }}</template>
+              <FilterHeader
+                v-else
+                :label="column.label"
+                :value="columnSearch[column.key]"
+                :options="colFilterOptions[column.key] || []"
+                @update:value="updateColumnFilter(column.key, $event)"
+              />
+            </div>
+          </template>
           <template slot-scope="scope">
-            <!-- <el-tooltip content="点击查看该账户的流水记录" placement="top"> -->
+            <template v-if="column.key === '_actions'">
+              <el-button
+                size="mini"
+                type="primary"
+                @click="handleEdit(scope.row)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                size="mini"
+                type="success"
+                style="margin-left: 8px;"
+                :disabled="scope.row.actived !== 0"
+                @click="handleAddTransaction(scope.row)"
+              >
+                新增流水
+              </el-button>
+            </template>
+            <template v-else-if="column.key === 'balance'">
               <span
                 class="balance-clickable"
                 @click="openTransactionList(scope.row)"
               >
                 <i class="el-icon-document balance-icon" />
                 <span class="balance-amount">
-                  {{ formatBalance(scope.row.balance) }}
+                  {{ getColumnValue(scope.row, column.key) }}
                 </span>
               </span>
-            <!-- </el-tooltip> -->
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="actived"
-          label="状态"
-          min-width="100"
-        >
-          <template slot-scope="scope">
-            <el-tag :type="scope.row.actived === 0 ? 'success' : 'info'" size="small">
-              {{ scope.row.actived === 0 ? '激活' : '弃用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="createName"
-          label="创建人"
-          min-width="120"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="createTime"
-          label="创建时间"
-          width="200"
-          show-overflow-tooltip
-        />
-         <el-table-column
-          prop="updateName"
-          label="修改人"
-          min-width="120"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="updateTime"
-          label="更新时间"
-          width="200"
-          show-overflow-tooltip
-        />
-        <el-table-column label="操作" fixed="right" width="180">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              type="primary"
-              @click="handleEdit(scope.row)"
-            >
-              编辑
-            </el-button>
-            <el-button
-              size="mini"
-              type="success"
-              style="margin-left: 8px;"
-              :disabled="scope.row.actived !== 0"
-              @click="handleAddTransaction(scope.row)"
-            >
-              新增流水
-            </el-button>
+            </template>
+            <template v-else-if="column.key === 'actived'">
+              <el-tag :type="scope.row.actived === 0 ? 'success' : 'info'" size="small">
+                {{ getColumnValue(scope.row, column.key) }}
+              </el-tag>
+            </template>
+            <template v-else>
+              {{ getColumnValue(scope.row, column.key) }}
+            </template>
           </template>
         </el-table-column>
       </el-table>
@@ -212,12 +170,36 @@
 </template>
 
 <script>
+import Sortable from 'sortablejs'
 import PaymentEntityDialog from './components/PaymentEntityDialog.vue'
 import TransactionDialog from './components/TransactionDialog.vue'
 import TransactionListDialog from './components/TransactionListDialog.vue'
 import EmptyState from "@/views/demandManage/wholesale/components/emptyState.vue"
+import FilterHeader from '@/views/business/manage/components/FilterHeader.vue'
 import { getPayerListApi, addPayerApi, updatePayerApi, getPayerAllListApi, addTransactionApi } from "@/api/monery"
 import { getSubjectOptionList } from "@/api/master"
+
+const COLUMNS = [
+  { key: 'payName', label: '收款企业名称', minWidth: 250, showOverflowTooltip: true },
+  { key: 'nickName', label: '简称', minWidth: 80, showOverflowTooltip: true },
+  { key: 'outCode', label: '吉客云编号', minWidth: 120, showOverflowTooltip: true },
+  { key: 'bankName', label: '开户行全称', minWidth: 200, showOverflowTooltip: true },
+  { key: 'payNo', label: '银行账号', minWidth: 200, showOverflowTooltip: true },
+  { key: 'balance', label: '账户余额', minWidth: 180, showOverflowTooltip: false },
+  { key: 'actived', label: '状态', minWidth: 100, showOverflowTooltip: false },
+  { key: 'createName', label: '创建人', minWidth: 120, showOverflowTooltip: true },
+  { key: 'createTime', label: '创建时间', minWidth: 200, showOverflowTooltip: true },
+  { key: 'updateName', label: '修改人', minWidth: 120, showOverflowTooltip: true },
+  { key: 'updateTime', label: '更新时间', minWidth: 200, showOverflowTooltip: true },
+  { key: '_actions', label: '操作', minWidth: 180, showOverflowTooltip: false, isAction: true }
+]
+
+function createColumnSearch() {
+  return COLUMNS.reduce((search, column) => {
+    search[column.key] = []
+    return search
+  }, {})
+}
 
 export default {
   name: 'MainConfiguration',
@@ -225,7 +207,8 @@ export default {
     PaymentEntityDialog,
     TransactionDialog,
     TransactionListDialog,
-    EmptyState
+    EmptyState,
+    FilterHeader
   },
   data() {
     return {
@@ -236,7 +219,7 @@ export default {
       tableData: [],
       pagination: {
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 30,
         total: 0
       },
       dialogVisible: false,
@@ -260,13 +243,39 @@ export default {
         id: null,
         name: ''
       },
-      defaultAccountName: null
+      defaultAccountName: null,
+      columnOrder: COLUMNS.map(column => column.key),
+      columnSearch: createColumnSearch()
+    }
+  },
+  computed: {
+    visibleColumns() {
+      return this.columnOrder.map(key => COLUMNS.find(column => column.key === key))
+    },
+    colFilterOptions() {
+      return COLUMNS.reduce((options, column) => {
+        if (column.isAction) return options
+        const values = this.tableData
+          .map(row => this.getColumnValue(row, column.key))
+          .filter(value => value !== '-')
+        options[column.key] = [...new Set(values)].map(value => ({ text: value, value }))
+        return options
+      }, {})
+    },
+    filteredTableData() {
+      return this.tableData.filter(row => this.matchesColumnFilters(row))
     }
   },
   created() {
     this.loadTableData()
     this.fetchAllPayers()
     this.loadSubjectOptions()
+  },
+  mounted() {
+    this.$nextTick(this.initColumnDrag)
+  },
+  beforeDestroy() {
+    this.destroyColumnDrag()
   },
   methods: {
     // 搜索
@@ -364,6 +373,17 @@ export default {
         this.$message.error(isEdit ? '修改失败' : '添加失败')
       }
     },
+    getColumnValue(row, key) {
+      if (key === 'actived') {
+        return row.actived === 0 ? '激活' : '弃用'
+      }
+      if (key === 'balance') {
+        const num = Number(row.balance || 0)
+        if (!isFinite(num)) return '0.00'
+        return num.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      }
+      return row[key] || '-'
+    },
     formatBalance(val) {
       const num = Number(val || 0)
       if (!isFinite(num)) return '0.00'
@@ -427,6 +447,50 @@ export default {
         name: row.payName
       }
       this.transactionListVisible = true
+    },
+    // 列筛选
+    updateColumnFilter(key, values) {
+      this.$set(this.columnSearch, key, values)
+    },
+    matchesColumnFilters(row) {
+      return COLUMNS.every(column => {
+        if (column.isAction) return true
+        const values = this.columnSearch[column.key]
+        return !values.length || values.includes(this.getColumnValue(row, column.key))
+      })
+    },
+    // 拖拽排序
+    initColumnDrag() {
+      const table = this.$refs.mainConfigTable
+      const headerRow = table && table.$el.querySelector('.el-table__header-wrapper tr')
+      if (!headerRow) {
+        return
+      }
+      this.destroyColumnDrag()
+      this.columnSortable = Sortable.create(headerRow, {
+        animation: 150,
+        fallbackTolerance: 6,
+        filter: '.action-column-th',
+        onEnd: ({ oldIndex, newIndex }) => this.moveColumn(oldIndex, newIndex)
+      })
+    },
+    destroyColumnDrag() {
+      if (this.columnSortable) {
+        this.columnSortable.destroy()
+        this.columnSortable = null
+      }
+    },
+    moveColumn(oldIndex, newIndex) {
+      if (oldIndex === newIndex || oldIndex === undefined || newIndex === undefined) {
+        return
+      }
+      const movedKey = this.columnOrder.splice(oldIndex, 1)[0]
+      this.columnOrder.splice(newIndex, 0, movedKey)
+      this.destroyColumnDrag()
+      this.$nextTick(() => {
+        this.$refs.mainConfigTable.doLayout()
+        this.initColumnDrag()
+      })
     }
   }
 }
@@ -620,5 +684,16 @@ export default {
     border-radius: var(--radius);
     box-shadow: var(--shadow-card);
   }
+}
+
+.master-product-column-header {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.master-product-column-header :deep(.filter-header-trigger) {
+  flex: 1;
+  min-width: 0;
 }
 </style>

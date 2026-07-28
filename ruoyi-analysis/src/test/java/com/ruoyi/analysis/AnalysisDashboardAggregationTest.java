@@ -18,16 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AnalysisDashboardAggregationTest {
 
     @Test
-    void shouldAggregatePerformanceAndChannelByDifferentDimensions() {
+    void shouldAggregatePerformanceBySubject() {
         AnalysisMetricService service = new AnalysisMetricService();
         List<AnalysisDailyMetric> metrics = Arrays.asList(metric("主体A", "PDD", "店铺1", "品牌A", "手机", "SKU-1", "100"),
                 metric("主体A", "TB", "店铺2", "品牌A", "手机", "SKU-2", "200"));
 
         AnalysisDashboardBO performance = service.performanceRollup(metrics);
-        AnalysisDashboardBO channel = service.channelProduction(metrics);
 
         assertEquals(1, performance.getRows().size());
-        assertEquals(2, channel.getRows().size());
         assertEquals(new BigDecimal("300"), performance.getSummary().getSalesRevenue());
     }
 

@@ -11,14 +11,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * 商品基础数据对象 p_product_sku
+ * 商品 SKU 主数据对象 m_product_sku。
  *
  * @author ruoyi
  * @date 2025-09-21
  */
 @Data
 @Accessors(chain = true)
-@TableName("p_product_sku")
+@TableName("m_product_sku")
 public class ProductSku {
     private static final long serialVersionUID = 1L;
 

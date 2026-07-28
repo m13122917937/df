@@ -8,6 +8,13 @@ export function getAnalysisDashboard(type, params) {
   })
 }
 
+export function getAnalysisDashboardFilterOptions() {
+  return request({
+    url: '/analysis/dashboard/filter-options',
+    method: 'get'
+  })
+}
+
 export function getAnalysisConfigList(params) {
   return request({
     url: '/analysis/config/list',
@@ -30,6 +37,10 @@ export function deleteAnalysisMargin(id) {
 
 export function getAnalysisCollectionCycleList(params) {
   return request({ url: '/analysis/collection-cycle/list', method: 'get', params })
+}
+
+export function getAnalysisStoreOptions() {
+  return request({ url: '/analysis/store-options', method: 'get' })
 }
 
 export function saveAnalysisCollectionCycle(data) {
@@ -87,5 +98,47 @@ export function rebuildAnalysis(date) {
     url: '/analysis/calculate/rebuild',
     method: 'post',
     params: { date }
+  })
+}
+
+// 平台服务费率
+export function getPlatformFeeRateList(params) {
+  return request({ url: '/analysis/platform-fee-rate/list', method: 'get', params })
+}
+
+export function savePlatformFeeRate(data) {
+  return request({ url: '/analysis/platform-fee-rate/save', method: 'post', data })
+}
+
+export function deletePlatformFeeRate(id) {
+  return request({ url: `/analysis/platform-fee-rate/${id}`, method: 'delete' })
+}
+
+export function importPlatformFeeRate(overwrite, file) {
+  const data = new FormData()
+  data.append('file', file)
+  return request({
+    url: '/analysis/platform-fee-rate/import',
+    method: 'post',
+    params: { overwrite },
+    data,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+export function exportPlatformFeeRate(params) {
+  return request({
+    url: '/analysis/platform-fee-rate/export',
+    method: 'post',
+    params,
+    responseType: 'blob'
+  })
+}
+
+export function downloadPlatformFeeRateTemplate() {
+  return request({
+    url: '/analysis/platform-fee-rate/template',
+    method: 'post',
+    responseType: 'blob'
   })
 }

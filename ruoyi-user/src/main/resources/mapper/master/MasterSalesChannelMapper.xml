@@ -6,12 +6,12 @@
         INSERT INTO m_sales_channel (
             jky_channel_id, channel_code, channel_name, channel_type,
             platform_code, platform_name, channel_department_id, channel_department_name,
-            jky_subject_id, subject_name, memo,
+            jky_subject_id, subject_name,
             last_sync_time, created_time, updated_time
         ) VALUES (
             #{jkyChannelId}, #{channelCode}, #{channelName}, #{channelType},
             #{platformCode}, #{platformName}, #{channelDepartmentId}, #{channelDepartmentName},
-            #{jkySubjectId}, #{subjectName}, #{memo},
+            #{jkySubjectId}, #{subjectName},
             #{lastSyncTime}, #{createdTime}, #{updatedTime}
         ) ON DUPLICATE KEY UPDATE
             channel_code = VALUES(channel_code),
@@ -23,15 +23,8 @@
             channel_department_name = VALUES(channel_department_name),
             jky_subject_id = VALUES(jky_subject_id),
             subject_name = VALUES(subject_name),
-            memo = VALUES(memo),
             last_sync_time = VALUES(last_sync_time),
             updated_time = VALUES(updated_time)
     </insert>
 
-    <update id="updateDeposit">
-        UPDATE m_sales_channel
-        SET deposit_amount = #{depositAmount},
-            updated_time = NOW()
-        WHERE id = #{id}
-    </update>
 </mapper>

@@ -3,8 +3,9 @@ package com.ruoyi.master.facade;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.master.model.bo.MasterSalesChannelBO;
-import com.ruoyi.master.model.param.MasterSalesChannelDepositParam;
 import com.ruoyi.master.model.query.MasterSalesChannelQuery;
+
+import java.util.List;
 
 /**
  * 销售渠道主数据领域对外接口。
@@ -21,11 +22,11 @@ public interface IMasterSalesChannelFacade {
     PageBO<MasterSalesChannelBO> page(MasterSalesChannelQuery query, PageParamV2 pageParam);
 
     /**
-     * 更新销售渠道保证金。
+     * 查询可用于经营分析配置的平台与店铺。
      *
-     * @param param 保证金维护参数
+     * @return 销售渠道主数据集合
      */
-    void updateDeposit(MasterSalesChannelDepositParam param);
+    List<MasterSalesChannelBO> listStoreOptions();
 
     /**
      * 同步吉客云销售渠道数据。

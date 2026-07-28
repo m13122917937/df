@@ -7,8 +7,8 @@ import com.ruoyi.jky.model.JkyResponse;
 import com.ruoyi.jky.model.JkyResult;
 import com.ruoyi.jky.param.sales.SalesChannelQueryParam;
 import com.ruoyi.jky.rep.sales.SalesChannelDataRep;
+import com.ruoyi.master.domain.MasterSalesChannel;
 import com.ruoyi.master.facade.impl.MasterSalesChannelFacade;
-import com.ruoyi.master.model.param.MasterSalesChannelDepositParam;
 import com.ruoyi.master.service.MasterSalesChannelService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,13 +99,14 @@ class MasterSalesChannelFacadeTest {
     }
 
     @Test
-    void shouldDelegateDepositUpdateToDomainService() {
-        MasterSalesChannelDepositParam param = new MasterSalesChannelDepositParam();
-        param.setId(1L);
+    void shouldReadStoreOptionsFromMasterData() {
+        MasterSalesChannel channel = new MasterSalesChannel();
+        channel.setChannelName("测试店铺");
+        when(masterSalesChannelService.list(any())).thenReturn(List.of(channel));
 
-        facade.updateDeposit(param);
+        assertEquals(1, facade.listStoreOptions().size());
 
-        verify(masterSalesChannelService).updateDeposit(param);
+        verify(masterSalesChannelService).list(any());
     }
 
     private JkyResponse<SalesChannelDataRep> successResponse() {

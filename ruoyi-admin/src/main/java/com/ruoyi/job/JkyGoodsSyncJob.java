@@ -44,7 +44,7 @@ public class JkyGoodsSyncJob {
     private SyncTimeUtil syncTimeUtil;
 
     /**
-     * 同步吉客云最近更新的商品 SKU 信息到 p_product_sku。
+     * 同步吉客云最近更新的商品 SKU 信息到 m_product_sku。
      */
     public void execute() {
         redisCache.tryLockRun(AdminRedisKey.Jky.GOODS_SYNC_LOCK, 30L, TimeUnit.MINUTES, "吉客云商品同步", this::doSync);

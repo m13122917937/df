@@ -54,26 +54,6 @@ public class AnalysisDashboardController extends BaseController {
     }
 
     /**
-     * 产渠分析。
-     */
-    @GetMapping("/channelProduction")
-    public AjaxResult channelProduction(AnalysisQueryRequest request) {
-        AnalysisDashboardVO result = AnalysisWebConvert.INSTANCE.toDashboardVO(
-                dashboardBizService.channelProduction(AnalysisWebConvert.INSTANCE.toQuery(request)));
-        return AjaxResult.success(result);
-    }
-
-    /**
-     * 人效分析。
-     */
-    @GetMapping("/humanEfficiency")
-    public AjaxResult humanEfficiency(AnalysisQueryRequest request) {
-        AnalysisDashboardVO result = AnalysisWebConvert.INSTANCE.toDashboardVO(
-                dashboardBizService.humanEfficiency(AnalysisWebConvert.INSTANCE.toQuery(request)));
-        return AjaxResult.success(result);
-    }
-
-    /**
      * 数据质量明细。
      */
     @GetMapping("/dataQuality")

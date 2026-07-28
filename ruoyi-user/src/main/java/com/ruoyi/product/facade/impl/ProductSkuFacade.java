@@ -14,7 +14,7 @@ import com.ruoyi.product.model.bo.ProductSkuBO;
 import com.ruoyi.product.model.param.ProductSkuParam;
 import com.ruoyi.product.model.query.ProductSkuQuery;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
  * @date 2025-09-21
  */
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class ProductSkuFacade implements IProductSkuFacade {
 
@@ -67,6 +67,18 @@ public class ProductSkuFacade implements IProductSkuFacade {
     @Override
     public long count(ProductSkuQuery productSkuQuery) {
          return productSkuService.count(DynamicCondition.toWrapper(productSkuQuery));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<String> listBrandOptions() {
+        return productSkuService.listBrand();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<String> listCategoryOptions() {
+        return productSkuService.listCategory(null);
     }
 
 

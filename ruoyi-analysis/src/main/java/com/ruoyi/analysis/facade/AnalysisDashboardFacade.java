@@ -28,22 +28,6 @@ public interface AnalysisDashboardFacade {
     AnalysisDashboardBO performanceRollup(AnalysisQuery query);
 
     /**
-     * 查询品牌、品类、平台和店铺维度的产渠数据。
-     *
-     * @param query 查询条件
-     * @return 产渠分析看板
-     */
-    AnalysisDashboardBO channelProduction(AnalysisQuery query);
-
-    /**
-     * 查询经营主体维度的人效成本数据。
-     *
-     * @param query 查询条件
-     * @return 人效分析看板
-     */
-    AnalysisDashboardBO humanEfficiency(AnalysisQuery query);
-
-    /**
      * 查询数据质量异常明细。
      *
      * @param query 查询条件

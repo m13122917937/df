@@ -29,18 +29,24 @@ export function getMasterSalesChannelList(params) {
 }
 
 /**
+ * 查询商品 SKU 主数据。
+ *
+ * @param {Object} params 查询参数
+ * @returns {Promise} 商品 SKU 分页数据
+ */
+export function getMasterProductList(params) {
+  return request({
+    url: '/master/product/list',
+    method: 'get',
+    params
+  })
+}
+
+/**
  * 修改销售渠道保证金。
  * @param {Object} data 保证金数据
  * @returns {Promise} 操作结果
  */
-export function updateMasterSalesChannelDeposit(data) {
-  return request({
-    url: '/master/sales-channel/deposit',
-    method: 'put',
-    data
-  })
-}
-
 /**
  * 查询主体下的银行卡列表及当前默认卡。
  *

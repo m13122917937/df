@@ -3,7 +3,6 @@ package com.ruoyi.analysis;
 import com.ruoyi.analysis.mapper.AnalysisCostConfigMapper;
 import com.ruoyi.analysis.model.param.AnalysisCostConfigParam;
 import com.ruoyi.analysis.service.AnalysisCostConfigService;
-import com.ruoyi.common.exception.ServiceException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -11,7 +10,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * 核算配置业务口径校验测试。
@@ -29,14 +27,6 @@ class AnalysisCostConfigValidationTest {
         ReflectionTestUtils.setField(service, "baseMapper", Mockito.mock(AnalysisCostConfigMapper.class));
 
         assertDoesNotThrow(() -> service.saveConfig(param));
-    }
-
-    @Test
-    void shouldRejectInternalCostWithoutHeadcount() {
-        AnalysisCostConfigParam param = monthlyParam("INTERNAL_COST");
-        param.setExtraData("{\"costScope\":\"DIRECT\"}");
-
-        assertThrows(ServiceException.class, () -> new AnalysisCostConfigService().saveConfig(param));
     }
 
     private AnalysisCostConfigParam monthlyParam(String configType) {

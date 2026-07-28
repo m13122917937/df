@@ -42,12 +42,10 @@ public class AnalysisDashboardVO {
         private BigDecimal fulfillmentGrossProfit;
         private BigDecimal capitalCost;
         private BigDecimal directLaborCost;
-        private BigDecimal directHeadcount;
         private BigDecimal departmentDirectCost;
         private BigDecimal otherAdjustment;
         private BigDecimal departmentProfit;
         private BigDecimal indirectLaborCost;
-        private BigDecimal indirectHeadcount;
         private BigDecimal allocatedIndirectCost;
         private BigDecimal operatingProfit;
         private String calcStatus;

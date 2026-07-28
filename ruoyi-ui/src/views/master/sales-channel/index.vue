@@ -53,11 +53,6 @@
               <span v-else>{{ scope.row[column.key] }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="100" fixed="right" align="center">
-            <template slot-scope="scope">
-              <el-button type="text" size="small" @click="openDepositDialog(scope.row)">修改保证金</el-button>
-            </template>
-          </el-table-column>
         </el-table>
       </div>
     </section>
@@ -72,33 +67,12 @@
       />
     </section>
 
-    <el-dialog title="修改保证金" :visible.sync="depositDialogVisible" width="420px" append-to-body>
-      <el-form ref="depositForm" :model="depositForm" :rules="depositRules" label-width="96px">
-        <el-form-item label="销售渠道">
-          <span>{{ depositChannelName }}</span>
-        </el-form-item>
-        <el-form-item label="保证金金额" prop="depositAmount">
-          <el-input-number
-            v-model="depositForm.depositAmount"
-            :min="0"
-            :precision="2"
-            :step="100"
-            controls-position="right"
-            class="sales-channel-deposit-input"
-          />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="depositDialogVisible = false">取 消</el-button>
-        <el-button type="primary" :loading="depositSubmitting" @click="submitDeposit">保 存</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
 import Sortable from 'sortablejs'
-import { getMasterSalesChannelList, updateMasterSalesChannelDeposit } from '@/api/master'
+import { getMasterSalesChannelList } from '@/api/master'
 import { parseTime } from '@/utils/ruoyi'
 import FilterHeader from '@/views/business/manage/components/FilterHeader.vue'
 
@@ -107,7 +81,6 @@ const SALES_CHANNEL_COLUMNS = [
   { key: 'channelName', label: '渠道名称', minWidth: 180, showOverflowTooltip: true },
   { key: 'platformName', label: '平台', minWidth: 130, showOverflowTooltip: true },
   { key: 'subjectName', label: '经营主体', minWidth: 200, showOverflowTooltip: true },
-  { key: 'depositAmount', label: '保证金', minWidth: 130, showOverflowTooltip: false },
   { key: 'lastSyncTime', label: '最后同步时间', minWidth: 180, showOverflowTooltip: false }
 ]
 
@@ -126,19 +99,6 @@ export default {
       loading: false,
       total: 0,
       channelList: [],
-      depositDialogVisible: false,
-      depositSubmitting: false,
-      depositChannelName: '',
-      depositForm: {
-        id: undefined,
-        depositAmount: 0
-      },
-      depositRules: {
-        depositAmount: [
-          { required: true, message: '请输入保证金金额', trigger: 'blur' },
-          { type: 'number', min: 0, message: '保证金金额不能小于0', trigger: 'blur' }
-        ]
-      },
       columnOrder: SALES_CHANNEL_COLUMNS.map(column => column.key),
       columnSearch: createColumnSearch(),
       queryParams: {
@@ -201,30 +161,6 @@ export default {
         subjectNameLike: ''
       }
       this.getList()
-    },
-    openDepositDialog(row) {
-      this.depositChannelName = row.channelName
-      this.depositForm = {
-        id: row.id,
-        depositAmount: Number(row.depositAmount || 0)
-      }
-      this.depositDialogVisible = true
-      this.$nextTick(() => this.$refs.depositForm.clearValidate())
-    },
-    submitDeposit() {
-      this.$refs.depositForm.validate(valid => {
-        if (!valid) {
-          return
-        }
-        this.depositSubmitting = true
-        updateMasterSalesChannelDeposit(this.depositForm).then(() => {
-          this.$modal.msgSuccess('保证金已更新')
-          this.depositDialogVisible = false
-          this.getList()
-        }).finally(() => {
-          this.depositSubmitting = false
-        })
-      })
     },
     updateColumnFilter(key, values) {
       this.$set(this.columnSearch, key, values)
@@ -339,10 +275,6 @@ export default {
 .sales-channel-card-title h3,
 .sales-channel-card-title p {
   margin: 0;
-}
-
-.sales-channel-deposit-input {
-  width: 100%;
 }
 
 .sales-channel-column-header {

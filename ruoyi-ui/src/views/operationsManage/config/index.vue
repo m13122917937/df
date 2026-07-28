@@ -23,8 +23,18 @@
         <el-form-item v-if="!isMargin && !isCollectionCycle" label="日期">
           <el-date-picker v-model="dateRange" type="daterange" value-format="yyyy-MM-dd" start-placeholder="开始日期" end-placeholder="结束日期" />
         </el-form-item>
-        <el-form-item label="平台"><el-input v-model="query.platform" clearable /></el-form-item>
-        <el-form-item label="店铺"><el-input v-model="query.shopName" clearable /></el-form-item>
+        <el-form-item label="平台">
+          <el-select v-if="isSimpleStoreConfig" v-model="query.platform" clearable filterable @change="handleQueryPlatformChange">
+            <el-option v-for="platform in platformOptions" :key="platform" :label="platform" :value="platform" />
+          </el-select>
+          <el-input v-else v-model="query.platform" clearable />
+        </el-form-item>
+        <el-form-item label="店铺">
+          <el-select v-if="isSimpleStoreConfig" v-model="query.shopName" clearable filterable :disabled="!query.platform">
+            <el-option v-for="shop in queryShopOptions" :key="shop.channelId" :label="shop.shopName" :value="shop.shopName" />
+          </el-select>
+          <el-input v-else v-model="query.shopName" clearable />
+        </el-form-item>
         <el-form-item v-if="!isMargin && !isCollectionCycle" label="货品编码"><el-input v-model="query.goodsNo" clearable /></el-form-item>
         <el-form-item :class="{ 'simple-query-actions': isSimpleStoreConfig }">
           <el-button type="primary" icon="el-icon-search" @click="loadData">查询</el-button>
@@ -34,20 +44,30 @@
     </section>
 
     <section class="config-card table-card">
-      <el-table v-loading="loading" :data="pagedRows" border stripe>
-        <template v-if="isMargin">
-          <el-table-column prop="platform" label="平台" min-width="180" />
-          <el-table-column prop="shopName" label="店铺名称" min-width="260" show-overflow-tooltip />
-          <el-table-column :label="amountLabel" min-width="180" align="right"><template slot-scope="scope">{{ money(scope.row.marginAmount) }}</template></el-table-column>
-          <el-table-column prop="updatedTime" label="操作时间" min-width="180" />
-        </template>
-        <template v-else-if="isCollectionCycle">
-          <el-table-column prop="platform" label="平台" min-width="140" />
-          <el-table-column prop="shopName" label="店铺名称" min-width="220" show-overflow-tooltip />
-          <el-table-column prop="goodsCollectionDays" label="货款回款天数" min-width="140" />
-          <el-table-column prop="subsidyCollectionDays" label="补贴款回款天数" min-width="150" />
-          <el-table-column prop="nationalSubsidyCollectionDays" label="国补款回款天数" min-width="150" />
-          <el-table-column prop="updatedTime" label="操作时间" min-width="180" />
+      <el-table ref="configTable" v-loading="loading" :data="pagedRows" border stripe>
+        <template v-if="isSimpleStoreConfig">
+          <el-table-column
+            v-for="column in visibleStoreConfigColumns"
+            :key="column.key"
+            :prop="column.key"
+            :label="column.label"
+            :min-width="column.minWidth"
+            :align="column.align"
+            :show-overflow-tooltip="column.overflow"
+            label-class-name="store-config-draggable-column"
+          >
+            <template #header>
+              <FilterHeader
+                :label="column.label"
+                :value="storeColumnSearch[column.key]"
+                :options="storeColumnFilterOptions[column.key] || []"
+                @update:value="updateStoreColumnFilter(column.key, $event)"
+              />
+            </template>
+            <template slot-scope="scope">
+              {{ displayStoreConfigValue(scope.row, column) }}
+            </template>
+          </el-table-column>
         </template>
         <template v-else-if="isWarehouseCostPage">
           <el-table-column prop="monthValue" label="月份" min-width="180" />
@@ -89,13 +109,13 @@
       <el-form ref="form" :model="form" :rules="formRules" :label-width="isSimpleStoreConfig ? '160px' : '100px'">
         <el-row :gutter="16">
           <template v-if="isMargin">
-            <el-col :span="24"><el-form-item label="平台" prop="platform"><el-input v-model="form.platform" placeholder="请输入平台" /></el-form-item></el-col>
-            <el-col :span="24"><el-form-item label="店铺名称" prop="shopName"><el-input v-model="form.shopName" placeholder="请输入店铺名称" /></el-form-item></el-col>
+            <el-col :span="24"><el-form-item label="平台" prop="platform"><el-select v-model="form.platform" filterable @change="handleFormPlatformChange"><el-option v-for="platform in platformOptions" :key="platform" :label="platform" :value="platform" /></el-select></el-form-item></el-col>
+            <el-col :span="24"><el-form-item label="店铺名称" prop="shopName"><el-select v-model="form.shopName" filterable :disabled="!form.platform"><el-option v-for="shop in formShopOptions" :key="shop.channelId" :label="shop.shopName" :value="shop.shopName" /></el-select></el-form-item></el-col>
             <el-col :span="24"><el-form-item label="保证金金额" prop="marginAmount"><el-input-number v-model="form.marginAmount" :min="0" :precision="2" :controls="false" /></el-form-item></el-col>
           </template>
           <template v-else-if="isCollectionCycle">
-            <el-col :span="24"><el-form-item label="平台" prop="platform"><el-input v-model="form.platform" placeholder="请输入平台" /></el-form-item></el-col>
-            <el-col :span="24"><el-form-item label="店铺名称" prop="shopName"><el-input v-model="form.shopName" placeholder="请输入店铺名称" /></el-form-item></el-col>
+            <el-col :span="24"><el-form-item label="平台" prop="platform"><el-select v-model="form.platform" filterable @change="handleFormPlatformChange"><el-option v-for="platform in platformOptions" :key="platform" :label="platform" :value="platform" /></el-select></el-form-item></el-col>
+            <el-col :span="24"><el-form-item label="店铺名称" prop="shopName"><el-select v-model="form.shopName" filterable :disabled="!form.platform"><el-option v-for="shop in formShopOptions" :key="shop.channelId" :label="shop.shopName" :value="shop.shopName" /></el-select></el-form-item></el-col>
             <el-col :span="24"><el-form-item label="货款回款天数" prop="goodsCollectionDays"><el-input-number v-model="form.goodsCollectionDays" :min="0" :precision="0" :controls="false" /></el-form-item></el-col>
             <el-col :span="24"><el-form-item label="补贴款回款天数" prop="subsidyCollectionDays"><el-input-number v-model="form.subsidyCollectionDays" :min="0" :precision="0" :controls="false" /></el-form-item></el-col>
             <el-col :span="24"><el-form-item label="国补款回款天数" prop="nationalSubsidyCollectionDays"><el-input-number v-model="form.nationalSubsidyCollectionDays" :min="0" :precision="0" :controls="false" /></el-form-item></el-col>
@@ -121,7 +141,6 @@
           <el-col :span="12"><el-form-item label="生效结束"><el-date-picker v-model="form.endDate" type="date" value-format="yyyy-MM-dd" /></el-form-item></el-col>
           <el-col v-if="isCapitalCost" :span="12"><el-form-item label="年化资金成本率"><el-input-number v-model="form.annualRatePercent" :precision="2" :min="0" :max="100" :controls="false" /><span class="field-unit">%</span></el-form-item></el-col>
           <el-col v-if="isPeopleCost" :span="12"><el-form-item label="成本归属"><el-select v-model="form.costScope"><el-option label="直接人员成本" value="DIRECT" /><el-option label="部门直接费用" value="DEPARTMENT" /><el-option label="间接人员成本" value="INDIRECT" /></el-select></el-form-item></el-col>
-          <el-col v-if="isPeopleCost" :span="12"><el-form-item label="人员数量"><el-input-number v-model="form.headcount" :precision="2" :min="0" :controls="false" /></el-form-item></el-col>
           <el-col v-if="isWarehouseCost" :span="12"><el-form-item label="成本归属"><el-select v-model="form.costScope"><el-option label="直接仓配成本" value="DIRECT" /><el-option label="间接仓配成本" value="INDIRECT" /></el-select></el-form-item></el-col>
           <el-col :span="24"><el-form-item label="说明"><el-input v-model="form.reason" type="textarea" :rows="3" /></el-form-item></el-col>
           </template>
@@ -155,10 +174,30 @@
 </template>
 
 <script>
-import { deleteAnalysisConfig, deleteAnalysisMargin, getAnalysisCollectionCycleList, getAnalysisConfigList, getAnalysisImportLogs, getAnalysisMarginList, getAnalysisWarehouseCostList, importAnalysisConfig, saveAnalysisCollectionCycle, saveAnalysisConfig, saveAnalysisMargin, saveAnalysisWarehouseCost } from '@/api/analysis'
+import Sortable from 'sortablejs'
+import { deleteAnalysisConfig, deleteAnalysisMargin, getAnalysisCollectionCycleList, getAnalysisConfigList, getAnalysisImportLogs, getAnalysisMarginList, getAnalysisStoreOptions, getAnalysisWarehouseCostList, importAnalysisConfig, saveAnalysisCollectionCycle, saveAnalysisConfig, saveAnalysisMargin, saveAnalysisWarehouseCost } from '@/api/analysis'
+import FilterHeader from '@/views/business/manage/components/FilterHeader.vue'
+
+const STORE_CONFIG_COLUMNS = {
+  MARGIN: [
+    { key: 'platform', label: '平台', minWidth: 160, align: 'left', overflow: true },
+    { key: 'shopName', label: '店铺名称', minWidth: 240, align: 'left', overflow: true },
+    { key: 'marginAmount', label: '保证金', minWidth: 160, align: 'right', overflow: false, format: 'money' },
+    { key: 'updatedTime', label: '操作时间', minWidth: 180, align: 'left', overflow: false }
+  ],
+  COLLECTION_DAYS: [
+    { key: 'platform', label: '平台', minWidth: 140, align: 'left', overflow: true },
+    { key: 'shopName', label: '店铺名称', minWidth: 220, align: 'left', overflow: true },
+    { key: 'goodsCollectionDays', label: '货款回款天数', minWidth: 150, align: 'right', overflow: false },
+    { key: 'subsidyCollectionDays', label: '补贴款回款天数', minWidth: 160, align: 'right', overflow: false },
+    { key: 'nationalSubsidyCollectionDays', label: '国补款回款天数', minWidth: 160, align: 'right', overflow: false },
+    { key: 'updatedTime', label: '操作时间', minWidth: 180, align: 'left', overflow: false }
+  ]
+}
 
 export default {
   name: 'AnalysisConfig',
+  components: { FilterHeader },
   data() {
     return {
       loading: false,
@@ -169,6 +208,9 @@ export default {
       importLogs: [],
       dateRange: [],
       query: { platform: '', shopName: '', goodsNo: '' },
+      storeOptions: [],
+      storeColumnOrder: [],
+      storeColumnSearch: {},
       rows: [],
       pageNum: 1,
       pageSize: 20,
@@ -179,20 +221,18 @@ export default {
   computed: {
     configType() {
       const mapping = {
-        fixedCoefficient: 'FIXED_COEFFICIENT', penalty: 'PENALTY',
+        penalty: 'PENALTY',
         promotion: 'PROMOTION', margin: 'MARGIN', collectionDays: 'COLLECTION_DAYS',
         internalCost: 'INTERNAL_COST', warehouseCost: 'WAREHOUSE_COST', shopWhitelist: 'SHOP_WHITELIST',
-        platformFee: 'PLATFORM_FEE', logisticsFee: 'LOGISTICS', tax: 'TAX',
+        logisticsFee: 'LOGISTICS', tax: 'TAX',
         otherAdjustment: 'OTHER_ADJUSTMENT'
       }
       const key = Object.keys(mapping).find(item => this.$route.path.indexOf(item) !== -1)
-      return key ? mapping[key] : 'FIXED_COEFFICIENT'
+      return key ? mapping[key] : 'OTHER_ADJUSTMENT'
     },
     pageTitle() { return this.$route.meta.title || '核算配置' },
     pageDescription() {
       const descriptions = {
-        FIXED_COEFFICIENT: '按商品、平台和店铺设置成本计算规则。',
-        PLATFORM_FEE: '记录平台服务、技术服务等经营费用。',
         LOGISTICS: '记录发货、快递和物流相关费用。',
         PROMOTION: '记录店铺和商品的推广投放费用。',
         TAX: '记录经营产生的税费。',
@@ -213,7 +253,39 @@ export default {
     isPeopleCost() { return this.configType === 'INTERNAL_COST' },
     isWarehouseCost() { return this.configType === 'WAREHOUSE_COST' },
     isWarehouseCostPage() { return this.configType === 'WAREHOUSE_COST' },
-    showCoefficient() { return ['FIXED_COEFFICIENT', 'COLLECTION_DAYS'].includes(this.configType) },
+    platformOptions() {
+      return [...new Set(this.storeOptions.map(item => item.platformName).filter(Boolean))]
+    },
+    queryShopOptions() {
+      return this.getShopOptions(this.query.platform)
+    },
+    formShopOptions() {
+      return this.getShopOptions(this.form.platform)
+    },
+    storeConfigColumns() {
+      return STORE_CONFIG_COLUMNS[this.configType] || []
+    },
+    visibleStoreConfigColumns() {
+      return this.storeColumnOrder
+        .map(key => this.storeConfigColumns.find(column => column.key === key))
+        .filter(Boolean)
+    },
+    storeColumnFilterOptions() {
+      return this.storeConfigColumns.reduce((options, column) => {
+        const values = this.rows
+          .map(row => row[column.key])
+          .filter(value => value !== null && value !== undefined && value !== '')
+        options[column.key] = [...new Set(values)].map(value => ({ text: this.formatStoreColumnOption(value, column), value }))
+        return options
+      }, {})
+    },
+    filteredRows() {
+      if (!this.isSimpleStoreConfig) {
+        return this.rows
+      }
+      return this.rows.filter(row => this.matchesStoreColumnFilters(row))
+    },
+    showCoefficient() { return ['COLLECTION_DAYS'].includes(this.configType) },
     amountLabel() {
       const labels = { MARGIN: '保证金', INTERNAL_COST: '月度成本', WAREHOUSE_COST: '月度成本' }
       return labels[this.configType] || '金额'
@@ -250,15 +322,109 @@ export default {
       }
       return this.isMonthlyCost ? {} : this.rules
     },
-    pagedRows() { return this.rows.slice((this.pageNum - 1) * this.pageSize, this.pageNum * this.pageSize) }
+    pagedRows() { return this.filteredRows.slice((this.pageNum - 1) * this.pageSize, this.pageNum * this.pageSize) }
   },
   watch: {
-    '$route.fullPath'() { this.loadData() }
+    '$route.fullPath'() {
+      this.resetStoreColumns()
+      this.loadData()
+    }
   },
   created() {
+    this.resetStoreColumns()
+    this.loadStoreOptions()
     this.loadData()
   },
+  mounted() {
+    this.$nextTick(() => this.initStoreColumnDrag())
+  },
+  beforeDestroy() {
+    this.destroyStoreColumnDrag()
+  },
   methods: {
+    resetStoreColumns() {
+      this.storeColumnOrder = this.storeConfigColumns.map(column => column.key)
+      this.storeColumnSearch = this.storeConfigColumns.reduce((search, column) => {
+        search[column.key] = []
+        return search
+      }, {})
+      this.destroyStoreColumnDrag()
+      this.$nextTick(() => this.initStoreColumnDrag())
+    },
+    initStoreColumnDrag() {
+      if (!this.isSimpleStoreConfig || !this.$refs.configTable) {
+        return
+      }
+      const headerRow = this.$refs.configTable.$el.querySelector('.el-table__header-wrapper tr')
+      if (!headerRow) {
+        return
+      }
+      this.destroyStoreColumnDrag()
+      this.storeColumnSortable = Sortable.create(headerRow, {
+        animation: 150,
+        draggable: '.store-config-draggable-column',
+        onEnd: () => this.syncStoreColumnOrder(headerRow)
+      })
+    },
+    destroyStoreColumnDrag() {
+      if (this.storeColumnSortable) {
+        this.storeColumnSortable.destroy()
+        this.storeColumnSortable = null
+      }
+    },
+    syncStoreColumnOrder(headerRow) {
+      const labelToKey = this.storeConfigColumns.reduce((mapping, column) => {
+        mapping[column.label] = column.key
+        return mapping
+      }, {})
+      this.storeColumnOrder = [...headerRow.querySelectorAll('.store-config-draggable-column')]
+        .map(header => header.querySelector('.filter-header-label'))
+        .map(label => label && labelToKey[label.textContent.trim()])
+        .filter(Boolean)
+      this.$nextTick(() => this.$refs.configTable.doLayout())
+    },
+    updateStoreColumnFilter(key, values) {
+      this.$set(this.storeColumnSearch, key, values)
+      this.pageNum = 1
+    },
+    matchesStoreColumnFilters(row) {
+      return this.storeConfigColumns.every(column => {
+        const values = this.storeColumnSearch[column.key]
+        return !values || !values.length || values.includes(row[column.key])
+      })
+    },
+    displayStoreConfigValue(row, column) {
+      const value = row[column.key]
+      if (value === null || value === undefined || value === '') {
+        return '-'
+      }
+      return column.format === 'money' ? this.money(value) : value
+    },
+    formatStoreColumnOption(value, column) {
+      return column.format === 'money' ? this.money(value) : String(value)
+    },
+    loadStoreOptions() {
+      return getAnalysisStoreOptions().then(response => {
+        this.storeOptions = response.data || []
+      })
+    },
+    getShopOptions(platform) {
+      const shopKeys = new Set()
+      return this.storeOptions.filter(item => {
+        const key = `${item.platformName}-${item.shopName}`
+        if (item.platformName !== platform || !item.shopName || shopKeys.has(key)) {
+          return false
+        }
+        shopKeys.add(key)
+        return true
+      })
+    },
+    handleQueryPlatformChange() {
+      this.query.shopName = ''
+    },
+    handleFormPlatformChange() {
+      this.form.shopName = ''
+    },
     async loadData() {
       this.loading = true
       try {
@@ -289,7 +455,7 @@ export default {
         businessDate: '', monthValue: '', platform: '', shopName: '', originalOrderNo: '',
         goodsNo: '', goodsName: '', brand: '', category: '', amount: null, marginAmount: null, coefficient: null,
         goodsCollectionDays: null, subsidyCollectionDays: null, nationalSubsidyCollectionDays: null, afterSalesHeadcount: null, afterSalesLaborCost: null,
-        startDate: '', endDate: '', reason: '', extraData: '', annualRatePercent: null, costScope: '', headcount: null
+        startDate: '', endDate: '', reason: '', extraData: '', annualRatePercent: null, costScope: ''
       }, row || {}, { configType: this.configType })
       this.fillBusinessFields()
       if (this.isMargin || this.isCollectionCycle) {
@@ -299,7 +465,6 @@ export default {
         this.form.endDate = ''
         this.form.annualRatePercent = null
         this.form.costScope = ''
-        this.form.headcount = null
       }
       this.dialogVisible = true
       this.$nextTick(() => this.$refs.form && this.$refs.form.clearValidate())
@@ -363,7 +528,6 @@ export default {
       try { data = this.form.extraData ? JSON.parse(this.form.extraData) : {} } catch (error) { data = {} }
       this.form.annualRatePercent = data.annualRate == null ? null : Number(data.annualRate) * 100
       this.form.costScope = data.costScope || ''
-      this.form.headcount = data.headcount == null ? null : Number(data.headcount)
     },
     buildPayload() {
       if (this.isMargin) {
@@ -391,11 +555,9 @@ export default {
       const extraData = {}
       if (this.isCapitalCost && payload.annualRatePercent != null) extraData.annualRate = Number(payload.annualRatePercent) / 100
       if ((this.isPeopleCost || this.isWarehouseCost) && payload.costScope) extraData.costScope = payload.costScope
-      if (this.isPeopleCost && payload.headcount != null) extraData.headcount = Number(payload.headcount)
       payload.extraData = Object.keys(extraData).length ? JSON.stringify(extraData) : ''
       delete payload.annualRatePercent
       delete payload.costScope
-      delete payload.headcount
       return payload
     },
     money(value) { return value == null ? '-' : `¥${Number(value).toFixed(2)}` }
@@ -419,6 +581,8 @@ export default {
 .simple-config-dialog .el-input-number { width: 100%; }
 .simple-config-dialog .el-input-number ::v-deep .el-input { width: 100%; }
 .simple-config-dialog .el-input-number ::v-deep .el-input__inner { padding-left: 8px; padding-right: 8px; }
+.store-config-draggable-column { cursor: move; }
+.store-config-draggable-column ::v-deep .filter-header-trigger { min-width: 0; }
 .warehouse-cost-dialog .el-input-number,
 .warehouse-cost-dialog .el-date-picker { width: 100%; }
 .warehouse-cost-dialog .el-input-number ::v-deep .el-input { width: 100%; }

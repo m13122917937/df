@@ -55,7 +55,7 @@
             <el-table-column
               label="全部单号"
               prop="orderCode"
-              width="230"
+              width="200"
               fixed="left"
             >
               <template slot-scope="scope">
@@ -81,7 +81,7 @@
                 {{ scope.row.payerName || '-' }}
               </template>
             </el-table-column>
-             <el-table-column prop="tradeCompanyName" label="供应商" width="400" align="center" :show-overflow-tooltip="true">
+             <el-table-column prop="tradeCompanyName" label="供应商" width="200" align="center" :show-overflow-tooltip="true">
               <template slot="header" slot-scope="scope">
                 <filter-header label="供应商" :value="columnSearch.tradeCompanyName || []" :options="colFilterOptions.tradeCompanyName || []" @update:value="columnSearch.tradeCompanyName = $event" />
               </template>
@@ -92,7 +92,7 @@
              <el-table-column
               label="采购人/成交时间"
               prop="createTime"
-              width="250"
+              width="200"
             >
               <template slot-scope="scope">
                 <div class="order-numbers">
@@ -107,7 +107,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="brand" label="品牌/品类" width="100" align="center">
+            <el-table-column prop="brand" label="品牌/品类" width="120" align="center">
               <template slot="header" slot-scope="scope">
                 <filter-header label="品牌/品类" :value="columnSearch.brand || []" :options="colFilterOptions.brand || []" @update:value="columnSearch.brand = $event" />
               </template>
@@ -156,13 +156,13 @@
                 {{ scope.row.warehouseQuantity || 0 }} / {{ scope.row.quantity || 0 }}
               </template>
             </el-table-column>
-            <el-table-column label="成交价" prop="tradePrice" width="90" align="center" />
+            <el-table-column label="成交价" prop="tradePrice" width="100" align="center" />
             <el-table-column prop="deliveryCode" label="送货码" width="90" align="center" >
               <template slot-scope="scope">
                 {{ scope.row.deliveryCode || '-' }}
               </template>
             </el-table-column>
-            <el-table-column prop="remark" label="备注" width="300" align="center" :show-overflow-tooltip="true">
+            <el-table-column prop="remark" label="备注" width="180" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
                 {{ scope.row.remark || '-' }}
               </template>

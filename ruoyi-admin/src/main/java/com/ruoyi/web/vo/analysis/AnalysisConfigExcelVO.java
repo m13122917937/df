@@ -37,8 +37,6 @@ public class AnalysisConfigExcelVO {
     private BigDecimal annualRatePercent;
     @ExcelProperty("成本归属")
     private String costScope;
-    @ExcelProperty("人员数量")
-    private BigDecimal headcount;
     @ExcelProperty("生效开始")
     private LocalDate startDate;
     @ExcelProperty("生效结束")

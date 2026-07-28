@@ -93,7 +93,7 @@
             <el-table-column
               label="单号"
               prop="orderCode"
-              min-width="300"
+              min-width="250"
               fixed="left"
             >
               <template slot-scope="scope">
@@ -145,7 +145,7 @@
             </el-table-column> -->
 
             <!-- 品牌 -->
-            <el-table-column label="品牌/品类" prop="brand" min-width="200" align="center">
+            <el-table-column label="品牌/品类" prop="brand" min-width="150" align="center">
               <template slot="header">
                 <FilterHeader label="品牌/品类" :value="columnSearch.brandCategory || []" :options="colFilterOptions.brandCategory || []" @update:value="columnSearch.brandCategory = $event" />
               </template>
@@ -192,7 +192,7 @@
             <el-table-column
               label="数量"
               prop="quantity"
-              min-width="130"
+              min-width="90"
               align="center"
             >
               <template slot-scope="scope">
@@ -243,7 +243,7 @@
             </el-table-column>
 
             <!-- 成交价格 -->
-            <el-table-column label="成交价" prop="tradePrice" min-width="300" align="center">
+            <el-table-column label="成交价" prop="tradePrice" min-width="200" align="center">
               <template slot-scope="scope">
                 <PriceChips :row="scope.row" />
               </template>

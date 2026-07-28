@@ -35,4 +35,18 @@ public interface IProductSkuFacade {
     /** @return 商品数量 */
     long count(ProductSkuQuery productSkuQuery);
 
+    /**
+     * 查询商品主数据中的全部品牌。
+     *
+     * @return 品牌列表
+     */
+    List<String> listBrandOptions();
+
+    /**
+     * 查询商品主数据中的全部品类。
+     *
+     * @return 品类列表
+     */
+    List<String> listCategoryOptions();
+
 }

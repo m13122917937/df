@@ -25,7 +25,7 @@ import java.util.Set;
 @Service
 public class AnalysisCostConfigService extends ServiceImpl<AnalysisCostConfigMapper, AnalysisCostConfig> {
     private static final Set<String> AMOUNT_REQUIRED_TYPES = new HashSet<>(Arrays.asList(
-            "CASHBACK", "PLATFORM_FEE", "LOGISTICS", "PROMOTION", "PENALTY", "IMPAIRMENT", "TAX",
+            "CASHBACK", "LOGISTICS", "PROMOTION", "PENALTY", "IMPAIRMENT", "TAX",
             "OTHER_ADJUSTMENT", "MARGIN", "INTERNAL_COST", "WAREHOUSE_COST"));
     private static final Set<String> MONTHLY_TYPES = new HashSet<>(Arrays.asList(
             "INTERNAL_COST", "WAREHOUSE_COST"));
@@ -130,6 +130,9 @@ public class AnalysisCostConfigService extends ServiceImpl<AnalysisCostConfigMap
         if ("MARGIN".equals(param.getConfigType()) || "COLLECTION_DAYS".equals(param.getConfigType())) {
             throw new ServiceException("该配置请使用对应的独立配置页面");
         }
+        if ("PLATFORM_FEE".equals(param.getConfigType())) {
+            throw new ServiceException("平台服务费已迁移至费率配置页面，请使用独立的费率页面");
+        }
         validateAmount(param);
         validateEffectiveDate(param);
         JsonNode extraData = parseExtraData(param.getExtraData());
@@ -142,10 +145,6 @@ public class AnalysisCostConfigService extends ServiceImpl<AnalysisCostConfigMap
         }
         if ("COLLECTION_DAYS".equals(param.getConfigType()) && param.getCoefficient() == null) {
             throw new ServiceException("回款周期必须填写回款天数");
-        }
-        if ("FIXED_COEFFICIENT".equals(param.getConfigType())
-                && param.getAmount() == null && param.getCoefficient() == null) {
-            throw new ServiceException("成本系数至少填写固定金额或系数");
         }
     }
 
@@ -198,9 +197,6 @@ public class AnalysisCostConfigService extends ServiceImpl<AnalysisCostConfigMap
         if (("INTERNAL_COST".equals(type) || "WAREHOUSE_COST".equals(type))
                 && isBlank(text(extraData, AnalysisConstants.EXTRA_COST_SCOPE))) {
             throw new ServiceException("人员成本和仓配成本必须选择成本归属");
-        }
-        if ("INTERNAL_COST".equals(type) && decimal(extraData, AnalysisConstants.EXTRA_HEADCOUNT) == null) {
-            throw new ServiceException("人员成本必须填写人员数量");
         }
     }
 

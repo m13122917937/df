@@ -2,20 +2,31 @@ package com.ruoyi.biz.analysis;
 
 import com.ruoyi.analysis.facade.AnalysisDashboardFacade;
 import com.ruoyi.analysis.model.bo.AnalysisDashboardBO;
+import com.ruoyi.analysis.model.bo.AnalysisDashboardFilterOptionsBO;
 import com.ruoyi.analysis.model.bo.AnalysisOrderFactBO;
 import com.ruoyi.analysis.model.query.AnalysisQuery;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ruoyi.biz.analysis.convert.AnalysisDashboardBizConvert;
+import com.ruoyi.master.facade.IMasterSalesChannelFacade;
+import com.ruoyi.master.model.bo.MasterSalesChannelBO;
+import com.ruoyi.product.facade.IProductSkuFacade;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 经营分析看板业务编排。
  */
 @Component
+@RequiredArgsConstructor
 public class AnalysisDashboardBizService {
-    @Autowired
-    private AnalysisDashboardFacade dashboardFacade;
+    private final AnalysisDashboardFacade dashboardFacade;
+
+    private final IMasterSalesChannelFacade masterSalesChannelFacade;
+
+    private final IProductSkuFacade productSkuFacade;
 
     /**
      * 查询经营看板。
@@ -38,26 +49,6 @@ public class AnalysisDashboardBizService {
     }
 
     /**
-     * 查询产渠分析。
-     *
-     * @param query 查询条件
-     * @return 产渠分析看板
-     */
-    public AnalysisDashboardBO channelProduction(AnalysisQuery query) {
-        return dashboardFacade.channelProduction(query);
-    }
-
-    /**
-     * 查询人效分析。
-     *
-     * @param query 查询条件
-     * @return 人效分析看板
-     */
-    public AnalysisDashboardBO humanEfficiency(AnalysisQuery query) {
-        return dashboardFacade.humanEfficiency(query);
-    }
-
-    /**
      * 查询缺失成本的数据质量明细。
      *
      * @param query 查询条件
@@ -65,5 +56,25 @@ public class AnalysisDashboardBizService {
      */
     public List<AnalysisOrderFactBO> dataQuality(AnalysisQuery query) {
         return dashboardFacade.dataQuality(query);
+    }
+
+    /**
+     * 查询经营统计使用的基础数据筛选项。
+     *
+     * @return 平台、店铺、品牌与品类筛选项
+     */
+    public AnalysisDashboardFilterOptionsBO listFilterOptions() {
+        List<MasterSalesChannelBO> stores = masterSalesChannelFacade.listStoreOptions();
+        AnalysisDashboardFilterOptionsBO options = new AnalysisDashboardFilterOptionsBO();
+        options.setStores(AnalysisDashboardBizConvert.INSTANCE.toStoreOptionList(stores));
+        options.setPlatforms(distinctOptions(stores.stream()
+                .map(MasterSalesChannelBO::getPlatformName).collect(Collectors.toList())));
+        options.setBrands(distinctOptions(productSkuFacade.listBrandOptions()));
+        options.setCategories(distinctOptions(productSkuFacade.listCategoryOptions()));
+        return options;
+    }
+
+    private List<String> distinctOptions(final List<String> values) {
+        return values.stream().filter(StringUtils::isNotBlank).distinct().sorted().collect(Collectors.toList());
     }
 }

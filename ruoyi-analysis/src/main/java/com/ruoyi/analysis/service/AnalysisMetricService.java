@@ -8,10 +8,12 @@ import com.ruoyi.analysis.convert.AnalysisMetricConvert;
 import com.ruoyi.analysis.domain.AnalysisCostConfig;
 import com.ruoyi.analysis.domain.AnalysisDailyMetric;
 import com.ruoyi.analysis.domain.AnalysisOrderFact;
+import com.ruoyi.analysis.domain.AnalysisPlatformFeeRate;
 import com.ruoyi.analysis.domain.AnalysisRefundFact;
 import com.ruoyi.analysis.mapper.AnalysisCostConfigMapper;
 import com.ruoyi.analysis.mapper.AnalysisDailyMetricMapper;
 import com.ruoyi.analysis.mapper.AnalysisOrderFactMapper;
+import com.ruoyi.analysis.mapper.AnalysisPlatformFeeRateMapper;
 import com.ruoyi.analysis.mapper.AnalysisRefundFactMapper;
 import com.ruoyi.analysis.model.bo.AnalysisDashboardBO;
 import com.ruoyi.analysis.model.source.AnalysisMetricCalculation;
@@ -46,6 +48,8 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
     @Autowired
     private AnalysisCostConfigMapper configMapper;
     @Autowired
+    private AnalysisPlatformFeeRateMapper platformFeeRateMapper;
+    @Autowired
     private AnalysisProperties properties;
 
     /**
@@ -64,6 +68,7 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
         Map<String, MetricAccumulator> groups = buildFactGroups(facts);
         applyRefunds(groups, refunds);
         applyConfigs(groups, configs, facts, date);
+        applyPlatformFeeRates(groups);
         baseMapper.deleteByMetricDate(date);
         List<AnalysisDailyMetric> metrics = groups.values().stream()
                 .map(value -> value.toMetric(date))
@@ -100,27 +105,6 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
      * @return 绩效汇总看板
      */
     public AnalysisDashboardBO performanceRollup(List<AnalysisDailyMetric> metrics) {
-        return dashboard(aggregate(metrics, metric -> safe(metric.getSubjectName())));
-    }
-
-    /**
-     * 按品牌、品类、平台和店铺汇总产渠数据。
-     *
-     * @param metrics 已过滤的每日经营指标
-     * @return 产渠分析看板
-     */
-    public AnalysisDashboardBO channelProduction(List<AnalysisDailyMetric> metrics) {
-        return dashboard(aggregate(metrics, metric -> String.join("|", safe(metric.getBrand()),
-                safe(metric.getCategory()), safe(metric.getPlatform()), safe(metric.getShopName()))));
-    }
-
-    /**
-     * 按经营主体汇总人效相关收入、利润和人力成本。
-     *
-     * @param metrics 已过滤的每日经营指标
-     * @return 人效分析看板
-     */
-    public AnalysisDashboardBO humanEfficiency(List<AnalysisDailyMetric> metrics) {
         return dashboard(aggregate(metrics, metric -> safe(metric.getSubjectName())));
     }
 
@@ -180,17 +164,84 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
             BigDecimal totalWeight = totalWeight(config, date, dailyWeights);
             String costScope = extraText(config, AnalysisConstants.EXTRA_COST_SCOPE);
             BigDecimal annualRate = extraDecimal(config, AnalysisConstants.EXTRA_ANNUAL_RATE);
-            BigDecimal headcount = extraDecimal(config, AnalysisConstants.EXTRA_HEADCOUNT);
             for (Map.Entry<String, BigDecimal> entry : dailyWeights.entrySet()) {
                 MetricAccumulator group = groups.get(entry.getKey());
                 if (group == null) {
                     continue;
                 }
                 BigDecimal allocated = allocateConfigAmount(config.getAmount(), entry.getValue(), totalWeight);
-                BigDecimal allocatedHeadcount = allocateConfigAmount(headcount, entry.getValue(), totalWeight);
-                group.applyConfig(config, allocated, entry.getValue(), costScope, annualRate, allocatedHeadcount);
+                group.applyConfig(config, allocated, entry.getValue(), costScope, annualRate);
             }
         }
+    }
+
+    /**
+     * 按费率配置计算平台服务费，替代旧 PLATFORM_FEE 固定金额模式。
+     * 匹配优先级: platform+business_type+category > platform+business_type > platform > 全局默认。
+     *
+     * @param groups 已分组的指标累加器
+     */
+    private void applyPlatformFeeRates(Map<String, MetricAccumulator> groups) {
+        List<AnalysisPlatformFeeRate> rates = platformFeeRateMapper.selectList(null);
+        if (rates.isEmpty()) {
+            return;
+        }
+        for (MetricAccumulator group : groups.values()) {
+            BigDecimal rate = findBestPlatformFeeRate(rates, group.platform, group.orderType, group.category);
+            if (rate == null || rate.compareTo(BigDecimal.ZERO) == 0) {
+                continue;
+            }
+            BigDecimal revenue = zero(group.goodsIncome)
+                    .add(zero(group.platformSubsidy))
+                    .add(zero(group.governmentSubsidy));
+            if (revenue.signum() == 0) {
+                continue;
+            }
+            BigDecimal fee = revenue.multiply(rate)
+                    .divide(HUNDRED, 4, RoundingMode.HALF_UP);
+            group.addPlatformFee(fee);
+        }
+    }
+
+    /**
+     * 查找最优匹配的费率。
+     * 优先: 全维度精确 > 平台+业态 > 仅平台 > 全局默认(platform=null)。
+     */
+    private BigDecimal findBestPlatformFeeRate(List<AnalysisPlatformFeeRate> rates,
+                                                String platform, String orderType, String category) {
+        // 1. 精确匹配: platform + businessType + category
+        for (AnalysisPlatformFeeRate r : rates) {
+            if (matchesValue(r.getPlatform(), platform)
+                    && matchesValue(r.getBusinessType() == null ? null : String.valueOf(r.getBusinessType()), orderType)
+                    && matchesValue(r.getCategory(), category)) {
+                return r.getFeeRate();
+            }
+        }
+        // 2. 平台 + 业态 (category=null)
+        for (AnalysisPlatformFeeRate r : rates) {
+            if (matchesValue(r.getPlatform(), platform)
+                    && matchesValue(r.getBusinessType() == null ? null : String.valueOf(r.getBusinessType()), orderType)
+                    && r.getCategory() == null) {
+                return r.getFeeRate();
+            }
+        }
+        // 3. 仅平台 (businessType=null, category=null)
+        for (AnalysisPlatformFeeRate r : rates) {
+            if (matchesValue(r.getPlatform(), platform)
+                    && r.getBusinessType() == null
+                    && r.getCategory() == null) {
+                return r.getFeeRate();
+            }
+        }
+        // 4. 全局默认 (platform=null, businessType=null, category=null)
+        for (AnalysisPlatformFeeRate r : rates) {
+            if (r.getPlatform() == null
+                    && r.getBusinessType() == null
+                    && r.getCategory() == null) {
+                return r.getFeeRate();
+            }
+        }
+        return null;
     }
 
     private Map<String, BigDecimal> groupWeights(List<AnalysisOrderFact> facts, AnalysisCostConfig config) {
@@ -352,11 +403,9 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
         private BigDecimal taxFee = BigDecimal.ZERO;
         private BigDecimal capitalCost = BigDecimal.ZERO;
         private BigDecimal directLaborCost = BigDecimal.ZERO;
-        private BigDecimal directHeadcount = BigDecimal.ZERO;
         private BigDecimal departmentDirectCost = BigDecimal.ZERO;
         private BigDecimal otherAdjustment = BigDecimal.ZERO;
         private BigDecimal indirectLaborCost = BigDecimal.ZERO;
-        private BigDecimal indirectHeadcount = BigDecimal.ZERO;
         private BigDecimal allocatedIndirectCost = BigDecimal.ZERO;
         private int factCount;
         private int incompleteCount;
@@ -420,11 +469,9 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
             taxFee = taxFee.add(zero(metric.getTaxFee()));
             capitalCost = capitalCost.add(zero(metric.getCapitalCost()));
             directLaborCost = directLaborCost.add(zero(metric.getDirectLaborCost()));
-            directHeadcount = directHeadcount.add(zero(metric.getDirectHeadcount()));
             departmentDirectCost = departmentDirectCost.add(zero(metric.getDepartmentDirectCost()));
             otherAdjustment = otherAdjustment.add(zero(metric.getOtherAdjustment()));
             indirectLaborCost = indirectLaborCost.add(zero(metric.getIndirectLaborCost()));
-            indirectHeadcount = indirectHeadcount.add(zero(metric.getIndirectHeadcount()));
             allocatedIndirectCost = allocatedIndirectCost.add(zero(metric.getAllocatedIndirectCost()));
             factCount += zeroInt(metric.getFactCount());
             incompleteCount += zeroInt(metric.getIncompleteCount());
@@ -441,6 +488,10 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
             }
         }
 
+        private void addPlatformFee(BigDecimal fee) {
+            platformFee = platformFee.add(fee);
+        }
+
         private BigDecimal calculateReversedCost(AnalysisOrderFact source, BigDecimal refundQuantity) {
             if (source.getAssessmentCost() != null) {
                 return source.getAssessmentCost().multiply(refundQuantity);
@@ -454,15 +505,9 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
         }
 
         private void applyConfig(AnalysisCostConfig config, BigDecimal amount, BigDecimal coefficientBase,
-                                 String costScope, BigDecimal annualRate, BigDecimal headcount) {
+                                 String costScope, BigDecimal annualRate) {
             String type = config.getConfigType();
-            if ("FIXED_COEFFICIENT".equals(type) && config.getCoefficient() != null) {
-                platformFee = platformFee.add(amount).add(coefficientBase.multiply(config.getCoefficient()));
-            } else if ("FIXED_COEFFICIENT".equals(type)) {
-                platformFee = platformFee.add(amount);
-            } else if ("PLATFORM_FEE".equals(type)) {
-                platformFee = platformFee.add(amount);
-            } else if ("LOGISTICS".equals(type)) {
+            if ("LOGISTICS".equals(type)) {
                 logisticsFee = logisticsFee.add(amount);
             } else if ("CASHBACK".equals(type) || "PROMOTION".equals(type)) {
                 marketingFee = marketingFee.add(amount);
@@ -478,7 +523,7 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
                 capitalCost = capitalCost.add(amount).add(collectionCost(coefficientBase,
                         config.getCoefficient(), annualRate));
             } else if ("INTERNAL_COST".equals(type)) {
-                applyInternalCost(amount, headcount, costScope);
+                applyInternalCost(amount, costScope);
             } else if ("WAREHOUSE_COST".equals(type)) {
                 applyWarehouseCost(amount, costScope);
             }
@@ -492,15 +537,13 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
                     .divide(BigDecimal.valueOf(365), 4, RoundingMode.HALF_UP);
         }
 
-        private void applyInternalCost(BigDecimal amount, BigDecimal headcount, String costScope) {
+        private void applyInternalCost(BigDecimal amount, String costScope) {
             if (AnalysisConstants.COST_SCOPE_INDIRECT.equals(costScope)) {
                 indirectLaborCost = indirectLaborCost.add(amount);
-                indirectHeadcount = indirectHeadcount.add(headcount);
             } else if (AnalysisConstants.COST_SCOPE_DEPARTMENT.equals(costScope)) {
                 departmentDirectCost = departmentDirectCost.add(amount);
             } else {
                 directLaborCost = directLaborCost.add(amount);
-                directHeadcount = directHeadcount.add(headcount);
             }
         }
 
@@ -538,10 +581,10 @@ public class AnalysisMetricService extends ServiceImpl<AnalysisDailyMetricMapper
                     .goodsGrossProfit(gross).platformFee(platformFee).logisticsFee(logisticsFee)
                     .marketingFee(marketingFee).impairmentFee(impairmentFee).penaltyFee(penaltyFee)
                     .taxFee(taxFee).fulfillmentGrossProfit(fulfillment).capitalCost(capitalCost)
-                    .directLaborCost(directLaborCost).directHeadcount(directHeadcount)
+                    .directLaborCost(directLaborCost)
                     .departmentDirectCost(departmentDirectCost)
                     .otherAdjustment(otherAdjustment).departmentProfit(department)
-                    .indirectLaborCost(indirectLaborCost).indirectHeadcount(indirectHeadcount)
+                    .indirectLaborCost(indirectLaborCost)
                     .allocatedIndirectCost(allocatedIndirectCost)
                     .operatingProfit(operating).factCount(factCount).incompleteCount(incompleteCount)
                     .calcStatus(incompleteCount == 0 ? AnalysisConstants.STATUS_COMPLETE

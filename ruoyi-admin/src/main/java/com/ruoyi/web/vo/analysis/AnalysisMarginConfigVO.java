@@ -1,5 +1,6 @@
 package com.ruoyi.web.vo.analysis;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,5 +15,6 @@ public class AnalysisMarginConfigVO {
     private String platform;
     private String shopName;
     private BigDecimal marginAmount;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updatedTime;
 }

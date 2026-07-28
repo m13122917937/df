@@ -14,10 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="specName"    column="spec_name"    />
         <result property="barCode"    column="bar_code"    />
         <result property="createTime"    column="create_time"    />
-        <result property="seriesCode"    column="series_code"    />
-        <result property="seriesName"    column="series_name"    />
-        <result property="isSeriesNumber"    column="is_series_number"    />
-        <result property="skuStatus"    column="sku_status"    />
+        <result property="snType"    column="sn_type"    />
         <result property="deleted"    column="deleted"    />
         <result property="sortOrder"    column="sort_order"    />
     </resultMap>

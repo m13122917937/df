@@ -2,7 +2,6 @@ package com.ruoyi.web.vo.master;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -16,6 +15,5 @@ public class MasterSalesChannelVO {
     private String channelName;
     private String platformName;
     private String subjectName;
-    private BigDecimal depositAmount;
     private LocalDateTime lastSyncTime;
 }

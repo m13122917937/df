@@ -29,26 +29,44 @@
         </div>
       </div>
       <div class="subject-table-wrap">
-        <el-table v-loading="loading" :data="subjectList" height="100%" border stripe>
-          <el-table-column prop="subjectCode" label="主体编码" min-width="130" show-overflow-tooltip />
-          <el-table-column prop="subjectName" label="主体名称" min-width="220" show-overflow-tooltip />
-          <el-table-column prop="subjectShortName" label="主体简称" min-width="160" show-overflow-tooltip />
-          <el-table-column label="状态" width="110" align="center">
-            <template slot-scope="scope">
-              <el-tag :type="scope.row.isDelete === 1 ? 'danger' : 'success'" size="mini">
-                {{ scope.row.isDelete === 1 ? '已删除' : '正常' }}
-              </el-tag>
+        <el-table v-loading="loading" :data="filteredSubjectList" height="100%" border stripe>
+          <el-table-column
+            v-for="column in tableColumns"
+            :key="column.key"
+            :prop="column.isAction ? undefined : column.key"
+            :label="column.label"
+            :min-width="column.minWidth"
+            :show-overflow-tooltip="column.showOverflowTooltip"
+          >
+            <template #header>
+              <div class="subject-column-header">
+                <template v-if="column.isAction">{{ column.label }}</template>
+                <FilterHeader
+                  v-else
+                  :label="column.label"
+                  :value="columnSearch[column.key]"
+                  :options="colFilterOptions[column.key] || []"
+                  @update:value="updateColumnFilter(column.key, $event)"
+                />
+              </div>
             </template>
-          </el-table-column>
-          <el-table-column prop="lastSyncTime" label="最后同步时间" min-width="180" />
-          <el-table-column label="操作" width="120" align="center" fixed="right">
             <template slot-scope="scope">
-              <el-button
-                type="text"
-                icon="el-icon-bank-card"
-                @click="handleBankManage(scope.row)"
-                v-hasPermi="['master:subject:bank:list']"
-              >银行卡</el-button>
+              <template v-if="column.key === '_actions'">
+                <el-button
+                  type="text"
+                  icon="el-icon-bank-card"
+                  @click="handleBankManage(scope.row)"
+                  v-hasPermi="['master:subject:bank:list']"
+                >银行卡</el-button>
+              </template>
+              <template v-else-if="column.key === 'isDelete'">
+                <el-tag :type="scope.row.isDelete === 1 ? 'danger' : 'success'" size="mini">
+                  {{ getColumnValue(scope.row, column.key) }}
+                </el-tag>
+              </template>
+              <template v-else>
+                {{ getColumnValue(scope.row, column.key) }}
+              </template>
             </template>
           </el-table-column>
         </el-table>
@@ -77,10 +95,27 @@
 <script>
 import { getMasterSubjectList } from '@/api/master'
 import SubjectBankDialog from './components/SubjectBankDialog'
+import FilterHeader from '@/views/business/manage/components/FilterHeader.vue'
+
+const ALL_COLUMNS = [
+  { key: 'subjectCode', label: '主体编码', minWidth: 130, showOverflowTooltip: true },
+  { key: 'subjectName', label: '主体名称', minWidth: 220, showOverflowTooltip: true },
+  { key: 'subjectShortName', label: '主体简称', minWidth: 160, showOverflowTooltip: true },
+  { key: 'isDelete', label: '状态', minWidth: 110, showOverflowTooltip: false },
+  { key: 'lastSyncTime', label: '最后同步时间', minWidth: 180, showOverflowTooltip: false },
+  { key: '_actions', label: '操作', minWidth: 120, showOverflowTooltip: false, isAction: true }
+]
+
+function createColumnSearch() {
+  return ALL_COLUMNS.reduce((search, column) => {
+    search[column.key] = []
+    return search
+  }, {})
+}
 
 export default {
   name: 'MasterSubject',
-  components: { SubjectBankDialog },
+  components: { SubjectBankDialog, FilterHeader },
   data() {
     return {
       loading: false,
@@ -94,7 +129,24 @@ export default {
         subjectCodeLike: '',
         subjectNameLike: '',
         status: undefined
-      }
+      },
+      columnSearch: createColumnSearch()
+    }
+  },
+  computed: {
+    tableColumns() { return ALL_COLUMNS },
+    filteredSubjectList() {
+      return this.subjectList.filter(row => this.matchesColumnFilters(row))
+    },
+    colFilterOptions() {
+      return ALL_COLUMNS.reduce((options, column) => {
+        if (column.isAction) return options
+        const values = this.subjectList
+          .map(row => this.getColumnValue(row, column.key))
+          .filter(value => value !== '-')
+        options[column.key] = [...new Set(values)].map(value => ({ text: value, value }))
+        return options
+      }, {})
     }
   },
   created() {
@@ -138,6 +190,22 @@ export default {
     handleBankManage(row) {
       this.currentSubject = row
       this.bankDialogVisible = true
+    },
+    getColumnValue(row, key) {
+      if (key === 'isDelete') {
+        return row.isDelete === 1 ? '已删除' : '正常'
+      }
+      return row[key] || '-'
+    },
+    updateColumnFilter(key, values) {
+      this.$set(this.columnSearch, key, values)
+    },
+    matchesColumnFilters(row) {
+      return ALL_COLUMNS.every(column => {
+        if (column.isAction) return true
+        const values = this.columnSearch[column.key]
+        return !values.length || values.includes(this.getColumnValue(row, column.key))
+      })
     }
   }
 }
@@ -219,6 +287,17 @@ export default {
   margin-top: 6px;
   color: var(--nl-color-weak);
   font-size: 13px;
+}
+
+.subject-column-header {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.subject-column-header :deep(.filter-header-trigger) {
+  flex: 1;
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
