@@ -572,7 +572,8 @@ public class WarehousingOrderBizService {
         param.setAccountingPeriod(accountingPeriod);
         param.setPayerId(payerBO.getId());
         param.setTrackingNumber(StrUtil.trim(row.getTrackingNumber()));
-        param.setTrackingCompany(LogisticsCode.SHUNFENG.getMsg());
+        param.setTrackingCompany(StrUtil.isBlank(row.getTrackingNumber())
+                ? LogisticsCode.ZS.getMsg() : LogisticsCode.SHUNFENG.getMsg());
         param.setRemark(row.getRemark());
         return param;
     }
