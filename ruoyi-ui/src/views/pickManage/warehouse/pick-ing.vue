@@ -19,6 +19,17 @@
         >
         </OrderSearch>
         <!-- 订单表格 -->
+        <div class="batch-inbound-toolbar">
+          <span class="batch-selection-count">已选 {{ selectedRows.length }} 条订单</span>
+          <el-button
+            type="primary"
+            size="small"
+            :disabled="selectedRows.length === 0"
+            @click="openBatchInboundDialog"
+          >
+            一键全部入库
+          </el-button>
+        </div>
         <div class="order-table-container table-section">
           <el-table
             ref="table"
@@ -32,11 +43,18 @@
             height="100%"
             header-cell-class-name="table-header-cell"
             :cell-style="{ padding: '8px 0' }"
+            @selection-change="handleSelectionChange"
           >
             <!-- 空数据状态 -->
             <template slot="empty">
               <EmptyState text="暂无等待捡货订单数据" />
             </template>
+            <el-table-column
+              type="selection"
+              width="52"
+              fixed="left"
+              :selectable="isOrderSelectable"
+            />
             <el-table-column
               label="订单编号"
               prop="orderCode"
@@ -328,6 +346,49 @@
         </el-row>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="一键全部入库"
+      :visible.sync="batchInboundDialogVisible"
+      custom-class="batch-inbound-dialog"
+      width="480px"
+      :append-to-body="true"
+      @closed="resetBatchInboundForm"
+    >
+      <el-form label-width="96px">
+        <el-form-item label="已选订单">
+          <span>{{ selectedRows.length }} 条</span>
+        </el-form-item>
+        <el-form-item label="入库仓库" required>
+          <el-select
+            v-model="batchWarehouseCode"
+            placeholder="请选择入库仓库"
+            clearable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="warehouse in warehouseOptions"
+              :key="warehouse.value"
+              :label="warehouse.label"
+              :value="warehouse.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <p class="batch-inbound-tip">
+        系统将按每条订单的剩余数量全部入库，入库后不可撤销。
+      </p>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="batchInboundDialogVisible = false">取消</el-button>
+        <el-button
+          type="primary"
+          :loading="batchInboundSubmitting"
+          @click="handleBatchInbound"
+        >
+          确认入库
+        </el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -380,6 +441,10 @@ export default {
       pickMode: "imei",
       // 选择项（可由接口替换）
       warehouseOptions: [],
+      selectedRows: [],
+      batchInboundDialogVisible: false,
+      batchWarehouseCode: "",
+      batchInboundSubmitting: false,
     };
   },
   computed: {},
@@ -434,6 +499,7 @@ export default {
       if (res && res.code === 200) {
         this.orderList = res.rows;
         this.pagination.total = res.total;
+        this.selectedRows = [];
       } else {
         this.$message.error(res?.msg || "获取订单列表失败");
       }
@@ -445,6 +511,74 @@ export default {
     },
     handleCurrentChange(current) {
       this.pagination.current = current;
+      this.fetchOrderList();
+    },
+    handleSelectionChange(rows) {
+      this.selectedRows = rows;
+    },
+    isOrderSelectable(row) {
+      return Number(row.quantity || 0) > Number(row.warehouseQuantity || 0);
+    },
+    async openBatchInboundDialog() {
+      if (!this.warehouseOptions.length) {
+        await this.loadWarehouseOptions();
+      }
+      this.batchInboundDialogVisible = true;
+    },
+    resetBatchInboundForm() {
+      this.batchWarehouseCode = "";
+      this.batchInboundSubmitting = false;
+    },
+    async handleBatchInbound() {
+      if (!this.batchWarehouseCode) {
+        this.$message.warning("请选择入库仓库");
+        return;
+      }
+      try {
+        await this.$confirm(
+          "确认将已选 " + this.selectedRows.length + " 条订单全部入库吗？",
+          "确认入库",
+          { type: "warning" }
+        );
+      } catch (error) {
+        return;
+      }
+      this.batchInboundSubmitting = true;
+      const failedOrderCodes = [];
+      let successCount = 0;
+      for (const row of this.selectedRows) {
+        const remainingQuantity =
+          Number(row.quantity || 0) - Number(row.warehouseQuantity || 0);
+        if (remainingQuantity <= 0) {
+          continue;
+        }
+        try {
+          const response = await setPicking({
+            orderCode: row.orderCode,
+            quantity: remainingQuantity,
+            remark: "批量一键入库",
+            snList: [],
+            warehouseCode: this.batchWarehouseCode,
+            batchInbound: true,
+          });
+          if (response && response.code === 200) {
+            successCount += 1;
+          } else {
+            failedOrderCodes.push(row.orderCode);
+          }
+        } catch (error) {
+          failedOrderCodes.push(row.orderCode);
+        }
+      }
+      this.batchInboundSubmitting = false;
+      this.batchInboundDialogVisible = false;
+      if (failedOrderCodes.length) {
+        this.$message.error(
+          "成功入库 " + successCount + " 条，失败 " + failedOrderCodes.length + " 条：" + failedOrderCodes.join("、")
+        );
+      } else {
+        this.$message.success("成功入库 " + successCount + " 条订单");
+      }
       this.fetchOrderList();
     },
     // 打开拣货弹窗
@@ -723,6 +857,30 @@ export default {
   flex-wrap: wrap;
 }
 
+.batch-inbound-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-tags);
+  border-radius: 8px;
+}
+
+.batch-selection-count {
+  color: var(--adm-text-secondary);
+  font-size: 13px;
+}
+
+.batch-inbound-tip {
+  margin: 0;
+  color: var(--adm-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 /* 订单信息样式 */
 .order-numbers {
   display: flex;
@@ -918,8 +1076,8 @@ export default {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 
   .el-dialog__header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--adm-primary);
+    color: var(--module-nav-active-text);
     padding: 20px 24px;
     border-radius: 12px 12px 0 0;
 
@@ -933,7 +1091,7 @@ export default {
       right: 24px;
 
       .el-dialog__close {
-        color: white;
+        color: var(--module-nav-active-text);
         font-size: 20px;
 
         &:hover {
@@ -1120,6 +1278,26 @@ export default {
 
   .el-dialog__body .el-input__inner {
     border-radius: 6px;
+  }
+}
+::v-deep .batch-inbound-dialog {
+  border: 1px solid var(--adm-primary);
+  background: var(--bg-card);
+
+  .el-dialog__header {
+    padding: 18px 20px;
+    background: var(--adm-primary);
+    border-bottom: 1px solid var(--adm-primary-active);
+  }
+
+  .el-dialog__title,
+  .el-dialog__close {
+    color: var(--module-nav-active-text);
+  }
+
+  .el-dialog__headerbtn {
+    top: 18px;
+    right: 20px;
   }
 }
 </style>

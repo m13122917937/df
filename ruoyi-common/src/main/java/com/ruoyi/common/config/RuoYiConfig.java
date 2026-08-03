@@ -48,6 +48,11 @@ public class RuoYiConfig {
      */
     private String warehouseNo;
 
+    /**
+     * 内部档口仓库编码。
+     */
+    private String internalWarehouseCode;
+
 
     public static String getProfile() {
         return profile;

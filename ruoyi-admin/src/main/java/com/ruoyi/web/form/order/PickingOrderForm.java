@@ -22,4 +22,7 @@ public class PickingOrderForm {
 
 
     private String warehouseCode;
+
+
+    private Boolean batchInbound;
 }

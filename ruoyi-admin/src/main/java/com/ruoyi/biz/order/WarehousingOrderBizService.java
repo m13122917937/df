@@ -16,6 +16,7 @@ import com.ruoyi.biz.bill.BillBizService;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.user.LoginUser;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
@@ -114,6 +115,9 @@ public class WarehousingOrderBizService {
 
     @Autowired
     IMasterSubjectBankFacade payerFacade;
+
+    @Autowired
+    RuoYiConfig ruoYiConfig;
 
     protected Integer getOrderType() {
         return OrderConsts.OrderType.PROCUREMENT.getCode();
@@ -267,12 +271,21 @@ public class WarehousingOrderBizService {
         OrderBO orderBO = queryPickingOrder(pickingOrderForm.getOrderCode());
         HangingOrderBO hangingOrderBO = queryPickingHangingOrder(pickingOrderForm.getOrderCode());
         TradeOrderBO tradeOrderBO = queryPickingTradeOrder(pickingOrderForm.getOrderCode());
+        boolean skipJkyAndSettlement = shouldSkipJkyAndSettlement(pickingOrderForm);
         log.info("开始拣货,{},操作用户：{}, 拣货信息：{}", pickingOrderForm.getOrderCode(), loginUser.getUsername(), JacksonUtil.toJson(pickingOrderForm));
 
         Integer quantity = Objects.isNull(pickingOrderForm.getQuantity())
-                ? pickingWithSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO, loginUser)
-                : pickingWithoutSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO, loginUser);
-        finishPickingOrder(pickingOrderForm.getOrderCode(), orderBO, quantity);
+                ? pickingWithSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO, loginUser, skipJkyAndSettlement)
+                : pickingWithoutSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO, loginUser, skipJkyAndSettlement);
+        finishPickingOrder(pickingOrderForm.getOrderCode(), orderBO, quantity, skipJkyAndSettlement);
+    }
+
+    /**
+     * 判断批量入库是否需要跳过吉客云及结算处理。
+     */
+    private boolean shouldSkipJkyAndSettlement(PickingOrderForm pickingOrderForm) {
+        return Boolean.TRUE.equals(pickingOrderForm.getBatchInbound())
+                && StrUtil.equals(pickingOrderForm.getWarehouseCode(), ruoYiConfig.getInternalWarehouseCode());
     }
 
 
@@ -306,11 +319,13 @@ public class WarehousingOrderBizService {
     /**
      * 处理 SN 管理商品拣货入仓。
      */
-    private Integer pickingWithSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser) throws IOException {
+    private Integer pickingWithSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser, boolean skipJkyAndSettlement) throws IOException {
         Integer quantity = pickingOrderForm.getSnList().size() + tradeOrderBO.getQuantity();
         Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
         savePickingSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO);
-        createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList().size(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        if (!skipJkyAndSettlement) {
+            createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getSnList().size(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        }
         updatePickingQuantity(pickingOrderForm.getOrderCode(), quantity);
         return quantity;
     }
@@ -318,11 +333,13 @@ public class WarehousingOrderBizService {
     /**
      * 处理非 SN 管理商品拣货入仓。
      */
-    private Integer pickingWithoutSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser) throws IOException {
+    private Integer pickingWithoutSn(PickingOrderForm pickingOrderForm, OrderBO orderBO, HangingOrderBO hangingOrderBO, TradeOrderBO tradeOrderBO, LoginUser loginUser, boolean skipJkyAndSettlement) throws IOException {
         Integer quantity = pickingOrderForm.getQuantity() + tradeOrderBO.getQuantity();
         Assert.isFalse(quantity > orderBO.getQuantity(), "订单入库数量大于成交数量");
         // 已切换至吉客云，原 createStockIn 调用已删除
-        createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getQuantity(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        if (!skipJkyAndSettlement) {
+            createJkyStockIn(orderBO, hangingOrderBO, tradeOrderBO, loginUser, pickingOrderForm.getWarehouseCode(), pickingOrderForm.getQuantity(), pickingOrderForm.getSnList(), pickingOrderForm.getRemark());
+        }
         updatePickingQuantity(pickingOrderForm.getOrderCode(), quantity);
         return quantity;
     }
@@ -347,13 +364,15 @@ public class WarehousingOrderBizService {
     /**
      * 完成全部拣货并生成账单。
      */
-    private void finishPickingOrder(String orderCode, OrderBO orderBO, Integer quantity) {
+    private void finishPickingOrder(String orderCode, OrderBO orderBO, Integer quantity, boolean skipJkyAndSettlement) {
         if (!Objects.equals(quantity, orderBO.getQuantity())) {
             return;
         }
         DateTime date = DateUtil.date();
         orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.ENDING.getCode()).setUpdateTime(date).setSignedTime(date), new OrderQuery().setOrderCode(orderCode));
-        billBizService.generateBill(orderBO);
+        if (!skipJkyAndSettlement) {
+            billBizService.generateBill(orderBO);
+        }
     }
 
     /**

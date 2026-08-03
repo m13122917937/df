@@ -15,6 +15,7 @@ ruoyi:
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
   warehouseNo: "dfc"
+  internalWarehouseCode: "hydkc"
 
 # 开发环境配置
 server:
