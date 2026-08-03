@@ -53,6 +53,7 @@
         <el-table-column prop="price" label="单价" width="90" align="right" />
         <el-table-column prop="accountingPeriod" label="账期(天)" width="80" align="center" />
         <el-table-column prop="payerName" label="付款主体" min-width="120" />
+        <el-table-column prop="trackingNumber" label="物流单号" min-width="140" />
         <el-table-column label="状态" width="120" align="center">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.success" type="success" size="small">通过</el-tag>

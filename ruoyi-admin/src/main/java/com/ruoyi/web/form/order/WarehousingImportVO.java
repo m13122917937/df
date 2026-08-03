@@ -26,6 +26,9 @@ public class WarehousingImportVO {
     @ExcelProperty("付款主体名称")
     private String payerName;
 
+    @ExcelProperty("物流单号")
+    private String trackingNumber;
+
     @ExcelProperty("备注")
     private String remark;
 }

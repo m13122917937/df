@@ -202,7 +202,8 @@ public class WarehousingOrderBizService {
         tradeOrderParam.setOrderId(orderBO.getOrderCode()).setTradePrice(warehousingSaveParam.getPrice()).setBrand(orderBO.getBrand()).setProductName(orderBO.getProductName());
         tradeOrderParam.setSkuName(orderBO.getSkuName()).setSkuCode(orderBO.getSkuCode()).setProvince(orderBO.getProvince()).setQuantity(0);
         tradeOrderParam.setOrderType(orderBO.getOrderType()).setTradeIndex(4).setHangOrderId(hangingOrderBO.getId()).setOrderId(orderBO.getOrderCode());
-        tradeOrderParam.setTrackingCompany(LogisticsCode.ZS.getMsg());
+        tradeOrderParam.setTrackingNumber(warehousingSaveParam.getTrackingNumber());
+        tradeOrderParam.setTrackingCompany(StrUtil.blankToDefault(warehousingSaveParam.getTrackingCompany(), LogisticsCode.ZS.getMsg()));
         tradeOrderFacade.save(tradeOrderParam);
         log.info("保存入仓订单成功,{}", orderBO.getOrderCode());
 
@@ -485,7 +486,8 @@ public class WarehousingOrderBizService {
         WarehousingImportRowResult r = new WarehousingImportRowResult()
                 .setRowIndex(index + 1).setSkuCode(row.getSkuCode()).setCompanyName(row.getCompanyName())
                 .setQuantity(row.getQuantity()).setPrice(row.getPrice())
-                .setAccountingPeriod(accountingPeriod).setPayerName(row.getPayerName()).setRemark(row.getRemark());
+                .setAccountingPeriod(accountingPeriod).setPayerName(row.getPayerName())
+                .setTrackingNumber(row.getTrackingNumber()).setRemark(row.getRemark());
         List<String> errors = new ArrayList<>();
 
         if (StrUtil.isBlank(row.getSkuCode())) {
@@ -569,6 +571,8 @@ public class WarehousingOrderBizService {
         }
         param.setAccountingPeriod(accountingPeriod);
         param.setPayerId(payerBO.getId());
+        param.setTrackingNumber(StrUtil.trim(row.getTrackingNumber()));
+        param.setTrackingCompany(LogisticsCode.SHUNFENG.getMsg());
         param.setRemark(row.getRemark());
         return param;
     }

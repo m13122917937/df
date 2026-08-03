@@ -37,5 +37,14 @@ public class WarehousingSaveParam {
     @NotNull(message = "付款主体不能为空")
     private Long payerId;
 
+    /**
+     * 物流单号。
+     */
+    private String trackingNumber;
+
+    /**
+     * 快递公司。
+     */
+    private String trackingCompany;
 
 }

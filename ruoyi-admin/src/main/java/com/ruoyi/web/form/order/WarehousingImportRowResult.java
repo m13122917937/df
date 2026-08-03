@@ -23,6 +23,8 @@ public class WarehousingImportRowResult {
 
     private String payerName;
 
+    private String trackingNumber;
+
     private String remark;
 
     private String productName;

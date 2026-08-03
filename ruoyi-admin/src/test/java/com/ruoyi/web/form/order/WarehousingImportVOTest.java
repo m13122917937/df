@@ -17,6 +17,7 @@ class WarehousingImportVOTest {
         Path filePath = Files.createTempFile("warehousing-import-", ".xlsx");
         WarehousingImportVO source = new WarehousingImportVO();
         source.setAccountingPeriod("T+3");
+        source.setTrackingNumber("SF1234567890");
 
         try {
             EasyExcel.write(filePath.toFile(), WarehousingImportVO.class)
@@ -25,6 +26,7 @@ class WarehousingImportVOTest {
                     .head(WarehousingImportVO.class).sheet().doReadSync();
 
             assertEquals("T+3", rows.get(0).getAccountingPeriod());
+            assertEquals("SF1234567890", rows.get(0).getTrackingNumber());
         } finally {
             Files.deleteIfExists(filePath);
         }
