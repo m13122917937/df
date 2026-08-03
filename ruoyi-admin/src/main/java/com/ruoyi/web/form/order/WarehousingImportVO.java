@@ -21,7 +21,7 @@ public class WarehousingImportVO {
     private BigDecimal price;
 
     @ExcelProperty("账期(天)")
-    private Integer accountingPeriod;
+    private String accountingPeriod;
 
     @ExcelProperty("付款主体名称")
     private String payerName;

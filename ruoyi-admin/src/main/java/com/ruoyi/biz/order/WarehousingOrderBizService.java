@@ -462,10 +462,11 @@ public class WarehousingOrderBizService {
      * 逐行校验并转换
      */
     private WarehousingImportRowResult validateRow(WarehousingImportVO row, int index) {
+        Integer accountingPeriod = parseAccountingPeriod(row.getAccountingPeriod());
         WarehousingImportRowResult r = new WarehousingImportRowResult()
                 .setRowIndex(index + 1).setSkuCode(row.getSkuCode()).setCompanyName(row.getCompanyName())
                 .setQuantity(row.getQuantity()).setPrice(row.getPrice())
-                .setAccountingPeriod(row.getAccountingPeriod()).setPayerName(row.getPayerName()).setRemark(row.getRemark());
+                .setAccountingPeriod(accountingPeriod).setPayerName(row.getPayerName()).setRemark(row.getRemark());
         List<String> errors = new ArrayList<>();
 
         if (StrUtil.isBlank(row.getSkuCode())) {
@@ -494,8 +495,8 @@ public class WarehousingOrderBizService {
         if (row.getPrice() == null || row.getPrice().compareTo(BigDecimal.ZERO) < 0) {
             errors.add("单价不能为空且不能小于0");
         }
-        if (row.getAccountingPeriod() == null || row.getAccountingPeriod() < 0) {
-            errors.add("账期不能为空且不能小于0");
+        if (accountingPeriod == null || accountingPeriod < 0) {
+            errors.add("账期格式不正确，请填写非负整数或T+天数");
         }
 
         if (errors.isEmpty()) {
@@ -543,11 +544,34 @@ public class WarehousingOrderBizService {
         param.setQuantity(row.getQuantity());
         param.setPrice(row.getPrice());
         param.setCompanyId(companyBO.getId());
-        param.setAccountingPeriod(row.getAccountingPeriod());
+        Integer accountingPeriod = parseAccountingPeriod(row.getAccountingPeriod());
+        if (accountingPeriod == null || accountingPeriod < 0) {
+            throw new ServiceException("账期格式不正确，请填写非负整数或T+天数");
+        }
+        param.setAccountingPeriod(accountingPeriod);
         param.setPayerId(payerBO.getId());
         param.setRemark(row.getRemark());
         return param;
     }
+
+    /**
+     * 将导入的账期规范为天数，兼容数字与 T+天数写法。
+     */
+    private Integer parseAccountingPeriod(String value) {
+        String normalizedValue = StrUtil.trim(value);
+        if (StrUtil.isBlank(normalizedValue)) {
+            return null;
+        }
+        if (normalizedValue.matches("(?i)t\\+\\d+")) {
+            normalizedValue = normalizedValue.substring(normalizedValue.indexOf('+') + 1);
+        }
+        if (!normalizedValue.matches("\\d+")) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(normalizedValue);
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+    }
 }
-
-
