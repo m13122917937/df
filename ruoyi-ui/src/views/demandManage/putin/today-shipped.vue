@@ -1028,12 +1028,14 @@ export default {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 
   .el-dialog__header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--primary-color);
+    border-bottom: 1px solid var(--primary-active);
+    color: var(--module-nav-active-text);
     padding: 20px 24px;
     border-radius: 12px 12px 0 0;
 
     .el-dialog__title {
+      color: var(--module-nav-active-text) !important;
       font-size: 18px;
       font-weight: 600;
     }
@@ -1043,11 +1045,11 @@ export default {
       right: 24px;
 
       .el-dialog__close {
-        color: white;
+        color: var(--module-nav-active-text);
         font-size: 20px;
 
         &:hover {
-          color: #ffd700;
+          color: var(--primary-light);
         }
       }
     }

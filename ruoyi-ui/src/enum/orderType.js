@@ -21,5 +21,5 @@ export function getOrderTypeLabel(code) {
     2: '代发',
     3: '销售订单',
   }
-  return map[code] || '代发'
+  return map[code] || '-'
 }

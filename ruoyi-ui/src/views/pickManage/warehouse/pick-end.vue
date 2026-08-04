@@ -76,7 +76,7 @@
               <template slot-scope="scope">
                 <div class="order-numbers">
                   <div class="order-number-item">
-                    {{ scope.row.tradeUserName || "-" }}
+                    {{ scope.row.createBy || "-" }}
                   </div>
                   <div class="order-number-item">
                      {{
@@ -85,6 +85,16 @@
                   </div>
                   
                 </div>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="signedTime"
+              label="入库时间"
+              min-width="180"
+              align="center"
+            >
+              <template slot-scope="scope">
+                {{ scope.row.signedTime || "-" }}
               </template>
             </el-table-column>
             <el-table-column prop="brand" label="品牌/品类" width="120" align="center">

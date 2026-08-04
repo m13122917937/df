@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :visible.sync="visible" width="720px" title="新建订单" @close="handleCancel">
+  <el-dialog :visible.sync="visible" width="720px" title="新建订单" custom-class="putin-new-order-dialog" @close="handleCancel">
     <div class="new-order-form">
       <el-form :model="form" label-width="110px" ref="formRef" :rules="rules">
         <el-form-item label="付款主体" prop="payerId">
@@ -346,8 +346,33 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-.new-order-form ::v-deep .el-select {
+<style lang="scss">
+.putin-new-order-dialog {
+  background: var(--bg-card);
+  border: 1px solid var(--border-tags);
+
+  .el-dialog__header {
+    padding: 20px 24px;
+    background: var(--primary-color) !important;
+    border-bottom: 1px solid var(--primary-active) !important;
+
+    .el-dialog__title {
+      color: var(--module-nav-active-text) !important;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .el-dialog__headerbtn .el-dialog__close {
+      color: var(--module-nav-active-text) !important;
+
+      &:hover {
+        color: var(--primary-light) !important;
+      }
+    }
+  }
+}
+
+.new-order-form .el-select {
   width: 100%;
 }
 </style>

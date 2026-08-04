@@ -278,7 +278,8 @@ public class WarehousingOrderBizService {
         Integer quantity = Objects.isNull(pickingOrderForm.getQuantity())
                 ? pickingWithSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO, loginUser, skipJkyAndSettlement)
                 : pickingWithoutSn(pickingOrderForm, orderBO, hangingOrderBO, tradeOrderBO, loginUser, skipJkyAndSettlement);
-        finishPickingOrder(pickingOrderForm.getOrderCode(), orderBO, quantity, skipJkyAndSettlement);
+        finishPickingOrder(pickingOrderForm.getOrderCode(), orderBO, quantity, skipJkyAndSettlement,
+                pickingOrderForm.getSignedTime());
     }
 
     /**
@@ -365,12 +366,15 @@ public class WarehousingOrderBizService {
     /**
      * 完成全部拣货并生成账单。
      */
-    private void finishPickingOrder(String orderCode, OrderBO orderBO, Integer quantity, boolean skipJkyAndSettlement) {
+    private void finishPickingOrder(String orderCode, OrderBO orderBO, Integer quantity, boolean skipJkyAndSettlement,
+                                    Date signedTime) {
         if (!Objects.equals(quantity, orderBO.getQuantity())) {
             return;
         }
         DateTime date = DateUtil.date();
-        orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.ENDING.getCode()).setUpdateTime(date).setSignedTime(date), new OrderQuery().setOrderCode(orderCode));
+        Date inboundTime = Objects.isNull(signedTime) ? date : signedTime;
+        orderFacade.update(new OrderParam().setStatus(OrderConsts.OrderStatus.ENDING.getCode()).setUpdateTime(date)
+                .setSignedTime(inboundTime), new OrderQuery().setOrderCode(orderCode));
         if (!skipJkyAndSettlement) {
             billBizService.generateBill(orderBO);
         }

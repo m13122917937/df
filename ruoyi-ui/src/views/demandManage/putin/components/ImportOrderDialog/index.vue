@@ -1,33 +1,37 @@
 <template>
-  <el-dialog :visible.sync="visible" width="1000px" title="Excel 批量导入" @close="handleClose" :close-on-click-modal="false">
+  <el-dialog :visible.sync="visible" width="1000px" title="Excel 批量导入" custom-class="putin-import-order-dialog" @close="handleClose" :close-on-click-modal="false" :close-on-press-escape="!isProcessing" :show-close="!isProcessing">
+    <div v-loading="isProcessing" :element-loading-text="loadingText">
     <!-- Step 1: Upload -->
     <div v-if="step === 'upload'" class="import-step">
       <div class="step-header">
         <span class="step-title">第一步：下载模板并上传文件</span>
       </div>
       <div class="template-download">
-        <el-button type="text" icon="el-icon-download" @click="handleDownloadTemplate" :loading="templateLoading">
+        <el-button type="text" icon="el-icon-download" @click="handleDownloadTemplate" :loading="templateLoading" :disabled="isProcessing">
           下载导入模板
         </el-button>
         <span class="template-hint">（.xlsx 格式）</span>
       </div>
-      <el-upload
-        ref="upload"
-        drag
-        accept=".xlsx,.xls"
-        :auto-upload="false"
-        :limit="1"
-        :on-change="handleFileChange"
-        :on-remove="handleFileRemove"
-        :file-list="fileList"
-      >
-        <i class="el-icon-upload"></i>
-        <div class="el-upload__text">将 Excel 文件拖到此处，或<em>点击上传</em></div>
-        <div class="el-upload__tip" slot="tip">仅支持 .xlsx 格式</div>
-      </el-upload>
+      <div class="upload-zone">
+        <el-upload
+          ref="upload"
+          drag
+          accept=".xlsx,.xls"
+          :auto-upload="false"
+          :limit="1"
+          :on-change="handleFileChange"
+          :on-remove="handleFileRemove"
+          :file-list="fileList"
+          :disabled="isProcessing"
+        >
+          <i class="el-icon-upload"></i>
+          <div class="el-upload__text">将 Excel 文件拖到此处，或<em>点击上传</em></div>
+          <div class="el-upload__tip" slot="tip">仅支持 .xlsx 格式</div>
+        </el-upload>
+      </div>
       <div class="step-actions">
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" :disabled="!selectedFile" :loading="validating" @click="handleValidate">
+        <el-button :disabled="isProcessing" @click="handleClose">取消</el-button>
+        <el-button type="primary" :disabled="!selectedFile || isProcessing" :loading="validating" @click="handleValidate">
           开始校验
         </el-button>
       </div>
@@ -68,11 +72,12 @@
         </el-table-column>
       </el-table>
       <div class="step-actions">
-        <el-button @click="handleBack">重新上传</el-button>
-        <el-button type="primary" :disabled="importResult.successCount === 0" :loading="importing" @click="handleImport">
+        <el-button :disabled="isProcessing" @click="handleBack">重新上传</el-button>
+        <el-button type="primary" :disabled="importResult.successCount === 0 || isProcessing" :loading="importing" @click="handleImport">
           确认导入（{{ importResult.successCount }} 条）
         </el-button>
       </div>
+    </div>
     </div>
   </el-dialog>
 </template>
@@ -99,6 +104,14 @@ export default {
       }
     }
   },
+  computed: {
+    isProcessing() {
+      return this.validating || this.importing
+    },
+    loadingText() {
+      return this.validating ? '正在校验 Excel 数据，请稍候…' : '正在导入订单，请稍候…'
+    }
+  },
   methods: {
     open() {
       this.reset()
@@ -108,9 +121,12 @@ export default {
       this.step = 'upload'
       this.fileList = []
       this.selectedFile = null
+      this.validating = false
+      this.importing = false
       this.importResult = { totalCount: 0, successCount: 0, errorCount: 0, rows: [] }
     },
     handleClose() {
+      if (this.isProcessing) return
       this.visible = false
       this.$emit('close')
     },
@@ -136,6 +152,7 @@ export default {
       this.selectedFile = null
     },
     async handleValidate() {
+      if (this.isProcessing) return
       if (!this.selectedFile) {
         this.$message.warning('请先选择文件')
         return
@@ -162,7 +179,7 @@ export default {
       }
     },
     async handleImport() {
-      if (!this.selectedFile || this.importResult.successCount === 0) return
+      if (!this.selectedFile || this.importResult.successCount === 0 || this.isProcessing) return
       this.importing = true
       try {
         const res = await importExcel(this.selectedFile)
@@ -227,6 +244,58 @@ export default {
   .error-msg {
     color: #f56c6c;
     font-size: 12px;
+  }
+}
+</style>
+
+<style lang="scss">
+.putin-import-order-dialog {
+  .el-dialog__header {
+    padding: 20px 24px;
+    background: var(--primary-color) !important;
+    border-bottom: 1px solid var(--primary-active) !important;
+
+    .el-dialog__title {
+      color: var(--module-nav-active-text) !important;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .el-dialog__headerbtn .el-dialog__close {
+      color: var(--module-nav-active-text) !important;
+
+      &:hover {
+        color: var(--primary-light) !important;
+      }
+    }
+  }
+  .upload-zone {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+
+    .el-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .el-upload-dragger {
+      width: 480px;
+      height: 240px;
+      padding: 60px 24px 0;
+    }
+
+    .el-upload__text {
+      margin-top: 16px;
+      font-size: 15px;
+    }
+
+    .el-upload__tip {
+      width: 100%;
+      margin-top: 10px;
+      text-align: center;
+    }
   }
 }
 </style>

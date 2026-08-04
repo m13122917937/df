@@ -202,7 +202,7 @@
         <el-table-column label="采购信息" min-width="250" >
           <template slot-scope="scope">
             <div class="order-product">公司：{{ scope.row.companyName || '--' }}</div>
-            <div class="order-product">方式：{{ scope.row.tradeTypeName || '一件代发' }}</div>
+            <div class="order-product">方式：{{ getOrderType(scope.row.orderType) }}</div>
           </template>
         </el-table-column>
 

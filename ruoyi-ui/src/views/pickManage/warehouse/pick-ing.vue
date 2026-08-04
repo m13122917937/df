@@ -102,6 +102,16 @@
               </template>
             </el-table-column>
             <el-table-column
+              prop="signedTime"
+              label="入库时间"
+              min-width="180"
+              align="center"
+            >
+              <template slot-scope="scope">
+                {{ scope.row.signedTime || "-" }}
+              </template>
+            </el-table-column>
+            <el-table-column
               prop="brand"
               label="品牌/品类"
               width="120"
@@ -374,6 +384,16 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="入库时间" required>
+          <el-date-picker
+            v-model="batchInboundTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择入库时间"
+            :clearable="false"
+            style="width: 100%"
+          />
+        </el-form-item>
       </el-form>
       <p class="batch-inbound-tip">
         系统将按每条订单的剩余数量全部入库，入库后不可撤销。
@@ -444,6 +464,7 @@ export default {
       selectedRows: [],
       batchInboundDialogVisible: false,
       batchWarehouseCode: "",
+      batchInboundTime: "",
       batchInboundSubmitting: false,
     };
   },
@@ -523,22 +544,38 @@ export default {
       if (!this.warehouseOptions.length) {
         await this.loadWarehouseOptions();
       }
+      this.batchInboundTime = this.getCurrentDateTime();
       this.batchInboundDialogVisible = true;
     },
     resetBatchInboundForm() {
       this.batchWarehouseCode = "";
+      this.batchInboundTime = "";
       this.batchInboundSubmitting = false;
+    },
+    getCurrentDateTime() {
+      const now = new Date();
+      const pad = value => String(value).padStart(2, "0");
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     },
     async handleBatchInbound() {
       if (!this.batchWarehouseCode) {
         this.$message.warning("请选择入库仓库");
         return;
       }
+      if (!this.batchInboundTime) {
+        this.$message.warning("请选择入库时间");
+        return;
+      }
       try {
         await this.$confirm(
           "确认将已选 " + this.selectedRows.length + " 条订单全部入库吗？",
           "确认入库",
-          { type: "warning" }
+          {
+            type: "warning",
+            zIndex: 3000,
+            closeOnClickModal: false,
+            closeOnPressEscape: false,
+          }
         );
       } catch (error) {
         return;
@@ -559,6 +596,7 @@ export default {
             remark: "批量一键入库",
             snList: [],
             warehouseCode: this.batchWarehouseCode,
+            signedTime: this.batchInboundTime,
             batchInbound: true,
           });
           if (response && response.code === 200) {
