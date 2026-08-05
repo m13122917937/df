@@ -1,5 +1,5 @@
 module.exports = {
-  title: '無界零售',
+  title: '无界供应链',
 
   /**
    * @type {boolean} true | false

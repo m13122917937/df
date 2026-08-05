@@ -3,18 +3,15 @@
     <!-- Header -->
     <div class="card-header">
       <div class="card-logo">
-        <svg viewBox="0 0 32 32" width="32" height="32">
-          <rect width="32" height="32" rx="7" fill="#1677FF"/>
-          <path d="M9 16 L13 20 L23 10" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
+        <img src="@/assets/logo.png" alt="无界供应链">
       </div>
-      <h3 class="card-title">無界电商</h3>
+      <h3 class="card-title">无界供应链</h3>
     </div>
 
     <!-- Welcome -->
     <div class="card-welcome">
       <h2>欢迎回来</h2>
-      <p>登录您的企业账号</p>
+      <p>登录无界供应链企业账号</p>
     </div>
 
     <!-- QR Login -->
@@ -135,6 +132,7 @@ $ease: cubic-bezier(0.16, 1, 0.3, 1);
     flex-shrink: 0;
     margin-right: 12px;
     svg { display: block; }
+    img { width: 32px; height: 32px; object-fit: contain; display: block; }
   }
 
   .card-title {

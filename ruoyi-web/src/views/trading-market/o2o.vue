@@ -408,7 +408,7 @@ export default {
 
       this.$alert(
         `<div style="text-align: left; line-height: 1.8; width: 100%;">
-          <div style="font-size: 18px; font-weight: 700; color: #FF9500; margin-bottom: 20px; text-align: center; padding-bottom: 12px; border-bottom: 2px solid #fbe6cd;">📢 無界电商平台重要公告</div>
+          <div style="font-size: 18px; font-weight: 700; color: #FF9500; margin-bottom: 20px; text-align: center; padding-bottom: 12px; border-bottom: 2px solid #fbe6cd;">📢 无界供应链平台重要公告</div>
 
           <div style="margin-bottom: 16px;">
             <div style="font-weight: 600; color: #FF3B30; margin-bottom: 8px; font-size: 15px;">🔴 合规经营提醒</div>
@@ -433,7 +433,7 @@ export default {
 
           <div style="margin-top: 20px; padding-top: 14px; border-top: 1px dashed #dcdfe6; text-align: right; color: #909399; font-size: 13px; background: #fafafa; border-radius: 6px;">
             <div>📅 公告时间：${timeStr}</div>
-            <div style="margin-top: 4px;">👤 公告人：無界电商运营部</div>
+            <div style="margin-top: 4px;">👤 公告人：无界供应链运营部</div>
           </div>
         </div>`,
         '平台温馨提示',

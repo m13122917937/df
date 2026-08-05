@@ -6,33 +6,30 @@
       <div class="brand-side">
         <div class="brand-content">
           <div class="brand-header">
-            <svg viewBox="0 0 36 36" width="36" height="36">
-              <rect width="36" height="36" rx="8" fill="#1677FF"/>
-              <path d="M10 18 L15 23 L26 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
-            <span class="brand-name">無界电商</span>
+            <img class="brand-logo" src="@/assets/logo.png" alt="无界供应链">
+            <span class="brand-name">无界供应链</span>
           </div>
 
           <div class="brand-tagline">
-            <h1>智能连接电商业务<br/>让管理更高效</h1>
+            <h1>无界供应链<br/>3C数码行业供应链业务</h1>
           </div>
 
           <p class="brand-desc">
-            为企业提供订单、商品、库存、数据分析<br/>与协同管理的一体化平台
+            为企业提供商品行情、商品、订单<br/>与协同管理的一体化平台
           </p>
 
           <div class="capabilities">
             <div class="cap-item">
               <span class="cap-check">✓</span>
-              <span>数据智能分析</span>
+              <span>3C商品行情</span>
             </div>
             <div class="cap-item">
               <span class="cap-check">✓</span>
-              <span>企业流程自动化</span>
+              <span>订单履约协同</span>
             </div>
             <div class="cap-item">
               <span class="cap-check">✓</span>
-              <span>多端协同管理</span>
+              <span>供应链一体化管理</span>
             </div>
           </div>
         </div>
@@ -43,11 +40,8 @@
         <div class="login-card">
           <!-- Card header -->
           <div class="card-header">
-            <svg viewBox="0 0 32 32" width="32" height="32">
-              <rect width="32" height="32" rx="7" fill="#1677FF"/>
-              <path d="M9 16 L13 20 L23 10" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
-            <h3 class="card-title">無界电商</h3>
+            <img class="card-logo" src="@/assets/logo.png" alt="无界供应链">
+            <h3 class="card-title">无界供应链</h3>
           </div>
 
           <div class="card-divider" />
@@ -117,7 +111,7 @@
     </div>
 
     <footer class="page-footer">
-      &copy; 2024 無界电商. All rights reserved.
+      &copy; 2024 无界供应链. All rights reserved.
     </footer>
   </div>
 </template>
@@ -250,6 +244,17 @@ $ease: cubic-bezier(0.16, 1, 0.3, 1);
 
     svg { flex-shrink: 0; filter: drop-shadow(0 2px 10px rgba(37,99,255,0.45)); }
 
+    .brand-logo {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      background: #fff;
+      padding: 4px;
+      object-fit: contain;
+      box-shadow: 0 2px 10px rgba(37,99,255,0.35);
+    }
+
     .brand-name {
       margin-left: 14px;
       font-size: 22px;
@@ -329,6 +334,7 @@ $ease: cubic-bezier(0.16, 1, 0.3, 1);
     align-items: center;
     gap: 10px;
     svg { flex-shrink: 0; }
+    .card-logo { width: 32px; height: 32px; flex-shrink: 0; object-fit: contain; }
     .card-title { font-size: 18px; font-weight: 600; color: #1D1D1F; margin: 0; letter-spacing: 0.5px; }
   }
 

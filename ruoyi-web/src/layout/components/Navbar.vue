@@ -3,8 +3,8 @@
     <!-- Logo 区域 -->
     <div class="logo-section">
       <div class="logo-wrapper">
-        <img class="logo-icon" src="@/assets/logo.png" alt="無界电商">
-        <span class="system-name">無界电商</span>
+        <img class="logo-icon" src="@/assets/logo.png" alt="无界供应链">
+        <span class="system-name">无界供应链</span>
       </div>
       <div class="logo-divider" />
     </div>

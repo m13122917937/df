@@ -147,8 +147,11 @@ public class ImeiBizService {
     public List<ImeiVO> list(String orderCode) {
 
         HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(orderCode).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
-        List<ImeiBO> list = imeiFacade.list(new ImeiQuery().setOrderId(orderCode).setHangingOrderId(hangingOrderBO.getId()));
+        ImeiQuery imeiQuery = new ImeiQuery().setOrderId(orderCode);
+        if (hangingOrderBO != null) {
+            imeiQuery.setHangingOrderId(hangingOrderBO.getId());
+        }
+        List<ImeiBO> list = imeiFacade.list(imeiQuery);
         return ImeiConvert.INSTANCE.toVo(list);
-
     }
 }

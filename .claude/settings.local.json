@@ -62,7 +62,20 @@
       "Bash(npx skills@latest *)",
       "Bash(curl -s \"https://raw.githubusercontent.com/emilkowalski/skills/main/skills/apple-design/SKILL.md\")",
       "Bash(npx vue-cli-service *)",
-      "Bash(xargs sed *)"
+      "Bash(xargs sed *)",
+      "Bash(xargs du *)",
+      "Bash(node *)",
+      "Bash(awk '{total += $5} END {print \"Total bytes:\", total, \"\\(\" int\\(total/1024\\) \" KB, \" int\\(total/1024/1024\\) \" MB\\)\"}')",
+      "Bash(awk '{total += $5} END {printf \"Total: %d bytes \\(%.0f KB, %.1f MB\\)\\\\n\", total, total/1024, total/1024/1024}')",
+      "Bash(mkdir -p \"/d/work/jie/adm/ruoyi-user/src/main/java/com/ruoyi/user/master/domain\")",
+      "Bash(mkdir -p \"/d/work/jie/adm/ruoyi-user/src/main/java/com/ruoyi/user/master/convert\")",
+      "Bash(mkdir -p \"/d/work/jie/adm/ruoyi-user/src/main/java/com/ruoyi/user/master/model/bo\")",
+      "Bash(mkdir -p \"/d/work/jie/adm/ruoyi-user/src/main/java/com/ruoyi/user/master/model/query\")",
+      "Bash(mkdir -p \"/d/work/jie/adm/ruoyi-user/src/main/java/com/ruoyi/user/master/mapper\")",
+      "Bash(docker run --rm mysql:8.0 mysql -h rm-wz9750v58imj89ts0.mysql.rds.aliyuncs.com -u op_user -pFy123Fy321!!! df -e ' *)",
+      "Bash(nslookup rm-wz9750v58imj89ts0.mysql.rds.aliyuncs.com)",
+      "Bash(curl -sS -o /dev/null -w \"%{http_code}\" telnet://rm-wz9750v58imj89ts0.mysql.rds.aliyuncs.com:3306)",
+      "PowerShell(Get-Command *)"
     ]
   }
 }

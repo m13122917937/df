@@ -37,7 +37,7 @@ public class JkyLogisticsTaskJob {
 
     private static final int MAX_RETRY_COUNT = 3;
 
-    private static final int[] RETRY_DELAY_MINUTES = {5, 10, 20};
+    private static final int[] RETRY_DELAY_MINUTES = {5, 15, 30};
 
     @Autowired
     private IJkyLogisticsTaskFacade jkyLogisticsTaskFacade;

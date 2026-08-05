@@ -25,7 +25,8 @@
       "Bash(mv tmp_star2 src/layout/components/TagsView/index.vue)",
       "Bash(mv tmp_star3 src/layout/components/TagsView/index.vue)",
       "Bash(mv tmp_final src/layout/components/TagsView/index.vue)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:1024)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:1024)",
+      "Bash(npm install *)"
     ]
   }
 }
