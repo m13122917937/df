@@ -16,22 +16,22 @@ router.beforeEach(async(to, from, next) => {
       next({ path: '/' })
       NProgress.done()
     } else {
-      const owner = store.getters.owner
-      if (owner === null || owner === undefined || owner === '') {
-        await store.dispatch('user/resetToken')
-        next(`/login`)
-        NProgress.done()
-        return
-      }
       // 新增判断是否已经注入动态路由
       const hasRoutesInjected = store.state.permission && store.state.permission.routesInjected
-      if ((owner || owner === 0) && hasRoutesInjected) {
+      if (hasRoutesInjected) {
         next()
       } else {
         try {
-          // 确保owner有效，如果无效则使用默认值
-          const validOwner = (owner !== null && owner !== undefined) ? owner : 1
-          const accessRoutes = await store.dispatch('permission/generateRoutes', [validOwner])
+          // 刷新后重新拉取用户信息，恢复 companyVOList / currentCompany
+          await store.dispatch('user/getInfo')
+          const owner = store.getters.owner
+          if (owner === null || owner === undefined || owner === '') {
+            await store.dispatch('user/resetToken')
+            next(`/login`)
+            NProgress.done()
+            return
+          }
+          const accessRoutes = await store.dispatch('permission/generateRoutes', [owner])
           router.addRoutes(accessRoutes)
           // 注入完标记
           store.commit('permission/SET_ROUTES_INJECTED', true)
