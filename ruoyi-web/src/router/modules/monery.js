@@ -7,7 +7,7 @@ const moneryRouter = {
   component: Layout,
   redirect: '/monery/earnest',
   meta: {
-    owner: [1], // 只有主账号可以访问
+    owner: [0], // 只有主账号可以访问
     title: '财务管理',
     icon: 'money'
   },
@@ -16,7 +16,7 @@ const moneryRouter = {
       path: '',
       component: () => import('@/views/monery/index'),
       meta: {
-        owner: [1], // 只有主账号可以访问
+        owner: [0], // 只有主账号可以访问
         title: '财务管理'
       },
       children: [
@@ -26,7 +26,7 @@ const moneryRouter = {
           name: 'Earnest',
           meta: {
             title: '保证金',
-            owner: [1] // 只有主账号可以访问
+            owner: [0] // 只有主账号可以访问
           }
         },
         {
@@ -35,7 +35,7 @@ const moneryRouter = {
           name: 'Collection',
           meta: {
             title: '收款信息',
-            owner: [1]
+            owner: [0]
           },
           redirect: '/monery/collection/payment',
           children: [
@@ -45,7 +45,7 @@ const moneryRouter = {
               name: 'PaymentDetails',
               meta: {
                 title: '收款详情',
-                owner: [1]
+                owner: [0]
               }
             },
             {
@@ -54,7 +54,7 @@ const moneryRouter = {
               name: 'AddAccount',
               meta: {
                 title: '收款账户',
-                owner: [1]
+                owner: [0]
               }
             }
           ]
@@ -65,7 +65,7 @@ const moneryRouter = {
           name: 'Contract',
           meta: {
             title: '合同',
-            owner: [1]
+            owner: [0]
           },
           redirect: '/monery/contract/sign',
           children: [
@@ -75,7 +75,7 @@ const moneryRouter = {
               name: 'SignInfo',
               meta: {
                 title: '签署信息',
-                owner: [1]
+                owner: [0]
               }
             },
             {
@@ -84,7 +84,7 @@ const moneryRouter = {
               name: 'Signed',
               meta: {
                 title: '已签署',
-                owner: [1]
+                owner: [0]
               }
             }
           ]

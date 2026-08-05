@@ -96,6 +96,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { changeCompany } from '@/api/login'
+import router, { resetRouter } from '@/router'
 
 export default {
   data() {
@@ -134,20 +135,19 @@ export default {
     },
     changeCompany(companyId) {
       changeCompany(companyId)
-        .then((res) => {
+        .then(async(res) => {
           const { data = '' } = res || {}
           this.$store.dispatch('user/setAccessToken', data)
-          this.$store
-            .dispatch('user/getInfo')
-            .then(() => {
-              this.$router.push({ path: '/df' })
-            })
-            .catch(() => {
-              this.$message.error('获取用户信息失败，请重试')
-            })
+          await this.$store.dispatch('user/getInfo')
+          const owner = this.$store.getters.owner
+          const accessRoutes = await this.$store.dispatch('permission/generateRoutes', [owner])
+          resetRouter()
+          router.addRoutes(accessRoutes)
+          this.$store.commit('permission/SET_ROUTES_INJECTED', true)
+          this.$router.push({ path: '/df' })
         })
         .catch(() => {
-          this.$message.error('登录失败，请重试')
+          this.$message.error('切换企业失败，请重试')
         })
     },
     handleLogout() {

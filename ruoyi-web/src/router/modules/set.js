@@ -7,7 +7,7 @@ const setRouter = {
   component: Layout,
   redirect: '/set/user',
   meta: {
-    owner: [1], // 只有主账号可以访问
+    owner: [0], // 只有主账号可以访问
     title: '基础配置',
     icon: 'setting'
   },
@@ -16,7 +16,7 @@ const setRouter = {
       path: '',
       component: () => import('@/views/set/index'),
       meta: {
-        owner: [1], // 只有主账号可以访问
+        owner: [0], // 只有主账号可以访问
         title: '基础配置'
       },
       children: [
@@ -26,7 +26,7 @@ const setRouter = {
           name: 'User',
           meta: {
             title: '用户管理',
-            owner: [1] // 只有主账号可以访问
+            owner: [0] // 只有主账号可以访问
           }
         }
       ]

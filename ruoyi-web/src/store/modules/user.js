@@ -53,13 +53,14 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
         const { owner, userName, companyVOList = [], uuid } = data
-        if (owner !== null && owner !== undefined) {
-          commit('SET_OWNER', owner)
+        const currentCompany = companyVOList.find(item => item.curr && item.curr === true)
+        const effectiveOwner = (owner !== null && owner !== undefined) ? owner : (currentCompany && currentCompany.owner)
+        if (effectiveOwner !== null && effectiveOwner !== undefined) {
+          commit('SET_OWNER', effectiveOwner)
         }
         commit('SET_NAME', userName)
         commit('SET_COMPANY_LIST', companyVOList)
         commit('SET_UUID', uuid)
-        const currentCompany = companyVOList.find(item => item.curr && item.curr === true)
         console.log('currentCompany', currentCompany)
         commit('SET_CURRENT_COMPANY', currentCompany)
         resolve(data)

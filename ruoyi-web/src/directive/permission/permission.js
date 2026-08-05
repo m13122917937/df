@@ -12,9 +12,7 @@ function checkPermission(el, binding) {
         return permissionRoles.includes(role)
       })
 
-      if (!hasPermission) {
-        el.parentNode && el.parentNode.removeChild(el)
-      }
+      el.style.display = hasPermission ? '' : 'none'
     }
   } else {
     throw new Error(`need roles! Like v-permission="['admin','editor']"`)
