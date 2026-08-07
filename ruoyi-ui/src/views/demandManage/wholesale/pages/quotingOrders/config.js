@@ -60,10 +60,10 @@ export const column = [
     align: "center",
   },
   {
-    key: "price",
-    prop: "price",
-    label: "价格",
-    minWidth: 200,
+      key: "price",
+      prop: "price",
+      label: "价格",
+      minWidth: 280,
     align: "center",
   },
   {

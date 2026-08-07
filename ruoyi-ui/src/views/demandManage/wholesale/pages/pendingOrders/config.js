@@ -52,10 +52,10 @@ export const column = [
     minWidth: 200,
   },
   {
-    key: "price",
-    prop: "price",
-    label: "价格",
-    minWidth: 200,
+      key: "price",
+      prop: "price",
+      label: "价格",
+      minWidth: 280,
   },
   {
     key: "lastShippingTime",

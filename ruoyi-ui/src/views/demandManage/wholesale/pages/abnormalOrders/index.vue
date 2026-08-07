@@ -310,7 +310,7 @@
             </el-table-column>
 
             <!-- 成交价格 -->
-            <el-table-column label="成交价" prop="tradePrice" min-width="200" align="center">
+            <el-table-column label="成交价" prop="tradePrice" min-width="280" align="center">
               <template slot-scope="scope">
                 <PriceChips :row="scope.row" />
               </template>
