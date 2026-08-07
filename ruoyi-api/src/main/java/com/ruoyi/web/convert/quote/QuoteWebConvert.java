@@ -1,9 +1,11 @@
 package com.ruoyi.web.convert.quote;
 
-import com.ruoyi.quote.model.bo.QuotePriceTierBO;
+import com.ruoyi.quote.model.bo.QuoteBrandBO;
+import com.ruoyi.quote.model.bo.QuoteCategoryBO;
 import com.ruoyi.quote.model.bo.QuoteProductBO;
 import com.ruoyi.quote.model.query.QuoteProductQuery;
-import com.ruoyi.web.vo.quote.QuotePriceTierVO;
+import com.ruoyi.web.vo.quote.QuoteBrandVO;
+import com.ruoyi.web.vo.quote.QuoteCategoryVO;
 import com.ruoyi.web.vo.quote.QuoteProductListRequest;
 import com.ruoyi.web.vo.quote.QuoteProductListVO;
 import org.mapstruct.Mapper;
@@ -28,12 +30,20 @@ public interface QuoteWebConvert {
     QuoteProductQuery toProductQuery(QuoteProductListRequest source);
 
     /**
-     * 批量转换价格档位响应。
+     * 批量转换品牌响应。
      *
      * @param source 业务对象集合
      * @return Web 响应集合
      */
-    List<QuotePriceTierVO> toTierVOList(List<QuotePriceTierBO> source);
+    List<QuoteBrandVO> toBrandVOList(List<QuoteBrandBO> source);
+
+    /**
+     * 批量转换品类响应。
+     *
+     * @param source 业务对象集合
+     * @return Web 响应集合
+     */
+    List<QuoteCategoryVO> toCategoryVOList(List<QuoteCategoryBO> source);
 
     /**
      * 批量转换商品列表响应。

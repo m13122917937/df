@@ -3,10 +3,24 @@
     <el-card shadow="never" class="quote-product-filter-card">
       <el-form :inline="true" :model="queryParams" size="small" @submit.native.prevent>
         <el-form-item label="品牌">
-          <el-input v-model="queryParams.brand" clearable placeholder="请输入品牌" @keyup.enter.native="handleQuery" />
+          <el-select v-model="queryParams.brandId" clearable filterable placeholder="请选择品牌" style="width: 180px" @change="handleQuery">
+            <el-option
+              v-for="brand in brandOptions"
+              :key="brand.id"
+              :label="brand.brandName"
+              :value="brand.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="品类">
-          <el-input v-model="queryParams.category" clearable placeholder="请输入品类" @keyup.enter.native="handleQuery" />
+          <el-select v-model="queryParams.categoryId" clearable filterable placeholder="请选择品类" style="width: 180px" @change="handleQuery">
+            <el-option
+              v-for="category in categoryOptions"
+              :key="category.id"
+              :label="category.categoryName"
+              :value="category.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="商品名称">
           <el-input v-model="queryParams.productNameLike" clearable placeholder="请输入商品名称" @keyup.enter.native="handleQuery" />
@@ -21,12 +35,21 @@
     <el-card shadow="never" class="quote-product-table-card">
       <div slot="header" class="quote-product-table-header">
         <span>商品列表</span>
-        <el-button
-          type="primary"
-          size="small"
-          icon="el-icon-plus"
-          @click="handleAdd"
-        >新增商品</el-button>
+        <div>
+          <el-upload
+            :show-file-list="false"
+            :action="importUrl"
+            :headers="uploadHeaders"
+            accept=".xlsx,.xls"
+            :on-success="handleImportSuccess"
+            :on-error="handleImportError"
+            style="display: inline-block; margin-right: 8px"
+          >
+            <el-button size="small" icon="el-icon-upload2">导入</el-button>
+          </el-upload>
+          <el-button size="small" icon="el-icon-download" @click="handleExport">导出</el-button>
+          <el-button type="primary" size="small" icon="el-icon-plus" @click="handleAdd">新增商品</el-button>
+        </div>
       </div>
 
       <el-table
@@ -41,17 +64,6 @@
         <el-table-column prop="category" label="品类" min-width="120" show-overflow-tooltip />
         <el-table-column prop="productName" label="商品名称" min-width="200" show-overflow-tooltip />
         <el-table-column prop="specName" label="规格/型号" min-width="160" show-overflow-tooltip />
-        <el-table-column
-          v-for="tier in tierOptions"
-          :key="'tier-' + tier.id"
-          :label="tier.tierName"
-          min-width="120"
-          align="right"
-        >
-          <template slot-scope="scope">
-            {{ formatPrice(getPriceByTier(scope.row, tier.id)) }}
-          </template>
-        </el-table-column>
         <el-table-column prop="sortOrder" label="排序" width="80" align="center" />
         <el-table-column label="操作" width="160" align="center" fixed="right">
           <template slot-scope="scope">
@@ -78,11 +90,25 @@
       :close-on-click-modal="false"
     >
       <el-form ref="productForm" :model="form" :rules="rules" label-width="90px">
-        <el-form-item label="品牌" prop="brand">
-          <el-input v-model="form.brand" placeholder="请输入品牌" maxlength="128" />
+        <el-form-item label="品牌" prop="brandId">
+          <el-select v-model="form.brandId" filterable placeholder="请选择品牌" style="width: 100%">
+            <el-option
+              v-for="brand in brandOptions"
+              :key="brand.id"
+              :label="brand.brandName"
+              :value="brand.id"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="品类" prop="category">
-          <el-input v-model="form.category" placeholder="请输入品类" maxlength="128" />
+        <el-form-item label="品类" prop="categoryId">
+          <el-select v-model="form.categoryId" filterable placeholder="请选择品类" style="width: 100%">
+            <el-option
+              v-for="category in categoryOptions"
+              :key="category.id"
+              :label="category.categoryName"
+              :value="category.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="商品名称" prop="productName">
           <el-input v-model="form.productName" placeholder="请输入商品名称" maxlength="255" />
@@ -90,33 +116,19 @@
         <el-form-item label="规格/型号">
           <el-input v-model="form.specName" placeholder="请输入规格/型号" maxlength="255" />
         </el-form-item>
+        <el-divider content-position="left">价格（可选，可在报价更新中维护）</el-divider>
+        <el-form-item label="零售价">
+          <el-input-number v-model="form.retailPrice" :min="0" :precision="2" :step="1" controls-position="right" style="width: 200px" />
+        </el-form-item>
+        <el-form-item label="分销1价">
+          <el-input-number v-model="form.distributor1Price" :min="0" :precision="2" :step="1" controls-position="right" style="width: 200px" />
+        </el-form-item>
+        <el-form-item label="分销2价">
+          <el-input-number v-model="form.distributor2Price" :min="0" :precision="2" :step="1" controls-position="right" style="width: 200px" />
+        </el-form-item>
         <el-form-item label="排序">
           <el-input-number v-model="form.sortOrder" :min="0" :max="9999" controls-position="right" />
         </el-form-item>
-        <el-divider content-position="left">档位价格</el-divider>
-        <el-form-item
-          v-for="tier in tierOptions"
-          :key="'price-' + tier.id"
-          :label="tier.tierName"
-          :prop="'priceMap.' + tier.id"
-          :rules="[{ validator: validatePrice, trigger: 'blur' }]"
-        >
-          <el-input-number
-            v-model="form.priceMap[tier.id]"
-            :min="0"
-            :precision="2"
-            :step="1"
-            controls-position="right"
-            style="width: 200px"
-          />
-        </el-form-item>
-        <el-alert
-          v-if="tierOptions.length === 0"
-          title="请先在“价格档位管理”中创建档位，再填写商品价格"
-          type="warning"
-          :closable="false"
-          show-icon
-        />
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -127,36 +139,54 @@
 </template>
 
 <script>
-import { getQuoteProductPage, saveQuoteProduct, delQuoteProduct, getQuoteTierOptions } from '@/api/quote'
+import { getToken } from '@/utils/auth'
+import {
+  getQuoteProductPage,
+  saveQuoteProduct,
+  delQuoteProduct,
+  getQuoteBrandOptions,
+  getQuoteCategoryOptions,
+  exportQuoteProduct
+} from '@/api/quote'
 
 export default {
   name: 'QuoteProduct',
   data() {
     return {
+      importUrl: process.env.VUE_APP_BASE_API + '/quote/product/import',
+      uploadHeaders: { Authorization: 'Bearer ' + getToken() },
       loading: false,
       total: 0,
       productList: [],
-      tierOptions: [],
+      brandOptions: [],
+      categoryOptions: [],
       queryParams: {
         pageNum: 1,
         pageSize: 20,
-        brand: '',
-        category: '',
+        brandId: undefined,
+        categoryId: undefined,
         productNameLike: ''
       },
       dialogVisible: false,
       form: {
         id: undefined,
+        brandId: undefined,
+        categoryId: undefined,
         brand: '',
         category: '',
         productName: '',
         specName: '',
-        sortOrder: 0,
-        priceMap: {}
+        retailPrice: undefined,
+        distributor1Price: undefined,
+        distributor2Price: undefined,
+        sortOrder: 0
       },
       rules: {
-        brand: [
-          { required: true, message: '品牌不能为空', trigger: 'blur' }
+        brandId: [
+          { required: true, message: '请选择品牌', trigger: 'change' }
+        ],
+        categoryId: [
+          { required: true, message: '请选择品类', trigger: 'change' }
         ],
         productName: [
           { required: true, message: '商品名称不能为空', trigger: 'blur' }
@@ -165,20 +195,26 @@ export default {
     }
   },
   created() {
-    this.loadTierOptions()
+    this.loadBrandOptions()
+    this.loadCategoryOptions()
     this.getList()
   },
   methods: {
-    loadTierOptions() {
-      getQuoteTierOptions().then((response) => {
-        this.tierOptions = response.data || []
+    loadBrandOptions() {
+      getQuoteBrandOptions().then((response) => {
+        this.brandOptions = response.data || []
+      })
+    },
+    loadCategoryOptions() {
+      getQuoteCategoryOptions().then((response) => {
+        this.categoryOptions = response.data || []
       })
     },
     getList() {
       this.loading = true
       getQuoteProductPage({
-        brand: this.queryParams.brand,
-        category: this.queryParams.category,
+        brandId: this.queryParams.brandId,
+        categoryId: this.queryParams.categoryId,
         productNameLike: this.queryParams.productNameLike,
         pageNum: this.queryParams.pageNum,
         pageSize: this.queryParams.pageSize
@@ -198,21 +234,11 @@ export default {
       this.queryParams = {
         pageNum: 1,
         pageSize: 20,
-        brand: '',
-        category: '',
+        brandId: undefined,
+        categoryId: undefined,
         productNameLike: ''
       }
       this.handleQuery()
-    },
-    getPriceByTier(row, tierId) {
-      const price = (row.prices || []).find((item) => item.tierId === tierId)
-      return price ? price.price : null
-    },
-    formatPrice(price) {
-      if (price === null || price === undefined || price === '') {
-        return '-'
-      }
-      return Number(price).toFixed(2)
     },
     handleAdd() {
       this.resetForm()
@@ -224,57 +250,43 @@ export default {
     handleEdit(row) {
       this.resetForm()
       this.form.id = row.id
-      this.form.brand = row.brand
-      this.form.category = row.category
+      this.form.brandId = row.brandId
+      this.form.categoryId = row.categoryId
       this.form.productName = row.productName
       this.form.specName = row.specName
+      this.form.retailPrice = row.retailPrice
+      this.form.distributor1Price = row.distributor1Price
+      this.form.distributor2Price = row.distributor2Price
       this.form.sortOrder = row.sortOrder
-      ;(row.prices || []).forEach((item) => {
-        this.$set(this.form.priceMap, item.tierId, item.price)
-      })
       this.dialogVisible = true
     },
     resetForm() {
       this.form = {
         id: undefined,
+        brandId: undefined,
+        categoryId: undefined,
         brand: '',
         category: '',
         productName: '',
         specName: '',
-        sortOrder: 0,
-        priceMap: {}
+        sortOrder: 0
       }
-    },
-    validatePrice(rule, value, callback) {
-      if (value === null || value === undefined || value === '') {
-        callback(new Error('请输入该档位价格'))
-        return
-      }
-      callback()
     },
     handleSubmit() {
       this.$refs.productForm.validate((valid) => {
         if (!valid) {
           return
         }
-        const prices = this.tierOptions
-          .map((tier) => ({
-            tierId: tier.id,
-            price: this.form.priceMap[tier.id]
-          }))
-          .filter((item) => item.price !== null && item.price !== undefined && item.price !== '')
-        if (prices.length === 0) {
-          this.$message.warning('至少需要填写一个档位价格')
-          return
-        }
         const payload = {
           id: this.form.id,
-          brand: this.form.brand,
-          category: this.form.category,
+          brandId: this.form.brandId,
+          categoryId: this.form.categoryId,
           productName: this.form.productName,
           specName: this.form.specName,
-          sortOrder: this.form.sortOrder,
-          prices
+          retailPrice: this.form.retailPrice,
+          distributor1Price: this.form.distributor1Price,
+          distributor2Price: this.form.distributor2Price,
+          sortOrder: this.form.sortOrder
         }
         saveQuoteProduct(payload).then(() => {
           this.$message.success('保存成功')
@@ -295,6 +307,30 @@ export default {
         this.getList()
       }).catch(() => {
       })
+    },
+    handleExport() {
+      exportQuoteProduct({
+        brandId: this.queryParams.brandId,
+        categoryId: this.queryParams.categoryId,
+        productNameLike: this.queryParams.productNameLike
+      })
+    },
+    handleImportSuccess(response) {
+      if (response && response.code === 200) {
+        const data = response.data || {}
+        let message = `导入完成：成功 ${data.success || 0} 条，失败 ${data.failed || 0} 条`
+        const errors = data.errors || []
+        if (errors.length > 0) {
+          message += '；' + errors.slice(0, 5).join('；')
+        }
+        this.$message({ type: data.failed > 0 ? 'warning' : 'success', message, duration: 8000 })
+        this.getList()
+      } else {
+        this.$message.error((response && response.msg) || '导入失败')
+      }
+    },
+    handleImportError() {
+      this.$message.error('导入失败，请检查文件格式')
     }
   }
 }

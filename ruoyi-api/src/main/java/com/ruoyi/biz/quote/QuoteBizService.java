@@ -2,11 +2,14 @@ package com.ruoyi.biz.quote;
 
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
-import com.ruoyi.quote.facade.IQuotePriceTierFacade;
+import com.ruoyi.quote.facade.IQuoteBrandFacade;
+import com.ruoyi.quote.facade.IQuoteCategoryFacade;
 import com.ruoyi.quote.facade.IQuoteProductFacade;
-import com.ruoyi.quote.model.bo.QuotePriceTierBO;
+import com.ruoyi.quote.model.bo.QuoteBrandBO;
+import com.ruoyi.quote.model.bo.QuoteCategoryBO;
 import com.ruoyi.quote.model.bo.QuoteProductBO;
-import com.ruoyi.quote.model.query.QuotePriceTierQuery;
+import com.ruoyi.quote.model.query.QuoteBrandQuery;
+import com.ruoyi.quote.model.query.QuoteCategoryQuery;
 import com.ruoyi.quote.model.query.QuoteProductQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,17 +23,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QuoteBizService {
 
-    private final IQuotePriceTierFacade quotePriceTierFacade;
     private final IQuoteProductFacade quoteProductFacade;
-
-    /**
-     * 查询全部价格档位。
-     *
-     * @return 价格档位集合
-     */
-    public List<QuotePriceTierBO> listTiers() {
-        return quotePriceTierFacade.list(new QuotePriceTierQuery());
-    }
+    private final IQuoteBrandFacade quoteBrandFacade;
+    private final IQuoteCategoryFacade quoteCategoryFacade;
 
     /**
      * 分页查询报价商品。
@@ -48,8 +43,8 @@ public class QuoteBizService {
      *
      * @return 品牌列表
      */
-    public List<String> listBrands() {
-        return quoteProductFacade.listBrands();
+    public List<QuoteBrandBO> listBrands() {
+        return quoteBrandFacade.list(new QuoteBrandQuery());
     }
 
     /**
@@ -57,7 +52,7 @@ public class QuoteBizService {
      *
      * @return 品类列表
      */
-    public List<String> listCategories() {
-        return quoteProductFacade.listCategories();
+    public List<QuoteCategoryBO> listCategories() {
+        return quoteCategoryFacade.list(new QuoteCategoryQuery());
     }
 }

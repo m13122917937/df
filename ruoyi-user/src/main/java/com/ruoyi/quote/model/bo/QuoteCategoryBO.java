@@ -3,10 +3,10 @@ package com.ruoyi.quote.model.bo;
 import lombok.Data;
 
 /**
- * 报价价格档位业务对象。
+ * 报价品类业务对象。
  */
 @Data
-public class QuotePriceTierBO {
+public class QuoteCategoryBO {
 
     /**
      * 主键
@@ -14,9 +14,14 @@ public class QuotePriceTierBO {
     private Long id;
 
     /**
-     * 档位名称
+     * 品类名称
      */
-    private String tierName;
+    private String categoryName;
+
+    /**
+     * 品类图片
+     */
+    private String imageUrl;
 
     /**
      * 排序

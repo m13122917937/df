@@ -3,20 +3,25 @@ package com.ruoyi.web.vo.quote;
 import lombok.Data;
 
 /**
- * 报价价格档位保存请求。
+ * 报价品牌响应。
  */
 @Data
-public class QuotePriceTierSaveRequest {
+public class QuoteBrandVO {
 
     /**
-     * 主键（为空表示新增）
+     * 主键
      */
     private Long id;
 
     /**
-     * 档位名称
+     * 品牌名称
      */
-    private String tierName;
+    private String brandName;
+
+    /**
+     * 品牌图片
+     */
+    private String imageUrl;
 
     /**
      * 排序

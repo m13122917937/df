@@ -2,7 +2,7 @@ package com.ruoyi.web.vo.quote;
 
 import lombok.Data;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * 批发报价页商品列表响应。
@@ -36,7 +36,17 @@ public class QuoteProductListVO {
     private String specName;
 
     /**
-     * 各档位价格明细
+     * 零售价
      */
-    private List<QuotePriceItemVO> prices;
+    private BigDecimal retailPrice;
+
+    /**
+     * 分销1价
+     */
+    private BigDecimal distributor1Price;
+
+    /**
+     * 分销2价
+     */
+    private BigDecimal distributor2Price;
 }

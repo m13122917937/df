@@ -9,6 +9,16 @@ import lombok.Data;
 public class QuoteProductListRequest {
 
     /**
+     * 品牌ID（精确匹配）
+     */
+    private Long brandId;
+
+    /**
+     * 品类ID（精确匹配）
+     */
+    private Long categoryId;
+
+    /**
      * 品牌（精确匹配）
      */
     private String brand;

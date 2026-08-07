@@ -1,57 +1,5 @@
 import request from '@/utils/request'
-
-/**
- * 分页查询报价价格档位。
- *
- * @param {Object} data 查询参数
- * @returns {Promise} 价格档位分页数据
- */
-export function getQuoteTierPage(data) {
-  return request({
-    url: '/quote/tier/list',
-    method: 'post',
-    data
-  })
-}
-
-/**
- * 查询全部价格档位（下拉选项）。
- *
- * @returns {Promise} 价格档位集合
- */
-export function getQuoteTierOptions() {
-  return request({
-    url: '/quote/tier/options',
-    method: 'get'
-  })
-}
-
-/**
- * 保存价格档位。
- *
- * @param {Object} data 档位数据
- * @returns {Promise} 操作结果
- */
-export function saveQuoteTier(data) {
-  return request({
-    url: '/quote/tier/save',
-    method: 'post',
-    data
-  })
-}
-
-/**
- * 删除价格档位。
- *
- * @param {number} id 档位ID
- * @returns {Promise} 操作结果
- */
-export function delQuoteTier(id) {
-  return request({
-    url: `/quote/tier/${id}`,
-    method: 'delete'
-  })
-}
+import { download } from '@/utils/request'
 
 /**
  * 分页查询报价商品。
@@ -82,6 +30,20 @@ export function saveQuoteProduct(data) {
 }
 
 /**
+ * 仅更新报价商品各档位价格（报价每日维护）。
+ *
+ * @param {Object} data 商品ID与价格数据
+ * @returns {Promise} 操作结果
+ */
+export function saveQuotePrices(data) {
+  return request({
+    url: '/quote/price/save',
+    method: 'post',
+    data
+  })
+}
+
+/**
  * 删除报价商品。
  *
  * @param {number} id 商品ID
@@ -95,25 +57,131 @@ export function delQuoteProduct(id) {
 }
 
 /**
- * 查询品牌列表。
+ * 分页查询品牌。
  *
- * @returns {Promise} 品牌列表
+ * @param {Object} data 查询参数
+ * @returns {Promise} 品牌分页数据
  */
-export function getQuoteBrands() {
+export function getQuoteBrandPage(data) {
   return request({
-    url: '/quote/product/brands',
+    url: '/quote/brand/page',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 查询全部品牌（下拉选项）。
+ *
+ * @returns {Promise} 品牌集合
+ */
+export function getQuoteBrandOptions() {
+  return request({
+    url: '/quote/brand/options',
     method: 'get'
   })
 }
 
 /**
- * 查询品类列表。
+ * 保存品牌。
  *
- * @returns {Promise} 品类列表
+ * @param {Object} data 品牌数据
+ * @returns {Promise} 操作结果
  */
-export function getQuoteCategories() {
+export function saveQuoteBrand(data) {
   return request({
-    url: '/quote/product/categories',
+    url: '/quote/brand/save',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 删除品牌。
+ *
+ * @param {number} id 品牌ID
+ * @returns {Promise} 操作结果
+ */
+export function delQuoteBrand(id) {
+  return request({
+    url: `/quote/brand/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 分页查询品类。
+ *
+ * @param {Object} data 查询参数
+ * @returns {Promise} 品类分页数据
+ */
+export function getQuoteCategoryPage(data) {
+  return request({
+    url: '/quote/category/page',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 查询全部品类（下拉选项）。
+ *
+ * @returns {Promise} 品类集合
+ */
+export function getQuoteCategoryOptions() {
+  return request({
+    url: '/quote/category/options',
     method: 'get'
+  })
+}
+
+/**
+ * 保存品类。
+ *
+ * @param {Object} data 品类数据
+ * @returns {Promise} 操作结果
+ */
+export function saveQuoteCategory(data) {
+  return request({
+    url: '/quote/category/save',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 删除品类。
+ *
+ * @param {number} id 品类ID
+ * @returns {Promise} 操作结果
+ */
+export function delQuoteCategory(id) {
+  return request({
+    url: `/quote/category/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 导出报价商品 Excel。
+ *
+ * @param {Object} data 查询参数
+ * @returns {Promise} 导出结果
+ */
+export function exportQuoteProduct(data) {
+  return download('/quote/product/export', data, '报价商品.xlsx')
+}
+
+/**
+ * 导入报价商品 Excel。
+ *
+ * @param {FormData} formData 文件表单
+ * @returns {Promise} 导入统计
+ */
+export function importQuoteProduct(formData) {
+  return request({
+    url: '/quote/product/import',
+    method: 'post',
+    data: formData
   })
 }

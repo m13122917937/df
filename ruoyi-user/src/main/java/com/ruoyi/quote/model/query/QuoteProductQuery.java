@@ -13,6 +13,18 @@ import lombok.experimental.Accessors;
 public class QuoteProductQuery {
 
     /**
+     * 品牌ID（精确匹配）
+     */
+    @QueryField(field = "brand_id")
+    private Long brandId;
+
+    /**
+     * 品类ID（精确匹配）
+     */
+    @QueryField(field = "category_id")
+    private Long categoryId;
+
+    /**
      * 品牌（精确匹配）
      */
     @QueryField(field = "brand")

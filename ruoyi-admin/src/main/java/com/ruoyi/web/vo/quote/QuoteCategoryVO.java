@@ -3,10 +3,10 @@ package com.ruoyi.web.vo.quote;
 import lombok.Data;
 
 /**
- * 报价价格档位响应。
+ * 报价品类响应。
  */
 @Data
-public class QuotePriceTierVO {
+public class QuoteCategoryVO {
 
     /**
      * 主键
@@ -14,9 +14,14 @@ public class QuotePriceTierVO {
     private Long id;
 
     /**
-     * 档位名称
+     * 品类名称
      */
-    private String tierName;
+    private String categoryName;
+
+    /**
+     * 品类图片
+     */
+    private String imageUrl;
 
     /**
      * 排序

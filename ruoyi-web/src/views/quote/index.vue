@@ -9,18 +9,19 @@
         </div>
         <div class="category-list">
           <div
-            :class="['category-item', { 'is-active': selectedCategory === '' }]"
-            @click="selectCategory('')"
+            :class="['category-item', { 'is-active': selectedCategoryId === null }]"
+            @click="selectCategory(null)"
           >
             <span class="category-name">全部品类</span>
           </div>
           <div
             v-for="category in categories"
-            :key="category"
-            :class="['category-item', { 'is-active': selectedCategory === category }]"
+            :key="category.id"
+            :class="['category-item', { 'is-active': selectedCategoryId === category.id }]"
             @click="selectCategory(category)"
           >
-            <span class="category-name">{{ category }}</span>
+            <img v-if="category.imageUrl" :src="category.imageUrl" class="category-image" alt="">
+            <span class="category-name">{{ category.categoryName }}</span>
           </div>
           <div v-if="categories.length === 0" class="category-empty">暂无品类</div>
         </div>
@@ -33,15 +34,18 @@
             <span class="filter-label">品牌：</span>
             <div class="filter-options">
               <span
-                :class="['filter-option', { active: selectedBrand === '' }]"
-                @click="selectBrand('')"
-              >全部</span>
+                :class="['filter-option', { active: selectedBrandId === null }]"
+                @click="selectBrand(null)"
+              >全部品牌</span>
               <span
                 v-for="brand in brands"
-                :key="brand"
-                :class="['filter-option', { active: selectedBrand === brand }]"
+                :key="brand.id"
+                :class="['filter-option', { active: selectedBrandId === brand.id }]"
                 @click="selectBrand(brand)"
-              >{{ brand }}</span>
+              >
+                <img v-if="brand.imageUrl" :src="brand.imageUrl" class="brand-image" alt="">
+                <span>{{ brand.brandName }}</span>
+              </span>
               <span v-if="brands.length === 0" class="filter-empty">暂无品牌</span>
             </div>
           </div>
@@ -85,15 +89,19 @@
             <el-table-column label="规格/型号" prop="specName" min-width="160" show-overflow-tooltip>
               <template slot-scope="scope">{{ scope.row.specName || '-' }}</template>
             </el-table-column>
-            <el-table-column
-              v-for="tier in tiers"
-              :key="'price-' + tier.id"
-              :label="tier.tierName"
-              min-width="120"
-              align="right"
-            >
+            <el-table-column label="零售价" min-width="120" align="right">
               <template slot-scope="scope">
-                <span class="price-text">¥{{ formatPrice(getPriceByTier(scope.row, tier.id)) }}</span>
+                <span class="price-text">¥{{ formatPrice(scope.row.retailPrice) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="分销1价" min-width="120" align="right">
+              <template slot-scope="scope">
+                <span class="price-text">¥{{ formatPrice(scope.row.distributor1Price) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="分销2价" min-width="120" align="right">
+              <template slot-scope="scope">
+                <span class="price-text">¥{{ formatPrice(scope.row.distributor2Price) }}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -119,7 +127,6 @@
 
 <script>
 import {
-  apiGetQuoteTierList,
   apiGetQuoteProductList,
   apiGetQuoteBrandList,
   apiGetQuoteCategoryList
@@ -130,11 +137,10 @@ export default {
   data() {
     return {
       loading: false,
-      tiers: [],
       brands: [],
       categories: [],
-      selectedBrand: '',
-      selectedCategory: '',
+      selectedBrandId: null,
+      selectedCategoryId: null,
       searchKeyword: '',
       productList: [],
       pagination: {
@@ -150,9 +156,6 @@ export default {
   },
   methods: {
     fetchMeta() {
-      apiGetQuoteTierList().then((res) => {
-        this.tiers = (res && res.data) || []
-      })
       this.fetchBrands()
       this.fetchCategories()
     },
@@ -169,8 +172,8 @@ export default {
     fetchProductList() {
       this.loading = true
       apiGetQuoteProductList({
-        brand: this.selectedBrand,
-        category: this.selectedCategory,
+        brandId: this.selectedBrandId,
+        categoryId: this.selectedCategoryId,
         productNameLike: this.searchKeyword
       }, {
         pageNum: this.pagination.current,
@@ -186,12 +189,12 @@ export default {
       })
     },
     selectBrand(brand) {
-      this.selectedBrand = brand
+      this.selectedBrandId = brand ? brand.id : null
       this.pagination.current = 1
       this.fetchProductList()
     },
     selectCategory(category) {
-      this.selectedCategory = category
+      this.selectedCategoryId = category ? category.id : null
       this.pagination.current = 1
       this.fetchProductList()
     },
@@ -206,10 +209,6 @@ export default {
     handleCurrentChange(current) {
       this.pagination.current = current
       this.fetchProductList()
-    },
-    getPriceByTier(row, tierId) {
-      const price = (row.prices || []).find((item) => item.tierId === tierId)
-      return price ? price.price : null
     },
     formatPrice(price) {
       if (price === null || price === undefined || price === '') {
@@ -256,6 +255,9 @@ export default {
     }
 
     .category-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       padding: 9px 12px;
       border-radius: 8px;
       cursor: pointer;
@@ -272,6 +274,14 @@ export default {
         color: var(--color-primary, #2563ff);
         font-weight: 600;
       }
+    }
+
+    .category-image {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
     }
 
     .category-empty {
@@ -316,6 +326,9 @@ export default {
         gap: 8px;
 
         .filter-option {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
           padding: 5px 12px;
           border-radius: 16px;
           background: #f5f7fa;
@@ -332,6 +345,13 @@ export default {
             background: var(--color-primary, #2563ff);
             color: #ffffff;
           }
+        }
+
+        .brand-image {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          object-fit: cover;
         }
 
         .filter-empty {

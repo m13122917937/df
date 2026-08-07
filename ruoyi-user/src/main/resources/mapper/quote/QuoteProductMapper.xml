@@ -20,4 +20,18 @@
         ORDER BY `category`
     </select>
 
+    <select id="countByBrandId" parameterType="long" resultType="long">
+        SELECT COUNT(*)
+        FROM `quote_product`
+        WHERE `deleted` = 0
+          AND `brand_id` = #{brandId}
+    </select>
+
+    <select id="countByCategoryId" parameterType="long" resultType="long">
+        SELECT COUNT(*)
+        FROM `quote_product`
+        WHERE `deleted` = 0
+          AND `category_id` = #{categoryId}
+    </select>
+
 </mapper>

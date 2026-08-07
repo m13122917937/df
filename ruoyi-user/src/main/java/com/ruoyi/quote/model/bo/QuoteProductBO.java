@@ -2,7 +2,7 @@ package com.ruoyi.quote.model.bo;
 
 import lombok.Data;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * 报价商品业务对象。
@@ -14,6 +14,16 @@ public class QuoteProductBO {
      * 主键
      */
     private Long id;
+
+    /**
+     * 品牌ID
+     */
+    private Long brandId;
+
+    /**
+     * 品类ID
+     */
+    private Long categoryId;
 
     /**
      * 品牌
@@ -36,12 +46,22 @@ public class QuoteProductBO {
     private String specName;
 
     /**
+     * 零售价
+     */
+    private BigDecimal retailPrice;
+
+    /**
+     * 分销1价
+     */
+    private BigDecimal distributor1Price;
+
+    /**
+     * 分销2价
+     */
+    private BigDecimal distributor2Price;
+
+    /**
      * 排序
      */
     private Integer sortOrder;
-
-    /**
-     * 各档位价格明细
-     */
-    private List<QuoteProductPriceBO> prices;
 }

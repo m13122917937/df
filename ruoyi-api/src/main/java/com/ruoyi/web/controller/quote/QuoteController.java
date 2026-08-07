@@ -5,10 +5,12 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.model.page.PageBO;
-import com.ruoyi.quote.model.bo.QuotePriceTierBO;
+import com.ruoyi.quote.model.bo.QuoteBrandBO;
+import com.ruoyi.quote.model.bo.QuoteCategoryBO;
 import com.ruoyi.quote.model.bo.QuoteProductBO;
 import com.ruoyi.web.convert.quote.QuoteWebConvert;
-import com.ruoyi.web.vo.quote.QuotePriceTierVO;
+import com.ruoyi.web.vo.quote.QuoteBrandVO;
+import com.ruoyi.web.vo.quote.QuoteCategoryVO;
 import com.ruoyi.web.vo.quote.QuoteProductListRequest;
 import com.ruoyi.web.vo.quote.QuoteProductListVO;
 import lombok.RequiredArgsConstructor;
@@ -31,18 +33,6 @@ public class QuoteController extends BaseController {
     private final QuoteBizService quoteBizService;
 
     /**
-     * 查询全部价格档位。
-     *
-     * @return 价格档位集合
-     */
-    @GetMapping("/tier/list")
-    public AjaxResult tierList() {
-        List<QuotePriceTierVO> rows = QuoteWebConvert.INSTANCE.toTierVOList(
-                quoteBizService.listTiers());
-        return AjaxResult.success(rows);
-    }
-
-    /**
      * 分页查询批发报价商品（含各档位价格）。
      *
      * @param request 查询请求
@@ -63,7 +53,8 @@ public class QuoteController extends BaseController {
      */
     @GetMapping("/brand/list")
     public AjaxResult brandList() {
-        return AjaxResult.success(quoteBizService.listBrands());
+        List<QuoteBrandBO> brands = quoteBizService.listBrands();
+        return AjaxResult.success(QuoteWebConvert.INSTANCE.toBrandVOList(brands));
     }
 
     /**
@@ -73,6 +64,7 @@ public class QuoteController extends BaseController {
      */
     @GetMapping("/category/list")
     public AjaxResult categoryList() {
-        return AjaxResult.success(quoteBizService.listCategories());
+        List<QuoteCategoryBO> categories = quoteBizService.listCategories();
+        return AjaxResult.success(QuoteWebConvert.INSTANCE.toCategoryVOList(categories));
     }
 }

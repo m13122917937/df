@@ -9,11 +9,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 报价价格档位实体，映射 quote_price_tier。
+ * 报价品类实体，映射 quote_category。
  */
 @Data
-@TableName("quote_price_tier")
-public class QuotePriceTier {
+@TableName("quote_category")
+public class QuoteCategory {
 
     /**
      * 主键
@@ -22,9 +22,14 @@ public class QuotePriceTier {
     private Long id;
 
     /**
-     * 档位名称
+     * 品类名称
      */
-    private String tierName;
+    private String categoryName;
+
+    /**
+     * 品类图片
+     */
+    private String imageUrl;
 
     /**
      * 排序

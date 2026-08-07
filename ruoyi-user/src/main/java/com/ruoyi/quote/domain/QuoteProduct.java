@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -20,6 +21,16 @@ public class QuoteProduct {
      */
     @TableId(type = IdType.AUTO)
     private Long id;
+
+    /**
+     * 品牌ID（引用 quote_brand）
+     */
+    private Long brandId;
+
+    /**
+     * 品类ID（引用 quote_category）
+     */
+    private Long categoryId;
 
     /**
      * 品牌
@@ -40,6 +51,21 @@ public class QuoteProduct {
      * 规格/型号
      */
     private String specName;
+
+    /**
+     * 零售价
+     */
+    private BigDecimal retailPrice;
+
+    /**
+     * 分销1价
+     */
+    private BigDecimal distributor1Price;
+
+    /**
+     * 分销2价
+     */
+    private BigDecimal distributor2Price;
 
     /**
      * 排序

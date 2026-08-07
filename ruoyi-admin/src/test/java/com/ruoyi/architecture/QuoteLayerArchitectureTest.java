@@ -1,7 +1,8 @@
 package com.ruoyi.architecture;
 
 import com.ruoyi.biz.quote.QuoteManageBizService;
-import com.ruoyi.quote.facade.impl.QuotePriceTierFacade;
+import com.ruoyi.quote.facade.impl.QuoteBrandFacade;
+import com.ruoyi.quote.facade.impl.QuoteCategoryFacade;
 import com.ruoyi.quote.facade.impl.QuoteProductFacade;
 import com.ruoyi.web.controller.quote.QuoteManageController;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -21,7 +23,9 @@ class QuoteLayerArchitectureTest {
 
     private static final Class<?>[] CONTROLLERS = {QuoteManageController.class};
     private static final Class<?>[] BIZ_SERVICES = {QuoteManageBizService.class};
-    private static final Class<?>[] FACADES = {QuotePriceTierFacade.class, QuoteProductFacade.class};
+    private static final Class<?>[] FACADES = {
+            QuoteProductFacade.class, QuoteBrandFacade.class, QuoteCategoryFacade.class
+    };
 
     /**
      * Controller 只能注入 Biz 层。
@@ -75,6 +79,9 @@ class QuoteLayerArchitectureTest {
     private void assertInjectedFieldsInPackage(final Class<?>[] types, final String allowedPackage) {
         for (Class<?> type : types) {
             for (Field field : type.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
                 assertTrue(field.getType().getName().startsWith(allowedPackage),
                         type.getName() + " 跨层依赖了 " + field.getType().getName());
             }

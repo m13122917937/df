@@ -25,4 +25,20 @@ public interface QuoteProductMapper extends BaseMapper<QuoteProduct> {
      * @return 品类列表
      */
     List<String> selectCategories();
+
+    /**
+     * 统计引用指定品牌的未删除商品数量。
+     *
+     * @param brandId 品牌ID
+     * @return 商品数量
+     */
+    long countByBrandId(Long brandId);
+
+    /**
+     * 统计引用指定品类的未删除商品数量。
+     *
+     * @param categoryId 品类ID
+     * @return 商品数量
+     */
+    long countByCategoryId(Long categoryId);
 }

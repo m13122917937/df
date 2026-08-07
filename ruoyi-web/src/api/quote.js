@@ -1,18 +1,6 @@
 import request from '@/utils/request'
 
 /**
- * 查询全部价格档位。
- *
- * @returns {Promise} 价格档位集合
- */
-export function apiGetQuoteTierList() {
-  return request({
-    url: '/quote/web/tier/list',
-    method: 'get'
-  })
-}
-
-/**
  * 分页查询批发报价商品（含各档位价格）。
  *
  * @param {Object} data 查询参数

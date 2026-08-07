@@ -4,11 +4,11 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * 报价价格档位参数。
+ * 报价品牌参数。
  */
 @Data
 @Accessors(chain = true)
-public class QuotePriceTierParam {
+public class QuoteBrandParam {
 
     /**
      * 主键（为空表示新增）
@@ -16,9 +16,14 @@ public class QuotePriceTierParam {
     private Long id;
 
     /**
-     * 档位名称
+     * 品牌名称
      */
-    private String tierName;
+    private String brandName;
+
+    /**
+     * 品牌图片
+     */
+    private String imageUrl;
 
     /**
      * 排序

@@ -4,9 +4,9 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * 报价价格档位查询条件。
+ * 报价品类查询条件。
  */
 @Data
 @Accessors(chain = true)
-public class QuotePriceTierQuery {
+public class QuoteCategoryQuery {
 }

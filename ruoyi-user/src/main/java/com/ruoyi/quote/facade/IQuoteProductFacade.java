@@ -23,11 +23,26 @@ public interface IQuoteProductFacade {
     PageBO<QuoteProductBO> page(QuoteProductQuery query, PageParamV2 pageParam);
 
     /**
-     * 新增或更新报价商品及其各档位价格。
+     * 查询报价商品全量（含各档位价格，导出用）。
+     *
+     * @param query 查询条件
+     * @return 报价商品集合
+     */
+    List<QuoteProductBO> list(QuoteProductQuery query);
+
+    /**
+     * 新增或更新报价商品基础信息（价格列表为空时保留现有价格）。
      *
      * @param param 商品参数
      */
     void save(QuoteProductParam param);
+
+    /**
+     * 仅更新报价商品三档价格（零售、分销1、分销2）。
+     *
+     * @param param 商品参数（需含 id 与 prices）
+     */
+    void savePrices(QuoteProductParam param);
 
     /**
      * 删除报价商品及其价格明细。
@@ -35,18 +50,4 @@ public interface IQuoteProductFacade {
      * @param id 商品ID
      */
     void delete(Long id);
-
-    /**
-     * 查询去重后的品牌列表。
-     *
-     * @return 品牌列表
-     */
-    List<String> listBrands();
-
-    /**
-     * 查询去重后的品类列表。
-     *
-     * @return 品类列表
-     */
-    List<String> listCategories();
 }

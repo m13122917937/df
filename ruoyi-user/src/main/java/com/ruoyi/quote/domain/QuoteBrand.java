@@ -2,18 +2,18 @@ package com.ruoyi.quote.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 报价商品价格明细实体，映射 quote_product_price。
+ * 报价品牌实体，映射 quote_brand。
  */
 @Data
-@TableName("quote_product_price")
-public class QuoteProductPrice {
+@TableName("quote_brand")
+public class QuoteBrand {
 
     /**
      * 主键
@@ -22,19 +22,25 @@ public class QuoteProductPrice {
     private Long id;
 
     /**
-     * 报价商品ID
+     * 品牌名称
      */
-    private Long productId;
+    private String brandName;
 
     /**
-     * 价格档位ID
+     * 品牌图片
      */
-    private Long tierId;
+    private String imageUrl;
 
     /**
-     * 价格
+     * 排序
      */
-    private BigDecimal price;
+    private Integer sortOrder;
+
+    /**
+     * 逻辑删除标记(0-正常，1-删除)
+     */
+    @TableLogic
+    private Long deleted;
 
     /**
      * 创建时间

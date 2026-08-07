@@ -1,9 +1,9 @@
 package com.ruoyi.quote.architecture;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.ruoyi.quote.domain.QuotePriceTier;
+import com.ruoyi.quote.domain.QuoteBrand;
+import com.ruoyi.quote.domain.QuoteCategory;
 import com.ruoyi.quote.domain.QuoteProduct;
-import com.ruoyi.quote.domain.QuoteProductPrice;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,9 +19,9 @@ class QuoteTableIsolationTest {
      */
     @Test
     void entitiesMustMapToQuoteTablesOnly() {
-        assertQuoteTable(QuotePriceTier.class);
+        assertQuoteTable(QuoteBrand.class);
+        assertQuoteTable(QuoteCategory.class);
         assertQuoteTable(QuoteProduct.class);
-        assertQuoteTable(QuoteProductPrice.class);
     }
 
     private void assertQuoteTable(final Class<?> entityClass) {

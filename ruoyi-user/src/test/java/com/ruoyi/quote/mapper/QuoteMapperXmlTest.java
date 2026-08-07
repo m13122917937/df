@@ -15,21 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class QuoteMapperXmlTest {
 
     /**
-     * 价格档位 Mapper XML 必须存在且使用正确的 namespace。
-     *
-     * @throws IOException 读取资源失败
-     */
-    @Test
-    void quotePriceTierMapperXmlShouldUseInterfaceAsNamespace() throws IOException {
-        try (InputStream input = getClass().getClassLoader()
-                .getResourceAsStream("mapper/quote/QuotePriceTierMapper.xml")) {
-            assertNotNull(input);
-            String xml = new String(input.readAllBytes(), StandardCharsets.UTF_8);
-            assertTrue(xml.contains("namespace=\"com.ruoyi.quote.mapper.QuotePriceTierMapper\""));
-        }
-    }
-
-    /**
      * 报价商品 Mapper XML 必须存在且使用正确的 namespace。
      *
      * @throws IOException 读取资源失败
@@ -45,17 +30,32 @@ class QuoteMapperXmlTest {
     }
 
     /**
-     * 价格明细 Mapper XML 必须存在且使用正确的 namespace。
+     * 品牌 Mapper XML 必须存在且使用正确的 namespace。
      *
      * @throws IOException 读取资源失败
      */
     @Test
-    void quoteProductPriceMapperXmlShouldUseInterfaceAsNamespace() throws IOException {
+    void quoteBrandMapperXmlShouldUseInterfaceAsNamespace() throws IOException {
         try (InputStream input = getClass().getClassLoader()
-                .getResourceAsStream("mapper/quote/QuoteProductPriceMapper.xml")) {
+                .getResourceAsStream("mapper/quote/QuoteBrandMapper.xml")) {
             assertNotNull(input);
             String xml = new String(input.readAllBytes(), StandardCharsets.UTF_8);
-            assertTrue(xml.contains("namespace=\"com.ruoyi.quote.mapper.QuoteProductPriceMapper\""));
+            assertTrue(xml.contains("namespace=\"com.ruoyi.quote.mapper.QuoteBrandMapper\""));
+        }
+    }
+
+    /**
+     * 品类 Mapper XML 必须存在且使用正确的 namespace。
+     *
+     * @throws IOException 读取资源失败
+     */
+    @Test
+    void quoteCategoryMapperXmlShouldUseInterfaceAsNamespace() throws IOException {
+        try (InputStream input = getClass().getClassLoader()
+                .getResourceAsStream("mapper/quote/QuoteCategoryMapper.xml")) {
+            assertNotNull(input);
+            String xml = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+            assertTrue(xml.contains("namespace=\"com.ruoyi.quote.mapper.QuoteCategoryMapper\""));
         }
     }
 }

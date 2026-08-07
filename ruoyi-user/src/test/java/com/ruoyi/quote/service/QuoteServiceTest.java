@@ -3,14 +3,13 @@ package com.ruoyi.quote.service;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.quote.domain.QuotePriceTier;
+import com.ruoyi.quote.domain.QuoteBrand;
+import com.ruoyi.quote.domain.QuoteCategory;
 import com.ruoyi.quote.domain.QuoteProduct;
-import com.ruoyi.quote.mapper.QuotePriceTierMapper;
+import com.ruoyi.quote.mapper.QuoteBrandMapper;
+import com.ruoyi.quote.mapper.QuoteCategoryMapper;
 import com.ruoyi.quote.mapper.QuoteProductMapper;
-import com.ruoyi.quote.mapper.QuoteProductPriceMapper;
-import com.ruoyi.quote.model.param.QuotePriceTierParam;
 import com.ruoyi.quote.model.param.QuoteProductParam;
-import com.ruoyi.quote.model.param.QuoteProductPriceParam;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,18 +20,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 报价服务事务与删除约束测试。
+ * 报价服务事务与校验测试。
  */
 @ExtendWith(MockitoExtension.class)
 class QuoteServiceTest {
@@ -41,15 +37,13 @@ class QuoteServiceTest {
     private QuoteProductMapper quoteProductMapper;
 
     @Mock
-    private QuoteProductPriceMapper quoteProductPriceMapper;
+    private QuoteBrandMapper quoteBrandMapper;
 
     @Mock
-    private QuotePriceTierMapper quotePriceTierMapper;
+    private QuoteCategoryMapper quoteCategoryMapper;
 
     @InjectMocks
     private QuoteProductService quoteProductService;
-
-    private QuotePriceTierService quotePriceTierService;
 
     /**
      * 初始化被测服务。
@@ -59,93 +53,130 @@ class QuoteServiceTest {
         TableInfoHelper.initTableInfo(
                 new MapperBuilderAssistant(new MybatisConfiguration(), ""), QuoteProduct.class);
         TableInfoHelper.initTableInfo(
-                new MapperBuilderAssistant(new MybatisConfiguration(), ""), QuotePriceTier.class);
+                new MapperBuilderAssistant(new MybatisConfiguration(), ""), QuoteBrand.class);
+        TableInfoHelper.initTableInfo(
+                new MapperBuilderAssistant(new MybatisConfiguration(), ""), QuoteCategory.class);
         ReflectionTestUtils.setField(quoteProductService, "baseMapper", quoteProductMapper);
-        quotePriceTierService = new QuotePriceTierService(quoteProductPriceMapper);
-        ReflectionTestUtils.setField(quotePriceTierService, "baseMapper", quotePriceTierMapper);
     }
 
     /**
-     * 保存商品时价格列表为空应拒绝。
+     * 商品库保存时未选择品牌应拒绝。
      */
     @Test
-    void shouldRejectSaveWhenPricesEmpty() {
-        QuoteProductParam param = validProduct().setPrices(List.of());
+    void shouldRejectSaveWhenBrandMissing() {
+        QuoteProductParam param = validProduct().setBrandId(null);
 
-        assertThrows(ServiceException.class, () -> quoteProductService.saveWithPrices(param));
-        verify(quoteProductPriceMapper, never()).deleteByProductId(any());
+        assertThrows(ServiceException.class, () -> quoteProductService.saveProduct(param));
     }
 
     /**
-     * 保存商品时价格为空或负数应拒绝。
+     * 商品库保存时品牌不存在应拒绝。
      */
     @Test
-    void shouldRejectSaveWhenPriceInvalid() {
-        QuoteProductParam negativePrice = validProduct()
-                .setPrices(List.of(new QuoteProductPriceParam().setTierId(1L).setPrice(new BigDecimal("-1"))));
+    void shouldRejectSaveWhenBrandNotExist() {
+        when(quoteBrandMapper.selectById(1L)).thenReturn(null);
 
-        assertThrows(ServiceException.class, () -> quoteProductService.saveWithPrices(negativePrice));
-
-        QuoteProductParam nullPrice = validProduct()
-                .setPrices(List.of(new QuoteProductPriceParam().setTierId(1L).setPrice(null)));
-        assertThrows(ServiceException.class, () -> quoteProductService.saveWithPrices(nullPrice));
+        assertThrows(ServiceException.class, () -> quoteProductService.saveProduct(validProduct()));
     }
 
     /**
-     * 保存商品成功后应先删除旧价格，再写入全部档位价格。
+     * 商品库保存时三档价格均为空应拒绝。
      */
     @Test
-    void shouldRebuildPricesWhenSaveSucceeds() {
-        QuoteProductParam param = validProduct().setId(10L).setPrices(List.of(
-                new QuoteProductPriceParam().setTierId(1L).setPrice(new BigDecimal("100.00")),
-                new QuoteProductPriceParam().setTierId(2L).setPrice(new BigDecimal("95.00"))));
+    void shouldRejectSaveWhenAllPricesEmpty() {
+        when(quoteBrandMapper.selectById(1L)).thenReturn(createBrand());
+        when(quoteCategoryMapper.selectById(2L)).thenReturn(createCategory());
 
-        quoteProductService.saveWithPrices(param);
+        assertThrows(ServiceException.class, () -> quoteProductService.saveProduct(validProduct()));
+    }
+
+    /**
+     * 商品保存时价格为负数应拒绝。
+     */
+    @Test
+    void shouldRejectSaveWhenPriceNegative() {
+        when(quoteBrandMapper.selectById(1L)).thenReturn(createBrand());
+        when(quoteCategoryMapper.selectById(2L)).thenReturn(createCategory());
+        QuoteProductParam param = validProduct().setRetailPrice(new BigDecimal("-1"));
+
+        assertThrows(ServiceException.class, () -> quoteProductService.saveProduct(param));
+    }
+
+    /**
+     * 商品库保存基础信息并携带价格时应成功保存。
+     */
+    @Test
+    void shouldSaveProductWithPrices() {
+        when(quoteBrandMapper.selectById(1L)).thenReturn(createBrand());
+        when(quoteCategoryMapper.selectById(2L)).thenReturn(createCategory());
+        QuoteProductParam param = validProduct()
+                .setRetailPrice(new BigDecimal("199.00"))
+                .setDistributor1Price(new BigDecimal("189.00"))
+                .setDistributor2Price(new BigDecimal("179.00"));
+
+        quoteProductService.saveProduct(param);
+
+        verify(quoteProductMapper).insert(any(QuoteProduct.class));
+    }
+
+    /**
+     * 报价更新时商品不存在应拒绝。
+     */
+    @Test
+    void shouldRejectSavePricesWhenProductMissing() {
+        when(quoteProductMapper.selectById(99L)).thenReturn(null);
+        QuoteProductParam param = validProduct().setId(99L).setRetailPrice(new BigDecimal("100"));
+
+        assertThrows(ServiceException.class, () -> quoteProductService.savePrices(param));
+    }
+
+    /**
+     * 报价更新时三档价格均为空应拒绝。
+     */
+    @Test
+    void shouldRejectSavePricesWhenAllPricesEmpty() {
+        QuoteProductParam param = validProduct().setId(10L);
+
+        assertThrows(ServiceException.class, () -> quoteProductService.savePrices(param));
+    }
+
+    /**
+     * 报价更新成功时应仅更新价格字段。
+     */
+    @Test
+    void shouldUpdatePricesWhenSavePricesSucceeds() {
+        when(quoteProductMapper.selectById(10L)).thenReturn(new QuoteProduct());
+        QuoteProductParam param = validProduct().setId(10L)
+                .setRetailPrice(new BigDecimal("200.00"))
+                .setDistributor1Price(new BigDecimal("190.00"))
+                .setDistributor2Price(new BigDecimal("180.00"));
+
+        quoteProductService.savePrices(param);
 
         verify(quoteProductMapper).updateById(any(QuoteProduct.class));
-        verify(quoteProductPriceMapper).deleteByProductId(10L);
-        verify(quoteProductPriceMapper, times(2)).insert(any());
-    }
-
-    /**
-     * 删除商品时应同时物理删除其价格明细。
-     */
-    @Test
-    void shouldDeleteProductWithPrices() {
-        quoteProductService.deleteWithPrices(10L);
-
-        verify(quoteProductMapper).deleteById(10L);
-        verify(quoteProductPriceMapper).deleteByProductId(10L);
-    }
-
-    /**
-     * 档位已被商品价格引用时删除应被拒绝。
-     */
-    @Test
-    void shouldRejectDeleteTierWhenReferenced() {
-        when(quoteProductPriceMapper.countByTierId(3L)).thenReturn(2L);
-
-        assertThrows(ServiceException.class, () -> quotePriceTierService.deleteTier(3L));
-        verify(quotePriceTierMapper, never()).deleteById(3L);
-    }
-
-    /**
-     * 档位未被引用时可正常逻辑删除。
-     */
-    @Test
-    void shouldDeleteTierWhenNotReferenced() {
-        when(quoteProductPriceMapper.countByTierId(3L)).thenReturn(0L);
-
-        assertDoesNotThrow(() -> quotePriceTierService.deleteTier(3L));
-        verify(quotePriceTierMapper).deleteById(3L);
+        verify(quoteProductMapper, never()).insert(any(QuoteProduct.class));
     }
 
     private QuoteProductParam validProduct() {
         return new QuoteProductParam()
-                .setBrand("华为")
-                .setCategory("手机")
+                .setBrandId(1L)
+                .setCategoryId(2L)
                 .setProductName("Mate 60")
                 .setSpecName("12G+512G")
                 .setSortOrder(1);
+    }
+
+    private QuoteBrand createBrand() {
+        QuoteBrand brand = new QuoteBrand();
+        brand.setId(1L);
+        brand.setBrandName("华为");
+        return brand;
+    }
+
+    private QuoteCategory createCategory() {
+        QuoteCategory category = new QuoteCategory();
+        category.setId(2L);
+        category.setCategoryName("手机");
+        return category;
     }
 }

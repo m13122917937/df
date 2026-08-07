@@ -1,20 +1,15 @@
 package com.ruoyi.quote.convert;
 
-import com.ruoyi.quote.domain.QuotePriceTier;
+import com.ruoyi.quote.domain.QuoteBrand;
 import com.ruoyi.quote.domain.QuoteProduct;
-import com.ruoyi.quote.domain.QuoteProductPrice;
-import com.ruoyi.quote.model.bo.QuotePriceTierBO;
-import com.ruoyi.quote.model.bo.QuoteProductBO;
-import com.ruoyi.quote.model.bo.QuoteProductPriceBO;
-import com.ruoyi.quote.model.param.QuotePriceTierParam;
+import com.ruoyi.quote.model.bo.QuoteBrandBO;
+import com.ruoyi.quote.model.param.QuoteBrandParam;
 import com.ruoyi.quote.model.param.QuoteProductParam;
-import com.ruoyi.quote.model.param.QuoteProductPriceParam;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * 报价领域对象转换测试。
@@ -22,56 +17,56 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class QuoteConvertTest {
 
     /**
-     * 档位参数应转换为档位实体。
+     * 品牌参数应转换为品牌实体。
      */
     @Test
-    void shouldConvertTierParamToDomain() {
-        QuotePriceTier tier = QuoteConvert.INSTANCE.toTierDomain(
-                new QuotePriceTierParam().setId(1L).setTierName("批发价").setSortOrder(1));
+    void shouldConvertBrandParamToDomain() {
+        QuoteBrand brand = QuoteConvert.INSTANCE.toBrandDomain(
+                new QuoteBrandParam().setId(1L).setBrandName("华为").setSortOrder(1));
 
-        assertEquals(1L, tier.getId());
-        assertEquals("批发价", tier.getTierName());
-        assertEquals(1, tier.getSortOrder());
+        assertEquals(1L, brand.getId());
+        assertEquals("华为", brand.getBrandName());
+        assertEquals(1, brand.getSortOrder());
     }
 
     /**
-     * 商品参数应转换为商品实体，价格明细应完整保留。
+     * 商品参数应转换为商品实体，三档价格应完整保留。
      */
     @Test
     void shouldConvertProductParamToDomain() {
         QuoteProductParam param = new QuoteProductParam()
-                .setId(2L)
+                .setBrandId(1L)
+                .setCategoryId(2L)
                 .setBrand("华为")
                 .setCategory("手机")
                 .setProductName("Mate 60")
-                .setSpecName("12G+512G");
+                .setSpecName("12G+512G")
+                .setRetailPrice(new BigDecimal("199.00"))
+                .setDistributor1Price(new BigDecimal("189.00"))
+                .setDistributor2Price(new BigDecimal("179.00"));
 
         QuoteProduct product = QuoteConvert.INSTANCE.toProductDomain(param);
 
-        assertEquals(2L, product.getId());
+        assertEquals(1L, product.getBrandId());
         assertEquals("华为", product.getBrand());
         assertEquals("Mate 60", product.getProductName());
+        assertEquals(0, new BigDecimal("199.00").compareTo(product.getRetailPrice()));
+        assertEquals(0, new BigDecimal("189.00").compareTo(product.getDistributor1Price()));
+        assertEquals(0, new BigDecimal("179.00").compareTo(product.getDistributor2Price()));
     }
 
     /**
-     * 实体应转换为业务对象，价格明细应完整保留。
+     * 品牌实体应转换为业务对象。
      */
     @Test
-    void shouldConvertDomainToBo() {
-        QuoteProductPrice price = new QuoteProductPrice();
-        price.setProductId(2L);
-        price.setTierId(3L);
-        price.setPrice(new BigDecimal("1288.00"));
+    void shouldConvertBrandToBo() {
+        QuoteBrand brand = new QuoteBrand();
+        brand.setId(3L);
+        brand.setBrandName("小米");
 
-        QuoteProductPriceBO priceBO = QuoteConvert.INSTANCE.toPriceBO(price);
-        QuotePriceTier tier = new QuotePriceTier();
-        tier.setId(3L);
-        tier.setTierName("批发价");
-        QuotePriceTierBO tierBO = QuoteConvert.INSTANCE.toTierBO(tier);
+        QuoteBrandBO brandBO = QuoteConvert.INSTANCE.toBrandBOList(java.util.List.of(brand)).get(0);
 
-        assertNotNull(priceBO);
-        assertEquals(3L, priceBO.getTierId());
-        assertEquals(0, new BigDecimal("1288.00").compareTo(priceBO.getPrice()));
-        assertEquals("批发价", tierBO.getTierName());
+        assertEquals(3L, brandBO.getId());
+        assertEquals("小米", brandBO.getBrandName());
     }
 }
