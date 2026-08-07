@@ -102,6 +102,15 @@ public class QuoteManageBizService {
     }
 
     /**
+     * 查询全部报价商品（含最新报价，按品牌/商品名/规格排序，报价单图片用）。
+     *
+     * @return 报价商品集合
+     */
+    public List<QuoteProductBO> listQuoteImageData() {
+        return quoteProductFacade.list(new QuoteProductQuery());
+    }
+
+    /**
      * 分页查询客户（公司）列表（含报价层级，默认零售）。
      *
      * @param pageParam 分页参数

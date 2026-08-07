@@ -2,36 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.quote.mapper.QuotePriceHistoryMapper">
 
-    <insert id="upsertByProductAndDate" parameterType="com.ruoyi.quote.domain.QuotePriceHistory">
-        INSERT INTO `quote_price_history` (
-            `product_id`, `quote_date`, `retail_price`,
-            `distributor1_price`, `distributor2_price`,
-            `create_time`, `update_time`
-        ) VALUES (
-            #{productId}, #{quoteDate}, #{retailPrice},
-            #{distributor1Price}, #{distributor2Price},
-            #{createTime}, #{updateTime}
-        )
-        ON DUPLICATE KEY UPDATE
-            `retail_price` = VALUES(`retail_price`),
-            `distributor1_price` = VALUES(`distributor1_price`),
-            `distributor2_price` = VALUES(`distributor2_price`),
-            `update_time` = VALUES(`update_time`)
-    </insert>
-
     <select id="selectLatestByProductIds" resultType="com.ruoyi.quote.domain.QuotePriceHistory">
-        SELECT p.`product_id`, p.`quote_date`, p.`retail_price`,
-               p.`distributor1_price`, p.`distributor2_price`
-        FROM `quote_price_history` p
-        JOIN (
-            SELECT `product_id`, MAX(`quote_date`) AS `max_date`
+        SELECT `product_id`, `quote_date`, `retail_price`,
+               `distributor1_price`, `distributor2_price`
+        FROM `quote_price_history`
+        WHERE `id` IN (
+            SELECT MAX(`id`)
             FROM `quote_price_history`
             WHERE `product_id` IN
             <foreach collection="productIds" item="productId" open="(" separator="," close=")">
                 #{productId}
             </foreach>
             GROUP BY `product_id`
-        ) t ON p.`product_id` = t.`product_id` AND p.`quote_date` = t.`max_date`
+        )
     </select>
 
 </mapper>

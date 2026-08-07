@@ -26,7 +26,10 @@
     <el-card shadow="never" class="quote-price-table-card">
       <div slot="header" class="quote-price-table-header">
         <span>每日报价维护（零售、分销1、分销2；保存后写入当天报价）</span>
-        <span class="quote-price-tip">保存后批发报价页立即生效</span>
+        <div>
+          <el-button size="small" type="success" icon="el-icon-picture-outline" :loading="imageLoading" @click="generateQuoteImage">生成报价单图片</el-button>
+          <span class="quote-price-tip">保存后批发报价页立即生效</span>
+        </div>
       </div>
 
       <el-table
@@ -120,6 +123,27 @@
       </el-table>
       <div v-if="!loadingHistory && historyList.length === 0" class="quote-history-empty">暂无历史报价</div>
     </el-dialog>
+
+    <el-dialog
+      title="生成报价单图片"
+      :visible.sync="imageDialogVisible"
+      width="420px"
+      append-to-body
+    >
+      <el-form label-width="90px">
+        <el-form-item label="价格档位">
+          <el-radio-group v-model="imageLevel">
+            <el-radio :label="0">零售</el-radio>
+            <el-radio :label="1">批发1</el-radio>
+            <el-radio :label="2">批发2</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="imageDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmGenerate">生 成</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -128,7 +152,8 @@ import {
   getQuoteProductPage,
   getQuoteBrandOptions,
   saveQuote,
-  getQuoteHistory
+  getQuoteHistory,
+  getQuoteImageData
 } from '@/api/quote'
 
 export default {
@@ -142,9 +167,13 @@ export default {
       brandOptions: [],
       historyDialogVisible: false,
       loadingHistory: false,
-      historyList: [],
-      historyProduct: null,
-      queryParams: {
+        historyList: [],
+        historyProduct: null,
+        imageLoading: false,
+        imageDialogVisible: false,
+        imageLevel: 0,
+        imageRows: [],
+        queryParams: {
         pageNum: 1,
         pageSize: 50,
         brandId: undefined,
@@ -224,6 +253,128 @@ export default {
       }).catch(() => {
         this.loadingHistory = false
       })
+    },
+    generateQuoteImage() {
+      this.imageLoading = true
+      getQuoteImageData().then((response) => {
+        const rows = (response && response.data) || []
+        if (rows.length === 0) {
+          this.$message.warning('暂无可生成的报价数据')
+          this.imageLoading = false
+          return
+        }
+        this.imageRows = rows
+        this.imageLevel = 0
+        this.imageDialogVisible = true
+        this.imageLoading = false
+      }).catch(() => {
+        this.imageLoading = false
+        this.$message.error('获取报价数据失败')
+      })
+    },
+    confirmGenerate() {
+      this.imageDialogVisible = false
+      this.drawQuoteImage(this.imageRows, this.imageLevel)
+    },
+    drawQuoteImage(rows, level) {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const width = 1200
+      const padding = 50
+      const topHeight = 150
+      const headerHeight = 52
+      const rowHeight = 44
+      const height = topHeight + headerHeight + rows.length * rowHeight + padding
+      canvas.width = width
+      canvas.height = height
+
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, width, height)
+
+      ctx.textAlign = 'center'
+      ctx.fillStyle = '#1a1a1a'
+      ctx.font = 'bold 38px "Microsoft YaHei", sans-serif'
+      ctx.fillText('无界供应链', width / 2, 78)
+      ctx.font = '16px "Microsoft YaHei", sans-serif'
+      ctx.fillStyle = '#666666'
+      const now = new Date()
+      const dateText = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      ctx.fillText(`报价日期：${dateText}`, width / 2, 112)
+
+      const img = new Image()
+      img.onload = () => {
+        ctx.drawImage(img, padding, 22, 72, 72)
+        this.drawQuoteTable(ctx, rows, level, width, topHeight, headerHeight, rowHeight, padding)
+        this.downloadCanvas(canvas, dateText)
+      }
+      img.onerror = () => {
+        this.drawQuoteTable(ctx, rows, level, width, topHeight, headerHeight, rowHeight, padding)
+        this.downloadCanvas(canvas, dateText)
+      }
+      img.src = require('@/assets/logo/logo3.png')
+    },
+    drawQuoteTable(ctx, rows, level, width, topHeight, headerHeight, rowHeight, padding) {
+      const priceLabel = ['零售价', '批发1价', '批发2价'][level] || '价格'
+      const columns = [
+        { label: '品牌', x: padding, width: 220 },
+        { label: '商品名称', x: padding + 220, width: 380 },
+        { label: '规格/型号', x: padding + 600, width: 340 },
+        { label: priceLabel, x: padding + 940, width: 210 }
+      ]
+      const tableTop = topHeight
+
+      ctx.textAlign = 'left'
+      ctx.font = 'bold 18px "Microsoft YaHei", sans-serif'
+      ctx.fillStyle = '#f2f4f7'
+      ctx.fillRect(padding, tableTop, width - padding * 2, headerHeight)
+      ctx.fillStyle = '#1a1a1a'
+      columns.forEach((col) => {
+        const isPrice = col.label.indexOf('价') > -1
+        ctx.textAlign = isPrice ? 'right' : 'left'
+        ctx.fillText(col.label, isPrice ? col.x + col.width - 16 : col.x + 16, tableTop + 34)
+      })
+
+      ctx.font = '16px "Microsoft YaHei", sans-serif'
+      rows.forEach((row, index) => {
+        const y = tableTop + headerHeight + index * rowHeight
+        if (index % 2 === 1) {
+          ctx.fillStyle = '#fafbfc'
+          ctx.fillRect(padding, y, width - padding * 2, rowHeight)
+        }
+        ctx.fillStyle = '#333333'
+        const priceValue = level === 1 ? row.distributor1Price : (level === 2 ? row.distributor2Price : row.retailPrice)
+        columns.forEach((col) => {
+          let value = ''
+          if (col.label === '品牌') value = row.brand || ''
+          if (col.label === '商品名称') value = row.productName || ''
+          if (col.label === '规格/型号') value = row.specName || ''
+          if (col.label.indexOf('价') > -1) value = `¥${this.formatPrice(priceValue)}`
+          const isPrice = col.label.indexOf('价') > -1
+          ctx.textAlign = isPrice ? 'right' : 'left'
+          ctx.fillText(value, isPrice ? col.x + col.width - 16 : col.x + 16, y + 30)
+        })
+      })
+
+      ctx.strokeStyle = '#e4e7ed'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(padding, tableTop)
+      ctx.lineTo(padding, tableTop + headerHeight + rows.length * rowHeight)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(width - padding, tableTop)
+      ctx.lineTo(width - padding, tableTop + headerHeight + rows.length * rowHeight)
+      ctx.stroke()
+    },
+    downloadCanvas(canvas, dateText) {
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `无界供应链报价单_${dateText.replace(/[:\s]/g, '')}.png`
+        a.click()
+        URL.revokeObjectURL(url)
+      }, 'image/png')
     },
     handleSaveAll() {
       const rows = this.productList

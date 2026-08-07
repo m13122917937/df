@@ -26,7 +26,7 @@ public class QuotePriceHistoryService extends ServiceImpl<QuotePriceHistoryMappe
     private final QuoteProductMapper quoteProductMapper;
 
     /**
-     * 保存当天报价（商品 × 日期 幂等覆盖）。
+     * 保存报价（每次保存新增一条历史记录）。
      *
      * @param param 报价流水参数
      */
@@ -52,7 +52,7 @@ public class QuotePriceHistoryService extends ServiceImpl<QuotePriceHistoryMappe
         history.setQuoteDate(param.getQuoteDate() != null ? param.getQuoteDate() : LocalDate.now());
         history.setCreateTime(now);
         history.setUpdateTime(now);
-        baseMapper.upsertByProductAndDate(history);
+        baseMapper.insert(history);
     }
 
     /**

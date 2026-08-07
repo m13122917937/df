@@ -46,6 +46,7 @@ public class QuoteBizService {
         return quoteProductFacade.page(query, pageParam);
     }
 
+
     /**
      * 查询品牌列表。
      *

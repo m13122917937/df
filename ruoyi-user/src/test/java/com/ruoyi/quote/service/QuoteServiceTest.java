@@ -26,7 +26,6 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -137,10 +136,10 @@ class QuoteServiceTest {
     }
 
     /**
-     * 保存当天报价成功时应幂等写入（upsert）。
+     * 保存报价成功时应新增一条历史记录。
      */
     @Test
-    void shouldUpsertQuoteWhenSaveSucceeds() {
+    void shouldInsertQuoteWhenSaveSucceeds() {
         when(quoteProductMapper.selectById(10L)).thenReturn(new QuoteProduct());
         QuotePriceHistoryParam param = new QuotePriceHistoryParam()
                 .setProductId(10L)
@@ -150,8 +149,7 @@ class QuoteServiceTest {
 
         quotePriceHistoryService.saveQuote(param);
 
-        verify(quotePriceHistoryMapper).upsertByProductAndDate(any(QuotePriceHistory.class));
-        verify(quotePriceHistoryMapper, never()).insert(any(QuotePriceHistory.class));
+        verify(quotePriceHistoryMapper).insert(any(QuotePriceHistory.class));
     }
 
     private QuoteProductParam validProduct() {

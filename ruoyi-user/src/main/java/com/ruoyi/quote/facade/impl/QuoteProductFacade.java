@@ -48,7 +48,7 @@ public class QuoteProductFacade implements IQuoteProductFacade {
     @Override
     public List<QuoteProductBO> list(final QuoteProductQuery query) {
         List<QuoteProduct> products = quoteProductService.list(
-                DynamicCondition.toWrapper(query, SortBy.of("sort_order,id")));
+                DynamicCondition.toWrapper(query, SortBy.of("brand,product_name,spec_name,id")));
         List<QuoteProductBO> productBOS = QuoteConvert.INSTANCE.toProductBOList(products);
         attachLatestQuotes(productBOS);
         return productBOS;

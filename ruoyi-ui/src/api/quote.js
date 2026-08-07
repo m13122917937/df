@@ -83,6 +83,18 @@ export function saveQuoteCustomerLevel(data) {
 }
 
 /**
+ * 查询报价单图片数据（全量商品 + 三档价格，按品牌/商品名/规格排序）。
+ *
+ * @returns {Promise} 报价单数据集合
+ */
+export function getQuoteImageData() {
+  return request({
+    url: '/quote/quote/image-data',
+    method: 'post'
+  })
+}
+
+/**
  * 删除报价商品。
  *
  * @param {number} id 商品ID

@@ -61,7 +61,7 @@
 
     <!-- 历史报价弹窗 -->
     <el-dialog
-      :title="historyProduct ? `${historyProduct.productName}（${historyProduct.specName || '-'}）- 历史报价` : '历史报价'"
+      :title="historyProduct ? `${historyProduct.productName} ${historyProduct.specName || '-'} - 历史报价` : '历史报价'"
       :visible.sync="historyDialogVisible"
       width="680px"
       append-to-body
@@ -70,14 +70,8 @@
         <el-table-column label="报价时间" min-width="170" align="center">
           <template slot-scope="scope">{{ formatDateTime(scope.row.updateTime || scope.row.quoteDate) }}</template>
         </el-table-column>
-        <el-table-column label="零售价" min-width="130" align="right">
-          <template slot-scope="scope">¥{{ formatPrice(scope.row.retailPrice) }}</template>
-        </el-table-column>
-        <el-table-column label="分销1价" min-width="130" align="right">
-          <template slot-scope="scope">¥{{ formatPrice(scope.row.distributor1Price) }}</template>
-        </el-table-column>
-        <el-table-column label="分销2价" min-width="130" align="right">
-          <template slot-scope="scope">¥{{ formatPrice(scope.row.distributor2Price) }}</template>
+        <el-table-column label="价格" min-width="130" align="right">
+          <template slot-scope="scope">¥{{ formatPrice(scope.row.price) }}</template>
         </el-table-column>
       </el-table>
       <div v-if="!loadingHistory && historyList.length === 0" class="history-empty">暂无历史报价</div>

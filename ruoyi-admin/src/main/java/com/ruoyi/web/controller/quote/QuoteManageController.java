@@ -23,6 +23,7 @@ import com.ruoyi.web.vo.quote.QuotePriceHistoryVO;
 import com.ruoyi.web.vo.quote.QuoteProductQueryRequest;
 import com.ruoyi.web.vo.quote.QuoteProductSaveRequest;
 import com.ruoyi.web.vo.quote.QuoteProductVO;
+import com.ruoyi.web.vo.quote.QuoteProductImageDataVO;
 import com.ruoyi.web.vo.quote.QuoteQuoteSaveRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 报价后台管理接口。
@@ -102,6 +104,31 @@ public class QuoteManageController extends BaseController {
     public AjaxResult quoteHistory(@PathVariable("id") final Long id) {
         List<QuotePriceHistoryBO> histories = quoteManageBizService.listQuoteHistory(id);
         List<QuotePriceHistoryVO> rows = QuoteWebConvert.INSTANCE.toPriceHistoryVOList(histories);
+        return AjaxResult.success(rows);
+    }
+
+    /**
+     * 查询报价单图片数据（全量商品 + 三档价格，按品牌/商品名/规格排序）。
+     *
+     * @return 报价单数据集合
+     */
+    @PostMapping("/quote/image-data")
+    @PreAuthorize("@ss.hasPermi('quote:product:list')")
+    public AjaxResult quoteImageData() {
+        List<QuoteProductImageDataVO> rows = quoteManageBizService.listQuoteImageData().stream()
+                .map(product -> {
+                    QuoteProductImageDataVO vo = new QuoteProductImageDataVO();
+                    vo.setBrand(product.getBrand());
+                    vo.setProductName(product.getProductName());
+                    vo.setSpecName(product.getSpecName());
+                    com.ruoyi.quote.model.bo.QuotePriceHistoryBO latest = product.getLatestQuote();
+                    if (latest != null) {
+                        vo.setRetailPrice(latest.getRetailPrice());
+                        vo.setDistributor1Price(latest.getDistributor1Price());
+                        vo.setDistributor2Price(latest.getDistributor2Price());
+                    }
+                    return vo;
+                }).collect(Collectors.toList());
         return AjaxResult.success(rows);
     }
 

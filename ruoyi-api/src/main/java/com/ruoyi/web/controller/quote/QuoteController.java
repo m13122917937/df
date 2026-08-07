@@ -92,7 +92,15 @@ public class QuoteController extends BaseController {
     @GetMapping("/quote/history/{productId}")
     public AjaxResult quoteHistory(@PathVariable("productId") final Long productId) {
         List<QuotePriceHistoryBO> histories = quoteBizService.listQuoteHistory(productId);
-        return AjaxResult.success(QuoteWebConvert.INSTANCE.toPriceHistoryVOList(histories));
+        int level = quoteBizService.getCustomerLevel(getDeptId());
+        List<QuotePriceHistoryVO> rows = histories.stream().map(history -> {
+            QuotePriceHistoryVO vo = new QuotePriceHistoryVO();
+            vo.setQuoteDate(history.getQuoteDate());
+            vo.setUpdateTime(history.getUpdateTime());
+            vo.setPrice(resolvePrice(history, level));
+            return vo;
+        }).collect(Collectors.toList());
+        return AjaxResult.success(rows);
     }
 
     private java.math.BigDecimal resolvePrice(final QuotePriceHistoryBO latestQuote, final int level) {

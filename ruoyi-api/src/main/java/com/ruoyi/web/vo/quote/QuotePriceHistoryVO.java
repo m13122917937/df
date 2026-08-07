@@ -23,17 +23,7 @@ public class QuotePriceHistoryVO {
     private LocalDateTime updateTime;
 
     /**
-     * 零售价
+     * 当前客户层级对应价格
      */
-    private BigDecimal retailPrice;
-
-    /**
-     * 分销1价
-     */
-    private BigDecimal distributor1Price;
-
-    /**
-     * 分销2价
-     */
-    private BigDecimal distributor2Price;
+    private BigDecimal price;
 }
