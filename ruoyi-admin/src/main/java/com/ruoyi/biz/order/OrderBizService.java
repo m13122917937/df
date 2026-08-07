@@ -277,31 +277,49 @@ public class OrderBizService {
     }
 
     /**
-     * 撤销订单
+     * 撤销订单（退货追单入口）
+     * <p>
+     * 根据订单当前所处阶段执行不同的撤销分支：
+     * <ol>
+     *     <li>未挂单：直接撤销订单，订单置为撤销状态；</li>
+     *     <li>已挂单未抢单：挂单置为失效并撤销订单；</li>
+     *     <li>已抢单未成交：作废抢单记录、挂单置为失效、撤销订单并退还抢单保证金；</li>
+     *     <li>已成交：仅当订单处于发货中/异常/已发货/在途等状态时，将订单流转为追单状态，
+     *     解冻成交占用资金、作废已激活串码、同步驳回吉客云审核并发送企业微信通知，其他状态不处理。</li>
+     * </ol>
+     *
+     * @param orderCode  订单编码
+     * @param revokeCode 撤销原因编码，见 {@link OrderConsts.RevokeType}
      */
     @Transactional
     public void revoke(final String orderCode, final Integer revokeCode) {
         log.info("撤销/追单订单：{}, 撤销原因:{}", orderCode, revokeCode);
+        // 查询订单及该订单对应正常状态的挂单记录
         OrderBO orderBO = orderFacade.getOne(new OrderQuery().setOrderCode(orderCode));
         HangingOrderBO hangingOrderBO = hangingOrderFacade.getOne(new HangingOrderQuery().setOrderId(orderCode).setStatus(HandingOrderConsts.Status.NORMAL.getCode()));
 
+        // 未挂单，直接撤销订单
         if (Objects.isNull(hangingOrderBO)) {
             revokeWithoutHanging(orderBO, revokeCode);
             return;
         }
 
+        // 查询该挂单下的所有抢单（成交）记录
         List<TradeOrderBO> tradeOrderBOList = tradeOrderFacade.list(new TradeOrderQuery().setOrderId(orderCode).setHangOrderId(hangingOrderBO.getId()));
 
+        // 已挂单但无人抢单，作废挂单并撤销订单
         if (CollectionUtil.isEmpty(tradeOrderBOList)) {
             revokeBeforeTrade(orderBO, hangingOrderBO, revokeCode);
             return;
         }
 
+        // 已抢单但尚未成交，作废抢单和挂单、撤销订单并退还保证金
         if (!isTradeConfirmed(tradeOrderBOList)) {
             revokeBeforeConfirm(orderBO, hangingOrderBO, tradeOrderBOList, revokeCode);
             return;
         }
 
+        // 已成交，进入退货追单流程
         revokeAfterConfirm(orderBO, hangingOrderBO, tradeOrderBOList, revokeCode);
     }
 
@@ -335,7 +353,7 @@ public class OrderBizService {
     }
 
     /**
-     * 追单3：已成交
+     * 追单3：已成交，订单流转为追单状态，并同步驳回吉客云审核
      */
     private void revokeAfterConfirm(OrderBO orderBO, HangingOrderBO hangingOrderBO, List<TradeOrderBO> tradeOrderBOList, Integer revokeCode) {
         List<Integer> ordreCodeList = List.of(OrderConsts.OrderStatus.DELIVERY_ING.getCode(), OrderConsts.OrderStatus.ERROR.getCode(), OrderConsts.OrderStatus.DELIVERY_END.getCode(), OrderConsts.OrderStatus.TRANSIT.getCode());
@@ -361,6 +379,9 @@ public class OrderBizService {
 
         RouteSubscribeBO routeSubscribeBO = routeSubscribeFacade.getOne(new RouteSubscribeQuery().setOrderCode(orderBO.getOrderCode()));
         sendMessage(revokeCode, Objects.nonNull(routeSubscribeBO) ? routeSubscribeBO.getLogisticsNo() : "", orderBO, confirmedTrade);
+
+        // 订单已转入追单状态，代发订单同步驳回吉客云审核
+        rejectJkyIfNeeded(orderBO);
     }
 
     private boolean isTradeConfirmed(List<TradeOrderBO> tradeOrderBOList) {
