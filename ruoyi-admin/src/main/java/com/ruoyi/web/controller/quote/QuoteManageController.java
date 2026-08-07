@@ -212,7 +212,7 @@ public class QuoteManageController extends BaseController {
      * @param request  查询请求
      * @param response HTTP 响应
      */
-    @GetMapping("/product/export")
+    @PostMapping("/product/export")
     @PreAuthorize("@ss.hasPermi('quote:product:list')")
     public void productExport(final QuoteProductQueryRequest request,
                               final HttpServletResponse response) throws IOException {
