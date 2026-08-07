@@ -1,7 +1,9 @@
 <template>
   <div class="tracking-info" :class="{ 'tracking-info-clickable': clickable }" @click="handleClick">
-    <span class="company">{{ company || '-' }}</span>
-    <span class="divider">｜</span>
+    <template v-if="showCompany">
+      <span class="company">{{ company || '-' }}</span>
+      <span class="divider">｜</span>
+    </template>
     <span class="number">{{ number || '-' }}</span>
   </div>
 </template>
@@ -17,6 +19,11 @@ export default {
     number: {
       type: String,
       default: ''
+    },
+    // 是否展示物流公司
+    showCompany: {
+      type: Boolean,
+      default: true
     },
     clickable: {
       type: Boolean,

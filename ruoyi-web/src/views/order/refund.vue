@@ -100,7 +100,7 @@
             <el-table-column prop="tradeTime" label="抢单时间" width="180" align="center"><template slot-scope="scope">{{ scope.row.tradeTime || '-' }}</template></el-table-column>
             <el-table-column prop="sendTime" label="发货时间" width="180" align="center"><template slot-scope="scope">{{ scope.row.sendTime || '-' }}</template></el-table-column>
             <el-table-column prop="trackingCompany" label="物流信息" width="200" align="center">
-              <template slot-scope="scope"><TrackingInfo :company="scope.row.trackingCompany" :number="scope.row.trackingNumber" :data="scope.row" @click="handleLogisticsInfo" /></template>
+              <template slot-scope="scope"><TrackingInfo :company="scope.row.trackingCompany" :number="scope.row.trackingNumber" :show-company="false" :data="scope.row" @click="handleLogisticsInfo" /></template>
             </el-table-column>
             <el-table-column prop="confirmTime" label="确认追单时间" width="180" align="center"><template slot-scope="scope">{{ scope.row.confirmTime || '-' }}</template></el-table-column>
             <el-table-column label="操作" width="260" fixed="right" align="center">

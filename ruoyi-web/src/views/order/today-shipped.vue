@@ -65,7 +65,7 @@
             <el-table-column prop="sendTime" label="发货时间" width="180" align="center"><template slot-scope="scope">{{ scope.row.sendTime || '-' }}</template></el-table-column>
             <el-table-column prop="tradeUserName" label="抢单人" width="100" align="center"><template slot-scope="scope">{{ scope.row.tradeUserName || '-' }}</template></el-table-column>
             <el-table-column prop="trackingCompany" label="物流信息" width="200" align="center">
-              <template slot-scope="scope"><TrackingInfo :company="scope.row.trackingCompany" :number="scope.row.trackingNumber" :data="scope.row" @click="handleLogisticsInfo" /></template>
+              <template slot-scope="scope"><TrackingInfo :company="scope.row.trackingCompany" :number="scope.row.trackingNumber" :show-company="false" :data="scope.row" @click="handleLogisticsInfo" /></template>
             </el-table-column>
             <el-table-column label="操作" width="200" fixed="right" align="center">
               <template slot-scope="scope">
