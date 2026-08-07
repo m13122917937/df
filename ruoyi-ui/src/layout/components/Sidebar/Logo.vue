@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-logo" :class="{ collapse: collapse }">
     <div class="logo-nav-area">
-      <span v-if="!collapse" class="logo-title">無界电商</span>
+      <span v-if="!collapse" class="logo-title">无界供应链</span>
     </div>
   </div>
 </template>
