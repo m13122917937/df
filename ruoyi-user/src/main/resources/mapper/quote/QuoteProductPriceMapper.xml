@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.quote.mapper.QuoteProductPriceMapper">
+
+    <delete id="deleteByProductId" parameterType="long">
+        DELETE FROM `quote_product_price`
+        WHERE `product_id` = #{productId}
+    </delete>
+
+    <select id="countByTierId" parameterType="long" resultType="long">
+        SELECT COUNT(*)
+        FROM `quote_product_price`
+        WHERE `tier_id` = #{tierId}
+    </select>
+
+</mapper>

@@ -12,6 +12,14 @@
     <!-- 主导航 -->
     <nav class="main-navigation">
       <div
+        :class="['nav-item', { 'is-active': activeMenu === '/quote' }]"
+        @click="handleMenuSelect('/quote')"
+      >
+        <i class="el-icon-price-tag" />
+        <span class="nav-text">批发报价</span>
+        <div class="nav-underline" />
+      </div>
+      <div
         :class="['nav-item', { 'is-active': activeMenu === '/df' }]"
         @click="handleMenuSelect('/df')"
       >
@@ -114,7 +122,9 @@ export default {
     ]),
     activeMenu() {
       const route = this.$route
-      if (route.path.startsWith('/order')) {
+      if (route.path.startsWith('/quote')) {
+        return '/quote'
+      } else if (route.path.startsWith('/order')) {
         return '/order/send'
       } else if (route.path.startsWith('/monery')) {
         return '/monery/earnest'

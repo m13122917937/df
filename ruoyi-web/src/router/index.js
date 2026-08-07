@@ -52,6 +52,15 @@ export const constantRoutes = [
     },
     children: [
       {
+        path: 'quote',
+        component: () => import('@/views/quote/index'),
+        name: 'QuotePrice',
+        meta: {
+          title: '批发报价',
+          owner: [0, 1] // 0: 管理员, 1: 非管理员都可以访问
+        }
+      },
+      {
         path: 'df',
         component: () => import('@/views/trading-market/o2o'),
         name: 'O2O',
@@ -59,7 +68,7 @@ export const constantRoutes = [
           title: '交易市场',
           owner: [0, 1] // 0: 管理员, 1: 非管理员都可以访问
         }
-      },
+      }
     ]
   }
 ]
