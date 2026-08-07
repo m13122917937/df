@@ -2,6 +2,7 @@ package com.ruoyi.biz.quote;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.ruoyi.quote.model.param.QuotePriceHistoryParam;
 import com.ruoyi.quote.model.param.QuoteProductParam;
 
 import java.math.BigDecimal;
@@ -13,6 +14,14 @@ import java.util.Map;
  * 报价商品 Excel 导入监听器；固定列序：品牌、品类、商品名、规格/型号、零售价、分销1价、分销2价。
  */
 public class QuoteProductImportListener extends AnalysisEventListener<Map<Integer, String>> {
+
+    private static final int BRAND_COLUMN = 0;
+    private static final int CATEGORY_COLUMN = 1;
+    private static final int PRODUCT_NAME_COLUMN = 2;
+    private static final int SPEC_NAME_COLUMN = 3;
+    private static final int RETAIL_PRICE_COLUMN = 4;
+    private static final int DISTRIBUTOR1_PRICE_COLUMN = 5;
+    private static final int DISTRIBUTOR2_PRICE_COLUMN = 6;
 
     private final Map<String, Long> brandMap;
     private final Map<String, Long> categoryMap;
@@ -68,9 +77,9 @@ public class QuoteProductImportListener extends AnalysisEventListener<Map<Intege
     }
 
     private String validateAndBuild(final Map<Integer, String> data) {
-        String brandName = cell(data, QuoteManageBizService.getBrandColumn());
-        String categoryName = cell(data, QuoteManageBizService.getCategoryColumn());
-        String productName = cell(data, QuoteManageBizService.getProductNameColumn());
+        String brandName = cell(data, BRAND_COLUMN);
+        String categoryName = cell(data, CATEGORY_COLUMN);
+        String productName = cell(data, PRODUCT_NAME_COLUMN);
         if (brandName.isBlank()) {
             return "品牌不能为空";
         }
@@ -86,12 +95,9 @@ public class QuoteProductImportListener extends AnalysisEventListener<Map<Intege
         if (!categoryMap.containsKey(categoryName)) {
             return "品类【" + categoryName + "】不存在，请先在品类管理中维护";
         }
-        BigDecimal retail = parsePriceOrNull(data, QuoteManageBizService.getRetailPriceColumn());
-        BigDecimal distributor1 = parsePriceOrNull(data, QuoteManageBizService.getDistributor1PriceColumn());
-        BigDecimal distributor2 = parsePriceOrNull(data, QuoteManageBizService.getDistributor2PriceColumn());
-        if (retail == null && distributor1 == null && distributor2 == null) {
-            return "至少需要填写一个价格";
-        }
+        BigDecimal retail = parsePriceOrNull(data, RETAIL_PRICE_COLUMN);
+        BigDecimal distributor1 = parsePriceOrNull(data, DISTRIBUTOR1_PRICE_COLUMN);
+        BigDecimal distributor2 = parsePriceOrNull(data, DISTRIBUTOR2_PRICE_COLUMN);
         if (isNegative(retail) || isNegative(distributor1) || isNegative(distributor2)) {
             return "价格必须为不小于 0 的数字";
         }
@@ -99,17 +105,26 @@ public class QuoteProductImportListener extends AnalysisEventListener<Map<Intege
     }
 
     private ImportRow toRow(final Map<Integer, String> data) {
+        String brandName = cell(data, BRAND_COLUMN);
+        String categoryName = cell(data, CATEGORY_COLUMN);
         QuoteProductParam param = new QuoteProductParam()
-                .setBrandId(brandMap.get(cell(data, QuoteManageBizService.getBrandColumn())))
-                .setCategoryId(categoryMap.get(cell(data, QuoteManageBizService.getCategoryColumn())))
-                .setBrand(cell(data, QuoteManageBizService.getBrandColumn()))
-                .setCategory(cell(data, QuoteManageBizService.getCategoryColumn()))
-                .setProductName(cell(data, QuoteManageBizService.getProductNameColumn()))
-                .setSpecName(cell(data, QuoteManageBizService.getSpecNameColumn()))
-                .setRetailPrice(parsePriceOrNull(data, QuoteManageBizService.getRetailPriceColumn()))
-                .setDistributor1Price(parsePriceOrNull(data, QuoteManageBizService.getDistributor1PriceColumn()))
-                .setDistributor2Price(parsePriceOrNull(data, QuoteManageBizService.getDistributor2PriceColumn()));
-        return new ImportRow(currentRowIndex, param);
+                .setBrandId(brandMap.get(brandName))
+                .setCategoryId(categoryMap.get(categoryName))
+                .setBrand(brandName)
+                .setCategory(categoryName)
+                .setProductName(cell(data, PRODUCT_NAME_COLUMN))
+                .setSpecName(cell(data, SPEC_NAME_COLUMN));
+        BigDecimal retail = parsePriceOrNull(data, RETAIL_PRICE_COLUMN);
+        BigDecimal distributor1 = parsePriceOrNull(data, DISTRIBUTOR1_PRICE_COLUMN);
+        BigDecimal distributor2 = parsePriceOrNull(data, DISTRIBUTOR2_PRICE_COLUMN);
+        QuotePriceHistoryParam priceParam = null;
+        if (retail != null || distributor1 != null || distributor2 != null) {
+            priceParam = new QuotePriceHistoryParam()
+                    .setRetailPrice(retail)
+                    .setDistributor1Price(distributor1)
+                    .setDistributor2Price(distributor2);
+        }
+        return new ImportRow(currentRowIndex, param, priceParam);
     }
 
     private BigDecimal parsePriceOrNull(final Map<Integer, String> data, final int column) {
@@ -136,10 +151,12 @@ public class QuoteProductImportListener extends AnalysisEventListener<Map<Intege
 
         private final int rowIndex;
         private final QuoteProductParam param;
+        private final QuotePriceHistoryParam priceParam;
 
-        ImportRow(final int rowIndex, final QuoteProductParam param) {
+        ImportRow(final int rowIndex, final QuoteProductParam param, final QuotePriceHistoryParam priceParam) {
             this.rowIndex = rowIndex;
             this.param = param;
+            this.priceParam = priceParam;
         }
 
         /**
@@ -158,6 +175,15 @@ public class QuoteProductImportListener extends AnalysisEventListener<Map<Intege
          */
         public QuoteProductParam getParam() {
             return param;
+        }
+
+        /**
+         * 当天报价参数。
+         *
+         * @return 报价参数
+         */
+        public QuotePriceHistoryParam getPriceParam() {
+            return priceParam;
         }
     }
 }

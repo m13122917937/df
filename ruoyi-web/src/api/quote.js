@@ -38,3 +38,16 @@ export function apiGetQuoteCategoryList() {
     method: 'get'
   })
 }
+
+/**
+ * 查询商品历史报价。
+ *
+ * @param {number} productId 商品ID
+ * @returns {Promise} 历史报价集合
+ */
+export function apiGetQuoteHistory(productId) {
+  return request({
+    url: `/quote/web/quote/history/${productId}`,
+    method: 'get'
+  })
+}

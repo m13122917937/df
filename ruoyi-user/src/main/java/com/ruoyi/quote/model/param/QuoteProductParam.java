@@ -3,7 +3,6 @@ package com.ruoyi.quote.model.param;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.math.BigDecimal;
 
 /**
  * 报价商品参数。
@@ -46,21 +45,6 @@ public class QuoteProductParam {
      * 规格/型号
      */
     private String specName;
-
-    /**
-     * 零售价
-     */
-    private BigDecimal retailPrice;
-
-    /**
-     * 分销1价
-     */
-    private BigDecimal distributor1Price;
-
-    /**
-     * 分销2价
-     */
-    private BigDecimal distributor2Price;
 
     /**
      * 排序

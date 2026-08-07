@@ -14,7 +14,7 @@ import java.util.List;
 public interface IQuoteProductFacade {
 
     /**
-     * 分页查询报价商品（含各档位价格）。
+     * 分页查询报价商品（含最新报价）。
      *
      * @param query     查询条件
      * @param pageParam 分页参数
@@ -23,7 +23,7 @@ public interface IQuoteProductFacade {
     PageBO<QuoteProductBO> page(QuoteProductQuery query, PageParamV2 pageParam);
 
     /**
-     * 查询报价商品全量（含各档位价格，导出用）。
+     * 查询报价商品全量（含最新报价，导出用）。
      *
      * @param query 查询条件
      * @return 报价商品集合
@@ -31,18 +31,11 @@ public interface IQuoteProductFacade {
     List<QuoteProductBO> list(QuoteProductQuery query);
 
     /**
-     * 新增或更新报价商品基础信息（价格列表为空时保留现有价格）。
+     * 新增或更新报价商品基础信息。
      *
      * @param param 商品参数
      */
     void save(QuoteProductParam param);
-
-    /**
-     * 仅更新报价商品三档价格（零售、分销1、分销2）。
-     *
-     * @param param 商品参数（需含 id 与 prices）
-     */
-    void savePrices(QuoteProductParam param);
 
     /**
      * 删除报价商品及其价格明细。

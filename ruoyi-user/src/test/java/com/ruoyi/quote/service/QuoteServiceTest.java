@@ -5,10 +5,13 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.quote.domain.QuoteBrand;
 import com.ruoyi.quote.domain.QuoteCategory;
+import com.ruoyi.quote.domain.QuotePriceHistory;
 import com.ruoyi.quote.domain.QuoteProduct;
 import com.ruoyi.quote.mapper.QuoteBrandMapper;
 import com.ruoyi.quote.mapper.QuoteCategoryMapper;
+import com.ruoyi.quote.mapper.QuotePriceHistoryMapper;
 import com.ruoyi.quote.mapper.QuoteProductMapper;
+import com.ruoyi.quote.model.param.QuotePriceHistoryParam;
 import com.ruoyi.quote.model.param.QuoteProductParam;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +45,13 @@ class QuoteServiceTest {
     @Mock
     private QuoteCategoryMapper quoteCategoryMapper;
 
+    @Mock
+    private QuotePriceHistoryMapper quotePriceHistoryMapper;
+
     @InjectMocks
     private QuoteProductService quoteProductService;
+
+    private QuotePriceHistoryService quotePriceHistoryService;
 
     /**
      * 初始化被测服务。
@@ -56,7 +64,11 @@ class QuoteServiceTest {
                 new MapperBuilderAssistant(new MybatisConfiguration(), ""), QuoteBrand.class);
         TableInfoHelper.initTableInfo(
                 new MapperBuilderAssistant(new MybatisConfiguration(), ""), QuoteCategory.class);
+        TableInfoHelper.initTableInfo(
+                new MapperBuilderAssistant(new MybatisConfiguration(), ""), QuotePriceHistory.class);
         ReflectionTestUtils.setField(quoteProductService, "baseMapper", quoteProductMapper);
+        quotePriceHistoryService = new QuotePriceHistoryService(quoteProductMapper);
+        ReflectionTestUtils.setField(quotePriceHistoryService, "baseMapper", quotePriceHistoryMapper);
     }
 
     /**
@@ -80,81 +92,66 @@ class QuoteServiceTest {
     }
 
     /**
-     * 商品库保存时三档价格均为空应拒绝。
+     * 商品库保存基础信息成功。
      */
     @Test
-    void shouldRejectSaveWhenAllPricesEmpty() {
+    void shouldSaveProductSucceeds() {
         when(quoteBrandMapper.selectById(1L)).thenReturn(createBrand());
         when(quoteCategoryMapper.selectById(2L)).thenReturn(createCategory());
 
-        assertThrows(ServiceException.class, () -> quoteProductService.saveProduct(validProduct()));
-    }
-
-    /**
-     * 商品保存时价格为负数应拒绝。
-     */
-    @Test
-    void shouldRejectSaveWhenPriceNegative() {
-        when(quoteBrandMapper.selectById(1L)).thenReturn(createBrand());
-        when(quoteCategoryMapper.selectById(2L)).thenReturn(createCategory());
-        QuoteProductParam param = validProduct().setRetailPrice(new BigDecimal("-1"));
-
-        assertThrows(ServiceException.class, () -> quoteProductService.saveProduct(param));
-    }
-
-    /**
-     * 商品库保存基础信息并携带价格时应成功保存。
-     */
-    @Test
-    void shouldSaveProductWithPrices() {
-        when(quoteBrandMapper.selectById(1L)).thenReturn(createBrand());
-        when(quoteCategoryMapper.selectById(2L)).thenReturn(createCategory());
-        QuoteProductParam param = validProduct()
-                .setRetailPrice(new BigDecimal("199.00"))
-                .setDistributor1Price(new BigDecimal("189.00"))
-                .setDistributor2Price(new BigDecimal("179.00"));
-
-        quoteProductService.saveProduct(param);
+        quoteProductService.saveProduct(validProduct());
 
         verify(quoteProductMapper).insert(any(QuoteProduct.class));
     }
 
     /**
-     * 报价更新时商品不存在应拒绝。
+     * 删除商品为逻辑删除。
      */
     @Test
-    void shouldRejectSavePricesWhenProductMissing() {
+    void shouldDeleteProduct() {
+        quoteProductService.deleteProduct(10L);
+
+        verify(quoteProductMapper).deleteById(10L);
+    }
+
+    /**
+     * 保存当天报价时商品不存在应拒绝。
+     */
+    @Test
+    void shouldRejectSaveQuoteWhenProductMissing() {
         when(quoteProductMapper.selectById(99L)).thenReturn(null);
-        QuoteProductParam param = validProduct().setId(99L).setRetailPrice(new BigDecimal("100"));
 
-        assertThrows(ServiceException.class, () -> quoteProductService.savePrices(param));
+        assertThrows(ServiceException.class, () -> quotePriceHistoryService.saveQuote(
+                new QuotePriceHistoryParam().setProductId(99L).setRetailPrice(new BigDecimal("100"))));
     }
 
     /**
-     * 报价更新时三档价格均为空应拒绝。
+     * 保存当天报价时三档价格均为空应拒绝。
      */
     @Test
-    void shouldRejectSavePricesWhenAllPricesEmpty() {
-        QuoteProductParam param = validProduct().setId(10L);
-
-        assertThrows(ServiceException.class, () -> quoteProductService.savePrices(param));
-    }
-
-    /**
-     * 报价更新成功时应仅更新价格字段。
-     */
-    @Test
-    void shouldUpdatePricesWhenSavePricesSucceeds() {
+    void shouldRejectSaveQuoteWhenAllPricesEmpty() {
         when(quoteProductMapper.selectById(10L)).thenReturn(new QuoteProduct());
-        QuoteProductParam param = validProduct().setId(10L)
+
+        assertThrows(ServiceException.class, () -> quotePriceHistoryService.saveQuote(
+                new QuotePriceHistoryParam().setProductId(10L)));
+    }
+
+    /**
+     * 保存当天报价成功时应幂等写入（upsert）。
+     */
+    @Test
+    void shouldUpsertQuoteWhenSaveSucceeds() {
+        when(quoteProductMapper.selectById(10L)).thenReturn(new QuoteProduct());
+        QuotePriceHistoryParam param = new QuotePriceHistoryParam()
+                .setProductId(10L)
                 .setRetailPrice(new BigDecimal("200.00"))
                 .setDistributor1Price(new BigDecimal("190.00"))
                 .setDistributor2Price(new BigDecimal("180.00"));
 
-        quoteProductService.savePrices(param);
+        quotePriceHistoryService.saveQuote(param);
 
-        verify(quoteProductMapper).updateById(any(QuoteProduct.class));
-        verify(quoteProductMapper, never()).insert(any(QuoteProduct.class));
+        verify(quotePriceHistoryMapper).upsertByProductAndDate(any(QuotePriceHistory.class));
+        verify(quotePriceHistoryMapper, never()).insert(any(QuotePriceHistory.class));
     }
 
     private QuoteProductParam validProduct() {

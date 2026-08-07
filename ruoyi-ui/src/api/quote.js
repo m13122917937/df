@@ -30,14 +30,53 @@ export function saveQuoteProduct(data) {
 }
 
 /**
- * 仅更新报价商品各档位价格（报价每日维护）。
+ * 保存当天报价（报价每日维护，幂等覆盖当天）。
  *
- * @param {Object} data 商品ID与价格数据
+ * @param {Object} data 商品ID与三档价格数据
  * @returns {Promise} 操作结果
  */
-export function saveQuotePrices(data) {
+export function saveQuote(data) {
   return request({
-    url: '/quote/price/save',
+    url: '/quote/quote/save',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 查询商品历史报价。
+ *
+ * @param {number} productId 商品ID
+ * @returns {Promise} 历史报价集合
+ */
+export function getQuoteHistory(productId) {
+  return request({
+    url: `/quote/quote/history/${productId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 分页查询客户层级。
+ *
+ * @returns {Promise} 客户层级分页数据
+ */
+export function getQuoteCustomerLevelPage() {
+  return request({
+    url: '/quote/customer-level/page',
+    method: 'post'
+  })
+}
+
+/**
+ * 保存客户层级。
+ *
+ * @param {Object} data 客户层级数据
+ * @returns {Promise} 操作结果
+ */
+export function saveQuoteCustomerLevel(data) {
+  return request({
+    url: '/quote/customer-level/save',
     method: 'post',
     data
   })

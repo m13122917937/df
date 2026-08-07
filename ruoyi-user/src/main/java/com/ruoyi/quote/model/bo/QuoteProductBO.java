@@ -64,4 +64,9 @@ public class QuoteProductBO {
      * 排序
      */
     private Integer sortOrder;
+
+    /**
+     * 最新一条报价
+     */
+    private QuotePriceHistoryBO latestQuote;
 }

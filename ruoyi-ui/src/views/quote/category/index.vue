@@ -8,6 +8,7 @@
 
       <el-table v-loading="loading" :data="categoryList" border stripe size="medium">
         <el-table-column prop="categoryName" label="品类名称" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="sortOrder" label="排序" width="100" align="center" />
         <el-table-column prop="updateBy" label="更新人" min-width="120" align="center" />
         <el-table-column prop="updateTime" label="更新时间" min-width="180" align="center" />
         <el-table-column label="操作" width="160" align="center">

@@ -64,4 +64,9 @@ public class QuoteProductVO {
      * 排序
      */
     private Integer sortOrder;
+
+    /**
+     * 最新一条报价
+     */
+    private QuotePriceHistoryVO latestQuote;
 }

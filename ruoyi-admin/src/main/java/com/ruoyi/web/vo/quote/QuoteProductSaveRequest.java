@@ -2,8 +2,6 @@ package com.ruoyi.web.vo.quote;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 /**
  * 报价商品保存请求。
  */
@@ -44,21 +42,6 @@ public class QuoteProductSaveRequest {
      * 规格/型号
      */
     private String specName;
-
-    /**
-     * 零售价
-     */
-    private BigDecimal retailPrice;
-
-    /**
-     * 分销1价
-     */
-    private BigDecimal distributor1Price;
-
-    /**
-     * 分销2价
-     */
-    private BigDecimal distributor2Price;
 
     /**
      * 排序

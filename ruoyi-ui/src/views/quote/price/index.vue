@@ -25,7 +25,7 @@
 
     <el-card shadow="never" class="quote-price-table-card">
       <div slot="header" class="quote-price-table-header">
-        <span>每日报价维护（零售、分销1、分销2 三档价格）</span>
+        <span>每日报价维护（零售、分销1、分销2；保存后写入当天报价）</span>
         <span class="quote-price-tip">保存后批发报价页立即生效</span>
       </div>
 
@@ -44,7 +44,7 @@
         <el-table-column label="零售价" min-width="140" align="center">
           <template slot-scope="scope">
             <el-input-number
-              v-model="scope.row.retailPrice"
+              v-model="scope.row._prices.retail"
               :min="0"
               :precision="2"
               :step="1"
@@ -57,7 +57,7 @@
         <el-table-column label="分销1价" min-width="140" align="center">
           <template slot-scope="scope">
             <el-input-number
-              v-model="scope.row.distributor1Price"
+              v-model="scope.row._prices.distributor1"
               :min="0"
               :precision="2"
               :step="1"
@@ -70,7 +70,7 @@
         <el-table-column label="分销2价" min-width="140" align="center">
           <template slot-scope="scope">
             <el-input-number
-              v-model="scope.row.distributor2Price"
+              v-model="scope.row._prices.distributor2"
               :min="0"
               :precision="2"
               :step="1"
@@ -80,8 +80,9 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="110" align="center" fixed="right">
+        <el-table-column label="操作" width="170" align="center" fixed="right">
           <template slot-scope="scope">
+            <el-button type="text" icon="el-icon-time" @click="handleHistory(scope.row)">历史报价</el-button>
             <el-button type="text" icon="el-icon-check" :loading="saving" @click="handleSaveRow(scope.row)">保存</el-button>
           </template>
         </el-table-column>
@@ -96,6 +97,29 @@
         @pagination="getList"
       />
     </el-card>
+
+    <el-dialog
+      :title="historyProduct ? `${historyProduct.productName} - 历史报价` : '历史报价'"
+      :visible.sync="historyDialogVisible"
+      width="700px"
+      append-to-body
+    >
+      <el-table :data="historyList" border stripe size="medium" max-height="420">
+        <el-table-column label="报价时间" min-width="170" align="center">
+          <template slot-scope="scope">{{ formatDateTime(scope.row.updateTime || scope.row.quoteDate) }}</template>
+        </el-table-column>
+        <el-table-column label="零售价" min-width="140" align="right">
+          <template slot-scope="scope">¥{{ formatPrice(scope.row.retailPrice) }}</template>
+        </el-table-column>
+        <el-table-column label="批发1价" min-width="140" align="right">
+          <template slot-scope="scope">¥{{ formatPrice(scope.row.distributor1Price) }}</template>
+        </el-table-column>
+        <el-table-column label="批发2价" min-width="140" align="right">
+          <template slot-scope="scope">¥{{ formatPrice(scope.row.distributor2Price) }}</template>
+        </el-table-column>
+      </el-table>
+      <div v-if="!loadingHistory && historyList.length === 0" class="quote-history-empty">暂无历史报价</div>
+    </el-dialog>
   </div>
 </template>
 
@@ -103,7 +127,8 @@
 import {
   getQuoteProductPage,
   getQuoteBrandOptions,
-  saveQuotePrices
+  saveQuote,
+  getQuoteHistory
 } from '@/api/quote'
 
 export default {
@@ -115,6 +140,10 @@ export default {
       total: 0,
       productList: [],
       brandOptions: [],
+      historyDialogVisible: false,
+      loadingHistory: false,
+      historyList: [],
+      historyProduct: null,
       queryParams: {
         pageNum: 1,
         pageSize: 50,
@@ -141,7 +170,17 @@ export default {
         pageNum: this.queryParams.pageNum,
         pageSize: this.queryParams.pageSize
       }).then((response) => {
-        this.productList = response.rows || []
+        this.productList = (response.rows || []).map((row) => {
+          const latest = row.latestQuote || {}
+          return {
+            ...row,
+            _prices: {
+              retail: latest.retailPrice,
+              distributor1: latest.distributor1Price,
+              distributor2: latest.distributor2Price
+            }
+          }
+        })
         this.total = response.total || 0
         this.loading = false
       }).catch(() => {
@@ -162,26 +201,33 @@ export default {
       this.handleQuery()
     },
     handleSaveRow(row) {
-      if (!this.hasAnyPrice(row)) {
+      if (!this.hasAnyPrice(row._prices)) {
         this.$message.warning('至少需要填写一个价格')
         return
       }
       this.saving = true
-      saveQuotePrices({
-        id: row.id,
-        retailPrice: row.retailPrice,
-        distributor1Price: row.distributor1Price,
-        distributor2Price: row.distributor2Price
-      }).then(() => {
-        this.$message.success(`商品“${row.productName}”价格已保存`)
+      saveQuote(this.buildPayload(row)).then(() => {
+        this.$message.success(`商品“${row.productName}”当天报价已保存`)
         this.saving = false
       }).catch(() => {
         this.saving = false
       })
     },
+    handleHistory(row) {
+      this.historyProduct = row
+      this.historyList = []
+      this.historyDialogVisible = true
+      this.loadingHistory = true
+      getQuoteHistory(row.id).then((response) => {
+        this.historyList = (response && response.data) || []
+        this.loadingHistory = false
+      }).catch(() => {
+        this.loadingHistory = false
+      })
+    },
     handleSaveAll() {
       const rows = this.productList
-      const invalid = rows.filter((row) => !this.hasAnyPrice(row))
+      const invalid = rows.filter((row) => !this.hasAnyPrice(row._prices))
       if (invalid.length > 0) {
         this.$message.warning(`请先为商品“${invalid[0].productName}”填写至少一个价格`)
         return
@@ -201,12 +247,7 @@ export default {
           return
         }
         const row = rows[index]
-        saveQuotePrices({
-          id: row.id,
-          retailPrice: row.retailPrice,
-          distributor1Price: row.distributor1Price,
-          distributor2Price: row.distributor2Price
-        }).then(() => {
+        saveQuote(this.buildPayload(row)).then(() => {
           success++
           doSave(index + 1)
         }).catch((error) => {
@@ -217,10 +258,30 @@ export default {
       }
       doSave(0)
     },
-    hasAnyPrice(row) {
-      return row.retailPrice !== null && row.retailPrice !== undefined && row.retailPrice !== ''
-        || row.distributor1Price !== null && row.distributor1Price !== undefined && row.distributor1Price !== ''
-        || row.distributor2Price !== null && row.distributor2Price !== undefined && row.distributor2Price !== ''
+    buildPayload(row) {
+      return {
+        productId: row.id,
+        retailPrice: row._prices.retail,
+        distributor1Price: row._prices.distributor1,
+        distributor2Price: row._prices.distributor2
+      }
+    },
+    hasAnyPrice(prices) {
+      return prices.retail !== null && prices.retail !== undefined && prices.retail !== ''
+        || prices.distributor1 !== null && prices.distributor1 !== undefined && prices.distributor1 !== ''
+        || prices.distributor2 !== null && prices.distributor2 !== undefined && prices.distributor2 !== ''
+    },
+    formatPrice(price) {
+      if (price === null || price === undefined || price === '') {
+        return '-'
+      }
+      return Number(price).toFixed(2)
+    },
+    formatDateTime(dateTime) {
+      if (!dateTime) {
+        return '-'
+      }
+      return String(dateTime).replace('T', ' ').slice(0, 19)
     }
   }
 }
@@ -241,6 +302,12 @@ export default {
   .quote-price-tip {
     color: #909399;
     font-size: 12px;
+  }
+
+  .quote-history-empty {
+    padding: 24px 0;
+    color: #999999;
+    text-align: center;
   }
 }
 </style>

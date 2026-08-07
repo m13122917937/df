@@ -7,7 +7,6 @@ import com.ruoyi.quote.model.param.QuoteBrandParam;
 import com.ruoyi.quote.model.param.QuoteProductParam;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,7 +29,7 @@ class QuoteConvertTest {
     }
 
     /**
-     * 商品参数应转换为商品实体，三档价格应完整保留。
+     * 商品参数应转换为商品实体。
      */
     @Test
     void shouldConvertProductParamToDomain() {
@@ -40,19 +39,13 @@ class QuoteConvertTest {
                 .setBrand("华为")
                 .setCategory("手机")
                 .setProductName("Mate 60")
-                .setSpecName("12G+512G")
-                .setRetailPrice(new BigDecimal("199.00"))
-                .setDistributor1Price(new BigDecimal("189.00"))
-                .setDistributor2Price(new BigDecimal("179.00"));
+                .setSpecName("12G+512G");
 
         QuoteProduct product = QuoteConvert.INSTANCE.toProductDomain(param);
 
         assertEquals(1L, product.getBrandId());
         assertEquals("华为", product.getBrand());
         assertEquals("Mate 60", product.getProductName());
-        assertEquals(0, new BigDecimal("199.00").compareTo(product.getRetailPrice()));
-        assertEquals(0, new BigDecimal("189.00").compareTo(product.getDistributor1Price()));
-        assertEquals(0, new BigDecimal("179.00").compareTo(product.getDistributor2Price()));
     }
 
     /**

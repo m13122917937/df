@@ -79,3 +79,17 @@ WHERE @quote_menu_id IS NOT NULL
       WHERE `parent_id` = @quote_menu_id
         AND `path` = 'price'
   );
+
+-- 7. 挂载“客户层级”子菜单
+INSERT INTO `sys_menu`
+    (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`,
+     `menu_type`, `visible`, `status`, `perms`, `icon`, `create_by`, `create_time`, `remark`)
+SELECT
+    '客户层级', @quote_menu_id, 5, 'customer-level', 'quote/customerLevel/index', '', 1, 0,
+    'C', '0', '0', 'quote:customerLevel:list', 'people', 'admin', NOW(), '报价客户层级设置'
+WHERE @quote_menu_id IS NOT NULL
+  AND NOT EXISTS (
+      SELECT 1 FROM `sys_menu`
+      WHERE `parent_id` = @quote_menu_id
+        AND `path` = 'customer-level'
+  );

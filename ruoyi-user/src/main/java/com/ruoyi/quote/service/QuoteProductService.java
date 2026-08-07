@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,7 +35,6 @@ public class QuoteProductService extends ServiceImpl<QuoteProductMapper, QuotePr
     @Transactional(rollbackFor = Exception.class)
     public void saveProduct(final QuoteProductParam param) {
         validateBrandAndCategory(param);
-        validatePrices(param.getRetailPrice(), param.getDistributor1Price(), param.getDistributor2Price());
         LocalDateTime now = LocalDateTime.now();
         QuoteProduct product = QuoteConvert.INSTANCE.toProductDomain(param);
         if (product.getId() == null) {
@@ -48,29 +46,6 @@ public class QuoteProductService extends ServiceImpl<QuoteProductMapper, QuotePr
             product.setUpdateTime(now);
             updateById(product);
         }
-    }
-
-    /**
-     * 仅更新报价商品三档价格（报价每日维护用）。
-     *
-     * @param param 商品参数（需含 id 与至少一个价格）
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void savePrices(final QuoteProductParam param) {
-        if (param.getId() == null) {
-            throw new ServiceException("商品ID不能为空");
-        }
-        if (baseMapper.selectById(param.getId()) == null) {
-            throw new ServiceException("商品不存在或已删除");
-        }
-        validatePrices(param.getRetailPrice(), param.getDistributor1Price(), param.getDistributor2Price());
-        QuoteProduct update = new QuoteProduct();
-        update.setId(param.getId());
-        update.setRetailPrice(param.getRetailPrice());
-        update.setDistributor1Price(param.getDistributor1Price());
-        update.setDistributor2Price(param.getDistributor2Price());
-        update.setUpdateTime(LocalDateTime.now());
-        updateById(update);
     }
 
     /**
@@ -120,17 +95,4 @@ public class QuoteProductService extends ServiceImpl<QuoteProductMapper, QuotePr
         param.setCategory(category.getCategoryName());
     }
 
-    private void validatePrices(final BigDecimal retailPrice, final BigDecimal distributor1Price,
-                                final BigDecimal distributor2Price) {
-        if (retailPrice == null && distributor1Price == null && distributor2Price == null) {
-            throw new ServiceException("至少需要填写一个价格");
-        }
-        if (isNegative(retailPrice) || isNegative(distributor1Price) || isNegative(distributor2Price)) {
-            throw new ServiceException("价格必须为不小于 0 的数字");
-        }
-    }
-
-    private boolean isNegative(final BigDecimal price) {
-        return price != null && price.compareTo(BigDecimal.ZERO) < 0;
-    }
 }

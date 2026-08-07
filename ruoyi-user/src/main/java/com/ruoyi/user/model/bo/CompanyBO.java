@@ -30,6 +30,11 @@ public class CompanyBO {
     /** 是否停款，默认0停款，1不停。 */
     private Integer stopPurchase;
 
+    /**
+     * 报价客户层级(0-零售，1-批发1，2-批发2)
+     */
+    private Integer quoteLevel;
+
     /** 对外的编码 */
     private String outNo;
 

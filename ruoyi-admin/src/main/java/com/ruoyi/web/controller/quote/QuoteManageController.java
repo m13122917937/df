@@ -7,7 +7,9 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.quote.model.bo.QuoteBrandBO;
 import com.ruoyi.quote.model.bo.QuoteCategoryBO;
+import com.ruoyi.quote.model.bo.QuotePriceHistoryBO;
 import com.ruoyi.quote.model.bo.QuoteProductBO;
+import com.ruoyi.user.model.bo.CompanyBO;
 import com.ruoyi.web.convert.quote.QuoteWebConvert;
 import com.ruoyi.web.vo.quote.QuoteBrandQueryRequest;
 import com.ruoyi.web.vo.quote.QuoteBrandSaveRequest;
@@ -15,9 +17,13 @@ import com.ruoyi.web.vo.quote.QuoteBrandVO;
 import com.ruoyi.web.vo.quote.QuoteCategoryQueryRequest;
 import com.ruoyi.web.vo.quote.QuoteCategorySaveRequest;
 import com.ruoyi.web.vo.quote.QuoteCategoryVO;
+import com.ruoyi.web.vo.quote.QuoteCustomerLevelSaveRequest;
+import com.ruoyi.web.vo.quote.QuoteCustomerLevelVO;
+import com.ruoyi.web.vo.quote.QuotePriceHistoryVO;
 import com.ruoyi.web.vo.quote.QuoteProductQueryRequest;
 import com.ruoyi.web.vo.quote.QuoteProductSaveRequest;
 import com.ruoyi.web.vo.quote.QuoteProductVO;
+import com.ruoyi.web.vo.quote.QuoteQuoteSaveRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -73,15 +79,55 @@ public class QuoteManageController extends BaseController {
     }
 
     /**
-     * 仅更新报价商品各档位价格（报价每日维护）。
+     * 保存当天报价（幂等覆盖当天）。
      *
-     * @param request 保存请求（需含 id 与 prices）
+     * @param request 报价保存请求
      * @return 操作结果
      */
-    @PostMapping("/price/save")
+    @PostMapping("/quote/save")
     @PreAuthorize("@ss.hasPermi('quote:product:list')")
-    public AjaxResult priceSave(@RequestBody final QuoteProductSaveRequest request) {
-        quoteManageBizService.saveProductPrices(QuoteWebConvert.INSTANCE.toProductParam(request));
+    public AjaxResult quoteSave(@RequestBody final QuoteQuoteSaveRequest request) {
+        quoteManageBizService.saveQuote(QuoteWebConvert.INSTANCE.toPriceHistoryParam(request));
+        return AjaxResult.success();
+    }
+
+    /**
+     * 查询商品历史报价。
+     *
+     * @param id 商品ID
+     * @return 历史报价集合
+     */
+    @GetMapping("/quote/history/{id}")
+    @PreAuthorize("@ss.hasPermi('quote:product:list')")
+    public AjaxResult quoteHistory(@PathVariable("id") final Long id) {
+        List<QuotePriceHistoryBO> histories = quoteManageBizService.listQuoteHistory(id);
+        List<QuotePriceHistoryVO> rows = QuoteWebConvert.INSTANCE.toPriceHistoryVOList(histories);
+        return AjaxResult.success(rows);
+    }
+
+    /**
+     * 分页查询客户层级。
+     *
+     * @return 客户层级分页数据
+     */
+    @PostMapping("/customer-level/page")
+    @PreAuthorize("@ss.hasPermi('quote:customerLevel:list')")
+    public TableDataInfo customerLevelPage() {
+        PageBO<CompanyBO> page = quoteManageBizService.pageCompanies(startParamV2());
+        List<QuoteCustomerLevelVO> rows = QuoteWebConvert.INSTANCE.toCustomerLevelVOList(page.getData());
+        return getDataTable(rows, page.getTotal());
+    }
+
+    /**
+     * 保存客户层级。
+     *
+     * @param request 保存请求
+     * @return 操作结果
+     */
+    @PostMapping("/customer-level/save")
+    @PreAuthorize("@ss.hasPermi('quote:customerLevel:list')")
+    public AjaxResult customerLevelSave(@RequestBody final QuoteCustomerLevelSaveRequest request) {
+        quoteManageBizService.saveCustomerLevel(request.getCompanyId(), request.getLevel());
         return AjaxResult.success();
     }
 

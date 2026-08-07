@@ -2,9 +2,11 @@ package com.ruoyi.web.convert.quote;
 
 import com.ruoyi.quote.model.bo.QuoteBrandBO;
 import com.ruoyi.quote.model.bo.QuoteCategoryBO;
+import com.ruoyi.quote.model.bo.QuotePriceHistoryBO;
 import com.ruoyi.quote.model.bo.QuoteProductBO;
 import com.ruoyi.quote.model.param.QuoteBrandParam;
 import com.ruoyi.quote.model.param.QuoteCategoryParam;
+import com.ruoyi.quote.model.param.QuotePriceHistoryParam;
 import com.ruoyi.quote.model.param.QuoteProductParam;
 import com.ruoyi.quote.model.query.QuoteBrandQuery;
 import com.ruoyi.quote.model.query.QuoteCategoryQuery;
@@ -15,10 +17,15 @@ import com.ruoyi.web.vo.quote.QuoteBrandVO;
 import com.ruoyi.web.vo.quote.QuoteCategoryQueryRequest;
 import com.ruoyi.web.vo.quote.QuoteCategorySaveRequest;
 import com.ruoyi.web.vo.quote.QuoteCategoryVO;
+import com.ruoyi.web.vo.quote.QuoteCustomerLevelVO;
+import com.ruoyi.user.model.bo.CompanyBO;
+import com.ruoyi.web.vo.quote.QuotePriceHistoryVO;
 import com.ruoyi.web.vo.quote.QuoteProductQueryRequest;
 import com.ruoyi.web.vo.quote.QuoteProductSaveRequest;
 import com.ruoyi.web.vo.quote.QuoteProductVO;
+import com.ruoyi.web.vo.quote.QuoteQuoteSaveRequest;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -102,4 +109,30 @@ public interface QuoteWebConvert {
      * @return Web 响应集合
      */
     List<QuoteProductVO> toProductVOList(List<QuoteProductBO> source);
+
+    /**
+     * 转换报价流水保存请求。
+     *
+     * @param source Web 保存请求
+     * @return 领域参数
+     */
+    QuotePriceHistoryParam toPriceHistoryParam(QuoteQuoteSaveRequest source);
+
+    /**
+     * 批量转换报价流水响应。
+     *
+     * @param source 业务对象集合
+     * @return Web 响应集合
+     */
+    List<QuotePriceHistoryVO> toPriceHistoryVOList(List<QuotePriceHistoryBO> source);
+
+    /**
+     * 批量转换客户层级响应。
+     *
+     * @param source 公司业务对象集合
+     * @return Web 响应集合
+     */
+    @Mapping(target = "companyId", source = "id")
+    @Mapping(target = "level", source = "quoteLevel", defaultValue = "0")
+    List<QuoteCustomerLevelVO> toCustomerLevelVOList(List<CompanyBO> source);
 }

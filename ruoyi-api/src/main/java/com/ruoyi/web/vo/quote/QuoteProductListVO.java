@@ -16,16 +16,6 @@ public class QuoteProductListVO {
     private Long id;
 
     /**
-     * 品牌
-     */
-    private String brand;
-
-    /**
-     * 品类
-     */
-    private String category;
-
-    /**
      * 商品名
      */
     private String productName;
@@ -36,17 +26,7 @@ public class QuoteProductListVO {
     private String specName;
 
     /**
-     * 零售价
+     * 当前客户层级对应价格
      */
-    private BigDecimal retailPrice;
-
-    /**
-     * 分销1价
-     */
-    private BigDecimal distributor1Price;
-
-    /**
-     * 分销2价
-     */
-    private BigDecimal distributor2Price;
+    private BigDecimal currentPrice;
 }

@@ -40,7 +40,15 @@ class QuoteLayerArchitectureTest {
      */
     @Test
     void bizMustOnlyInjectFacadeLayer() {
-        assertInjectedFieldsInPackage(BIZ_SERVICES, "com.ruoyi.quote.facade");
+        for (Class<?> type : BIZ_SERVICES) {
+            for (Field field : type.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+                assertTrue(field.getType().getName().contains(".facade."),
+                        type.getName() + " 跨层依赖了 " + field.getType().getName());
+            }
+        }
     }
 
     /**

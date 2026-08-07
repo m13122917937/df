@@ -58,4 +58,20 @@ class QuoteMapperXmlTest {
             assertTrue(xml.contains("namespace=\"com.ruoyi.quote.mapper.QuoteCategoryMapper\""));
         }
     }
+
+    /**
+     * 报价流水 Mapper XML 必须存在且使用正确的 namespace。
+     *
+     * @throws IOException 读取资源失败
+     */
+    @Test
+    void quotePriceHistoryMapperXmlShouldUseInterfaceAsNamespace() throws IOException {
+        try (InputStream input = getClass().getClassLoader()
+                .getResourceAsStream("mapper/quote/QuotePriceHistoryMapper.xml")) {
+            assertNotNull(input);
+            String xml = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+            assertTrue(xml.contains("namespace=\"com.ruoyi.quote.mapper.QuotePriceHistoryMapper\""));
+        }
+    }
+
 }

@@ -3,6 +3,7 @@ package com.ruoyi.quote.architecture;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.quote.domain.QuoteBrand;
 import com.ruoyi.quote.domain.QuoteCategory;
+import com.ruoyi.quote.domain.QuotePriceHistory;
 import com.ruoyi.quote.domain.QuoteProduct;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +23,7 @@ class QuoteTableIsolationTest {
         assertQuoteTable(QuoteBrand.class);
         assertQuoteTable(QuoteCategory.class);
         assertQuoteTable(QuoteProduct.class);
+        assertQuoteTable(QuotePriceHistory.class);
     }
 
     private void assertQuoteTable(final Class<?> entityClass) {

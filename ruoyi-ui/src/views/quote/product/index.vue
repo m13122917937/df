@@ -116,16 +116,6 @@
         <el-form-item label="规格/型号">
           <el-input v-model="form.specName" placeholder="请输入规格/型号" maxlength="255" />
         </el-form-item>
-        <el-divider content-position="left">价格（可选，可在报价更新中维护）</el-divider>
-        <el-form-item label="零售价">
-          <el-input-number v-model="form.retailPrice" :min="0" :precision="2" :step="1" controls-position="right" style="width: 200px" />
-        </el-form-item>
-        <el-form-item label="分销1价">
-          <el-input-number v-model="form.distributor1Price" :min="0" :precision="2" :step="1" controls-position="right" style="width: 200px" />
-        </el-form-item>
-        <el-form-item label="分销2价">
-          <el-input-number v-model="form.distributor2Price" :min="0" :precision="2" :step="1" controls-position="right" style="width: 200px" />
-        </el-form-item>
         <el-form-item label="排序">
           <el-input-number v-model="form.sortOrder" :min="0" :max="9999" controls-position="right" />
         </el-form-item>
@@ -176,9 +166,6 @@ export default {
         category: '',
         productName: '',
         specName: '',
-        retailPrice: undefined,
-        distributor1Price: undefined,
-        distributor2Price: undefined,
         sortOrder: 0
       },
       rules: {
@@ -254,9 +241,6 @@ export default {
       this.form.categoryId = row.categoryId
       this.form.productName = row.productName
       this.form.specName = row.specName
-      this.form.retailPrice = row.retailPrice
-      this.form.distributor1Price = row.distributor1Price
-      this.form.distributor2Price = row.distributor2Price
       this.form.sortOrder = row.sortOrder
       this.dialogVisible = true
     },
@@ -283,9 +267,6 @@ export default {
           categoryId: this.form.categoryId,
           productName: this.form.productName,
           specName: this.form.specName,
-          retailPrice: this.form.retailPrice,
-          distributor1Price: this.form.distributor1Price,
-          distributor2Price: this.form.distributor2Price,
           sortOrder: this.form.sortOrder
         }
         saveQuoteProduct(payload).then(() => {

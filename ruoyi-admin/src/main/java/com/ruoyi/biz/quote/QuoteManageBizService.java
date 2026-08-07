@@ -7,16 +7,24 @@ import com.ruoyi.common.model.page.PageBO;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.quote.facade.IQuoteBrandFacade;
 import com.ruoyi.quote.facade.IQuoteCategoryFacade;
+import com.ruoyi.quote.facade.IQuotePriceHistoryFacade;
 import com.ruoyi.quote.facade.IQuoteProductFacade;
 import com.ruoyi.quote.model.bo.QuoteBrandBO;
 import com.ruoyi.quote.model.bo.QuoteCategoryBO;
+import com.ruoyi.quote.model.bo.QuotePriceHistoryBO;
 import com.ruoyi.quote.model.bo.QuoteProductBO;
 import com.ruoyi.quote.model.param.QuoteBrandParam;
 import com.ruoyi.quote.model.param.QuoteCategoryParam;
+import com.ruoyi.quote.model.param.QuotePriceHistoryParam;
 import com.ruoyi.quote.model.param.QuoteProductParam;
 import com.ruoyi.quote.model.query.QuoteBrandQuery;
 import com.ruoyi.quote.model.query.QuoteCategoryQuery;
+import com.ruoyi.quote.model.query.QuotePriceHistoryQuery;
 import com.ruoyi.quote.model.query.QuoteProductQuery;
+import com.ruoyi.user.facade.ICompanyFacade;
+import com.ruoyi.user.model.bo.CompanyBO;
+import com.ruoyi.user.model.param.CompanyParam;
+import com.ruoyi.user.model.query.CompanyQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,20 +46,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QuoteManageBizService {
 
-    private static final int BRAND_COLUMN = 0;
-    private static final int CATEGORY_COLUMN = 1;
-    private static final int PRODUCT_NAME_COLUMN = 2;
-    private static final int SPEC_NAME_COLUMN = 3;
-    private static final int RETAIL_PRICE_COLUMN = 4;
-    private static final int DISTRIBUTOR1_PRICE_COLUMN = 5;
-    private static final int DISTRIBUTOR2_PRICE_COLUMN = 6;
-
     private final IQuoteProductFacade quoteProductFacade;
     private final IQuoteBrandFacade quoteBrandFacade;
     private final IQuoteCategoryFacade quoteCategoryFacade;
+    private final IQuotePriceHistoryFacade quotePriceHistoryFacade;
+    private final ICompanyFacade companyFacade;
 
     /**
-     * 分页查询报价商品。
+     * 分页查询报价商品（含最新报价）。
      *
      * @param query     查询条件
      * @param pageParam 分页参数
@@ -63,21 +64,12 @@ public class QuoteManageBizService {
     }
 
     /**
-     * 保存报价商品基础信息与三档价格。
+     * 保存报价商品基础信息（不含价格）。
      *
      * @param param 商品参数
      */
     public void saveProduct(final QuoteProductParam param) {
         quoteProductFacade.save(param);
-    }
-
-    /**
-     * 仅更新报价商品三档价格。
-     *
-     * @param param 商品参数（需含 id 与至少一个价格）
-     */
-    public void saveProductPrices(final QuoteProductParam param) {
-        quoteProductFacade.savePrices(param);
     }
 
     /**
@@ -87,6 +79,53 @@ public class QuoteManageBizService {
      */
     public void deleteProduct(final Long id) {
         quoteProductFacade.delete(id);
+    }
+
+    /**
+     * 保存当天报价（幂等覆盖当天）。
+     *
+     * @param param 报价流水参数
+     */
+    public void saveQuote(final QuotePriceHistoryParam param) {
+        quotePriceHistoryFacade.saveQuote(param);
+    }
+
+    /**
+     * 查询商品历史报价（按日期倒序）。
+     *
+     * @param productId 商品ID
+     * @return 历史报价集合
+     */
+    public List<QuotePriceHistoryBO> listQuoteHistory(final Long productId) {
+        return quotePriceHistoryFacade.list(
+                new QuotePriceHistoryQuery().setProductId(productId));
+    }
+
+    /**
+     * 分页查询客户（公司）列表（含报价层级，默认零售）。
+     *
+     * @param pageParam 分页参数
+     * @return 客户分页数据
+     */
+    public PageBO<CompanyBO> pageCompanies(final PageParamV2 pageParam) {
+        return companyFacade.listPage(new CompanyQuery(), pageParam);
+    }
+
+    /**
+     * 保存客户报价层级。
+     *
+     * @param companyId 客户（公司）ID
+     * @param level     客户层级(0-零售，1-批发1，2-批发2)
+     */
+    public void saveCustomerLevel(final Long companyId, final Integer level) {
+        if (companyId == null) {
+            throw new ServiceException("客户不能为空");
+        }
+        if (level == null || level < 0 || level > 2) {
+            throw new ServiceException("客户层级必须为 0(零售)、1(批发1)、2(批发2)");
+        }
+        companyFacade.update(new CompanyParam().setId(companyId).setQuoteLevel(level),
+                new CompanyQuery().setId(companyId));
     }
 
     /**
@@ -168,7 +207,7 @@ public class QuoteManageBizService {
     }
 
     /**
-     * 导出报价商品 Excel（品牌、品类、商品名、规格、零售价、分销1价、分销2价）。
+     * 导出报价商品 Excel（品牌、品类、商品名、规格、最新报价三档价格）。
      *
      * @param query    查询条件
      * @param response HTTP 响应
@@ -181,9 +220,12 @@ public class QuoteManageBizService {
                 List.of("零售价"), List.of("分销1价"), List.of("分销2价"));
         List<List<Object>> rows = new ArrayList<>();
         for (QuoteProductBO product : products) {
+            QuotePriceHistoryBO latest = product.getLatestQuote();
             rows.add(List.of(product.getBrand(), product.getCategory(), product.getProductName(),
-                    product.getSpecName(), product.getRetailPrice(),
-                    product.getDistributor1Price(), product.getDistributor2Price()));
+                    product.getSpecName(),
+                    latest == null ? null : latest.getRetailPrice(),
+                    latest == null ? null : latest.getDistributor1Price(),
+                    latest == null ? null : latest.getDistributor2Price()));
         }
         EasyExcel.write(response.getOutputStream()).head(head).sheet("报价商品").doWrite(rows);
     }
@@ -212,6 +254,9 @@ public class QuoteManageBizService {
         for (QuoteProductImportListener.ImportRow row : listener.getRows()) {
             try {
                 quoteProductFacade.save(row.getParam());
+                if (row.getPriceParam() != null) {
+                    quotePriceHistoryFacade.saveQuote(row.getPriceParam());
+                }
                 success++;
             } catch (Exception e) {
                 log.warn("导入报价商品失败，行号 {}：{}", row.getRowIndex(), e.getMessage());
@@ -233,81 +278,5 @@ public class QuoteManageBizService {
     private Map<String, Long> loadCategoryMap() {
         return listCategories().stream()
                 .collect(Collectors.toMap(QuoteCategoryBO::getCategoryName, QuoteCategoryBO::getId));
-    }
-
-    /**
-     * 价格解析工具（导入校验用）。
-     *
-     * @param text 价格文本
-     * @return 价格
-     */
-    public static BigDecimal parsePrice(final String text) {
-        if (text == null || text.isBlank()) {
-            return null;
-        }
-        return new BigDecimal(text.trim());
-    }
-
-    /**
-     * Excel 列索引常量访问。
-     *
-     * @return 品牌列索引
-     */
-    public static int getBrandColumn() {
-        return BRAND_COLUMN;
-    }
-
-    /**
-     * 品类列索引。
-     *
-     * @return 品类列索引
-     */
-    public static int getCategoryColumn() {
-        return CATEGORY_COLUMN;
-    }
-
-    /**
-     * 商品名列索引。
-     *
-     * @return 商品名列索引
-     */
-    public static int getProductNameColumn() {
-        return PRODUCT_NAME_COLUMN;
-    }
-
-    /**
-     * 规格列索引。
-     *
-     * @return 规格列索引
-     */
-    public static int getSpecNameColumn() {
-        return SPEC_NAME_COLUMN;
-    }
-
-    /**
-     * 零售价列索引。
-     *
-     * @return 零售价列索引
-     */
-    public static int getRetailPriceColumn() {
-        return RETAIL_PRICE_COLUMN;
-    }
-
-    /**
-     * 分销1价列索引。
-     *
-     * @return 分销1价列索引
-     */
-    public static int getDistributor1PriceColumn() {
-        return DISTRIBUTOR1_PRICE_COLUMN;
-    }
-
-    /**
-     * 分销2价列索引。
-     *
-     * @return 分销2价列索引
-     */
-    public static int getDistributor2PriceColumn() {
-        return DISTRIBUTOR2_PRICE_COLUMN;
     }
 }
