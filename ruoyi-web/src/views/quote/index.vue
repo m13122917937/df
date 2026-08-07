@@ -61,7 +61,7 @@
 
     <!-- 历史报价弹窗 -->
     <el-dialog
-      :title="historyProduct ? `${historyProduct.productName} - 历史报价` : '历史报价'"
+      :title="historyProduct ? `${historyProduct.productName}（${historyProduct.specName || '-'}）- 历史报价` : '历史报价'"
       :visible.sync="historyDialogVisible"
       width="680px"
       append-to-body
