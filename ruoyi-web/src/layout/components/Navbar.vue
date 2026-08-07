@@ -24,7 +24,7 @@
         @click="handleMenuSelect('/df')"
       >
         <i class="el-icon-house" />
-        <span class="nav-text">交易市场</span>
+        <span class="nav-text">落地零售</span>
         <div class="nav-underline" />
       </div>
       <div

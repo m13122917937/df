@@ -35,7 +35,7 @@
             <div class="nav-icon">
               <i class="el-icon-s-shop" />
             </div>
-            <h4>交易市场</h4>
+            <h4>落地零售</h4>
             <p>O2O和群接龙交易</p>
           </div>
         </el-col>

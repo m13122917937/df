@@ -235,8 +235,13 @@ export default {
       this.loading = true
       try {
         const response = await getOrderAllList(searchParams, { pageNum: this.pagination.current, pageSize: this.pagination.size })
-        if (response && response.rows) { this.orderList = response.rows || []; this.pagination.total = response.total || 0 }
-        else { this.orderList = []; this.pagination.total = 0 }
+        if (response && response.rows) {
+          this.orderList = response.rows || []
+          this.pagination.total = response.total || 0
+        } else {
+          this.orderList = []
+          this.pagination.total = 0
+        }
       } catch (error) {
         console.error('获取订单列表失败:', error); this.$message.error('获取订单列表失败，请稍后重试')
         this.orderList = []; this.pagination.total = 0

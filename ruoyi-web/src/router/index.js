@@ -47,7 +47,7 @@ export const constantRoutes = [
     name: 'TradingMarket',
     meta: {
       owner: [0, 1], // 0: 管理员, 1: 非管理员都可以访问
-      title: '交易市场',
+      title: '落地零售',
       icon: 'shopping'
     },
     children: [
@@ -65,7 +65,7 @@ export const constantRoutes = [
         component: () => import('@/views/trading-market/o2o'),
         name: 'O2O',
         meta: {
-          title: '交易市场',
+          title: '落地零售',
           owner: [0, 1] // 0: 管理员, 1: 非管理员都可以访问
         }
       }

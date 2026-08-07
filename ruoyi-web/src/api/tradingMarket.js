@@ -61,7 +61,7 @@ export function apiGetSkuOrderInfo(data) {
     method: 'get'
   })
 }
-// 交易市场抢单
+// 落地零售抢单
 export function apiTradeGrabOrder(data) {
   return request({
     url: `/index/trade`,

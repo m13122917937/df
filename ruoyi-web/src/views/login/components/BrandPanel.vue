@@ -23,12 +23,17 @@
     </svg>
     <div class="bg-glow" />
     <div class="bg-nodes">
-      <span v-for="i in 8" :key="i" class="node" :style="{
-        left: `${10 + (i * 17) % 75}%`,
-        top: `${8 + (i * 23) % 80}%`,
-        animationDelay: `${i * 0.7}s`,
-        animationDuration: `${5 + (i % 3) * 2}s`
-      }" />
+      <span
+        v-for="i in 8"
+        :key="i"
+        class="node"
+        :style="{
+          left: `${10 + (i * 17) % 75}%`,
+          top: `${8 + (i * 23) % 80}%`,
+          animationDelay: `${i * 0.7}s`,
+          animationDuration: `${5 + (i % 3) * 2}s`
+        }"
+      />
     </div>
 
     <!-- Content -->
