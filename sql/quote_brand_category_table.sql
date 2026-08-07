@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS `quote_brand` (
     `brand_name` varchar(128) NOT NULL DEFAULT '' COMMENT '品牌名称',
     `image_url` varchar(512) NOT NULL DEFAULT '' COMMENT '品牌图片',
     `sort_order` int NOT NULL DEFAULT 0 COMMENT '排序',
+    `update_by` varchar(64) NOT NULL DEFAULT '' COMMENT '更新人',
     `deleted` bigint NOT NULL DEFAULT 0 COMMENT '逻辑删除标记(0-正常，1-删除)',
     `create_time` datetime DEFAULT NULL COMMENT '创建时间',
     `update_time` datetime DEFAULT NULL COMMENT '更新时间',
@@ -18,8 +19,8 @@ CREATE TABLE IF NOT EXISTS `quote_brand` (
 CREATE TABLE IF NOT EXISTS `quote_category` (
     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
     `category_name` varchar(128) NOT NULL DEFAULT '' COMMENT '品类名称',
-    `image_url` varchar(512) NOT NULL DEFAULT '' COMMENT '品类图片',
     `sort_order` int NOT NULL DEFAULT 0 COMMENT '排序',
+    `update_by` varchar(64) NOT NULL DEFAULT '' COMMENT '更新人',
     `deleted` bigint NOT NULL DEFAULT 0 COMMENT '逻辑删除标记(0-正常，1-删除)',
     `create_time` datetime DEFAULT NULL COMMENT '创建时间',
     `update_time` datetime DEFAULT NULL COMMENT '更新时间',

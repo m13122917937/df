@@ -2,6 +2,8 @@ package com.ruoyi.web.vo.quote;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 报价品牌响应。
  */
@@ -27,4 +29,14 @@ public class QuoteBrandVO {
      * 排序
      */
     private Integer sortOrder;
+
+    /**
+     * 更新人
+     */
+    private String updateBy;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 }

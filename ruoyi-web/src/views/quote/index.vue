@@ -20,7 +20,6 @@
             :class="['category-item', { 'is-active': selectedCategoryId === category.id }]"
             @click="selectCategory(category)"
           >
-            <img v-if="category.imageUrl" :src="category.imageUrl" class="category-image" alt="">
             <span class="category-name">{{ category.categoryName }}</span>
           </div>
           <div v-if="categories.length === 0" class="category-empty">暂无品类</div>
@@ -274,14 +273,6 @@ export default {
         color: var(--color-primary, #2563ff);
         font-weight: 600;
       }
-    }
-
-    .category-image {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-      flex-shrink: 0;
     }
 
     .category-empty {

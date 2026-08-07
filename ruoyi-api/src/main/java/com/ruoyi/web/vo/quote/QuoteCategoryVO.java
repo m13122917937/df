@@ -18,8 +18,4 @@ public class QuoteCategoryVO {
      */
     private String categoryName;
 
-    /**
-     * 品类图片
-     */
-    private String imageUrl;
 }

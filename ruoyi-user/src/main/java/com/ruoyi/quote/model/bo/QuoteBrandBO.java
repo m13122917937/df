@@ -2,6 +2,8 @@ package com.ruoyi.quote.model.bo;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 报价品牌业务对象。
  */
@@ -27,4 +29,14 @@ public class QuoteBrandBO {
      * 排序
      */
     private Integer sortOrder;
+
+    /**
+     * 更新人
+     */
+    private String updateBy;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 }

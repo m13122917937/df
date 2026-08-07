@@ -21,6 +21,8 @@
         </el-table-column>
         <el-table-column prop="brandName" label="品牌名称" min-width="200" show-overflow-tooltip />
         <el-table-column prop="sortOrder" label="排序" width="120" align="center" />
+        <el-table-column prop="updateBy" label="更新人" min-width="120" align="center" />
+        <el-table-column prop="updateTime" label="更新时间" min-width="180" align="center" />
         <el-table-column label="操作" width="160" align="center">
           <template slot-scope="scope">
             <el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.row)">编辑</el-button>

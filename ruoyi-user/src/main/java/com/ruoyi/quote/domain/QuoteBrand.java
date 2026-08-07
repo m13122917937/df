@@ -37,6 +37,11 @@ public class QuoteBrand {
     private Integer sortOrder;
 
     /**
+     * 更新人
+     */
+    private String updateBy;
+
+    /**
      * 逻辑删除标记(0-正常，1-删除)
      */
     @TableLogic

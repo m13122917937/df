@@ -29,4 +29,9 @@ public class QuoteBrandParam {
      * 排序
      */
     private Integer sortOrder;
+
+    /**
+     * 更新人
+     */
+    private String updateBy;
 }

@@ -7,20 +7,9 @@
       </div>
 
       <el-table v-loading="loading" :data="categoryList" border stripe size="medium">
-        <el-table-column label="图片" width="100" align="center">
-          <template slot-scope="scope">
-            <el-image
-              v-if="scope.row.imageUrl"
-              :src="scope.row.imageUrl"
-              :preview-src-list="[scope.row.imageUrl]"
-              fit="cover"
-              style="width: 48px; height: 48px; border-radius: 6px"
-            />
-            <span v-else class="quote-category-empty-img">无图</span>
-          </template>
-        </el-table-column>
         <el-table-column prop="categoryName" label="品类名称" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="sortOrder" label="排序" width="120" align="center" />
+        <el-table-column prop="updateBy" label="更新人" min-width="120" align="center" />
+        <el-table-column prop="updateTime" label="更新时间" min-width="180" align="center" />
         <el-table-column label="操作" width="160" align="center">
           <template slot-scope="scope">
             <el-button type="text" icon="el-icon-edit" @click="handleEdit(scope.row)">编辑</el-button>
@@ -42,9 +31,6 @@
       <el-form ref="categoryForm" :model="form" :rules="rules" label-width="90px">
         <el-form-item label="品类名称" prop="categoryName">
           <el-input v-model="form.categoryName" placeholder="请输入品类名称" maxlength="128" />
-        </el-form-item>
-        <el-form-item label="品类图片">
-          <image-upload v-model="form.imageUrl" :limit="1" action="/common/v2/upload" />
         </el-form-item>
         <el-form-item label="排序" prop="sortOrder">
           <el-input-number v-model="form.sortOrder" :min="0" :max="9999" controls-position="right" />
@@ -76,7 +62,6 @@ export default {
       form: {
         id: undefined,
         categoryName: '',
-        imageUrl: '',
         sortOrder: 0
       },
       rules: {
@@ -101,7 +86,7 @@ export default {
       })
     },
     handleAdd() {
-      this.form = { id: undefined, categoryName: '', imageUrl: '', sortOrder: 0 }
+      this.form = { id: undefined, categoryName: '', sortOrder: 0 }
       this.dialogVisible = true
       this.$nextTick(() => {
         this.$refs.categoryForm && this.$refs.categoryForm.clearValidate()
@@ -111,7 +96,6 @@ export default {
       this.form = {
         id: row.id,
         categoryName: row.categoryName,
-        imageUrl: row.imageUrl,
         sortOrder: row.sortOrder
       }
       this.dialogVisible = true
@@ -151,11 +135,6 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-
-  .quote-category-empty-img {
-    color: #999999;
-    font-size: 12px;
   }
 
   .quote-danger-text {

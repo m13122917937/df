@@ -19,11 +19,6 @@ public class QuoteCategorySaveRequest {
     private String categoryName;
 
     /**
-     * 品类图片
-     */
-    private String imageUrl;
-
-    /**
      * 排序
      */
     private Integer sortOrder;

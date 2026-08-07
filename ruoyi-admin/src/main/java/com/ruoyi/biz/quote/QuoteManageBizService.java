@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.model.PageParamV2;
 import com.ruoyi.common.model.page.PageBO;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.quote.facade.IQuoteBrandFacade;
 import com.ruoyi.quote.facade.IQuoteCategoryFacade;
 import com.ruoyi.quote.facade.IQuoteProductFacade;
@@ -114,6 +115,7 @@ public class QuoteManageBizService {
      * @param param 品牌参数
      */
     public void saveBrand(final QuoteBrandParam param) {
+        param.setUpdateBy(SecurityUtils.getUsername());
         quoteBrandFacade.save(param);
     }
 
@@ -152,6 +154,7 @@ public class QuoteManageBizService {
      * @param param 品类参数
      */
     public void saveCategory(final QuoteCategoryParam param) {
+        param.setUpdateBy(SecurityUtils.getUsername());
         quoteCategoryFacade.save(param);
     }
 

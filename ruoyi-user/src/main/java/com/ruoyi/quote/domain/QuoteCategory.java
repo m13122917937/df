@@ -27,9 +27,9 @@ public class QuoteCategory {
     private String categoryName;
 
     /**
-     * 品类图片
+     * 更新人
      */
-    private String imageUrl;
+    private String updateBy;
 
     /**
      * 排序
