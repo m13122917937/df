@@ -50,7 +50,7 @@ public class CommonV2Controller {
         String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         String url = cloudStorageService.uploadSuffix(file.getBytes(), suffix);
 
-        return AjaxResult.success(url );
+        return AjaxResult.success(url).put("fileName", url).put("url", url);
     }
 
 

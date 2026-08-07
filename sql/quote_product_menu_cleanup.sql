@@ -56,3 +56,30 @@ OR `parent_id` IN (
           )
     ) AS dup_tmp
 );
+
+-- ============ 4. 清理已废弃的“价格档位”菜单（旧版残留） ============
+-- 删除“报价单”顶级菜单下名为“价格档位”的子菜单；若不存在则无影响。
+DELETE FROM `sys_menu`
+WHERE `menu_name` = '价格档位'
+  AND `parent_id` IN (
+      SELECT `menu_id`
+      FROM (
+          SELECT `menu_id`
+          FROM `sys_menu`
+          WHERE `parent_id` = 0
+            AND `menu_name` = '报价单'
+      ) AS quote_tmp
+  );
+
+-- 更早版本的旧菜单名（如“商品库管理”“价格档位管理”）若存在也一并清理
+DELETE FROM `sys_menu`
+WHERE `menu_name` IN ('商品库管理', '价格档位管理')
+  AND `parent_id` IN (
+      SELECT `menu_id`
+      FROM (
+          SELECT `menu_id`
+          FROM `sys_menu`
+          WHERE `parent_id` = 0
+            AND `menu_name` = '报价单'
+      ) AS quote_tmp
+  );
