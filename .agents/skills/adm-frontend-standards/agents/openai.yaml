@@ -1,0 +1,4 @@
+interface:
+  display_name: "ADM 前端代码规范"
+  short_description: "规范 ADM 双 Vue 前端的接口、组件、样式、状态与构建质量"
+  default_prompt: "使用 $adm-frontend-standards 开发或审查 ADM 前端代码。"

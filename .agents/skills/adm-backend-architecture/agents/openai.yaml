@@ -1,0 +1,4 @@
+interface:
+  display_name: "ADM 后端架构与规范"
+  short_description: "规范 ADM 后端分层架构、编码约束、事务边界与验证流程"
+  default_prompt: "使用 $adm-backend-architecture 设计或审查 ADM 后端代码。"
