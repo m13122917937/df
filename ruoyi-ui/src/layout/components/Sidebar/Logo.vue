@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-logo" :class="{ collapse: collapse }">
     <div class="logo-nav-area">
-      <span v-if="!collapse" class="logo-title">无界供应链</span>
+      <span class="logo-title">{{ collapse ? '无界' : '无界供应链' }}</span>
     </div>
   </div>
 </template>
@@ -30,7 +30,7 @@ export default {
 }
 
 .logo-nav-area {
-  width: var(--module-nav-width, 80px);
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,16 +39,17 @@ export default {
 }
 
 .logo-title {
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--adm-text-primary);
   white-space: nowrap;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.3em;
 }
 
 .sidebar-logo.collapse {
   .logo-title {
-    display: none;
+    font-size: 16px;
+    letter-spacing: 0.05em;
   }
 }
 </style>
