@@ -52,6 +52,11 @@ public class QuoteProduct {
     private String specName;
 
     /**
+     * 商品编码
+     */
+    private String productCode;
+
+    /**
      * 排序
      */
     private Integer sortOrder;

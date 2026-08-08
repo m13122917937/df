@@ -46,6 +46,11 @@ public class QuoteProductVO {
     private String specName;
 
     /**
+     * 商品编码
+     */
+    private String productCode;
+
+    /**
      * 零售价
      */
     private BigDecimal retailPrice;

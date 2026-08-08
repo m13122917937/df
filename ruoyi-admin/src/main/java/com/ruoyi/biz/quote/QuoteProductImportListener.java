@@ -19,9 +19,10 @@ public class QuoteProductImportListener extends AnalysisEventListener<Map<Intege
     private static final int CATEGORY_COLUMN = 1;
     private static final int PRODUCT_NAME_COLUMN = 2;
     private static final int SPEC_NAME_COLUMN = 3;
-    private static final int RETAIL_PRICE_COLUMN = 4;
-    private static final int DISTRIBUTOR1_PRICE_COLUMN = 5;
-    private static final int DISTRIBUTOR2_PRICE_COLUMN = 6;
+    private static final int PRODUCT_CODE_COLUMN = 4;
+    private static final int RETAIL_PRICE_COLUMN = 5;
+    private static final int DISTRIBUTOR1_PRICE_COLUMN = 6;
+    private static final int DISTRIBUTOR2_PRICE_COLUMN = 7;
 
     private final Map<String, Long> brandMap;
     private final Map<String, Long> categoryMap;
@@ -113,7 +114,8 @@ public class QuoteProductImportListener extends AnalysisEventListener<Map<Intege
                 .setBrand(brandName)
                 .setCategory(categoryName)
                 .setProductName(cell(data, PRODUCT_NAME_COLUMN))
-                .setSpecName(cell(data, SPEC_NAME_COLUMN));
+                .setSpecName(cell(data, SPEC_NAME_COLUMN))
+                .setProductCode(cell(data, PRODUCT_CODE_COLUMN));
         BigDecimal retail = parsePriceOrNull(data, RETAIL_PRICE_COLUMN);
         BigDecimal distributor1 = parsePriceOrNull(data, DISTRIBUTOR1_PRICE_COLUMN);
         BigDecimal distributor2 = parsePriceOrNull(data, DISTRIBUTOR2_PRICE_COLUMN);

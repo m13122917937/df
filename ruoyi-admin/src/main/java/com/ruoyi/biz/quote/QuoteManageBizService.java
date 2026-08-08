@@ -225,13 +225,13 @@ public class QuoteManageBizService {
             throws IOException {
         List<QuoteProductBO> products = quoteProductFacade.list(query);
         List<List<String>> head = List.of(
-                List.of("品牌"), List.of("品类"), List.of("商品名"), List.of("规格/型号"),
+                List.of("品牌"), List.of("品类"), List.of("商品名"), List.of("规格/型号"), List.of("商品编码"),
                 List.of("零售价"), List.of("分销1价"), List.of("分销2价"));
         List<List<Object>> rows = new ArrayList<>();
         for (QuoteProductBO product : products) {
             QuotePriceHistoryBO latest = product.getLatestQuote();
             rows.add(List.of(product.getBrand(), product.getCategory(), product.getProductName(),
-                    product.getSpecName(),
+                    product.getSpecName(), product.getProductCode(),
                     latest == null ? null : latest.getRetailPrice(),
                     latest == null ? null : latest.getDistributor1Price(),
                     latest == null ? null : latest.getDistributor2Price()));

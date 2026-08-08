@@ -64,6 +64,7 @@
         <el-table-column prop="category" label="品类" min-width="120" show-overflow-tooltip />
         <el-table-column prop="productName" label="商品名称" min-width="200" show-overflow-tooltip />
         <el-table-column prop="specName" label="规格/型号" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="productCode" label="商品编码" min-width="130" show-overflow-tooltip />
         <el-table-column prop="sortOrder" label="排序" width="80" align="center" />
         <el-table-column label="操作" width="160" align="center" fixed="right">
           <template slot-scope="scope">
@@ -116,6 +117,9 @@
         <el-form-item label="规格/型号">
           <el-input v-model="form.specName" placeholder="请输入规格/型号" maxlength="255" />
         </el-form-item>
+        <el-form-item label="商品编码">
+          <el-input v-model="form.productCode" placeholder="请输入商品编码" maxlength="128" />
+        </el-form-item>
         <el-form-item label="排序">
           <el-input-number v-model="form.sortOrder" :min="0" :max="9999" controls-position="right" />
         </el-form-item>
@@ -166,6 +170,7 @@ export default {
         category: '',
         productName: '',
         specName: '',
+        productCode: '',
         sortOrder: 0
       },
       rules: {
@@ -241,6 +246,7 @@ export default {
       this.form.categoryId = row.categoryId
       this.form.productName = row.productName
       this.form.specName = row.specName
+      this.form.productCode = row.productCode
       this.form.sortOrder = row.sortOrder
       this.dialogVisible = true
     },
@@ -253,6 +259,7 @@ export default {
         category: '',
         productName: '',
         specName: '',
+        productCode: '',
         sortOrder: 0
       }
     },
@@ -267,6 +274,7 @@ export default {
           categoryId: this.form.categoryId,
           productName: this.form.productName,
           specName: this.form.specName,
+          productCode: this.form.productCode,
           sortOrder: this.form.sortOrder
         }
         saveQuoteProduct(payload).then(() => {
