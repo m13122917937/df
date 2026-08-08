@@ -90,6 +90,15 @@
             </el-radio-group>
           </el-form-item>
         </el-col>
+        <el-col :span="12">
+          <el-form-item label="客户层级" prop="quoteLevel">
+            <el-select v-model="form.quoteLevel" style="width: 100%">
+              <el-option label="零售" :value="0" />
+              <el-option label="批发1" :value="1" />
+              <el-option label="批发2" :value="2" />
+            </el-select>
+          </el-form-item>
+        </el-col>
       </el-row>
 
       <el-row :gutter="20">
@@ -146,6 +155,7 @@ export default {
         stopPurchase: 1,
         accountingPeriod: null,
         grabStatus: 0,
+        quoteLevel: 0,
         contractAuthStatus: 0
       },
       rules: {
@@ -314,6 +324,7 @@ export default {
         stopPurchase: 1,
         accountingPeriod: null,
         grabStatus: 0,
+        quoteLevel: 0,
         contractAuthStatus: 0
       }
       // 清空城市列表通过store

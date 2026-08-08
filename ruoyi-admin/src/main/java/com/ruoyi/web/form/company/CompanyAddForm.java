@@ -42,6 +42,10 @@ public class CompanyAddForm {
      */
 
     private Integer grabStatus;
+    /**
+     * 报价客户层级(0-零售，1-批发1，2-批发2)
+     */
+    private Integer quoteLevel;
 
 
 

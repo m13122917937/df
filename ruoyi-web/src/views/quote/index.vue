@@ -1,6 +1,13 @@
 <template>
   <div class="quote-page">
     <div class="quote-content">
+      <!-- 顶部滚动提示条 -->
+      <div class="notice-bar">
+        <div class="notice-track">
+          <span class="notice-text">本司所有的机子都为原封未激活正品  省内机器禁止出省报量  本司所有的机子都为原封未激活正品  省内机器禁止出省报量</span>
+        </div>
+      </div>
+
       <!-- 头部筛选：品牌 + 搜索（与落地零售风格一致） -->
       <div class="content-filters">
         <div class="filter-group">
@@ -179,6 +186,35 @@ export default {
     gap: 16px;
   }
 
+  .notice-bar {
+    overflow: hidden;
+    background: #fff7e6;
+    border: 1px solid #ffe7ba;
+    border-radius: 6px;
+    padding: 9px 0;
+
+    .notice-track {
+      display: inline-block;
+      white-space: nowrap;
+      animation: notice-scroll 18s linear infinite;
+    }
+
+    .notice-text {
+      color: #ad6800;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  @keyframes notice-scroll {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
   .content-filters {
     background: linear-gradient(#ffffff, #ffffff) padding-box,
                 linear-gradient(135deg, #e9f3ff, #f3e9ff) border-box;
@@ -191,20 +227,22 @@ export default {
     z-index: 3;
     backdrop-filter: saturate(1.1);
 
-    .filter-group {
-      display: flex;
-      align-items: center;
-
-      .filter-label {
-        font-weight: 500;
-        color: #333;
-        min-width: 60px;
-      }
-
-      .filter-options {
+      .filter-group {
         display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
+        align-items: center;
+        gap: 8px;
+
+        .filter-label {
+          font-weight: 500;
+          color: #333;
+          min-width: 60px;
+          flex-shrink: 0;
+        }
+
+        .filter-options {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
 
         .filter-option {
           display: inline-flex;
