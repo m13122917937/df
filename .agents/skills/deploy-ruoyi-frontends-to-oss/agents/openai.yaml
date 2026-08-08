@@ -1,0 +1,4 @@
+interface:
+  display_name: "若依前端发布到 OSS"
+  short_description: "构建并安全发布若依双前端项目至阿里云 OSS"
+  default_prompt: "使用 $deploy-ruoyi-frontends-to-oss 构建并发布若依前端项目到 OSS。"
