@@ -49,6 +49,19 @@ public class MemberService  extends ServiceImpl<MemberMapper, Member> {
     }
 
     /**
+     * 创建不关联企业的轻量会员。
+     *
+     * @param member 会员信息
+     * @return 已创建会员
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Member createMember(final Member member) {
+        member.setCreateTime(DateUtil.date()).setDeleted(MemberEnum.UserDeleted.NORMAL.getValue());
+        save(member);
+        return member;
+    }
+
+    /**
      * 为已有会员绑定企业并更新昵称。
      *
      * @param memberId 会员主键

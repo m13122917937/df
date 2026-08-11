@@ -1,0 +1,3 @@
+.page { min-height: 100vh; padding: 24rpx; background: #f7f8fa; box-sizing: border-box; }
+.address { margin-bottom: 20rpx; padding: 24rpx; background: #fff; border-radius: 12rpx; }
+.line { display: flex; gap: 20rpx; align-items: center; font-weight: 600; }.default { color: #e64545; font-size: 24rpx; }.detail { margin-top: 14rpx; color: #666; line-height: 1.5; }.actions { display: flex; justify-content: flex-end; gap: 32rpx; margin-top: 18rpx; color: #576b95; }.empty { padding: 160rpx 0; text-align: center; color: #999; }

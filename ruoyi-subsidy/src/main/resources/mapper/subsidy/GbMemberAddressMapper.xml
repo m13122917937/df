@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.subsidy.mapper.GbMemberAddressMapper">
+    <select id="selectByMemberId" resultType="com.ruoyi.subsidy.domain.GbMemberAddress">
+        SELECT * FROM gb_member_address WHERE member_id = #{memberId} ORDER BY default_address DESC, update_time DESC
+    </select>
+    <select id="selectByIdAndMemberId" resultType="com.ruoyi.subsidy.domain.GbMemberAddress">
+        SELECT * FROM gb_member_address WHERE id = #{id} AND member_id = #{memberId} LIMIT 1
+    </select>
+    <update id="clearDefaultByMemberId">
+        UPDATE gb_member_address SET default_address = 0, update_time = NOW()
+        WHERE member_id = #{memberId} AND default_address = 1
+    </update>
+</mapper>

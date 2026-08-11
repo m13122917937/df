@@ -1,0 +1,7 @@
+<view wx:if="{{product}}" class="page">
+  <swiper class="main-image" indicator-dots><swiper-item wx:for="{{product.imageUrls.length ? product.imageUrls : [product.mainImageUrl]}}" wx:key="*this"><image src="{{item}}" mode="aspectFill" /></swiper-item></swiper>
+  <view class="content"><view class="title">{{product.productName}}</view><view class="subtitle">{{product.subtitle}}</view><view class="price">¥{{selectedSku.originalPrice}}</view>
+  <view class="label">选择规格</view><view class="sku-list"><button wx:for="{{product.skus}}" wx:key="id" class="sku" data-sku="{{item}}" bindtap="selectSku">{{item.specName}}</button></view>
+  <view class="notice">活动优惠以订单结算页及支付金额为准；不代表政府资格核销。</view></view>
+  <button class="buy" type="warn" bindtap="buyNow">立即购买</button>
+</view>

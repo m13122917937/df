@@ -1,0 +1,1 @@
+<view class="page"><view wx:for="{{categories}}" wx:key="id" class="category" data-id="{{item.id}}" bindtap="openCategory"><image src="{{item.iconUrl}}" mode="aspectFit" /><text>{{item.categoryName}}</text></view></view>

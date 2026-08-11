@@ -1,0 +1,1 @@
+.page{padding:24rpx;background:#f7f8fa;min-height:100vh}.order{background:#fff;border-radius:12rpx;padding:24rpx;margin-bottom:18rpx}.row{display:flex;justify-content:space-between;font-size:26rpx}.status{color:#e64545}.amount{font-size:34rpx;font-weight:600;margin:22rpx 0}.actions{text-align:right}.empty{text-align:center;color:#999;padding-top:180rpx}

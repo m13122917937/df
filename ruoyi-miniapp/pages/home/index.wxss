@@ -1,0 +1,8 @@
+.page { padding: 24rpx; background: #f7f8fa; min-height: 100vh; }
+.banners{height:280rpx;margin:-24rpx -24rpx 24rpx}.banners image{width:100%;height:280rpx}
+.search { background: #fff; border-radius: 36rpx; padding: 18rpx 28rpx; }
+.categories { white-space: nowrap; margin: 24rpx 0; }
+.category { display: inline-block; margin-right: 20rpx; color: #333; }
+.product { display: inline-block; width: 48%; margin: 0 2% 20rpx 0; background: #fff; border-radius: 12rpx; overflow: hidden; }
+.product image { width: 100%; height: 260rpx; }
+.product view { padding: 10rpx 16rpx; }.price { color: #e64545; font-weight: bold; }

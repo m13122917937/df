@@ -1,0 +1,4 @@
+{
+  "pages": ["pages/home/index", "pages/category/index", "pages/product/detail", "pages/address/index", "pages/address/edit", "pages/order/create", "pages/order/pay", "pages/order/list"],
+  "window": { "navigationBarTitleText": "国补商城", "navigationBarBackgroundColor": "#ffffff", "navigationBarTextStyle": "black" }
+}

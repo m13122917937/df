@@ -69,8 +69,10 @@
         <module>ruoyi-order</module>
         <module>ruoyi-finance</module>
         <module>ruoyi-analysis</module>
+        <module>ruoyi-subsidy</module>
         <module>ruoyi-starter</module>
         <module>ruoyi-api</module>
+        <module>ruoyi-app</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -413,6 +415,13 @@
             <dependency>
                 <groupId>com.ruoyi</groupId>
                 <artifactId>ruoyi-user</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
+            <!-- 国补商城领域模块 -->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-subsidy</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 

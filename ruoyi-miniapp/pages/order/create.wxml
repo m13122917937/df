@@ -1,0 +1,8 @@
+<view class="page">
+  <view class="address" bindtap="selectAddress">
+    <block wx:if="{{address}}"><view>{{address.receiverName}} {{address.receiverPhone}}</view><view>{{address.provinceName}}{{address.cityName}}{{address.districtName}}{{address.detailAddress}}</view></block>
+    <view wx:else>请选择收货地址</view>
+  </view>
+  <button plain bindtap="selectAddress">选择或管理地址</button>
+  <button type="warn" bindtap="submit">提交订单并支付</button>
+</view>

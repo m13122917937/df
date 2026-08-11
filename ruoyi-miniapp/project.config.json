@@ -1,0 +1,6 @@
+{
+  "description": "国补微信小程序",
+  "miniprogramRoot": "./",
+  "setting": { "es6": true, "minified": true, "urlCheck": true },
+  "appid": "${MINIAPP_APP_ID}"
+}

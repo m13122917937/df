@@ -1,0 +1,8 @@
+<view class="page">
+  <swiper wx:if="{{banners.length}}" class="banners" indicator-dots autoplay circular><swiper-item wx:for="{{banners}}" wx:key="id"><image src="{{item.imageUrl}}" mode="aspectFill" /></swiper-item></swiper>
+  <input class="search" placeholder="搜索商品" value="{{keyword}}" bindinput="onSearchInput" confirm-type="search" bindconfirm="onSearch" />
+  <scroll-view class="categories" scroll-x="true"><view wx:for="{{categories}}" wx:key="id" class="category">{{item.categoryName}}</view></scroll-view>
+  <view wx:for="{{products}}" wx:key="id" class="product" data-id="{{item.id}}" bindtap="openProduct">
+    <image src="{{item.mainImageUrl}}" mode="aspectFill" /><view>{{item.productName}}</view><view class="price">¥{{item.salePrice}}</view>
+  </view>
+</view>

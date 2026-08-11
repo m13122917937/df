@@ -1,0 +1,1 @@
+<view class="page"><view class="tip">订单已创建，请完成微信支付。</view><button type="warn" bindtap="pay">微信支付</button></view>

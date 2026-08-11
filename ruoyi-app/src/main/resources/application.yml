@@ -1,0 +1,26 @@
+server:
+  port: 7774
+
+spring:
+  application:
+    name: ruoyi-app
+  config:
+    import: optional:file:${RUOYI_APP_EXTERNAL_CONFIG:}
+  profiles:
+    active: dev
+
+token:
+  header: Authorization
+  secret: ${APP_TOKEN_SECRET}
+  expireTime: 120
+
+wechat:
+  miniapp:
+    app-id: ${WECHAT_MINIAPP_APP_ID:}
+    secret: ${WECHAT_MINIAPP_SECRET:}
+  pay:
+    mch-id: ${WECHAT_PAY_MCH_ID:}
+    api-v3-key: ${WECHAT_PAY_API_V3_KEY:}
+    private-key-path: ${WECHAT_PAY_PRIVATE_KEY_PATH:}
+    certificate-path: ${WECHAT_PAY_CERTIFICATE_PATH:}
+    notify-base-url: ${WECHAT_PAY_NOTIFY_BASE_URL:}

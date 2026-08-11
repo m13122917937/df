@@ -1,0 +1,13 @@
+<view class="page">
+  <view wx:if="{{!orders.length}}" class="empty">暂无订单</view>
+  <view wx:for="{{orders}}" wx:key="orderNo" class="order">
+    <view class="row"><text>订单号：{{item.orderNo}}</text><text class="status">{{item.orderStatus}}</text></view>
+    <view class="amount">实付 ￥{{item.payAmount}}</view>
+    <view class="actions">
+      <button wx:if="{{item.orderStatus === 'PENDING_PAY'}}" size="mini" type="warn" data-order-no="{{item.orderNo}}" bindtap="pay">去支付</button>
+      <button wx:if="{{item.orderStatus === 'PENDING_PAY'}}" size="mini" data-order-no="{{item.orderNo}}" bindtap="cancel">取消</button>
+      <button wx:if="{{item.orderStatus === 'PAID'}}" size="mini" data-order-no="{{item.orderNo}}" bindtap="applyRefund">申请退款</button>
+      <button wx:if="{{item.orderStatus === 'SHIPPED'}}" size="mini" type="primary" data-order-no="{{item.orderNo}}" bindtap="confirmReceived">确认收货</button>
+    </view>
+  </view>
+</view>
