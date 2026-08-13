@@ -31,7 +31,6 @@ public class OrderAddForm {
      * 原始订单号
      */
     @NotBlank(message = "原始订单号不能为空", groups = AddGroup.class)
-
     @ExcelProperty(value = "原始单号")
     private String originalOrderId;
 
