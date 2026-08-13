@@ -11,6 +11,7 @@ import com.ruoyi.subsidy.facade.IGbRefundFacade;
 import com.ruoyi.subsidy.model.bo.GbRefundPaymentBO;
 import com.ruoyi.subsidy.domain.GbRefund;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
 /** 国补后台退款审核应用编排。 */
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "wechat.pay", name = "mch-id")
 public class SubsidyRefundBizService {
     private final IGbRefundFacade refundFacade;
     private final WxPayService adminWxPayService;

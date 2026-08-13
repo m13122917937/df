@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.subsidy;
 
 import com.ruoyi.biz.subsidy.SubsidyRefundBizService;
 import com.ruoyi.common.core.domain.AjaxResult;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /** 国补后台退款审核接口。 */
 @RestController
 @RequestMapping("/subsidy/refunds")
+@ConditionalOnProperty(prefix = "wechat.pay", name = "mch-id")
 public class SubsidyRefundController {
     private final SubsidyRefundBizService refundBizService;
 
