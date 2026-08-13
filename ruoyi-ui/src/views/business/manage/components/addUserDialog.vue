@@ -7,6 +7,7 @@
     :before-close="handleClose"
     class="add-user-dialog"
     :close-on-click-modal="false"
+    append-to-body
   >
     <!-- 步骤指示器 -->
     <div class="step-indicator">
@@ -86,6 +87,25 @@
         完成注册
       </el-button>
     </div>
+
+    <el-dialog
+      title="完成注册确认"
+      :visible.sync="completeConfirmVisible"
+      width="420px"
+      append-to-body
+      :z-index="100000"
+      :close-on-click-modal="false"
+      class="register-confirm-dialog"
+    >
+      <div class="register-confirm-content">
+        <i class="el-icon-success" />
+        <span>确认用户已经扫码并完成注册？</span>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="completeConfirmVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmComplete">确定</el-button>
+      </div>
+    </el-dialog>
   </el-dialog>
 </template>
 
@@ -122,6 +142,7 @@ export default {
       },
       imgUrl: '',
       loading: false,
+      completeConfirmVisible: false,
       currentStep: 0,
       rules: {
         nickName: [
@@ -201,6 +222,7 @@ export default {
       this.imgUrl = ''
       this.currentStep = 0
       this.loading = false
+      this.completeConfirmVisible = false
       this.handleReset()
     },
     async handleSave() {
@@ -239,17 +261,13 @@ export default {
       })
     },
     handleComplete() {
-      this.$confirm('确认已完成用户注册？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'success'
-      }).then(() => {
-        this.$message.success('用户注册完成')
-        this.$emit('save', this.form)
-        this.handleClose()
-      }).catch(() => {
-        // 用户取消
-      })
+      this.completeConfirmVisible = true
+    },
+    confirmComplete() {
+      this.completeConfirmVisible = false
+      this.$message.success('用户注册完成')
+      this.$emit('save', this.form)
+      this.handleClose()
     }
   }
 }
@@ -455,6 +473,19 @@ export default {
         }
       }
     }
+  }
+}
+
+.register-confirm-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--adm-text-primary);
+  font-size: 15px;
+
+  .el-icon-success {
+    color: var(--success-color, #67c23a);
+    font-size: 24px;
   }
 }
 

@@ -581,7 +581,8 @@ public class OrderBizService {
             return;
         } else if (Objects.equals(orderBO.getStatus(), OrderConsts.OrderStatus.REVOKE.getCode())) {
             OrderParam orderParam = new OrderParam().setStatus(OrderConsts.OrderStatus.NEW.getCode()).setCreateTime(DateUtil.date()).setSubStatus(OrderConsts.OrderSubStatus.NEW_REVOKE.getCode()).setHandleApply(OrderConsts.HandleApply.NO.getCode());
-            orderParam.setAddressee(orderAddForm.getAddressee()).setPhone(orderAddForm.getPhone()).setReceivingAddress(orderAddForm.getAddress());
+            orderParam.setErpOrderId(orderAddForm.getErpOrderId()).setAddressee(orderAddForm.getAddressee())
+                    .setPhone(orderAddForm.getPhone()).setReceivingAddress(orderAddForm.getAddress());
             if (Objects.nonNull(addressInfo)) {
                 if (Objects.nonNull(addressInfo.getProvinceCode())) {
                     orderParam.setProvince(Long.valueOf(addressInfo.getProvinceCode()));
@@ -592,6 +593,8 @@ public class OrderBizService {
             }
             orderFacade.update(orderParam, new OrderQuery().setOrderCode(orderBO.getOrderCode()));
         } else {
+            orderFacade.update(new OrderParam().setErpOrderId(orderAddForm.getErpOrderId()),
+                    new OrderQuery().setOrderCode(orderBO.getOrderCode()));
             log.info("订单已经存在:{}", orderAddForm.getOriginalOrderId());
         }
 

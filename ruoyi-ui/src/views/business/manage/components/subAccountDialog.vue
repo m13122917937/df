@@ -5,6 +5,7 @@
     width="1200px"
     :before-close="handleClose"
     class="sub-account-dialog"
+    append-to-body
   >
     <div class="dialog-header">
       <div class="company-info">
