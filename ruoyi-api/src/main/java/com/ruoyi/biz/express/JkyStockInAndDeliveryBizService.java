@@ -22,6 +22,7 @@ import com.ruoyi.order.facade.ITradeOrderFacade;
 import com.ruoyi.order.model.bo.ImeiBO;
 import com.ruoyi.order.model.bo.OrderBO;
 import com.ruoyi.order.model.bo.TradeOrderBO;
+import com.ruoyi.order.model.consts.ImeiConsts;
 import com.ruoyi.order.model.consts.TradeOrderConsts;
 import com.ruoyi.order.model.param.JkyLogisticsTaskParam;
 import com.ruoyi.order.model.query.ImeiQuery;
@@ -173,7 +174,7 @@ public class JkyStockInAndDeliveryBizService {
     }
 
     private List<ImeiBO> queryJkyImeiList(OrderBO orderBO) {
-        return iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
+        return iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()).setActivated(ImeiConsts.Activated.SUCCESS.getCode()).setPlatformImei(ImeiConsts.PlatformImei.NORMAL.getCode()));
     }
 
 

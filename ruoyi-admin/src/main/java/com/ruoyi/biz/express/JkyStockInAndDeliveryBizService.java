@@ -13,6 +13,7 @@ import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.JacksonUtil;
 import com.ruoyi.express.facade.IRouteSubscribeFacade;
 import com.ruoyi.order.facade.IJkyLogisticsTaskFacade;
+import com.ruoyi.order.model.consts.ImeiConsts;
 import com.ruoyi.order.model.param.JkyLogisticsTaskParam;
 import com.ruoyi.express.model.bo.RouteSubscribeBO;
 import com.ruoyi.express.model.query.RouteSubscribeQuery;
@@ -169,7 +170,7 @@ public class JkyStockInAndDeliveryBizService {
     }
 
     private List<ImeiBO> queryJkyImeiList(OrderBO orderBO) {
-        return iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()));
+        return iMeiFacade.list(new ImeiQuery().setOrderId(orderBO.getOrderCode()).setActivated(ImeiConsts.Activated.SUCCESS.getCode()).setPlatformImei(ImeiConsts.PlatformImei.NORMAL.getCode()));
     }
 
     private static String resolveJkyLogisticsName(final String logisticsName) {
